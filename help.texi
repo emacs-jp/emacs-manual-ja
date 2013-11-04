@@ -1,0 +1,836 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Help, Mark, M-x, Top
+@c @chapter Help
+@chapter ヘルプ機能
+@kindex Help
+@c @cindex help
+@cindex ヘルプ機能
+@c @cindex self-documentation
+@cindex セルフドキュメント
+@findex help-command
+@kindex C-h
+@kindex F1
+
+@c   Emacs provides extensive help features accessible through a single
+@c character, @kbd{C-h}.  @kbd{C-h} is a prefix key that is used only for
+@c documentation-printing commands.  The characters that you can type after
+@c @kbd{C-h} are called @dfn{help options}.  One help option is @kbd{C-h};
+@c that is how you ask for help about using @kbd{C-h}.  To cancel, type
+@c @kbd{C-g}.  The function key @key{F1} is equivalent to @kbd{C-h}.
+Emacsには、@kbd{C-h}のたった1文字で呼び出せる
+高度なヘルプ機能があります。
+@kbd{C-h}は、説明文表示コマンドのためだけに使われるプレフィックスキーです。
+@kbd{C-h}のあとに打つ文字（列）を
+@dfn{ヘルプオプション}（help options）と呼びます。
+@kbd{C-h}もヘルプオプションの1つであって、
+@kbd{C-h}の使い方を調べることができます。
+途中で取り消すには、@kbd{C-g}を打ちます。
+ファンクションキー@key{F1}は、@kbd{C-h}と等価です。
+
+@kindex C-h C-h
+@findex help-for-help
+@c   @kbd{C-h C-h} (@code{help-for-help}) displays a list of the possible
+@c help options, each with a brief description.  Before you type a help
+@c option, you can use @key{SPC} or @key{DEL} to scroll through the list.
+@kbd{C-h C-h}（@code{help-for-help}）は、
+利用可能なヘルプオプションの一覧を簡素な説明とともに表示します。
+ヘルプオプションを打つまでは、
+@key{SPC}や@key{DEL}で一覧をスクロールできます。
+
+@c   @kbd{C-h} or @key{F1} means ``help'' in various other contexts as
+@c well.  For example, in the middle of @code{query-replace}, it describes
+@c the options available for how to operate on the current match.  After a
+@c prefix key, it displays a list of the alternatives that can follow the
+@c prefix key.  (A few prefix keys don't support @kbd{C-h}, because they
+@c define other meanings for it, but they all support @key{F1}.)
+@kbd{C-h}や@key{F1}は、他のさまざまな状況でも『ヘルプ』を意味します。
+たとえば、@code{query-replace}の実行中には、
+今一致している文字列に対して適用可能な操作を説明します。
+プレフィックスキーに続けて@kbd{C-h}や@key{F1}を打つと、
+そのプレフィックスキーに続けることができるキーの一覧を表示します。
+（@kbd{C-h}に独自の意味を定義しているプレフィックスキーもあり、
+そのような場合には@kbd{C-h}を使えない。
+しかし、@key{F1}はすべてのプレフィックスキーで使える。）
+
+@c   Most help buffers use a special major mode, Help mode, which lets you
+@c scroll conveniently with @key{SPC} and @key{DEL}.
+ほとんどのヘルプバッファでは、特別なメジャーモードである
+ヘルプ（help）モードを使います。
+ヘルプ（help）モードでは、
+@key{SPC}と@key{DEL}で画面を簡単にスクロールできます。
+
+@menu
+* Help Summary::	Brief list of all Help commands.
+* Key Help::		Asking what a key does in Emacs.
+* Name Help::		Asking about a command, variable or function name.
+* Apropos::		Asking what pertains to a given topic.
+* Library Keywords::	Finding Lisp libraries by keywords (topics).
+* Language Help::       Help relating to international language support.
+* Help Mode::           Special features of Help mode and Help buffers.
+* Misc Help::		Other help commands.
+@end menu
+
+@iftex
+@node Help Summary
+@end iftex
+@ifinfo
+@node Help Summary
+@c @section Help Summary
+@section ヘルプのまとめ
+@end ifinfo
+
+@c   Here is a summary of the defined help commands.
+定義されているヘルプコマンドを以下にまとめておきます。
+
+@table @kbd
+@item C-h a @var{regexp} @key{RET}
+@c Display a list of commands whose names match @var{regexp}
+@c (@code{apropos-command}).
+正規表現@var{regexp}に一致する名前を持つコマンドの一覧を表示する
+（@code{apropos-command}）。
+@item C-h b
+@c Display a table of all key bindings in effect now, in this order: minor
+@c mode bindings, major mode bindings, and global bindings
+@c (@code{describe-bindings}).
+現在有効なすべてのキーバインドの一覧を、
+マイナモードのバインディング、
+メジャーモードのバインディング、
+グローバルバインディングの順に表示する
+（@code{describe-bindings}）。
+@item C-h c @var{key}
+@c Print the name of the command that @var{key} runs
+@c (@code{describe-key-briefly}).  Here @kbd{c} stands for `character'.  For more
+@c extensive information on @var{key}, use @kbd{C-h k}.
+@var{key}が実行するコマンドの名前を表示する（@code{describe-key-briefly}）。
+ここで、@kbd{c}は『character』（文字）のcのこと。
+@var{key}のさらに詳しい情報を得るには、@kbd{C-h k}を使う。
+@item C-h f @var{function} @key{RET}
+@c Display documentation on the Lisp function named @var{function}
+@c (@code{describe-function}).  Since commands are Lisp functions,
+@c a command name may be used.
+Lisp関数@var{function}の説明文を表示する
+（@code{describe-function}）。
+コマンドはLisp関数なので、コマンド名も使える。
+@item C-h h
+@c Display the @file{hello} file, which shows examples of various character
+@c sets.
+さまざまな文字集合の例文を例示する@file{hello}ファイルを表示する。
+@item C-h i
+@c Run Info, the program for browsing documentation files (@code{info}).
+@c The complete Emacs manual is available on-line in Info.
+ドキュメントファイルを閲覧するプログラム、
+infoを起動する（@code{info}）。
+infoでは、完全なEmacsマニュアルをオンラインで見ることができる。
+@item C-h k @var{key}
+@c Display the name and documentation of the command that @var{key} runs
+@c (@code{describe-key}).
+@var{key}が実行するコマンドの名前と説明文を表示する
+（@code{describe-key}）。
+@item C-h l
+@c Display a description of the last 100 characters you typed
+@c (@code{view-lossage}).
+これまでに打鍵した最後の100文字を表示する（@code{view-lossage}）。
+@item C-h m
+@c Display documentation of the current major mode (@code{describe-mode}).
+現在のメジャーモードの説明文を表示する
+（@code{describe-mode}）。
+@item C-h n
+@c Display documentation of Emacs changes, most recent first
+@c (@code{view-emacs-news}).
+Emacsの変更点に関する説明を最新のものから順に表示する
+（@code{view-emacs-news}）。
+@item C-h p
+@c Find packages by topic keyword (@code{finder-by-keyword}).
+トピックのキーワードで、一致するパッケージを探す
+（@code{finder-by-keyword}）。
+@item C-h s
+@c Display current contents of the syntax table, plus an explanation of
+@c what they mean (@code{describe-syntax}).  @xref{Syntax}.
+現在の構文テーブルとその意味の説明を表示する
+（@code{describe-syntax}）。
+@pxref{Syntax}。
+@item C-h t
+@c Enter the Emacs interactive tutorial (@code{help-with-tutorial}).
+Emacsの対話型のチュートリアルに入る
+（@code{help-with-tutorial}）。
+@item C-h v @var{var} @key{RET}
+@c Display the documentation of the Lisp variable @var{var}
+@c (@code{describe-variable}).
+Lisp変数@var{var}の説明文を表示する
+（@code{describe-variable}）。
+@item C-h w @var{command} @key{RET}
+@c Print which keys run the command named @var{command} (@code{where-is}).
+コマンド@var{command}を実行するキーを表示する
+（@code{where-is}）。
+@item C-h C @var{coding} @key{RET}
+@c Describe coding system @var{coding}
+@c (@code{describe-coding-system}).
+コーディングシステム@var{coding}を説明する
+（@code{describe-coding-system}）。
+@item C-h C @key{RET}
+@c Describe the coding systems currently in use.
+現在使用中のコーディングシステムを説明する。
+@item C-h I @var{method} @key{RET}
+@c Describe an input method (@code{describe-input-method}).
+入力方式を説明する（@code{describe-input-method}）。
+@item C-h L @var{language-env} @key{RET}
+@c Describe information on the character sets, coding systems and input
+@c methods used for language environment @var{language-env}
+@c (@code{describe-language-environment}).
+言語環境@var{language-env}において使われる、
+文字集合、コーディングシステム、入力方式を説明する
+（@code{describe-language-environment}）。
+@item C-h C-c
+@c Display the copying conditions for GNU Emacs.
+GNU Emacsのコピーライトを表示する。
+@item C-h C-d
+@c Display information about getting new versions of GNU Emacs.
+GNU Emacsの新版の入手方法に関する情報を表示する。
+@item C-h C-f @var{function} @key{RET}
+@c Enter Info and go to the node documenting the Emacs function @var{function}
+@c (@code{Info-goto-emacs-command-node}).
+infoに入って、Emacsの関数@var{function}を説明しているノードに移動する
+（@code{Info-goto-emacs-command-node}）。
+@item C-h C-k @var{key}
+@c Enter Info and go to the node where the key sequence @var{key} is
+@c documented (@code{Info-goto-emacs-key-command-node}).
+infoに入って、キー列@var{key}を説明しているノードに移動する
+（@code{Info-goto-emacs-key-command-node}）。
+@item C-h C-p
+@c Display information about the GNU Project.
+GNUプロジェクトに関する情報を表示する。
+@item C-h @key{TAB} @var{symbol} @key{RET}
+@c Display the Info documentation on symbol @var{symbol} according to the
+@c programming language you are editing (@code{info-lookup-symbol}).
+編集中のプログラム言語に応じて、
+シンボル@var{symbol}に関するinfoドキュメントを表示する
+（@code{info-lookup-symbol}）。
+@end table
+
+@node Key Help
+@c @section Documentation for a Key
+@section キーに関する説明
+
+@kindex C-h c
+@findex describe-key-briefly
+@c   The most basic @kbd{C-h} options are @kbd{C-h c}
+@c (@code{describe-key-briefly}) and @w{@kbd{C-h k}} (@code{describe-key}).
+@c @kbd{C-h c @var{key}} prints in the echo area the name of the command
+@c that @var{key} is bound to.  For example, @kbd{C-h c C-f} prints
+@c @samp{forward-char}.  Since command names are chosen to describe what
+@c the commands do, this is a good way to get a very brief description of
+@c what @var{key} does.
+@kbd{C-h}のもっとも基本的なオプションは、
+@kbd{C-h c}（@code{describe-key-briefly}）と
+@w{@kbd{C-h k}}（@code{describe-key}）です。
+@kbd{C-h c @var{key}}は、
+@var{key}にバインドしてあるコマンド名をエコー領域に表示します。
+たとえば、@kbd{C-h c C-f}と打てば@samp{forward-char}と表示されます。
+コマンド名はそのコマンドが何をするかを表すように選んでありますから、
+キー@var{key}が何をするかをちょっと調べたい場合に、よい方法です。
+
+@kindex C-h k
+@findex describe-key
+@c   @kbd{C-h k @var{key}} is similar but gives more information: it
+@c displays the documentation string of the command as well as its name.
+@c This is too big for the echo area, so a window is used for the display.
+@kbd{C-h k @var{key}}も同様ですが、より多くの情報を表示します。
+つまり、コマンドの名前だけでなく、説明文も表示します。
+その内容はエコー領域に表示するには多すぎるため、
+ウィンドウに表示します。
+
+@c   @kbd{C-h c} and @kbd{C-h k} work for any sort of key sequences,
+@c including function keys and mouse events.
+@kbd{C-h c}や@kbd{C-h k}は、ファンクションキーやマウスイベントも含めた、
+あらゆるキー列に適用できます。
+
+@node Name Help
+@c @section Help by Command or Variable Name
+@section コマンド名や変数名によるヘルプ表示
+
+@kindex C-h f
+@findex describe-function
+@c   @kbd{C-h f} (@code{describe-function}) reads the name of a Lisp function
+@c using the minibuffer, then displays that function's documentation string
+@c in a window.  Since commands are Lisp functions, you can use this to get
+@c the documentation of a command that you know by name.  For example,
+@kbd{C-h f}（@code{describe-function}）は、
+ミニバッファでLisp関数の名前を読み取り、
+その関数の説明文字列をウィンドウに表示します。
+コマンドはLisp関数ですから、
+名前を知っているコマンドであれば、
+その説明文を得ることができます。
+たとえば、
+
+@example
+C-h f auto-fill-mode @key{RET}
+@end example
+
+@noindent
+@c displays the documentation of @code{auto-fill-mode}.  This is the only
+@c way to get the documentation of a command that is not bound to any key
+@c (one which you would normally run using @kbd{M-x}).
+とすると、@code{auto-fill-mode}の説明文字列を表示できます。
+どのキーにもバインドしていない
+（つまり、通常@kbd{M-x}で起動する）コマンドの説明文字列を見るには、
+この方法しかありません。
+
+@c   @kbd{C-h f} is also useful for Lisp functions that you are planning to
+@c use in a Lisp program.  For example, if you have just written the
+@c expression @code{(make-vector len)} and want to check that you are using
+@c @code{make-vector} properly, type @kbd{C-h f make-vector @key{RET}}.
+@c Because @kbd{C-h f} allows all function names, not just command names,
+@c you may find that some of your favorite abbreviations that work in
+@c @kbd{M-x} don't work in @kbd{C-h f}.  An abbreviation may be unique
+@c among command names yet fail to be unique when other function names are
+@c allowed.
+@kbd{C-h f}はまた、
+Lispプログラムの中で使おうと考えているLisp関数に対しても有益です。
+たとえば、式@code{(make-vector len)}を書いたとしましょう。
+@code{make-vector}を正しく使っているかどうか調べたいときには、
+@kbd{C-h f make-vector @key{RET}}と打ちます。
+@kbd{C-h f}は、コマンド名だけでなく、すべての関数名に適用できるので、
+普段@kbd{M-x}で使えている省略形が@kbd{C-h f}では使えないかもしれません。
+ある省略形がコマンド名としては一意であったとしても、
+他の関数名を含めてみると一意ではない場合もあります。
+
+@c   The function name for @kbd{C-h f} to describe has a default which is
+@c used if you type @key{RET} leaving the minibuffer empty.  The default is
+@c the function called by the innermost Lisp expression in the buffer around
+@c point, @emph{provided} that is a valid, defined Lisp function name.  For
+@c example, if point is located following the text @samp{(make-vector (car
+@c x)}, the innermost list containing point is the one that starts with
+@c @samp{(make-vector}, so the default is to describe the function
+@c @code{make-vector}.
+ミニバッファで@key{RET}だけを打ってミニバッファが空の場合、
+@kbd{C-h f}に与えられる関数名にはデフォルト値があります。
+デフォルト値は、バッファ内のポイント周辺でもっとも内側のLisp式で
+呼び出される関数ですが、それが定義された正しいLisp関数の名前で
+ある場合に@emph{限ります}。
+たとえば、@samp{(make-vector (car x)}というテキストの直後にポイントがあると、
+ポイントを含むもっとも内側のリストは@samp{(make-vector}から始まる部分なので、
+デフォルトは関数@code{make-vector}です。
+
+@c   @kbd{C-h f} is often useful just to verify that you have the right
+@c spelling for the function name.  If @kbd{C-h f} mentions a name from the
+@c buffer as the default, that name must be defined as a Lisp function.  If
+@c that is all you want to know, just type @kbd{C-g} to cancel the @kbd{C-h
+@c f} command, then go on editing.
+@kbd{C-h f}は、関数名の綴りが正しことを
+単に確認するためだけにも役立ちます。
+@kbd{C-h f}がバッファ内の名前をデフォルトとして表示すれば、
+その名前はLisp関数として定義されているはずです。
+これだけを確認したいのであれば、
+@kbd{C-g}を打って@kbd{C-h f}コマンドを取り消して、編集を続けます。
+
+@kindex C-h w
+@findex where-is
+@c   @kbd{C-h w @var{command} @key{RET}} tells you what keys are bound to
+@c @var{command}.  It prints a list of the keys in the echo area.  If it
+@c says the command is not on any key, you must use @kbd{M-x} to run it.
+@c @kbd{C-h w} runs the command @code{where-is}.
+@kbd{C-h w @var{command} @key{RET}}は、
+どのキーを@var{command}にバインドしてあるかを表示します。
+キーの一覧をエコー領域に表示します。
+どのキーにも割り当てられていないと表示された場合は、
+そのコマンドは@kbd{M-x}で起動する必要があります。
+@kbd{C-h w}はコマンド@code{where-is}を実行します。
+
+@c   @kbd{C-h v} (@code{describe-variable}) is like @kbd{C-h f} but describes
+@c Lisp variables instead of Lisp functions.  Its default is the Lisp symbol
+@c around or before point, but only if that is the name of a known Lisp
+@c variable.  @xref{Variables}.@refill
+@kbd{C-h v}（@code{describe-variable}）は@kbd{C-h f}に似ていますが、
+Lisp関数ではなくLisp変数を説明する点が異なります。
+デフォルトはポイント周辺またはポイントの直前のLispシンボルですが、
+既知のLisp変数に限ります。
+@xref{Variables}。
+
+@node Apropos
+@c @section Apropos
+@section アプロポス
+
+@kindex C-h a
+@findex apropos-command
+@c @cindex apropos
+@cindex アプロポス
+@c   A more sophisticated sort of question to ask is, ``What are the
+@c commands for working with files?''  To ask this question, type @kbd{C-h
+@c a file @key{RET}}, which displays a list of all command names that
+@c contain @samp{file}, including @code{copy-file}, @code{find-file}, and
+@c so on.  With each command name appears a brief description of how to use
+@c the command, and what keys you can currently invoke it with.  For
+@c example, it would say that you can invoke @code{find-file} by typing
+@c @kbd{C-x C-f}.  The @kbd{a} in @kbd{C-h a} stands for `Apropos';
+@c @kbd{C-h a} runs the command @code{apropos-command}.  This command
+@c normally checks only commands (interactive functions); if you specify a
+@c prefix argument, it checks noninteractive functions as well.
+より洗練された質問方法としては、『ファイルを扱うコマンドは？』と
+いうのがあります。
+このように質問するには、@kbd{C-h a file @key{RET}}と打ちます。
+すると、@code{copy-file}や@code{find-file}といった、
+@samp{file}を名前に含むすべてのコマンドの一覧が表示されます。
+各コマンドには、使い方の簡単な説明や
+そのコマンドを起動するキーが表示されます。
+たとえば、@code{find-file}を起動するには@kbd{C-x C-f}と打つ、
+といった具合です。
+@kbd{C-h a}の@kbd{a}は「Apropos」（「適切な」の意味）を表していて、
+@kbd{C-h a}はコマンド@code{apropos-command}を実行します。
+このコマンドは、通常、コマンド（対話的な関数）のみを調べます。
+前置引数を指定すれば、非対話的な関数も調べます。
+
+@c   Because @kbd{C-h a} looks only for functions whose names contain the
+@c string you specify, you must use ingenuity in choosing the
+@c string.  If you are looking for commands for killing backwards and
+@c @kbd{C-h a kill-backwards @key{RET}} doesn't reveal any, don't give up.
+@c Try just @kbd{kill}, or just @kbd{backwards}, or just @kbd{back}.  Be
+@c persistent.  Also note that you can use a regular expression as the
+@c argument, for more flexibility (@pxref{Regexps}).
+@kbd{C-h a}は指定した文字列を名前に含む関数しか調べませんので、
+文字列の指定には工夫が必要です。
+後向きに文字をキルするコマンドを探そうとして、
+@kbd{C-h a kill-backwards @key{RET}}で
+何も表示されなくてもあきらめないでください。
+@kbd{kill}のみ、あるいは@kbd{backwards}のみ、
+もしくは@kbd{back}のみを試して、続けてください。
+柔軟性を増すために、引数として正規表現も使えます
+（@pxref{Regexps}）。
+
+@c   Here is a set of arguments to give to @kbd{C-h a} that covers many
+@c classes of Emacs commands, since there are strong conventions for naming
+@c the standard Emacs commands.  By giving you a feel for the naming
+@c conventions, this set should also serve to aid you in developing a
+@c technique for picking @code{apropos} strings.
+以下に、@kbd{C-h a}に指定する引数のうち、
+Emacsコマンドの多くの種類を網羅するものをあげておきます。
+というのは、Emacsコマンドの標準の命名法には強い慣行があるからです。
+命名法の慣行を理解してもらえば、
+適切な（@code{apropos}）文字列を拾い出す技法の向上の手助けにもなるでしょう。
+
+@quotation
+@c char, line, word, sentence, paragraph, region, page, sexp, list, defun,
+@c rect, buffer, frame, window, face, file, dir, register, mode, beginning, end,
+@c forward, backward, next, previous, up, down, search, goto, kill, delete,
+@c mark, insert, yank, fill, indent, case, change, set, what, list, find,
+@c view, describe, default.
+char、line、word、sentence、paragraph、region、page、sexp、list、defun、
+rect、buffer、frame、window、face、file、dir、register、mode、beginning、end、
+forward、backward、next、previous、up、down、search、goto、kill、delete、
+mark、insert、yank、fill、indent、case、change、set、what、list、find、
+view、describe、default。
+@end quotation
+
+@findex apropos-variable
+@c   To list all user variables that match a regexp, use the command
+@c @kbd{M-x apropos-variable}. This command shows only user variables and
+@c customization options by default; if you specify a prefix argument, it
+@c checks all variables.
+正規表現に一致するすべてのユーザー変数を表示するには、
+コマンド@kbd{M-x apropos-variable}を使います。
+このコマンドは、デフォルトでは、ユーザー変数とカスタマイズオプションだけを
+表示します。
+すべての変数を調べるには、前置引数を指定します。
+
+@findex apropos
+@c   To list all Lisp symbols that contain a match for a regexp, not just
+@c the ones that are defined as commands, use the command @kbd{M-x apropos}
+@c instead of @kbd{C-h a}.  This command does not check key bindings by
+@c default; specify a numeric argument if you want it to check them.
+コマンドとして定義されているものだけでなく、
+正規表現に一致するすべてのLispシンボルを表示するには、
+@kbd{C-h a}のかわりに@kbd{M-x apropos}を使います。
+このコマンドは、デフォルトでは、キーバインドを調べません。
+キーバインドを調べるには、前置引数を指定します。
+
+@findex apropos-documentation
+@c   The @code{apropos-documentation} command is like @code{apropos} except
+@c that it searches documentation strings as well as symbol names for
+@c matches for the specified regular expression.
+@code{apropos-documentation}コマンドは@code{apropos}に似ていますが、
+指定した正規表現に一致するシンボル名だけでなく、
+説明文字列も探索する点が異なります。
+
+@findex apropos-value
+@c   The @code{apropos-value} command is like @code{apropos} except that it
+@c searches symbols' values for matches for the specified regular
+@c expression.  This command does not check function definitions or
+@c property lists by default; specify a numeric argument if you want it to
+@c check them.
+@code{apropos-value}コマンドは@code{apropos}に似ていますが、
+指定した正規表現に一致するシンボルの値を探す点が異なります。
+このコマンドは、デフォルトでは、関数定義や属性リストを調べません。
+それらも調べるには、前置引数を指定します。
+
+@vindex apropos-do-all
+@c   If the variable @code{apropos-do-all} is non-@code{nil}, the commands
+@c above all behave as if they had been given a prefix argument.
+変数@code{apropos-do-all}が@code{nil}以外ならば、
+上に述べたコマンドはすべて、前置引数を指定したものとして動作します。
+
+@c   If you want more information about a function definition, variable or
+@c symbol property listed in the Apropos buffer, you can click on it with
+@c @kbd{Mouse-2} or move there and type @key{RET}.
+アプロポス（apropos）バッファに表示された関数定義、
+変数、属性リストについて詳しく知りたいときには、
+@kbd{Mouse-2}ボタンでクリックするか、
+その箇所へ移動して@key{RET}を打ちます。
+
+@node Library Keywords
+@c @section Keyword Search for Lisp Libraries
+@section Lispライブラリに対するキーワード探索
+
+@kindex C-h p
+@findex finder-by-keyword
+@c The @kbd{C-h p} command lets you search the standard Emacs Lisp
+@c libraries by topic keywords.  Here is a partial list of keywords you can
+@c use:
+@kbd{C-h p}コマンドで、
+標準Emacs Lispライブラリをトピックのキーワードで検索できます。
+利用可能なキーワードの一部を以下に示します。
+
+@display
+@c abbrev --- abbreviation handling, typing shortcuts, macros.
+abbrev --- 略語操作、短縮入力、マクロ。
+@c bib --- support for the bibliography processor @code{bib}.
+bib --- 参考、参照プロセッサ支援@code{bib}。
+@c c --- C and C++ language support.
+c --- C言語あるいはC++支援。
+@c calendar --- calendar and time management support.
+calendar --- 日付および時間管理支援。
+@c comm --- communications, networking, remote access to files.
+comm --- 通信、ネットワーク、ファイルのリモートアクセス。
+@c data --- support for editing files of data.
+data --- データファイルの編集支援。
+@c docs --- support for Emacs documentation.
+docs --- Emacsドキュメントに関する支援。
+@c emulations --- emulations of other editors.
+emulations --- 他のエディタのエミュレーション。
+@c extensions --- Emacs Lisp language extensions.
+extensions --- Emacs Lisp言語の拡張。
+@c faces --- support for using faces (fonts and colors; @pxref{Faces}).
+faces --- フェイス（フォントや表示色、@pxref{Faces}）に関する支援。
+@c frames --- support for Emacs frames and window systems.
+frames --- Emacsフレームやウィンドウシステムに対する支援。
+@c games --- games, jokes and amusements.
+games --- ゲーム、ジョーク、娯楽。
+@c hardware --- support for interfacing with exotic hardware.
+hardware --- 外部ハードウェアとのインターフェイス支援。
+@c help --- support for on-line help systems.
+help --- オンラインヘルプシステム支援。
+@c hypermedia --- support for links within text, or other media types.
+hypermedia --- テキストあるいは他メディア内でのリンク支援。
+@c i18n --- internationalization and alternate character-set support.
+i18n --- 国際化、代替文字集合支援。
+@c internal --- code for Emacs internals, build process, defaults.
+internal --- Emacs内部コード、構築手順、デフォルト。
+@c languages --- specialized modes for editing programming languages.
+languages --- プログラム言語編集用の特殊モード。
+@c lisp --- support for using Lisp (including Emacs Lisp).
+lisp --- Lisp利用支援（Emacs Lispも含む）。
+@c local --- libraries local to your site.
+local --- サイトにローカルなライブラリ。
+@c maint --- maintenance aids for the Emacs development group.
+maint --- Emacs開発グループ向けの管理用。
+@c mail --- modes for electronic-mail handling.
+mail --- 電子メイル操作用のモード。
+@c matching --- searching and matching.
+matching --- 探索、一致。
+@c news --- support for netnews reading and posting.
+news --- ネットニュースの購読、投稿支援。
+@c non-text --- support for editing files that are not ordinary text.
+non-text --- 非テキストファイル編集支援。
+@c oop --- support for object-oriented programming.
+oop --- オブジェクト指向プログラミング支援。
+@c outlines --- hierarchical outlining.
+outlines --- 階層アウトライン。
+@c processes --- process, subshell, compilation, and job control support.
+processes --- プロセス、サブシェル、コンパイル、ジョブ制御支援。
+@c terminals --- support for terminal types.
+terminals --- 端末タイプ支援。
+@c tex --- support for the @TeX{} formatter.
+tex --- @TeX{}による文書整形支援。
+@c tools --- programming tools.
+tools --- プログラミングツール。
+@c unix --- front-ends/assistants for, or emulators of, Unix features.
+unix --- UNIX機能のフロントエンド／アシスタントあるいはエミュレーション。
+@c vms --- support code for VMS.
+vms --- VMS支援コード。
+@c wp --- word processing.
+wp --- ワープロ。
+@end display
+
+@node Language Help
+@c @section Help for International Language Support
+@section 多言語支援に関するヘルプ
+
+@c   You can use the command @kbd{C-h L}
+@c (@code{describe-language-environment}) to find out the support for a
+@c specific language environment.  @xref{Language Environments}.  This
+@c tells you which languages this language environment is useful for, and
+@c lists the character sets, coding systems, and input methods that go with
+@c it.  It also shows some sample text to illustrate scripts.
+コマンド@kbd{C-h L}（@code{describe-language-environment}）を使うと、
+特定の言語環境向けに、どのような支援があるかを把握できます。
+@xref{Language Environments}。
+このコマンドは、今の言語環境がどの言語向けなのかを示し、
+一緒に使われる文字集合、コーディングシステム、入力方式も表示します。
+また、字体を例示するためのサンプルテキストもいくつか表示します。
+
+@c   The command @kbd{C-h h} (@code{view-hello-file}) displays the file
+@c @file{etc/HELLO}, which shows how to say ``hello'' in many languages.
+コマンド@kbd{C-h h}（@code{view-hello-file}）は、
+ファイル@file{etc/HELLO}を表示します。
+このファイルには、いろいろな国の言葉で書いた『hello』を収めてあります。
+
+@c   The command @kbd{C-h I} (@code{describe-input-method}) describes
+@c information about input methods---either a specified input method, or by
+@c default the input method in use.  @xref{Input Methods}.
+コマンド@kbd{C-h I}（@code{describe-input-method}）は、
+指定した入力方式、あるいは、デフォルトとして
+今使っている入力方式についての情報を表示します。
+@xref{Input Methods}。
+
+@c   The command @kbd{C-h C} (@code{describe-coding-system}) describes
+@c information about coding systems---either a specified coding system, or
+@c the ones currently in use.  @xref{Coding Systems}.
+コマンド@kbd{C-h C}（@code{describe-coding-system}）は、
+指定したコーディングシステム、あるいは、デフォルトとして
+今使っているコーディングシステムについての情報を表示します。
+@xref{Coding Systems}。
+
+@node Help Mode
+@c @section Help Mode Commands
+@section ヘルプモードのコマンド
+
+@c   Help buffers provide the commands of View mode (@pxref{Misc File
+@c Ops}), plus a few special commands of their own.
+ヘルプバッファには、閲覧（view）モード（@pxref{Misc File Ops}）の
+コマンドに加えて、独自の特別なコマンドもいくつかあります。
+
+@table @kbd
+@item @key{SPC}
+@c Scroll forward.
+前向きにスクロールする。
+@item @key{DEL}
+@c Scroll backward.
+後向きにスクロールする。
+@item @key{RET}
+@c Follow a cross reference at point.
+ポイント位置の相互参照を辿る。
+@item @key{TAB}
+@c Move point forward to the next cross reference.
+つぎの相互参照へ進む。
+@item S-@key{TAB}
+@c Move point back to the previous cross reference.
+まえの相互参照へ戻る。
+@item Mouse-2
+@c Follow a cross reference that you click on.
+クリックした相互参照を辿る。
+@end table
+
+@c   When a command name (@pxref{M-x,, Running Commands by Name}) or
+@c variable name (@pxref{Variables}) appears in the documentation, it
+@c normally appears inside paired single-quotes.  You can click on the name
+@c with @kbd{Mouse-2}, or move point there and type @key{RET}, to view the
+@c documentation of that command or variable.  Use @kbd{C-c C-b} to retrace
+@c your steps.
+説明文に現れるコマンド名（@pxref{M-x}）や変数名（@pxref{Variables}）は
+通常、引用符（@code{'}）で囲まれています。
+その名前を@kbd{Mouse-2}でクリックしたり、あるいは、
+そこへポイントを移動して@key{RET}を打つと、
+そのコマンドや変数の説明文字列を表示できます。
+もとの場所に戻るには@kbd{C-c C-b}を使います。
+
+@c @kindex @key{TAB} @r{(Help mode)}
+@kindex @key{TAB} @r{（ヘルプモード）}
+@findex help-next-ref
+@c @kindex S-@key{TAB} @r{(Help mode)}
+@kindex S-@key{TAB} @r{（ヘルプモード）}
+@findex help-previous-ref
+@c   There are convenient commands for moving point to cross references in
+@c the help text.  @key{TAB} (@code{help-next-ref}) moves point down to the
+@c next cross reference.  Use @kbd{S-@key{TAB}} to move point up to the
+@c previous cross reference (@code{help-previous-ref}).
+ヘルプテキスト内の相互参照にポイントを移動する便利なコマンドがあります。
+@key{TAB}（@code{help-next-ref}）は、
+ポイントをつぎの相互参照箇所へ進めます。
+ポイントをまえの相互参照箇所へ戻すには
+@kbd{S-@key{TAB}}（@code{help-previous-ref}）を使います。
+
+@node Misc Help
+@c @section Other Help Commands
+@section その他のヘルプコマンド
+
+@kindex C-h i
+@findex info
+@c @cindex Info
+@cindex info
+@c @cindex manuals, on-line
+@cindex マニュアル、オンライン
+@c @cindex on-line manuals
+@cindex オンラインマニュアル
+@c   @kbd{C-h i} (@code{info}) runs the Info program, which is used for
+@c browsing through structured documentation files.  The entire Emacs manual
+@c is available within Info.  Eventually all the documentation of the GNU
+@c system will be available.  Type @kbd{h} after entering Info to run
+@c a tutorial on using Info.
+@kbd{C-h i}（@code{info}）はinfoプログラムを実行します。
+infoは構造化されたドキュメントファイルを閲覧するプログラムです。
+Emacsの完全なマニュアルもinfoで読むことができます。
+将来的には、GNUシステムのすべてのドキュメントが読めるようになるでしょう。
+infoの使い方についてのチュートリアルを起動するには、
+infoに入ってから@kbd{h}と打ちます。
+
+@c   If you specify a numeric argument, @kbd{C-h i} prompts for the name of
+@c a documentation file.  This way, you can browse a file which doesn't
+@c have an entry in the top-level Info menu.  It is also handy when you
+@c need to get to the documentation quickly, and you know the exact name of
+@c the file.
+数引数を指定すると、@kbd{C-h i}はドキュメントファイルの名前を聞いてきます。
+こうすれば、トップレベルのinfoメニューに記載されていない
+ファイルでも閲覧できます。
+
+@kindex C-h C-f
+@kindex C-h C-k
+@findex Info-goto-emacs-key-command-node
+@findex Info-goto-emacs-command-node
+@c   There are two special help commands for accessing Emacs documentation
+@c through Info.  @kbd{C-h C-f @var{function} @key{RET}} enters Info and
+@c goes straight to the documentation of the Emacs function
+@c @var{function}.  @kbd{C-h C-k @var{key}} enters Info and goes straight
+@c to the documentation of the key @var{key}.  These two keys run the
+@c commands @code{Info-goto-emacs-command-node} and
+@c @code{Info-goto-emacs-key-command-node}.
+infoを介してEmacsドキュメントを参照するための
+特別なヘルプコマンドが2つあります。
+@kbd{C-h C-f @var{function} @key{RET}}は、
+infoに入ってただちにEmacsの関数@var{function}のドキュメントに移動します。
+@kbd{C-h C-k @var{key}}は、
+infoに入ってただちにキー@var{key}のドキュメントに移動します。
+これら2つのキーは、それぞれ、
+@code{Info-goto-emacs-command-node}、
+@code{Info-goto-emacs-key-command-node}を実行します。
+
+@c   When editing a program, if you have an Info version of the manual for
+@c the programming language, you can use the command @kbd{C-h C-i} to refer
+@c to the manual documentation for a symbol (keyword, function or
+@c variable).  The details of how this command works depend on the major
+@c mode.
+プログラム言語のinfo版のマニュアルがあれば、
+プログラムの編集中にコマンド@kbd{C-h C-i}を使って、
+マニュアルドキュメントの
+シンボル（キーワード、関数、変数）に関する箇所を参照できます。
+コマンドの細かい動作は、メジャーモードに依存します。
+
+@kindex C-h l
+@findex view-lossage
+@c   If something surprising happens, and you are not sure what commands you
+@c typed, use @kbd{C-h l} (@code{view-lossage}).  @kbd{C-h l} prints the last
+@c 100 command characters you typed in.  If you see commands that you don't
+@c know, you can use @kbd{C-h c} to find out what they do.
+予期しなかったことが起きたり、
+入力したコマンドがわからなくなってしまったときは、
+@kbd{C-h l}（@code{view-lossage}）を使ってください。
+@kbd{C-h l}は、それまでに打鍵した最後の100個のコマンド文字を表示します。
+知らないコマンドが表示されたら、@kbd{C-h c}でその機能を知ることができます。
+
+@kindex C-h m
+@findex describe-mode
+@c   Emacs has numerous major modes, each of which redefines a few keys and
+@c makes a few other changes in how editing works.  @kbd{C-h m}
+@c (@code{describe-mode}) prints documentation on the current major mode,
+@c which normally describes all the commands that are changed in this
+@c mode.
+Emacsには数多くのメジャーモードがあり、各メジャーモードでは、
+いくつかのキーを再定義し、編集動作も少々変更しています。
+@kbd{C-h m}（@code{describe-mode}）は、
+使用中のメジャーモードについての説明文を表示します。
+これには、通常、モード内で変更してある
+すべてのコマンドについての記述があります。
+
+@kindex C-h b
+@findex describe-bindings
+@c   @kbd{C-h b} (@code{describe-bindings}) and @kbd{C-h s}
+@c (@code{describe-syntax}) present other information about the current
+@c Emacs mode.  @kbd{C-h b} displays a list of all the key bindings now in
+@c effect; the local bindings defined by the current minor modes first,
+@c then the local bindings defined by the current major mode, and finally
+@c the global bindings (@pxref{Key Bindings}).  @kbd{C-h s} displays the
+@c contents of the syntax table, with explanations of each character's
+@c syntax (@pxref{Syntax}).
+@kbd{C-h b}（@code{describe-bindings}）と
+@kbd{C-h s}（@code{describe-syntax}）は、
+Emacsの現在のモードに関するその他の情報を与えてくれます。
+@kbd{C-h b}は、現在有効なすべてのキーバインドの一覧を表示します。
+マイナモードで定義されているローカルバインディングから始めて、
+現在のメジャーモードで定義されているローカルバインディング、
+最後にグローバルバインディングを表示します
+（@pxref{Key Bindings}）。
+@kbd{C-h s}は、各文字の構文の説明を付けて
+構文テーブルの内容を表示します（@pxref{Syntax}）。
+
+@c   You can get a similar list for a particular prefix key by typing
+@c @kbd{C-h} after the prefix key.  (There are a few prefix keys for which
+@c this does not work---those that provide their own bindings for
+@c @kbd{C-h}.  One of these is @key{ESC}, because @kbd{@key{ESC} C-h} is
+@c actually @kbd{C-M-h}, which marks a defun.)
+プレフィックスキーに続けて@kbd{C-h}を打てば、
+特定のプレフィックスキーについて同様な一覧を表示できます。
+（この方法では表示できないプレフィックスキーも存在する。
+それらのキーでは、@kbd{C-h}に対しては独自のバインディングがある。
+@key{ESC}は、そのようなものの1つ。
+@kbd{@key{ESC} C-h}は、実際には@kbd{C-M-h}であり、
+関数定義（defun）をマークする。）
+
+@kindex C-h F
+@findex view-emacs-FAQ
+@kindex C-h n
+@findex view-emacs-news
+@kindex C-h C-c
+@findex describe-copying
+@kindex C-h C-d
+@findex describe-distribution
+@kindex C-h C-w
+@findex describe-no-warranty
+@kindex C-h C-p
+@findex describe-project
+@c   The other @kbd{C-h} options display various files of useful
+@c information.  @kbd{C-h C-w} displays the full details on the complete
+@c absence of warranty for GNU Emacs.  @kbd{C-h n} (@code{view-emacs-news})
+@c displays the file @file{emacs/etc/NEWS}, which contains documentation on
+@c Emacs changes arranged chronologically.  @kbd{C-h F}
+@c (@code{view-emacs-FAQ}) displays the Emacs frequently-answered-questions
+@c list.  @kbd{C-h t} (@code{help-with-tutorial}) displays the
+@c learn-by-doing Emacs tutorial.  @kbd{C-h C-c} (@code{describe-copying})
+@c displays the file @file{emacs/etc/COPYING}, which tells you the
+@c conditions you must obey in distributing copies of Emacs.  @kbd{C-h C-d}
+@c (@code{describe-distribution}) displays the file
+@c @file{emacs/etc/DISTRIB}, which tells you how you can order a copy of
+@c the latest version of Emacs.  @kbd{C-h C-p} (@code{describe-project})
+@c displays general information about the GNU Project.
+@kbd{C-h}の他のオプションは、
+有益な情報を収めたさまざまなファイルを表示します。
+@kbd{C-h C-w}は、
+GNU Emacsがまったく無保証であることに関する全詳細を表示します。
+@kbd{C-h n}（@code{view-emacs-news}）は、
+ファイル@file{emacs/etc/NEWS}を表示します。
+このファイルには、Emacsの変更に関する記述を時間順に収めてあります。
+@kbd{C-h F}（@code{view-emacs-FAQ}）は、
+Emacsの「よくある質問集」を表示します。
+@kbd{C-h t}（@code{help-with-tutorial}）は、
+「操作しながらEmacsを学ぶ」チュートリアルを表示します。
+@kbd{C-h C-c}（@code{describe-copying}）は、
+ファイル@file{emacs/etc/COPYING}を表示します。
+このファイルには、Emacsを配布する場合に従うべき条件を記述してあります。
+@kbd{C-h C-d}（@code{describe-distribution}）は、
+ファイル@file{emacs/etc/DISTRIB}を表示します。
+このファイルには、Emacsの最新版の注文方法を述べてあります。
+@kbd{C-h C-p}（@code{describe-project}）は、
+GNUプロジェクトに関する一般情報を表示します。

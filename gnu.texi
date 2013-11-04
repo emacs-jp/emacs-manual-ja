@@ -1,0 +1,1021 @@
+@c =============================================================
+@c = GNU宣言（GNU Manifesto 1993年改訂）− 日本語版 − (1998年11月4日)
+@c = Copyright (C) 1998 Mieko Hikichi and Nobuyuki Hikichi @*
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 1986, 1987, 1993, 1995 Free Software Foundation, Inc.
+@ifclear justgnu
+@node Manifesto, Glossary, MS-DOS, Top
+@c @unnumbered The GNU Manifesto
+@unnumbered GNU宣言
+@end ifclear
+@ifset justgnu
+Copyright (C) 1985, 1993 Free Software Foundation, Inc.
+
+@c Permission is granted to anyone to make or distribute verbatim copies
+@c of this document, in any medium, provided that the
+@c copyright notice and permission notice are preserved,
+@c and that the distributor grants the recipient permission
+@c for further redistribution as permitted by this notice.
+いかなる媒体でも次の条件が全て満たされている場合に限り、
+本ドキュメントをそのまま複写し配布することを許可する。
+配布者は第三者に対して本著作権表示と本許可告知と同一の許可を
+与える場合に限り、再配布を許可する。
+@itemize @bullet
+@item
+受領、配布された写しに著作権表示および許諾告知が前もって載せられていること。
+@item
+第三者(写しの受領者)がさらに再配布する場合は、
+配布者が本告知と同じ許可を第三者に与えていること。
+@end itemize
+
+@c Modified versions may not be made.
+修正版の作成を禁ずる。
+
+@display
+【本日本語版について】 @*
+Copyright (C) 1998 Mieko Hikichi and Nobuyuki Hikichi @*
+上記と全く同じ条件が満たされている場合に限り、
+そのまま複写し配布することを許可する。
+@end display
+
+@node Top
+@c @top The GNU Manifesto
+@top GNU宣言
+@end ifset
+
+@quotation
+@c The GNU Manifesto which appears below was written by Richard Stallman at
+@c the beginning of the GNU project, to ask for participation and support.
+@c For the first few years, it was updated in minor ways to account for
+@c developments, but now it seems best to leave it unchanged as most people
+@c have seen it.
+GNU宣言（GNU Manifesto）（以下参照）は、GNUプロジェクトの初期の頃に、
+Richard Stallmanが参加とサポートを求めるために書いたものである。
+当初2〜3年間は、開発について説明するために参考として用いつつ更新していたが、
+現在では、人々がよく目にするので変更しないでおくことが最善であると考えている。
+
+@c Since that time, we have learned about certain common misunderstandings
+@c that different wording could help avoid.  Footnotes added in 1993 help
+@c clarify these points.
+その時以来、我々は、いくつかの表現をわかりやすくしたつもりだが
+よく誤解を招く点があることがわかった。
+そこで、そのような点を明確にするべく、1993年に脚注として追記した。
+
+@c For up-to-date information about the available GNU software, please see
+@c the latest issue of the GNU's Bulletin.  The list is much too long to
+@c include here.
+現在配布可能なGNUソフトウェアに関する最新情報は、
+GNU's Bulletin（[訳注]日本語版であれば「GNUダイジェスト」）の最新号を
+ご覧いただきたい。
+ここに引用するには情報量が多すぎるので。
+@end quotation
+
+@c @unnumberedsec What's GNU?  Gnu's Not Unix!
+@unnumberedsec GNUとは何か？ GnuはUnixではない（Gnu's Not Unix）！
+
+@c GNU, which stands for Gnu's Not Unix, is the name for the complete
+@c Unix-compatible software system which I am writing so that I can give it
+@c away free to everyone who can use it.@footnote{The wording here was
+@c careless.  The intention was that nobody would have to pay for
+@c @emph{permission} to use the GNU system.  But the words don't make this
+@c clear, and people often interpret them as saying that copies of GNU
+@c should always be distributed at little or no charge.  That was never the
+@c intent; later on, the manifesto mentions the possibility of companies
+@c providing the service of distribution for a profit.  Subsequently I have
+@c learned to distinguish carefully between ``free'' in the sense of
+@c freedom and ``free'' in the sense of price.  Free software is software
+@c that users have the freedom to distribute and change.  Some users may
+@c obtain copies at no charge, while others pay to obtain copies---and if
+@c the funds help support improving the software, so much the better.  The
+@c important thing is that everyone who has a copy has the freedom to
+@c cooperate with others in using it.} Several other volunteers are helping
+@c me.  Contributions of time, money, programs and equipment are greatly
+@c needed.
+GNUとはGnu's Not Unixの略であり、誰もがフリーに使えるよう@footnote{
+ここの言葉遣いは不注意であった。
+意図することは、誰もGNUシステムを使う@emph{許可}のために支払う必要はない、
+という意味である。
+しかし、これでも明確になっていないし、
+GNUの複写は常にほとんどまたは全くの無料で配布されるべきであると
+言われていると解釈している人が多い。
+後述で、この宣言では、利益のために配布サービスを提供している
+企業の可能性について述べているように、これは意図した意味では決してない。
+その後、私は、自由という意味の『フリー』と価格という意味の『無料』を
+注意深く区別するようになった。
+フリー・ソフトウェアとは、配布する自由と変更する自由をユーザが持っている
+ソフトウェアのことである。
+無料でコピーを入手するかもしれないユーザもいれば、
+コピーの入手に支払うユーザもいるかもしれない。
+また、集まったお金がソフトウェアの改良支援となればますます良いことである。
+重要なことは、コピーを持っている人は誰でも、そのコピーの使用にあたり、
+他人と協力するための自由があるという点である。}、
+私が今作成しているUnixと完全互換のソフトウェア・システムの名称である。
+何人ものプログラマが私を手伝ってくれている。
+時間やお金、プログラム、機器の寄付を大いに必要としている。
+
+@c So far we have an Emacs text editor with Lisp for writing editor commands,
+@c a source level debugger, a yacc-compatible parser generator, a linker, and
+@c around 35 utilities.  A shell (command interpreter) is nearly completed.  A
+@c new portable optimizing C compiler has compiled itself and may be released
+@c this year.  An initial kernel exists but many more features are needed to
+@c emulate Unix.  When the kernel and compiler are finished, it will be
+@c possible to distribute a GNU system suitable for program development.  We
+@c will use @TeX{} as our text formatter, but an nroff is being worked on.  We
+@c will use the free, portable X window system as well.  After this we will
+@c add a portable Common Lisp, an Empire game, a spreadsheet, and hundreds of
+@c other things, plus on-line documentation.  We hope to supply, eventually,
+@c everything useful that normally comes with a Unix system, and more.
+既に我々のもとには、エディタ・コマンド記述用のLispを備えている
+Emacsというテキスト・エディタや、ソース・レベル・デバッガ、
+yacc互換の構文解析部生成ツール、リンカ、その他約35個のユーティリティがある。
+シェル（コマンド・インタープリタ）はほぼ完成している。
+移植性の良い新しい最適化Cコンパイラは自分自身をコンパイルできるようになり、
+今年中にはリリースできるだろう。
+初期段階のカーネルはあるが、Unixをエミュレートするためには
+もっと多くの機能が必要である。
+カーネルとコンパイラが完成すれば、
+プログラム開発にふさわしいGNUシステムを配布できるだろう。
+テキスト処理には@TeX{}を採用するつもりだが、nroff関連の作業も進行中である。
+また、フリーで移植性の良いX Window Systemも採用する。
+そのあとは、移植性の良いCommon Lispや、Empireゲーム、スプレッドシート、
+その他数多くのものを、オンライン・ドキュメントと共に追加していく。
+最終的には、Unixシステムに標準で付いている有用なツール全てに加えて、
+さらにはそれ以上のものを提供したいと考えている。
+
+@c GNU will be able to run Unix programs, but will not be identical to Unix.
+@c We will make all improvements that are convenient, based on our experience
+@c with other operating systems.  In particular, we plan to have longer
+@c file names, file version numbers, a crashproof file system, file name
+@c completion perhaps, terminal-independent display support, and perhaps
+@c eventually a Lisp-based window system through which several Lisp programs
+@c and ordinary Unix programs can share a screen.  Both C and Lisp will be
+@c available as system programming languages.  We will try to support UUCP,
+@c MIT Chaosnet, and Internet protocols for communication.
+GNUは、Unixのプログラムを実行できるようにするつもりだが、
+Unixとは同一のものにはならない。
+他のオペレーティング・システムでの我々の経験を基に、
+より使いやすくなるよう、全面的に改良していくからである。
+特に、長いファイル名の使用やファイルのバージョン番号、
+耐クラッシュ性に優れたファイル・システム、
+ファイル名の補完機能（[訳注]ファイル名を途中まで指定しただけで
+そのあとはシステムが完全なファイル名を追加してくれる機能）、
+端末に依存しない表示のサポート、おそらく最終的には、
+いくつかのLispプログラムと通常のUnixプログラムが1つの画面を
+共有できるようなLispベースのウィンドウ・システムを作る予定である。
+システム・プログラミング言語としては、C言語とLispの両方が使用可能になるだろう。
+通信用には、UUCP、MIT Chaosnet、Internetの各プロトコルを
+サポートしようと考えている。
+
+@c GNU is aimed initially at machines in the 68000/16000 class with virtual
+@c memory, because they are the easiest machines to make it run on.  The extra
+@c effort to make it run on smaller machines will be left to someone who wants
+@c to use it on them.
+GNUでは、最初は68000/16000（[訳注]モトローラ68000とナショナル・
+セミコンダクタの16000）クラスの仮想記憶を備えたマシンを対象とする。
+というのは、GNUを最も実行しやすいマシンだからである。
+もっと能力の小さなマシン上でGNUを動作させるための努力は、
+そのマシン上で使いたい人の手に委ねることにする。
+
+@c To avoid horrible confusion, please pronounce the `G' in the word `GNU'
+@c when it is the name of this project.
+とんでもない誤解を避けるために、このプロジェクトの名称としての
+「GNU」の場合は、「G」を発音していただきたい。
+（[訳注]もともと普通名詞のGnuはヌーという動物であり、
+その発音を採用するとGNU projectはヌー・プロジェクトになり
+new projectと間違われる可能性もある。）
+
+@c @unnumberedsec Why I Must Write GNU
+@unnumberedsec なぜGNUを作成しなければならないのか？
+
+@c I consider that the golden rule requires that if I like a program I must
+@c share it with other people who like it.  Software sellers want to divide
+@c the users and conquer them, making each user agree not to share with
+@c others.  I refuse to break solidarity with other users in this way.  I
+@c cannot in good conscience sign a nondisclosure agreement or a software
+@c license agreement.  For years I worked within the Artificial Intelligence
+@c Lab to resist such tendencies and other inhospitalities, but eventually
+@c they had gone too far: I could not remain in an institution where such
+@c things are done for me against my will.
+もし私の好きなプログラムを他の人も好きであれば、
+私はその人とプログラムを分かち合わなくてはならない、
+という黄金律（[訳注]自分の欲することは他の人にも為すという考え方）を考案した。
+ソフトウェア販売会社は、ユーザ1人1人に他人と共有しない契約を
+させることによって、ユーザを分離し支配しようとしている。
+そのような方法で他のユーザとの連帯意識を壊すことは私は嫌である。
+機密保持契約やソフトウェア・ライセンス契約へのサインは良心からできない。
+何年もの間、私はそういった傾向やその他の冷遇に抵抗するために、
+AIラボ内で活動してきたが、最後にはその傾向や冷遇は度を越していった。
+私に対してAIラボが行なった事は私の意志に反するので、
+そこに留まることができなくなった。
+
+@c So that I can continue to use computers without dishonor, I have decided to
+@c put together a sufficient body of free software so that I will be able to
+@c get along without any software that is not free.  I have resigned from the
+@c AI lab to deny MIT any legal excuse to prevent me from giving GNU away.
+信念を曲げることなくコンピュータを使い続けるために、
+フリーでないソフトウェアがなくてもうまくやっていけるような
+フリー・ソフトウェアのしっかりした団体を組織することを決意した。
+私がGNUを配布することをMITが合法的に阻止するのを拒否するために、
+私はAIラボを辞職した。
+
+@c @unnumberedsec Why GNU Will Be Compatible with Unix
+@unnumberedsec なぜGNUはUnix互換なのか？
+
+@c Unix is not my ideal system, but it is not too bad.  The essential features
+@c of Unix seem to be good ones, and I think I can fill in what Unix lacks
+@c without spoiling them.  And a system compatible with Unix would be
+@c convenient for many other people to adopt.
+Unixは私の理想とするシステムではないが、それほど悪いシステムでもない。
+Unixの基本的な機能は良いものなので、それらを生かしつつ、
+Unixに欠けているものを補っていけるだろうと考えている。
+また、Unix互換のシステムであれば、
+GNUを採用する他の多くの人々にとっても有用であろう。
+
+@c @unnumberedsec How GNU Will Be Available
+@unnumberedsec GNUをどうやって配布するか？
+
+@c GNU is not in the public domain.  Everyone will be permitted to modify and
+@c redistribute GNU, but no distributor will be allowed to restrict its
+@c further redistribution.  That is to say, proprietary modifications will not
+@c be allowed.  I want to make sure that all versions of GNU remain free.
+GNUはパブリック・ドメインには置かない。
+それにより、誰もがGNUを修正して再配布でき、
+配布者が再配布することを禁止されることもない。
+つまり、独占的な修正はできないのである。
+私は、あらゆるバージョンのGNU
+（[訳注]誰でもソース・コードをアクセスできるという意味で）が
+確実にフリーであり続けて欲しいのである。
+
+@c @unnumberedsec Why Many Other Programmers Want to Help
+@unnumberedsec なぜ他の多くのプログラマが協力してくれるのか？
+
+@c I have found many other programmers who are excited about GNU and want to
+@c help.
+私は、他の数多くのプログラマがGNUに熱狂し、
+そして協力したがっていることを知った。
+
+@c Many programmers are unhappy about the commercialization of system
+@c software.  It may enable them to make more money, but it requires them to
+@c feel in conflict with other programmers in general rather than feel as
+@c comrades.  The fundamental act of friendship among programmers is the
+@c sharing of programs; marketing arrangements now typically used essentially
+@c forbid programmers to treat others as friends.  The purchaser of software
+@c must choose between friendship and obeying the law.  Naturally, many decide
+@c that friendship is more important.  But those who believe in law often do
+@c not feel at ease with either choice.  They become cynical and think that
+@c programming is just a way of making money.
+多くのプログラマが、システム・ソフトウェアの営利化に不満を抱いている。
+その営利化とは、プログラマに金儲けをさせる代わりに、
+他の一般のプログラマを仲間ではなく競争相手として見るよう仕向けるからである。
+プログラマ間の友情を示す基本的な行為は、プログラムの共有である。
+現在の典型的な市場の取り決めは、
+プログラマが他のプログラマを友人として接することを根本的に禁じてしまっている。
+ソフトウェアの購入者は、友情をとるか、法律に従うかを選択しなくてはならない。
+当然、友情のほうが大切であると考える人のほうが多いだろう。
+しかし、法律に従うべきであると考える人のなかには、
+このようなことが簡単に選択できない人が多い。
+そういう人は人の誠意を信じない人間になっており、
+プログラミングは単なる金儲けの一手段でしかないと考えているからである。
+
+@c By working on and using GNU rather than proprietary programs, we can be
+@c hospitable to everyone and obey the law.  In addition, GNU serves as an
+@c example to inspire and a banner to rally others to join us in sharing.
+@c This can give us a feeling of harmony which is impossible if we use
+@c software that is not free.  For about half the programmers I talk to, this
+@c is an important happiness that money cannot replace.
+独占的なプログラムではなくGNUに関する作業を行ない、GNUを使っていれば、
+誰に対しても排斥的ではなくなり法を守ることもできる。
+さらに、GNUは共有という点において、激励するための一例となり、
+人々が我々に参加すべく結集するための旗印となる。
+これにより、もし我々がフリーでないソフトウェアを使っていては
+得られないある種の和の感情を抱くことができる。
+私が対話したプログラマのうちの約半数が、
+これはお金には換えられない大切な幸福であると言っている。
+
+@c @unnumberedsec How You Can Contribute
+@unnumberedsec あなたはどのようにしたら貢献できるか？
+
+@c I am asking computer manufacturers for donations of machines and money.
+@c I'm asking individuals for donations of programs and work.
+私は、コンピュータ・メーカにはマシンとお金の寄付を求めている。
+個人に対してはプログラムと労働の寄付を求めている。
+
+@c One consequence you can expect if you donate machines is that GNU will run
+@c on them at an early date.  The machines should be complete, ready to use
+@c systems, approved for use in a residential area, and not in need of
+@c sophisticated cooling or power.
+マシンの寄付を受けた場合は、その見返りの1つとして、
+GNUが近いうちにそのマシン上で動作するようになるだろう。
+マシンは完成していてシステムが使える状態であり、
+住宅区域で使用可能で、特殊な冷却や電力を必要としないものでなくてはならない。
+
+@c I have found very many programmers eager to contribute part-time work for
+@c GNU.  For most projects, such part-time distributed work would be very hard
+@c to coordinate; the independently-written parts would not work together.
+@c But for the particular task of replacing Unix, this problem is absent.  A
+@c complete Unix system contains hundreds of utility programs, each of which
+@c is documented separately.  Most interface specifications are fixed by Unix
+@c compatibility.  If each contributor can write a compatible replacement for
+@c a single Unix utility, and make it work properly in place of the original
+@c on a Unix system, then these utilities will work right when put together.
+@c Even allowing for Murphy to create a few unexpected problems, assembling
+@c these components will be a feasible task.  (The kernel will require closer
+@c communication and will be worked on by a small, tight group.)
+私は非常に多くのプログラマがGNUのためにパートタイムで作業する
+熱意があることを知った。
+ほとんどのプロジェクトでは、
+そういったパートタイムでの分散した作業をまとめていくことは非常に困難だろう。
+しかし、Unixを置き換えるというこの特定の作業に関しては、そのような問題はない。
+完全なUnixシステムには数百ものユーティリティ・プログラムがあり、
+その1つ1つには別個にドキュメントが付いている。
+たいていのインタフェース仕様は、Unixとの互換性の観点から決定されている。
+プログラマ各人が単一のUnixユーティリティと互換の代替品を作成できれば、
+そのようなユーティリティをひとまとめにしても正しく動作するはずである。
+マーフィーの例で言えば、いくつか予期せぬ問題が生じたとしても、
+これらの構成要素をまとめることは可能な作業であろう。
+（カーネル作業には、より緊密なコミュニケーションが必要なので、
+少人数で密接なグループでの作業となる。）
+
+@c If I get donations of money, I may be able to hire a few people full or
+@c part time.  The salary won't be high by programmers' standards, but I'm
+@c looking for people for whom building community spirit is as important as
+@c making money.  I view this as a way of enabling dedicated people to devote
+@c their full energies to working on GNU by sparing them the need to make a
+@c living in another way.
+お金の寄付を受けた場合は、フルタイムかパートタイムで2〜3人を雇えるだろう。
+給料はプログラマの標準収入ほど高くはないが、お金を稼ぐことと同じように
+共同体精神を築くことは重要だと考えている人を私は捜している。
+私は、この給料とは、プログラマが別の方法で生計を立てなくても、
+GNU作業に全力投球できるようにするための一手段としてとらえている。
+
+@c @unnumberedsec Why All Computer Users Will Benefit
+@unnumberedsec なぜ全てのコンピュータ・ユーザが恩恵をうけるのか？
+
+@c Once GNU is written, everyone will be able to obtain good system
+@c software free, just like air.@footnote{This is another place I failed to
+@c distinguish carefully between the two different meanings of ``free''.
+@c The statement as it stands is not false---you can get copies of GNU
+@c software at no charge, from your friends or over the net.  But it does
+@c suggest the wrong idea.}
+いったんGNUが作成されれば、誰もが良質のシステム・ソフトウェアを無料で
+入手できるようになる。@footnote{
+これは、2種類の意味を持つ『フリー』について私が注意深く区別するのを
+怠ったもう1つの箇所である。
+この文は文字どおりの意味である。
+つまり、GNUソフトウェアのコピーを友人やネット経由で無料で入手することができる、
+という意味である。
+ただし、間違った考え方を提示してしまっている。}
+
+@c This means much more than just saving everyone the price of a Unix license.
+@c It means that much wasteful duplication of system programming effort will
+@c be avoided.  This effort can go instead into advancing the state of the
+@c art.
+これは、Unixライセンスの価格を誰もが節約できることだけではなく
+多くのことを意味する。
+つまり、非常に無駄となるシステム・プログラミングの重複を避けることができる。
+代わりに、その労力は現在の技術水準の進歩に向けることができる。
+
+@c Complete system sources will be available to everyone.  As a result, a user
+@c who needs changes in the system will always be free to make them himself,
+@c or hire any available programmer or company to make them for him.  Users
+@c will no longer be at the mercy of one programmer or company which owns the
+@c sources and is in sole position to make changes.
+完全なシステム・ソースは誰に対しても配布可能になる。
+そのため、システムに変更を施さなくてはならないユーザは、
+自分でいつでも自由にそれを行なったり、あるいは、
+自分の代わりにそれを行なってくれるプログラマや企業を
+雇うことができるようになる。
+ユーザはもはや、ソース・コードを所有するプログラマや企業のなすがままに
+なることはなく、変更を施すことに関しては独立した存在でいられる。
+
+@c Schools will be able to provide a much more educational environment by
+@c encouraging all students to study and improve the system code.  Harvard's
+@c computer lab used to have the policy that no program could be installed on
+@c the system if its sources were not on public display, and upheld it by
+@c actually refusing to install certain programs.  I was very much inspired by
+@c this.
+大学側は、学生にシステム・コードを学習し、改良するよう奨めることにより、
+はるかに良い教育環境の提供が可能になる。
+ハーバード大学のコンピュータ研究所では、
+ソース・コードを公開して見れないようなプログラムは一切、
+システムにインストールしないという方針が習慣であり、
+特定のプログラムをインストールすることを実際に拒否することを支持した。
+このことに私は非常に勇気づけられた。
+
+@c Finally, the overhead of considering who owns the system software and what
+@c one is or is not entitled to do with it will be lifted.
+最後に、システム・ソフトウェアを誰が所有しているのかを、
+それを使ってやっていいことといけないことを考慮することの
+オーバーヘッドが解消されるだろう。
+
+@c Arrangements to make people pay for using a program, including licensing of
+@c copies, always incur a tremendous cost to society through the cumbersome
+@c mechanisms necessary to figure out how much (that is, which programs) a
+@c person must pay for.  And only a police state can force everyone to obey
+@c them.  Consider a space station where air must be manufactured at great
+@c cost: charging each breather per liter of air may be fair, but wearing the
+@c metered gas mask all day and all night is intolerable even if everyone can
+@c afford to pay the air bill.  And the TV cameras everywhere to see if you
+@c ever take the mask off are outrageous.  It's better to support the air
+@c plant with a head tax and chuck the masks.
+人々にプログラムの使用料を支払わせる契約（複製のライセンスを含む）は
+常に、人がいくら（つまり、どのプログラムに）支払わなくてはならないかを
+理解するのに欠くことのできない厄介な機構を通じて、
+社会は多大なコストを被っている。
+そして、警察国家でもなければ、
+そのような機構に全ての人を従わせることはできない。
+例えば、多大なコストをかけて空気を製造しなくてはならない
+宇宙ステーションのことを考えてみよう。
+空気1リットルごとの息継ぎに課金すれば公平かもしれないが、
+たとえ皆が空気料金を支払う余裕があったとしても、
+そのために一日中メータ付きの空気マスクを付けるとなれば耐え難いことである。
+まして、マスクを外したかどうかをTVカメラが至る所で見張っているなどというのは、
+全くとんでもないことである。
+それよりは、料金を頭割りにした税金で空気工場を維持して、
+マスクを外すほうがましである。
+
+@c Copying all or parts of a program is as natural to a programmer as
+@c breathing, and as productive.  It ought to be as free.
+プログラムの一部または全てを複写することは、
+プログラマにとって呼吸するのと同じくらい自然なことであり生産的なものである。
+だから、プログラムはフリーであるべきである。
+
+@c @unnumberedsec Some Easily Rebutted Objections to GNU's Goals
+@unnumberedsec GNUの目標への異議と、簡単にできる反証
+
+@quotation
+@c ``Nobody will use it if it is free, because that means they can't rely
+@c on any support.''
+『プログラムがフリーであれば誰もそれを使わないだろう。
+なぜならば、無料ということは、サポートを当てにできないからである。』
+
+@c ``You have to charge for the program to pay for providing the
+@c support.''
+『サポートを提供するために料金をプログラムに課す必要がある。』
+@end quotation
+
+@c If people would rather pay for GNU plus service than get GNU free without
+@c service, a company to provide just service to people who have obtained GNU
+@c free ought to be profitable.@footnote{Several such companies now exist.}
+人々が、サービスのない無料のGNUよりも、
+サービス付きの有料のGNUのほうに支払うというのであれば、
+GNUを無料で入手した人々に対して、
+サービスだけを提供する企業は利益を得て当然である。@footnote{
+そのような企業は現に数社存在する。}
+
+@c We must distinguish between support in the form of real programming work
+@c and mere handholding.  The former is something one cannot rely on from a
+@c software vendor.  If your problem is not shared by enough people, the
+@c vendor will tell you to get lost.
+本当のプログラミング作業を行なうサポートと、
+単なる支援とは区別すべきである。
+前者は、ソフトウェア業者からのサポートを当てにできない種類のものである。
+もしあなたの問題が多くの人々の問題になっていなかった場合には、
+ソフトウェア業者は邪魔しないでほしいと言うだろう。
+
+@c If your business needs to be able to rely on support, the only way is to
+@c have all the necessary sources and tools.  Then you can hire any available
+@c person to fix your problem; you are not at the mercy of any individual.
+@c With Unix, the price of sources puts this out of consideration for most
+@c businesses.  With GNU this will be easy.  It is still possible for there to
+@c be no available competent person, but this problem cannot be blamed on
+@c distribution arrangements.  GNU does not eliminate all the world's problems,
+@c only some of them.
+あなたのビジネスがサポートに頼らざるをえない場合は、
+必要なソース・コードとツールを全て自分で抱えるしかない。
+そうすれば、あなたの問題点を直してもらうための人を雇うことができる。
+人に翻弄されることはない。
+Unixを使う場合、ソース・コードが高価なので、
+ほとんどのビジネスではこのようなことはできない。
+GNUを使えば、これは簡単に実現する。
+有能な人材がいなかったとしても可能であり、しかも、
+問題点を修正できないのは配布規定のせいでは断じてない。
+GNUは、世界中の全ての問題ではなく、その一部のみを取り除いている。
+
+@c Meanwhile, the users who know nothing about computers need handholding:
+@c doing things for them which they could easily do themselves but don't know
+@c how.
+一方、コンピュータについて何も知らないユーザには支援が必要である。
+自分で容易に処理できる範疇であっても、
+その方法を知らない場合に支援が必要なのである。
+
+@c Such services could be provided by companies that sell just hand-holding
+@c and repair service.  If it is true that users would rather spend money and
+@c get a product with service, they will also be willing to buy the service
+@c having got the product free.  The service companies will compete in quality
+@c and price; users will not be tied to any particular one.  Meanwhile, those
+@c of us who don't need the service should be able to use the program without
+@c paying for the service.
+そのようなサービスは、単なる指導や修理サービスだけを行なっている
+企業が請け負うことができるだろう。
+ユーザがお金を支払ってもサービス付きの製品を購入するほうが良いと
+考えているのであれば、無料の製品に対するサービスにも喜んでお金を払うだろう。
+サービス会社は、品質と価格の面で競争することになり、
+ユーザは特定のサービス会社にこだわる必要がなくなる。
+一方、サービスを必要としない我々等などであれば、
+サービスへの対価を支払わなくても、プログラムを使うことができる。
+
+@quotation
+@c ``You cannot reach many people without advertising,
+@c and you must charge for the program to support that.''
+『広告なしでは多くの人々に知らせることは無理であり、
+その費用だけでもプログラムに料金を課すべきである。』
+
+@c ``It's no use advertising a program people can get free.''
+『誰もが無料で入手できるようなプログラムを宣伝しても仕方がない。』
+@end quotation
+
+@c There are various forms of free or very cheap publicity that can be used to
+@c inform numbers of computer users about something like GNU.  But it may be
+@c true that one can reach more microcomputer users with advertising.  If this
+@c is really so, a business which advertises the service of copying and
+@c mailing GNU for a fee ought to be successful enough to pay for its
+@c advertising and more.  This way, only the users who benefit from the
+@c advertising pay for it.
+GNU等の情報を、多くのコンピュータ・ユーザに知らせられるような
+無料またはきわめて安価な広告媒体がいろいろとある。
+しかし、宣伝すれば、より多くのマイクロコンピュータ・ユーザに
+知らせられるというのも事実かもしれない。
+本当にそうであれば、GNUを無料で複写したり配布するサービスを
+宣伝するビジネスは、その広告費用にかかった以上の成功をおさめるはずである。
+この方法は、宣伝によって利益を得るユーザだけが広告料を払うものである。
+
+@c On the other hand, if many people get GNU from their friends, and such
+@c companies don't succeed, this will show that advertising was not really
+@c necessary to spread GNU.  Why is it that free market advocates don't
+@c want to let the free market decide this?@footnote{The Free Software
+@c Foundation raises most of its funds from a distribution service,
+@c although it is a charity rather than a company.  If @emph{no one}
+@c chooses to obtain copies by ordering from the FSF, it will be unable
+@c to do its work.  But this does not mean that proprietary restrictions
+@c are justified to force every user to pay.  If a small fraction of all
+@c the users order copies from the FSF, that is sufficient to keep the FSF
+@c afloat.  So we ask users to choose to support us in this way.  Have you
+@c done your part?}
+他方では、多くの人々が友人からGNUを入手するので、
+上記のような企業が成功しないというのであれば、その宣伝がGNUを広める上で、
+本当に必要なものではないということである。
+なぜ自由市場擁護者は、
+このことを自由市場に決めさせたくないのだろうか？@footnote{
+Free Software Foundationは企業ではなく慈善団体ではあるが、
+配布サービスで資金の大半を調達している。
+FSFへの注文によってコピーを入手する人がいなくなると、
+作業ができなくなるだろう。
+しかし、これは独占的制限によってユーザに支払いを強要することが
+正しいという意味ではない。
+たとえ小さな注文であってもユーザ全てがFSFへコピーを発注してくれれば、
+それだけでFSFは借金をしないで済む。
+あなたなりに何か貢献しているのか？}
+
+@quotation
+@c ``My company needs a proprietary operating system
+@c to get a competitive edge.''
+『私の会社は、競争の頂点に立つために独占的なオペレーティング・
+システムが必要である。』
+@end quotation
+
+@c GNU will remove operating system software from the realm of competition.
+@c You will not be able to get an edge in this area, but neither will your
+@c competitors be able to get an edge over you.  You and they will compete in
+@c other areas, while benefiting mutually in this one.  If your business is
+@c selling an operating system, you will not like GNU, but that's tough on
+@c you.  If your business is something else, GNU can save you from being
+@c pushed into the expensive business of selling operating systems.
+GNUにより、オペレーティング・システム・ソフトウェアは競争の世界から
+取り除かれることになるだろう。
+このオペレーティング・システム・ソフトウェアの分野では、
+あなたは競争の頂点に立つことはできないし、競争相手もそうなることはできない。
+この分野では、あなたとその競争相手は互いに利益を受け、
+競い合うのは他の分野でということになる。
+あなたのビジネスがオペレーティング・システムの販売であった場合には、
+GNUは好ましくなく、あなたにとって厳しい状況になるだろう。
+あるいは他の種類のビジネスならば、オペレーティング・システムの販売といった
+高価なビジネスにあなたが強要されないよう、GNUがあなたを救うことができる。
+
+@c I would like to see GNU development supported by gifts from many
+@c manufacturers and users, reducing the cost to each.@footnote{A group of
+@c computer companies recently pooled funds to support maintenance of the
+@c GNU C Compiler.}
+私は、多くのメーカやユーザからの寄付に支えられてGNUが発展し、
+そのような人々の個々のコストが軽減されていくのを
+この目で見たいと思う。@footnote{
+コンピュータ企業が数社集まって、GNU Cコンパイラの保守を
+サポートするための資金を最近共同出資した。}
+
+@quotation
+@c ``Don't programmers deserve a reward for their creativity?''
+『プログラマは自分の創造性に対して報酬を受けるに値しないのではないか？』
+@end quotation
+
+@c If anything deserves a reward, it is social contribution.  Creativity can
+@c be a social contribution, but only in so far as society is free to use the
+@c results.  If programmers deserve to be rewarded for creating innovative
+@c programs, by the same token they deserve to be punished if they restrict
+@c the use of these programs.
+何事にも報酬があるとしたら、それは社会的貢献である。
+創造性は社会的貢献となりうるが、
+それは社会がその成果を自由に使用できる場合に限られる。
+もしプログラマが、革新的なプログラムを作成したことで報酬を得るとしたら、
+そのようなプログラムの利用を制限した場合にも同じ理由で罰に値する。
+
+@quotation
+@c ``Shouldn't a programmer be able to ask for a reward for his creativity?''
+『プログラマは、自分の創造性に対して報酬を要求してはいけないのではないか？』
+@end quotation
+
+@c There is nothing wrong with wanting pay for work, or seeking to maximize
+@c one's income, as long as one does not use means that are destructive.  But
+@c the means customary in the field of software today are based on
+@c destruction.
+仕事に対して支払いを求めたり、自分の収入を最大に増やすよう求めることは、
+破壊的な手段を使わない限り、何ら悪いことではない。
+しかし、今日のソフトウェア分野で習慣となっている手段は、
+破壊的行為に基づいている。
+
+@c Extracting money from users of a program by restricting their use of it is
+@c destructive because the restrictions reduce the amount and the ways that
+@c the program can be used.  This reduces the amount of wealth that humanity
+@c derives from the program.  When there is a deliberate choice to restrict,
+@c the harmful consequences are deliberate destruction.
+プログラムの使用を制限してプログラムのユーザからお金をとることは、
+その制限のせいで、使用できるプログラムの種類や方法が減ってしまうので、
+破壊的行為となる。
+これは、人類がプログラムから得られる富の量を減らしてしまう。
+故意に制限すると決定したときには、
+意図的な破壊という有害な結果をもたらすだろう。
+
+@c The reason a good citizen does not use such destructive means to become
+@c wealthier is that, if everyone did so, we would all become poorer from the
+@c mutual destructiveness.  This is Kantian ethics; or, the Golden Rule.
+@c Since I do not like the consequences that result if everyone hoards
+@c information, I am required to consider it wrong for one to do so.
+@c Specifically, the desire to be rewarded for one's creativity does not
+@c justify depriving the world in general of all or part of that creativity.
+善良な市民がそのような破壊的手段を用いないのは、
+そうしないことこそが裕福であると思っているからである。
+もし誰もが破壊的手段を用いたとしたら、
+我々は互いの破壊行為によってさらに貧しくなっていくばかりであろう。
+これがカント哲学の倫理、または黄金律である。
+皆が情報を隠し持った結果として生じる結末を私は好まないので、
+そうすることは悪いことであると考えざるを得ない。
+明確に言えば、自分の創造性が報われたいという欲望は、
+その創造性の全部または一部を、一般の世の中から奪う言い訳にはならない。
+
+@quotation
+@c ``Won't programmers starve?''
+『プログラマは飢えてしまわないだろうか？』
+@end quotation
+
+@c I could answer that nobody is forced to be a programmer.  Most of us cannot
+@c manage to get any money for standing on the street and making faces.  But
+@c we are not, as a result, condemned to spend our lives standing on the
+@c street making faces, and starving.  We do something else.
+プログラマに強要できる者はいないということは言える。
+我々の大半は、街に立ってしかめ面をしてもどうにもお金を稼ぐことはできない。
+しかし、結果的には、我々がしかめ面をしながらひもじい思いをしつつ街に立って
+一生を過ごすことになったとしても、それを厳しく非難されはしない。
+我々には他にすることがあるからである。
+
+@c But that is the wrong answer because it accepts the questioner's implicit
+@c assumption: that without ownership of software, programmers cannot possibly
+@c be paid a cent.  Supposedly it is all or nothing.
+しかし、これは、質問者の暗黙の仮定、つまり、ソフトウェアの所有権がなければ、
+プログラマは一銭たりとも収入を得ることはできないという仮定を
+受け入れているので間違った答えである。
+おそらく、一か八かということなのだろう。
+
+@c The real reason programmers will not starve is that it will still be
+@c possible for them to get paid for programming; just not paid as much as
+@c now.
+プログラマが飢えてしまわない本当の理由は、単に今ほどの額ではないだけであって、
+プログラミングに対しては支払われる可能性が依然としてあるからである。
+
+@c Restricting copying is not the only basis for business in software.  It is
+@c the most common basis because it brings in the most money.  If it were
+@c prohibited, or rejected by the customer, software business would move to
+@c other bases of organization which are now used less often.  There are
+@c always numerous ways to organize any kind of business.
+複写を制限することだけが、ソフトウェアにおけるビジネスの唯一の基礎ではない。
+それが最も多くのお金をもたらすので、一番の共通基盤になっているだけである。
+もし顧客のほうから複写の制限を禁じたり拒絶すれば、
+ソフトウェア・ビジネスの組織の土台は、
+今ではあまり多くは使用されていないような別の種類ものへと変わるだろう。
+
+@c Probably programming will not be as lucrative on the new basis as it is
+@c now.  But that is not an argument against the change.  It is not considered
+@c an injustice that sales clerks make the salaries that they now do.  If
+@c programmers made the same, that would not be an injustice either.  (In
+@c practice they would still make considerably more than that.)
+おそらく、新しい基盤のもとではプログラミングは
+現在と同じくらいの利益にしかならないだろう。
+しかし、それだからといって変化に反対する理由にはならない。
+販売員が今と同じ給料を得ることが不公平だというのではない。
+プログラマも同様に今と同じ給料を得たとしても、不公平にはならないだろう。
+（実際、プログラマは給料以上のことを行なうだろうから。）
+
+@quotation
+@c ``Don't people have a right to control how their creativity is used?''
+『人々には自分の創造性がどのように使用されるのかを
+制御する権利があるのではないか？』
+@end quotation
+
+@c ``Control over the use of one's ideas'' really constitutes control over
+@c other people's lives; and it is usually used to make their lives more
+@c difficult.
+『自分のアイデアの使用を制御すること』は実は、他人の人生を制御し、
+一般にその人の人生をもっと困難にするために用いられる性質のものである。
+
+@c People who have studied the issue of intellectual property rights carefully
+@c (such as lawyers) say that there is no intrinsic right to intellectual
+@c property.  The kinds of supposed intellectual property rights that the
+@c government recognizes were created by specific acts of legislation for
+@c specific purposes.
+（弁護士のように）知的所有権の問題を勉強した人によれば、
+知的所有物には本来の権利もないと言っている。
+政府が認めている推定上の知的所有権の類は、
+特定の目的のための特定の法律によって作り出されたものである。
+
+@c For example, the patent system was established to encourage inventors to
+@c disclose the details of their inventions.  Its purpose was to help society
+@c rather than to help inventors.  At the time, the life span of 17 years for
+@c a patent was short compared with the rate of advance of the state of the
+@c art.  Since patents are an issue only among manufacturers, for whom the
+@c cost and effort of a license agreement are small compared with setting up
+@c production, the patents often do not do much harm.  They do not obstruct
+@c most individuals who use patented products.
+例えば、特許制度は、発明家がその発明の細部を公開するよう
+促進するために制定された。
+その目的は、発明家を保護するというよりは、社会を保護することにあった。
+当時、17年という特許の保護期間は、技術水準の進歩に比べて短いものであった。
+特許は製造業者の間だけの問題なので、ライセンス契約のコストや手間が
+製品作りの準備に比べれば少ないような人々にとっての特許とは、
+さほどの損害にはならない場合が多い。
+特許製品を使用するたいていの個人を妨害してはいない。
+
+@c The idea of copyright did not exist in ancient times, when authors
+@c frequently copied other authors at length in works of non-fiction.  This
+@c practice was useful, and is the only way many authors' works have survived
+@c even in part.  The copyright system was created expressly for the purpose
+@c of encouraging authorship.  In the domain for which it was
+@c invented---books, which could be copied economically only on a printing
+@c press---it did little harm, and did not obstruct most of the individuals
+@c who read the books.
+著作権という概念は、著者がノンフィクション作品の中に他の著者から長々と
+頻繁に真似ていた古代には存在しなかった。
+この習慣は役に立っていたし、
+現在でも多くの著者の作品に部分的に生き続けている習慣である。
+著作権制度は、著述業を明白に促進するために作られた。
+その制度が作られた分野として本があるが、
+これは印刷するだけで安く複製できるのでほとんど損害を与えることはなく、
+何よりも本を読む個人を妨害することはなかった。
+
+@c All intellectual property rights are just licenses granted by society
+@c because it was thought, rightly or wrongly, that society as a whole would
+@c benefit by granting them.  But in any particular situation, we have to ask:
+@c are we really better off granting such license?  What kind of act are we
+@c licensing a person to do?
+全ての知的所有権は、社会が認めるライセンスにすぎない。
+というのは、良きにつけ悪しきにつけ、
+知的所有権を認めることにより社会全体が利益を得ると考えられたからである。
+しかし、どのような特殊な状況においても、
+我々には問直さなければならないことがある。
+「我々はそのようなライセンスを認めることで本当により裕福になるのか？」、
+「我々はどのような種類の行為を人に許可しているというだろうか？」と。
+
+@c The case of programs today is very different from that of books a hundred
+@c years ago.  The fact that the easiest way to copy a program is from one
+@c neighbor to another, the fact that a program has both source code and
+@c object code which are distinct, and the fact that a program is used rather
+@c than read and enjoyed, combine to create a situation in which a person who
+@c enforces a copyright is harming society as a whole both materially and
+@c spiritually; in which a person should not do so regardless of whether the
+@c law enables him to.
+今日のプログラム事情は、100年前の書物のときとは全く異なっている。
+例えば、プログラムを複写するときの最も簡単な方法は、
+隣の人からさらに隣の人へと順にまわしていくという事実や、
+プログラムにはソース・コードとオブジェクト・コードがあって
+それぞれ別のものであるという事実、プログラムは読んだり楽しむものではなく
+使用されるものであるという事実が混ぜ合わされて、著作権を押し通す人が、
+物質的にも精神的にも社会全体に害を及ぼしている状況を作り出しているのである。
+つまり、法的に著作権の強要が可能かどうかにかかわらず、
+人はそのようなことをすべきではないということである。
+
+@quotation
+@c ``Competition makes things get done better.''
+『競争が物事をより良くしていく。』
+@end quotation
+
+@c The paradigm of competition is a race: by rewarding the winner, we
+@c encourage everyone to run faster.  When capitalism really works this way,
+@c it does a good job; but its defenders are wrong in assuming it always works
+@c this way.  If the runners forget why the reward is offered and become
+@c intent on winning, no matter how, they may find other strategies---such as,
+@c attacking other runners.  If the runners get into a fist fight, they will
+@c all finish late.
+競争の典型はレースである。
+勝者には報酬が与えられるので、誰もがもっと速く走ろうと努力する。
+資本主義が本当にこの方法で機能すればよいが、資本主義の擁護者は、
+この方法で常に機能することを前提としている点が間違っている。
+例えば、なぜ報酬が与えられるのかを走者が忘れてしまい、
+手段を選ばず勝つことのみに執着したとすれば、
+他の走者を攻撃するといった他の作戦をとるかもしれない。
+走者達が真っ先に殴り合いをしてしまえば、皆のゴールインが遅れてしまうだろう。
+
+@c Proprietary and secret software is the moral equivalent of runners in a
+@c fist fight.  Sad to say, the only referee we've got does not seem to
+@c object to fights; he just regulates them (``For every ten yards you run,
+@c you can fire one shot'').  He really ought to break them up, and penalize
+@c runners for even trying to fight.
+ソフトウェアの占有と秘密は、真っ先に殴り合う走者と道義的には同じである。
+悲しいことに、我々の唯一の審判でさえ、殴り合いに反対していないように見える。
+ただ走者を（『10ヤード走るごとに1発殴ってもよい』というふうにして）
+規制するだけである。
+審判は本来、そのような走者達の中に分け入って、
+暴力を働こうとした走者を罰してしかるべきである。
+
+@quotation
+@c ``Won't everyone stop programming without a monetary incentive?''
+『金銭的な刺激がなくなっては誰もプログラミングなどしないのではないか？』
+@end quotation
+
+@c Actually, many people will program with absolutely no monetary incentive.
+@c Programming has an irresistible fascination for some people, usually the
+@c people who are best at it.  There is no shortage of professional musicians
+@c who keep at it even though they have no hope of making a living that way.
+実際には、多くの人々が金銭的刺激が皆無であってもプログラムを書いているだろう。
+プログラミングには、一部の人にとってはたまらないほどの魅力があり、
+そういう人こそプログラミングに最も向いている。
+音楽で生計を立てる望みがないからといって、プロの音楽家がいなくなることはない。
+
+@c But really this question, though commonly asked, is not appropriate to the
+@c situation.  Pay for programmers will not disappear, only become less.  So
+@c the right question is, will anyone program with a reduced monetary
+@c incentive?  My experience shows that they will.
+しかし、この疑問は実際、よく提起されるのだが、現実に即してはいない。
+プログラマへの支払いは少なくなっても、無くなることはない。
+したがって、正しい質問は、
+『金銭的な魅力が減っても人はプログラムを書くか？』となる。
+私の経験がそれを語っている。
+
+@c For more than ten years, many of the world's best programmers worked at the
+@c Artificial Intelligence Lab for far less money than they could have had
+@c anywhere else.  They got many kinds of non-monetary rewards: fame and
+@c appreciation, for example.  And creativity is also fun, a reward in itself.
+10年以上もの間、世界中の多くの最優秀プログラマが、
+よそでならもっと収入を得られたはずにも関わらず、AIラボで働いてきた。
+彼らは、金銭ではない報酬、例えば、名声や感謝といったものを得てきた。
+そして、創造は楽しくもあり、それ自体が自分への報償であった。
+
+@c Then most of them left when offered a chance to do the same interesting
+@c work for a lot of money.
+やがて、彼らの大半は、多くの給料をもらいながら引き続き興味ある
+同じ仕事ができる機会を与えられて去っていった。
+
+@c What the facts show is that people will program for reasons other than
+@c riches; but if given a chance to make a lot of money as well, they will
+@c come to expect and demand it.  Low-paying organizations do poorly in
+@c competition with high-paying ones, but they do not have to do badly if the
+@c high-paying ones are banned.
+この事実は、人は金持ちになること以外の理由でもプログラムを
+書くということを示している。
+しかし、より多くのお金を得る機会があれば、人はそれを期待し求めもするだろう。
+給料が少ない組織は、多いところと競争すれば劣勢にはなるが、
+給料の多い組織が息詰まっても、少ないほうまで悪くなるわけではない。
+
+@quotation
+@c ``We need the programmers desperately.  If they demand that we
+@c stop helping our neighbors, we have to obey.''
+『我々は絶望的になってプログラマを必要としているのではないか。
+我々の隣人を助けるのをやめるようプログラマが我々に要求すれば、
+我々はそれに従わざるを得ない。』
+@end quotation
+
+@c You're never so desperate that you have to obey this sort of demand.
+@c Remember: millions for defense, but not a cent for tribute!
+あなたは、そういった要求に従うほど決して絶望的ではない。
+忘れないでいただきたい。
+そのような要求に従わなければ数百万ドルの価値となるが、
+従えば1セントもの賛辞には値しないのである！
+
+@quotation
+@c ``Programmers need to make a living somehow.''
+『プログラマは何とかして生計を立てなくてはならない。』
+@end quotation
+
+@c In the short run, this is true.  However, there are plenty of ways that
+@c programmers could make a living without selling the right to use a program.
+@c This way is customary now because it brings programmers and businessmen the
+@c most money, not because it is the only way to make a living.  It is easy to
+@c find other ways if you want to find them.  Here are a number of examples.
+短い目で見ればこれは当てはまる。
+だが、プログラマが、プログラムの使用権を売らずに生計を立てていける方法は
+いくらでもある。
+この方法は、他に生計を立てる手立てがないからではなく、
+プログラマやビジネスマンに多額のお金をもたらすので、今では慣習的となっている。
+他の方法を見つけようと思えば簡単に見つかる。
+その例をいくつか示しておく。
+
+@c A manufacturer introducing a new computer will pay for the porting of
+@c operating systems onto the new hardware.
+新しいコンピュータを導入している製造業者は、
+新しいハードウェアにオペレーティング・システムを
+移植する作業に対して支払うだろう。
+
+@c The sale of teaching, hand-holding and maintenance services could also
+@c employ programmers.
+プログラミングに関する教育や指導、保守といったサービスを
+ビジネスとする場合にもプログラマを雇うことができるだろう。
+
+@c People with new ideas could distribute programs as freeware, asking for
+@c donations from satisfied users, or selling hand-holding services.  I have
+@c met people who are already working this way successfully.
+新しいアイデアを持った人は、プログラムをフリーウェアとして配布し、
+それに満足したユーザに寄付を求めたり、簡単な指導サービスを
+ビジネスにすることができるだろう。
+私は、この方法を既に実践して成功した人々を知っている。
+
+@c Users with related needs can form users' groups, and pay dues.  A group
+@c would contract with programming companies to write programs that the
+@c group's members would like to use.
+似たような要求があるユーザ同士は、ユーザ・グループを組織し、会費を払う。
+グループでは、ソフトウェア業者と契約して、
+メンバーが使いたいプログラムを作成してもらう。
+
+@c All sorts of development can be funded with a Software Tax:
+あらゆる種類の開発が、以下に示す「ソフトウェア税」で積み立てることができる。
+
+@quotation
+@c Suppose everyone who buys a computer has to pay x percent of
+@c the price as a software tax.  The government gives this to
+@c an agency like the NSF to spend on software development.
+コンピュータを買う人は誰でも、ソフトウェア税として、
+その価格のxパーセントを支払うようにする。
+政府は、これを、ソフトウェア開発のためにNSF
+（[訳注]米国科学財団、National Science Foundation）のような機関に与える。
+
+@c But if the computer buyer makes a donation to software development
+@c himself, he can take a credit against the tax.  He can donate to
+@c the project of his own choosing---often, chosen because he hopes to
+@c use the results when it is done.  He can take a credit for any amount
+@c of donation up to the total tax he had to pay.
+ただし、コンピュータの購入者がソフトウェア開発に寄付する場合には、
+相当額の税金控除となる。
+自分で選んだプロジェクトへ寄付することができる。
+ほとんどは、プロジェクトの成果を利用したいような所を選ぶだろう。
+本来支払うべき税金の合計を上限として、寄付金の額に応じて控除することができる。
+
+@c The total tax rate could be decided by a vote of the payers of
+@c the tax, weighted according to the amount they will be taxed on.
+全体の税率は、課税額に応じて重み付けをし、納税者の投票によって決定可能とする。
+
+@c The consequences:
+その結果、
+
+@itemize @bullet
+@item
+@c The computer-using community supports software development.
+コンピュータを使用するコミュニティはソフトウェア開発を支援する。
+@item
+@c This community decides what level of support is needed.
+そのコミュニティは、どの程度のサポートが必要なのかを決定する。
+@item
+@c Users who care which projects their share is spent on
+@c can choose this for themselves.
+自分達の負担したものがどのプロジェクトに費されるかに関心のあるユーザは、
+自分で（[訳注]立ち上げて欲しい）プロジェクトを選ぶことができる。
+@end itemize
+@end quotation
+
+@c In the long run, making programs free is a step toward the post-scarcity
+@c world, where nobody will have to work very hard just to make a living.
+@c People will be free to devote themselves to activities that are fun, such
+@c as programming, after spending the necessary ten hours a week on required
+@c tasks such as legislation, family counseling, robot repair and asteroid
+@c prospecting.  There will be no need to be able to make a living from
+@c programming.
+長い目で見た場合には、プログラムをフリーにすることは、
+欠乏の無い世界への第一歩であり、
+そこでは誰も生計を立てるためだけにあくせく働く必要はないだろう。
+人々は、週に10時間の課せられた仕事、例えば、法律の制定や、家族との相談、
+ロボットの修理、小惑星の試掘といった必要な仕事をこなしたあとは、
+プログラミングといった楽しめる活動に自由に専念することになるだろう。
+もはやプログラミングで生計を立てる必要はなくなる。
+
+@c We have already greatly reduced the amount of work that the whole society
+@c must do for its actual productivity, but only a little of this has
+@c translated itself into leisure for workers because much nonproductive
+@c activity is required to accompany productive activity.  The main causes of
+@c this are bureaucracy and isometric struggles against competition.  Free
+@c software will greatly reduce these drains in the area of software
+@c production.  We must do this, in order for technical gains in productivity
+@c to translate into less work for us.
+我々は既に、社会全体が実質的生産のためにしなければならない作業量を
+大幅に減らしてきたが、そのうちのほんのわずかが労働者の娯楽に
+変わっただけである。
+というのは、生産活動に伴い多くの非生産活動が必要とされるからである。
+その主な原因は、官僚主義と競争に対する差の無い骨折りである。
+フリー・ソフトウェアは、ソフトウェア生産の分野でこれらの乱費流出を
+大幅に減らすだろう。
+生産における技術的利得が我々にとっての労働の軽減になるよう、
+我々はこれを行なっていかなければならないのである。

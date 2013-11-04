@@ -1,0 +1,1021 @@
+\input texinfo
+@c This is an annex of the Emacs manual.
+@c Copyright (C) 1994, 1995, 2002 Free Software Foundation, Inc.
+@c Author: Daniel.Pfeiffer@Informatik.START.dbp.de, fax (+49 69) 7588-2389
+@setfilename ../info/autotype-ja
+@c @node Autotypist, Picture, Abbrevs, Top
+@c @chapter Features for Automatic Typing
+@c @settitle Features for Automatic Typing
+@settitle 自動入力機能の特徴
+@c  @cindex text
+@c  @cindex selfinserting text
+@c  @cindex autotypist
+
+@ignore
+@copying
+Copyright @copyright{} 1994, 1995, 1999 Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being ``The GNU Manifesto'', ``Distribution'' and
+``GNU GENERAL PUBLIC LICENSE'', with the Front-Cover texts being ``A GNU
+Manual'', and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License'' in the Emacs manual.
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+@end ignore
+
+@dircategory Emacs
+@direntry
+* Autotype: (autotype). Convenient features for text that you enter frequently
+                          in Emacs.
+@end direntry
+
+@titlepage
+@sp 10
+
+@center @titlefont{Autotyping}
+@sp 2
+@center @subtitlefont{Convenient features for text that you enter
+frequently in Emacs}
+@sp 2
+@center Daniel Pfeiffer
+@center additions by Dave Love
+
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@node Top, Using Skeletons, (dir), (dir)
+@top Autotyping
+
+@c   Under certain circumstances you will find yourself typing similar things
+@c over and over again.  This is especially true of form letters and programming
+@c language constructs.  Project-specific header comments, flow-control
+@c constructs or magic numbers are essentially the same every time.  Emacs has
+@c various features for doing tedious and repetitive typing chores for you
+@c in addition to the Abbrev features (@pxref{(emacs)Abbrevs}).
+何度も何度も同じ文字を入力するようなことがありませんか．何度も同じ文字を入力
+することは手紙を書くことからプログラムを作るときまで起こり得ます．あるプロジェ
+クトに特有なコメントやflow control constructs，マジックナンバーなどを何度も入力
+することはあらゆる時に起こります．Emacs は略称展開
+(@pxref{(emacs)Abbrevs})
+の他にも退屈な繰り返しをするためのさまざま機能があります．
+
+@c   One solution is using skeletons, flexible rules that say what to
+@c insert, and how to do it.  Various programming language modes offer some
+@c ready-to-use skeletons, and you can adapt them to suit your needs or
+@c taste, or define new ones.
+一つの答えはskeletonを使うことです．これは，何を挿入して，何をするかを柔軟に定義
+できます．さまざまなプログラミング言語はすぐに使用できるskeletonがあります．そし
+て，自分の必要性や好みに応じて合わせたり，新しく定義したりできます．
+
+@c   Another feature is automatic insertion of what you want into empty files,
+@c depending on the file-name or the mode as appropriate.  You can have a file or
+@c a skeleton inserted, or you can call a function.  Then there is the
+@c possibility to have Un*x interpreter scripts automatically take on a magic
+@c number and be executable as soon as they are saved.  Or you can have a
+@c copyright notice's year updated, if necessary, every time you save a
+@c file.  Similarly for time stamps in the file.
+他の機能はテンプレート機能です．これは新しいファイルにファイル名やモードに応じて
+適当なものを挿入します．挿入されるファイルか skelton あるいは呼び出される関数を
+持つことができるのです．それから，マジックナンバーを自動的に変更するようなスクリ
+プトを保存時に実行することもできます．あるいは，著作権表示を保存するたびに更新す
+ることもできるのです．これは，ファイルの更新時間の機能と似ています．
+
+@c   URLs can be inserted based on a word at point.  Flexible templates can
+@c be defined for inserting and navigating between text more generally.  A
+@c sort of meta-expansion facility can be used to try a set of alternative
+@c completions and expansions of text at point.
+カーソル付近の単語に応じてURLを挿入できます．挿入されるURLは柔軟に定義できます．
+meta-expansionの機能は代替補完とカーソル付近の文字に応じた展開との組を試すのに利
+用できます．
+
+@menu
+* Using Skeletons::             How to insert a skeleton into your text.
+* Wrapping Skeletons::          Putting existing text within a skeleton.
+* Skeletons as Abbrevs::        An alternative for issuing skeleton commands.
+* Skeleton Language::           Making skeleton commands insert what you want.
+* Inserting Pairs::             Typing one character and getting another
+                             after point.
+* Autoinserting::               Filling up empty files as soon as you visit them.
+* Copyrights::                  Inserting and updating copyrights.
+* Executables::                 Turning interpreter scripts into executables.
+* Timestamps::                  Updating dates and times in modified files.
+* QuickURL::                    Inserting URLs based on text at point.
+* Tempo::                       Flexible template insertion.
+* Hippie Expand::               Expansion of text trying various methods.
+
+* Concept Index::               
+* Command Index::               
+* Variable Index::              
+@end menu
+
+
+
+@node Using Skeletons, Wrapping Skeletons, Top, Top
+@c @chapter Using Skeletons
+@chapter Skeleton を使う @emph{(2004/04/02)}
+@cindex skeletons
+@cindex using skeletons
+
+@c   When you want Emacs to insert a form letter or a typical construct of the
+@c programming language you are using, skeletons are a means of accomplishing
+@c this.  Normally skeletons each have a command of their own, that, when called,
+@c will insert the skeleton.  These commands can be issued in the usual ways
+@c (@pxref{(emacs)Commands}).  Modes that offer various skeletons will often
+@c bind these to key-sequences on the @kbd{C-c} prefix, as well as having
+@c an @cite{Insert} menu and maybe even predefined abbrevs for them
+@c (@pxref{Skeletons as Abbrevs}).
+Emacsで一連の文字やプログラミング言語のコンストラクタを入力したい時、
+skeleton を活用できます。普通それぞれの skeleton には専用のコマンドが
+あります。そして、それらのコマンドは普通の方法(@kbd{M-x}やキー割り当てな
+ど)で呼ぶことが
+できます
+(@pxref{(emacs)Commands})。さまざまな
+skeleton を利用できるモードでは@kbd{C-c}にキーが割当てられていることも
+あります。モードによっては@cite{Insert}メニューや定義済みの abbrev も
+あるかもしれません
+(@pxref{Skeletons as Abbrevs})。
+
+@c   The simplest kind of skeleton will simply insert some text indented
+@c according to the major mode and leave the cursor at a likely place in the
+@c middle.  Interactive skeletons may prompt you for a string that will be part
+@c of the inserted text.
+skeleton で最も単純なものはメジャーモードに応じたテキストを挿入し、編
+集する可能性のありそうな場所にカーソルを移動させることです。テンプレー
+トによっては、ユーザに入力を求め、挿入されたテキストの中に埋めていくこ
+ともあります。
+
+@c   Skeletons may ask for input several times.  They even have a looping
+@c mechanism in which you will be asked for input as long as you are willing to
+@c furnish it.  An example would be multiple ``else if'' conditions.  You can
+@c recognize this situation by a prompt ending in @key{RET}, @kbd{C-g}
+@c or @kbd{C-h}.  This
+@c means that entering an empty string will simply assume that you are finished.
+@c Typing quit on the other hand terminates the loop but also the rest of the
+@c skeleton, e.g. an ``else'' clause is skipped.  Only a syntactically necessary
+@c termination still gets inserted.
+skeletonは何度も入力する文字を尋ねるかもしれません。skeleton はループ
+機能さえ持っており、ユーザが入力を終えたいと思うまで何度でも尋ねさせる
+ことができるのです。何度も入力させるような例として「else if」がありま
+す。ループかどうかを確認するには@key{RET}や@kbd{C-g}、@kbd{C-h} を利用
+します。単に @key{RET} として空文字を入力すると、そこでループは終了し
+ます。一方、@kbd{C-g}で終了させると、ループだけでなくループ以降も実行
+されずに終了します。したがって、「else if」の例であれば「else」を閉じ
+る処理は実行されません。ただし、中止させても構文上必要となるテキストは
+挿入されます。
+
+@node Wrapping Skeletons, Skeletons as Abbrevs, Using Skeletons, Top
+@c @chapter Wrapping Skeletons Around Existing Text
+@chapter すでに存在するテキストを Skelton で加工 @emph{(2004/04/02)}
+@cindex wrapping skeletons
+
+@c   Often you will find yourself with some code that for whatever reason
+@c suddenly becomes conditional.  Or you have written a bit of text and want to
+@c put it in the middle of a form letter.  Skeletons provide a means for
+@c accomplishing this, and can even, in the case of programming languages,
+@c reindent the wrapped code for you.
+こんなことはないだろうか。いくらかのコードが理由は何であれ突然条件節に
+変えたくなった。ちょっとしたテキストをある定型的な文書の中に入れたい。
+これらは skeleton を使えば可能になります。プログラミング言語で埋め込ま
+れたコードを再インデントすることでさえ可能なのです。
+
+@c   Skeleton commands take an optional numeric prefix argument
+@c (@pxref{(emacs)Arguments}).  This is interpreted in two different ways depending
+@c on whether the prefix is positive, i.e. forwards oriented or negative,
+@c i.e. backwards oriented.
+skeleton はオプションで数引数
+(@pxref{(emacs)Arguments})
+を取ります。この引数は正であれば順方向、負であれば逆方向という2種類に
+解釈されます。
+
+@c   A positive prefix means to wrap the skeleton around that many
+@c following words.  This is accomplished by putting the words there where
+@c the point is normally left after that skeleton is inserted (@pxref{Using
+@c Skeletons}).  The point (@pxref{(emacs)Point}) is left at the next
+@c interesting spot in the skeleton instead.
+正引数の場合は後に続く語に skeleton を適用することになる。実際には、
+skeleton を挿入した後でカーソルがある場所にskeleton を適用してい
+る語を入れている(@pxref{Using Skeletons})。そして、ポイント
+(@pxref{(emacs)Point})
+は skeleton で次に入力すべき場所に移ります。
+
+@c   A negative prefix means to do something similar with that many precedingly
+@c marked interregions (@pxref{(emacs)Mark}).  In the simplest case, if you type
+@c @kbd{M--} just before issuing the skeleton command, that will wrap the
+@c skeleton around the current region, just like a positive argument would have
+@c wrapped it around a number of words.
+負引数は前もってマークされた中間リージョン
+(@pxref{(emacs)Mark})
+に対して同様のことを行う。単純な例では、skeletonコマンドを実行する前に
+@kbd{M--}を入力すると、リージョン内のテキストを内包するように働く。こ
+れは、正引数がいくつかの単語を内包するように働くのに対応します。
+
+@c   Smaller negative arguments will wrap that many interregions into successive
+@c interesting spots within the skeleton, again leaving the point at the next one.
+@c We speak about interregions rather than regions here, because we treat them in
+@c the order they appear in the buffer, which coincides with successive regions
+@c only if they were marked in order.
+より小さな負引数を指定すると skeleton コマンドは連続して多くの中間リージョ
+ン(interregions)内文字を必要な場所へ埋め込み、カーソルを次に入力すべき
+場所へ移動します。ここでリージョンではなく、中間リージョン
+(interregions) という言葉を使ってきました。これは、skelton が見つかっ
+た順番に処理を行い、マークされたリージョンが順番に並んでいる時としか同
+じにならないためです。
+
+@c   That is, if you marked in alphabetical order the points A B C [] (where []
+@c represents the point) and call a skeleton command with @kbd{M-- 3}, you will
+@c wrap the text from A to B into the first interesting spot of the skeleton, the
+@c text from B to C into the next one, the text from C to the point into the
+@c third one, and leave the point in the fourth one.  If there are less marks in
+@c the buffer, or if the skeleton defines less interesting points, the surplus is
+@c ignored.
+つまり、A B C []([]はカーソル位置)というテキストがあって、アルファベッ
+ト順にマークしていったとします。そして、引数として @kbd{M-- 3} を与え
+てskeletonコマンドを実行したとします。すると、最初にskeltonの必要な場
+所へAからBのテキストが入り、次にBからCまでが、3番目にCからポイントまで
+が入り、カーソルは4番目に入力すべき場所へ移動します。もし引数よりもマー
+クが少ない、あるいはskeltonの定義場所が少ない時には、余分なものが無視
+されます。
+
+@c   If, on the other hand, you marked in alphabetical order the points [] A C B,
+@c and call a skeleton command with @kbd{M-- 3}, you will wrap the text from
+@c point to A, then the text from A to C and finally the text from C to B.  This
+@c is done because the regions overlap and Emacs would be helplessly lost if it
+@c tried to follow the order in which you marked these points.
+一方、[] A C B というテキストをアルファベット順にマークしたとします。
+そして、引数として @kbd{M-- 3} を与えてskeletonコマンドを実行すると、
+
+
+
+@node Skeletons as Abbrevs, Skeleton Language, Wrapping Skeletons, Top
+@c @chapter Skeletons as Abbrev Expansions
+@chapter 略称展開 @emph{(2004/04/02)}
+@cindex skeletons as abbrevs
+
+@c   Rather than use a key binding for every skeleton command, you can also
+@c define an abbreviation (@pxref{(emacs)Defining Abbrevs}) that will expand
+@c (@pxref{(emacs)Expanding Abbrevs}) into the skeleton.
+すべての skeleton コマンドをキーバインドを割り当てなくても，略称を定義する
+(@pxref{(emacs)Defining Abbrevs}) し，skeleton として展開
+(@pxref{(emacs)Expanding Abbrevs}) させることもできます．
+
+@c   Say you want @samp{ifst} to be an abbreviation for the C language if
+@c statement.  You will tell Emacs that @samp{ifst} expands to the empty string
+@c and then calls the skeleton command.  In Emacs-lisp you can say something like
+@c @code{(define-abbrev c-mode-abbrev-table "ifst" "" 'c-if)}.  Or you can edit
+@c the output from @kbd{M-x list-abbrevs} to make it look like this:
+C言語で@samp{ifst}を通常の構文の時に略称として登録したい場合には，@samp{ifst} を
+空文字の略称とし，それからskeltonコマンドを呼ぶようにします．Emacs Lispでは
+@code{(define-abbrev c-mode-abbrev-table "ifst" "" 'c-if)} のようにすることがで
+きます．あるいは，@kbd{M-x list-abbrevs} から出力を以下のように編集することもで
+きます．
+
+@example
+(c-mode-abbrev-table)
+"if"	       0    ""	       c-if
+@end example
+
+@noindent
+@c (Some blank lines of no semantic significance, and other abbrev tables,
+@c have been omitted.)
+(意味のない空行や他モードの略称との間にある空行は削除されます)
+
+
+@node Skeleton Language, Inserting Pairs, Skeletons as Abbrevs, Top
+@c @chapter Skeleton Language
+@chapter Skeleton 言語 @emph{(2004/04/02)}
+@cindex skeleton language
+
+@findex skeleton-insert
+@c   Skeletons are an shorthand extension to the Lisp language, where various
+@c atoms directly perform either actions on the current buffer or rudimentary
+@c flow control mechanisms.  Skeletons are interpreted by the function
+@c @code{skeleton-insert}.
+skeleton はLispを少し拡張したもので，さまざまなアトムはカレントバッファでコマンド
+や一部の作業を実行することができます．skeletonは @code{skeleton-insert} により処
+理されます．
+
+@c   A skeleton is a list starting with an interactor, which is usually a
+@c prompt-string, or @code{nil} when not needed, but can also be a Lisp
+@c expression for complex read functions or for returning some calculated value.
+@c The rest of the list are any number of elements as described in the following
+@c table:
+skelton とは相互に情報をやりとりするためのリストで，大抵はプロンプトに表示する文
+字になります．必要がなければ，@code{nil} になりますが，複雑な入力関数や計算した
+値を返すようなLisp言語でも構いません．リストの残りの部分は以下の表で説明する要素
+になります．
+
+@table @asis
+@item @code{"@var{string}"}, @code{?@var{c}}, @code{?\@var{c}}
+@vindex skeleton-transformation
+@c Insert string or character.  Literal strings and characters are passed through
+@c @code{skeleton-transformation} when that is non-@code{nil}.
+文字列や文字を挿入する．文字通りの文字列や文字は @code{skeleton-transformation}
+が 非@code{nil} であれば，その関数で処理される．
+@item @code{?\n}
+@c ??? something seems very wrong here.
+@c Insert a newline and align under current line.  Use newline character
+@c @code{?\n} to prevent alignment.
+改行を挿入し，現在行に配置します．配置を調整するためには，@code{?\n}
+を使います．
+@item @code{_}
+@c Interesting point.  When wrapping skeletons around successive regions, they are
+@c put at these places.  Point is left at first @code{_} where nothing is wrapped.
+ポイントを挿入する．連続するリージョンに対しスケルトンを使うような時に，
+使われます．ポイント位置は最初の@code{_}の左になります．
+@item @code{>}
+@c Indent line according to major mode.  When following element is @code{_}, and
+@c there is a interregion that will be wrapped here, indent that interregion.
+メジャーモードに応じてインデントを行います．続く要素が@code{_}で，そこ
+を内包するような内部リージョンがあると，その内部リージョンをインデント
+します．
+@item @code{&}
+@c Logical and.  Iff preceding element moved point, i.e. usually inserted
+@c something, do following element.
+論理 AND．カーソルを移動させるような要素 (大抵は文字の挿入など)が先にある
+と，続く要素を実行します．
+@item @code{|}
+@c Logical xor.  Iff preceding element didn't move point, i.e. usually inserted
+@c nothing, do following element.
+論理 OR．カーソルを移動させない要素(大抵は何も挿入しないようなもの)が
+先にあると，続く要素を実行します．
+@item @code{-@var{number}}
+@c Delete preceding number characters.  Depends on value of
+@c @code{skeleton-untabify}.
+number の数だけ先に続く文字を削除します．@code{skeleton-untabify} の値
+に依存します．
+@item @code{()} or @code{nil}
+@c Ignored.
+無視されます．
+@item @var{lisp-expression}
+@c Evaluated, and the return value is again interpreted as a skeleton element.
+Lisp 式を評価して，戻り値をスケルトンの要素として再び評価します．
+@item @code{str}
+@c A special variable that, when evaluated the first time, usually prompts
+@c for input according to the skeleton's interactor.  It is then set to the
+@c return value resulting from the interactor.  Each subskeleton has its local
+@c copy of this variable.
+これは特別な変数で，最初に評価されると，大抵入力を求めます．そして，戻
+り値で値が設定されます．各サブスケルトンはこの値のローカルコピーを持ち
+ます．
+@item @code{v1}, @code{v2}
+@c Skeleton-local user variables.
+スケルトンのローカルユーザ変数
+@item @code{'@var{expression}}
+@c Evaluate following lisp expression for its side-effect, but prevent it from
+@c being interpreted as a skeleton element.
+Lisp 式を評価しますが，スケルトンの要素としての評価はされません．
+@item @var{skeleton}
+@c Subskeletons are inserted recursively, not once, but as often as the user
+@c enters something at the subskeletons interactor.  Thus there must be a
+@c @code{str} in the subskeleton.  They can also be used non-interactively, when
+@c prompt is a lisp-expression that returns successive list-elements.
+サブスケルトンが再帰的に挿入されます．一度だけでなく，ユーザがサブスケ
+ルトンとして何かを入力しただけ挿入されます．それにより，サブスケルトン
+には @code{str} が必ず存在します．入力を要素を返すような Lisp 式で行う
+場合には，これらを非対話的に使うこともできます．
+@item @code{resume:}
+@c Ignored.  Execution resumes here if the user quits during skeleton
+@c interpretation.
+無視されます．スケルトンの解釈中にユーザが停止すると，ここで実行が再開
+します．
+@item @code{quit}
+@c A constant which is non-@code{nil} when the @code{resume:} section was entered
+@c because the user quit.
+ユーザによる中止のために @code{resume:} 部分が実行されると 非
+@code{nil} な値となる定数．
+@end table
+
+@findex skeleton-further-elements
+@c   Some modes also use other skeleton elements they themselves defined.  For
+@c example in shell script mode's skeletons you will find @code{<} which does a
+@c rigid indentation backwards, or in CC mode's skeletons you find the
+@c self-inserting elements @code{@{} and @code{@}}.  These are defined by the
+@c buffer-local variable @code{skeleton-further-elements} which is a list of
+@c variables bound while interpreting a skeleton.
+いくつかのモードでは，既に定義した他のスケルトンも使用します．例えば，
+shell スクリプトモードのスケルトンでは，@code{<} が後方への厳密なイン
+デントになっていますし，CCモードでは@code{@{} と @code{@}} が自身を挿
+入する要素となっています．これらはバッファローカル変数である
+@code{skeleton-further-elements} で定義されており，スケルトンを解釈す
+る際に利用されるリストになっています．
+
+@findex define-skeleton
+@c   The macro @code{define-skeleton} defines a command for interpreting a
+@c skeleton.  The first argument is the command name, the second is a
+@c documentation string, and the rest is an interactor and any number of skeleton
+@c elements together forming a skeleton.  This skeleton is assigned to a variable
+@c of the same name as the command and can thus be overridden from your
+@c @file{~/.emacs} file (@pxref{(emacs)Init File}).
+マクロ @code{define-skeleton} はスケルトンを解釈するための関数を定義し
+ます．1番目の引数は関数名です．2番目は説明用のドキュメントで，残りは解
+釈子やスケルトンを共に形成するスケルトン要素になります．このスケルトン
+は関数と同じ名前の変数として作成され，@file{~/.emacs} ファイル
+(@pxref{(emacs)Init File}) で定義できます．
+
+訳者注：skelton.el には下記の例が載せられています．評価して M-x
+local-variables-section を試してみてください．
+
+@lisp
+(define-skeleton local-variables-section
+  "Insert a local variables section.  Use current comment syntax if any."
+  (completing-read
+   "Mode: " obarray
+   (lambda (symbol)
+     (if (commandp symbol)
+         (string-match "-mode$" (symbol-name symbol))))
+   t)
+  '(save-excursion
+     (if (re-search-forward page-delimiter nil t)
+         (error "Not on last page")))
+  comment-start "Local Variables:" comment-end \n
+  comment-start "mode: " str
+  & -5 | '(kill-line 0) & -1 | comment-end \n
+  ((completing-read
+    (format "Variable, %s: " skeleton-subprompt)
+    obarray
+    (lambda (symbol)
+      (or (eq symbol 'eval)
+          (user-variable-p symbol)))
+    t)
+    comment-start str ": "
+    (read-from-minibuffer
+     "Expression: " nil read-expression-map nil
+     'read-expression-history) | _
+     comment-end \n)
+  resume:
+  "\n"
+  comment-start "End:" comment-end \n)
+@end lisp
+
+@node Inserting Pairs, Autoinserting, Skeleton Language, Top
+@c @chapter Inserting Matching Pairs of Characters
+@chapter 文字のペアを挿入
+@cindex inserting pairs
+@cindex pairs
+
+@c   Various characters usually appear in pairs.  When, for example, you insert
+@c an open parenthesis, no matter whether you are programming or writing prose,
+@c you will surely enter a closing one later.  By entering both at the same time
+@c and leaving the cursor inbetween, Emacs can guarantee you that such
+@c parentheses are always balanced.  And if you have a non-qwerty keyboard, where
+@c typing some of the stranger programming language symbols makes you bend your
+@c fingers backwards, this can be quite relieving too.
+いくつかの文字は通常ペアで用いられます．例えば，開き括弧を挿入する時，
+プログラミング言語であれ散文であれ，大抵閉じ括弧を入力するでしょう．こ
+の両者を同時に入力し，カーソルを間に残すことで，Emacs はそのような括弧
+の釣り合いが取れていることを保証できるのです．そして，もし qwertyキー
+ボードではなく，ある種のプログラミング言語においてシンボルを入力するの
+に指を無理に曲げないといけないような時でも，苦痛を取り除くこともできる
+でしょう．
+
+@findex skeleton-pair-insert-maybe
+@vindex skeleton-pair
+@c   This is done by binding the first key (@pxref{(emacs)Rebinding}) of
+@c the pair to @code{skeleton-pair-insert-maybe} instead of
+@c @code{self-insert-command}.  The ``maybe'' comes from the fact that
+@c this at-first surprising behavior is initially turned off.  To enable
+@c it, you must set @code{skeleton-pair} to some non-@code{nil} value.
+@c And even then, a positive argument (@pxref{(emacs)Arguments}) will
+@c make this key behave like a self-inserting key
+@c (@pxref{(emacs)Inserting Text}).
+これは @code{self-insert-command} の代わりに
+@code{skeleton-pair-insert-maybe} にバインドする
+(@pxref{(emacs)Rebinding}) ことで実現されています．「ひょっとすると」
+最初はこの驚かされる挙動は初期時にはオフになっていることに端を発するの
+かもしれません．これを有効にするためには，@code{skeleton-pair} を非
+@code{nil} にしなければなりません．そして，正引数
+(@pxref{(emacs)Arguments}) を与えると，通常の挿入キー
+(@pxref{(emacs)Inserting Text}) と同じ動作になります．
+
+@vindex skeleton-pair-on-word
+@c   While this breaks with the stated intention of always balancing pairs, it
+@c turns out that one often doesn't want pairing to occur, when the following
+@c character is part of a word.  If you want pairing to occur even then, set
+@c @code{skeleton-pair-on-word} to some non-@code{nil} value.
+続く文字が単語の一部などで，ペアでの挿入が起こって欲しくなく，いつも釣
+り合いが取れたペアになるような挙動をやめたくなるような場合があります．
+そのような時でさえペアで挿入したい場合には，
+@code{skeleton-pair-on-word} を非 @code{nil} にします．
+
+@vindex skeleton-pair-alist
+@c   Pairing is possible for all visible characters.  By default the
+@c parenthesis @samp{(}, the square bracket @samp{[}, the brace
+@c @samp{@{}, the pointed bracket @samp{<} and the backquote @samp{`} all
+@c pair with the symmetrical character.  All other characters pair
+@c themselves.  This behavior can be modified by the variable
+@c @code{skeleton-pair-alist}.  This is in fact an alist of skeletons
+@c (@pxref{Skeleton Language}), with the first part of each sublist
+@c matching the typed character.  This is the position of the interactor,
+@c but since pairs don't need the @code{str} element, this is ignored.
+ペアにすることはすべての文字で可能です．デフォルトでは丸括弧 @samp{(}，
+角括弧 @samp{[}，大括弧 @samp{@{}，@samp{<}，逆引用符(バッククォート)
+@samp{`} といった左右対象となるペアです．他のすべての文字のペアはその
+文字自身になっています．これは変数 @code{skeleton-pair-alist} で制御で
+きます．実際には，これはスケルトンのリストで (@pxref{Skeleton
+Language})，各リストの最初は入力した文字に一致する部分になります．この
+位置は解釈する位置になりますが，@code{str} 要素は必要なく無視されます．
+
+@c   Some modes have bound the command @code{skeleton-pair-insert-maybe}
+@c to relevant keys.  These modes also configure the pairs as
+@c appropriate.  For example, when typing english prose, you'd expect the
+@c backquote (@samp{`}) to pair with the quote (@samp{'}), while in Shell
+@c script mode it must pair to itself.  They can also inhibit pairing in
+@c certain contexts.  For example an escaped character stands for itself.
+いくつかのモードでは関数 @code{skeleton-pair-insert-maybe} を適切なキー
+に割り当てています．これらのモードではペアについても適切に設定していま
+す．例えば，英語の散文を入力する時，逆引用符 (@samp{`}) を入力すると，
+引用符 (@samp{'}) とペアになることを期待するでしょう．Shell スクプトモー
+ドではペアでなければなりません．ある文脈ではペアにすることを禁止できま
+す．例えば，エスケープするとその文字自身を意味します．
+
+@node Autoinserting, Copyrights, Inserting Pairs, Top
+@c @chapter Autoinserting Text in Empty Files
+@chapter 新規ファイルへの自動挿入
+@cindex autoinserting
+
+@findex auto-insert
+@c   @kbd{M-x auto-insert} will put some predefined text at the beginning of
+@c the buffer.  The main application for this function, as its name suggests,
+@c is to have it be called automatically every time an empty, and only an
+@c empty file is visited.  This is accomplished by putting @code{(add-hook
+@c 'find-file-hook 'auto-insert)} into your @file{~/.emacs} file
+@c (@pxref{(emacs)Init File}).
+@kbd{M-x auto-insert} とすると，バッファの先頭にあらかじめ定義されたテ
+キストを挿入します．この関数は，その名前が示すように，主に新規作成時や空のファイル
+を開いた時にだけ機能するように使います．これを実現するには，
+@code{(add-hook 'find-file-hook 'auto-insert)} を @file{~/.emacs} ファ
+イルに追加します (@pxref{(emacs)Init File})．
+
+訳者注：これで自動挿入が動作しない場合には @code{(auto-insert-mode t)}
+も追加してみてください．
+
+@vindex auto-insert-alist
+@c   What gets inserted, if anything, is determined by the variable
+@c @code{auto-insert-alist}.  The @sc{car}s of this list are each either
+@c a mode name, making an element applicable when a buffer is in that
+@c mode.  Or they can be a string, which is a regexp matched against the
+@c buffer's file name.  In that way different kinds of files that have
+@c the same mode in Emacs can be distinguished.  The @sc{car}s may also
+@c be cons cells consisting of mode name or regexp as above and an
+@c additional descriptive string.
+挿入されるものが何であっても変数 @code{auto-insert-alist} で定義されま
+す．リストの @sc{car} はモード名で，そのバッファがそのモードであれば，
+要素が実行されます．あるいは，リストの @sc{car} が文字である場合には，
+バッファのファイル名が正規表現に一致するかどうかで適用するかどうかが決
+まります．これにより同じモードを持ついろいろな種類のファイルを Emacs
+は区別できるのです．リストの @sc{car} は上述したようなモード名や正規表
+現，さらなる記述成るコンスセルかもしれません．
+
+@c   When a matching element is found, the @sc{cdr} says what to do.  It may
+@c be a string, which is a file name, whose contents are to be inserted, if
+@c that file is found in the directory @code{auto-insert-directory} or under a
+@c absolute file name.  Or it can be a skeleton (@pxref{Skeleton Language}) to
+@c be inserted.
+一致する要素があると，その @sc{cdr} が何をするべきかを表します．それは，
+挿入されるファイルのファイル名かもしれません．もし，ファイルが
+@code{auto-insert-directory} にあるか絶対パスで存在していれば，そのファ
+イルは挿入されます．そうでなければ，挿入されるべきスケルトンとして処理
+されます (@pxref{Skeleton Language}) ．
+
+@c   It can also be a function, which allows doing various things.  The function
+@c can simply insert some text, indeed, it can be skeleton command (@pxref{Using
+@c Skeletons}).  It can be a lambda function which will for example conditionally
+@c call another function.  Or it can even reset the mode for the buffer. If you
+@c want to perform several such actions in order, you use a vector, i.e. several
+@c of the above elements between square brackets (@samp{[@r{@dots{}}]}).
+あるいは様々なことを行うための関数であるかもしれません．関数は単にいく
+つかのテキストを挿入することもできますし，スケルトンも利用できます
+(@pxref{Using Skeletons})．例えば他の関数を呼ぶようなラムダ関数でも構
+いません．また，そのような機能を順番に実行したければ，ベクトルを使うこ
+ともできます．つまり，上記の要素を角括弧 (@samp{[@r{@dots{}}]}) で括れ
+ばいいのです．
+
+@c   By default C and C++ headers insert a definition of a symbol derived from
+@c the filename to prevent multiple inclusions.  C and C++ sources insert an
+@c include of the header.  Makefiles insert the file makefile.inc if it exists.
+デフォルトでは C や C++ ヘッダファイルでは多重読み込みを避けるため，ファ
+イル名から得られたシンボル定義を挿入します．CやC++のソーソファイルでは
+ヘッダのインクルードを挿入します．Makefile では存在すれば makefile.inc
+を挿入します．
+
+@c   TeX and bibTeX mode files insert the file tex-insert.tex if it exists, while
+@c LaTeX mode files insert a typical @code{\documentclass} frame.  Html
+@c files insert a skeleton with the usual frame.
+TeX や bibTeX モードでは存在すれば tex-insert.tex を挿入します，一方，
+LaTeX モードのファイルでは典型的な @code{\documentclass} の枠組みを挿
+入します．html ファイルは最低限の枠組みをスケルトンで挿入します．
+
+@c   Ada mode files call the Ada header skeleton command.  Emacs lisp
+@c source files insert the usual header, with a copyright of your
+@c environment variable @env{$ORGANIZATION} or else the FSF, and prompt
+@c for valid keywords describing the contents.  Files in a @file{bin}
+@c directory for which Emacs could determine no specialized mode
+@c (@pxref{(emacs)Choosing Modes}) are set to Shell script mode.
+Ada モードでは Ada のヘッダ挿入のためのスケルトンが実行されます．Emacs
+Lisp では通常のヘッダである @env{$ORGANIZATION} に応じたたものか FSF 
+のコピーライト，キーワード，内容の記述を挿入します．@file{bin} ディレ
+クトリ(パスが通ったところ)にあって，Emacs がモードを決定できない 
+(@pxref{(emacs)Choosing Modes}) ファイルは shell スクリプトモードにな
+ります．
+
+@findex define-auto-insert
+@c   In Lisp (@pxref{(emacs)Init File}) you can use the function
+@c @code{define-auto-insert} to add to or modify
+@c @code{auto-insert-alist}.  See its documentation with @kbd{C-h f
+@c auto-insert-alist}.
+Lisp 式では(@pxref{(emacs)Init File})，関数 @code{define-auto-insert} を
+使うことで @code{auto-insert-alist} に要素を追加したり編集したりできま
+す．@kbd{C-h f auto-insert-alist} とすることで関数のドキュメントを参照
+ください．
+
+@vindex auto-insert
+@c   The variable @code{auto-insert} says what to do when @code{auto-insert} is
+@c called non-interactively, e.g. when a newly found file is empty (see above):
+変数 @code{auto-insert} は@code{auto-insert} が非対話的に呼ばれた際
+(ファイルが空だった場合など)どうすべきかを決定します．
+@table @asis
+@item @code{nil}
+@c Do nothing.
+何もしない．
+@item @code{t}
+@c Insert something if possible, i.e. there is a matching entry in
+@c @code{auto-insert-alist}.
+もし可能なら何かを挿入します．つまり，@code{auto-insert-alist} に一致す
+る要素があれば挿入します．
+@item other
+@c Insert something if possible, but mark as unmodified.
+可能なら何かを挿入するが，未変更のままとする．
+@end table
+
+@vindex auto-insert-query
+@c   The variable @code{auto-insert-query} controls whether to ask about
+@c inserting something.  When this is @code{nil}, inserting is only done with
+@c @kbd{M-x auto-insert}.  When this is @code{function}, you are queried
+@c whenever @code{auto-insert} is called as a function, such as when Emacs
+@c visits an empty file and you have set the above-mentioned hook.  Otherwise
+@c you are alway queried.
+変数 @code{auto-insert-query} は何かを挿入する際に確認するかどうかを制
+御します．@code{nil} であれば，挿入は @kbd{M-x auto-insert} で実行した
+時だけになります． @code{function} であれば，空のファイルを開いた時や，
+上記の hook を設定した場合など，@code{auto-insert} が関数として呼ばれ
+る時はいつでも確認されます．それ以外なら，いつも確認されます．
+
+@vindex auto-insert-prompt
+@c   When querying, the variable @code{auto-insert-prompt}'s value is used as a
+@c prompt for a y-or-n-type question.  If this includes a @samp{%s} construct,
+@c that is replaced by what caused the insertion rule to be chosen.  This is
+@c either a descriptive text, the mode-name of the buffer or the regular
+@c expression that matched the filename.
+確認時に変数 @code{auto-insert-prompt} の値が y-or-n タイプのプロンプ
+トとして使われます．もし，@samp{%s}を含むと，選択された挿入規則で置き
+換えられます．これは説明文かバッファのモード名，ファイル名に一致した正
+規表現のいづれかになります．
+
+@node Copyrights, Executables, Autoinserting, Top
+@c @chapter Inserting and Updating Copyrights
+@chapter 著作権表示の挿入と更新
+@cindex copyrights
+
+@findex copyright
+@c   @kbd{M-x copyright} is a skeleton inserting command, that adds a copyright
+@c notice at the point.  The ``by'' part is taken from your environment variable
+@c @env{$ORGANIZATION} or if that isn't set you are prompted for it.  If the
+@c buffer has a comment syntax (@pxref{(emacs)Comments}), this is inserted as a comment.
+@kbd{M-x copyright} はスケルトンの挿入コマンドで，ポイント位置に著作権
+表示を追加します．「by」部分には環境変数 @env{$ORGANIZATION} の値か設
+定されていなければプロンプトで入力された値が使われます．バッファにコメ
+ントの記述方法 (@pxref{(emacs)Comments}) があれば，コメントとして挿入
+します．
+
+@findex copyright-update
+@vindex copyright-limit
+@vindex copyright-current-year
+@c   @kbd{M-x copyright-update} looks for a copyright notice in the first
+@c @code{copyright-limit} characters of the buffer and updates it when necessary.
+@c The current year (variable @code{copyright-current-year}) is added to the
+@c existing ones, in the same format as the preceding year, i.e. 1994, '94 or 94.
+@c If a dash-separated year list up to last year is found, that is extended to
+@c current year, else the year is added separated by a comma.  Or it replaces
+@c them when this is called with a prefix argument.  If a header referring to a
+@c wrong version of the GNU General Public License (@pxref{(emacs)Copying}) is found,
+@c that is updated too.
+@kbd{M-x copyright-update} は @code{copyright-limit} で制限された箇所
+まで著作権表示を探し，必要なら更新します．現在年 (変数
+@code{copyright-current-year}) が既存のものに同じ書式 (つまり，1994や'
+94， 94) で追加されます．ダッシュで区切られたリストに最新年があれば，
+現在年まで拡大するかカンマで区切られた年を追加します．前置引数をつけて
+実行した場合には元のものを置き換えます．ヘッダが間違ったバージョンの 
+GNU General Public License (@pxref{(emacs)Copying}) を参照している場合
+には，アップデートも行います．
+
+@c   An interesting application for this function is to have it be called
+@c automatically every time a file is saved.  This is accomplished by putting
+@c @code{(add-hook 'write-file-functions 'copyright-update)} into your @file{~/.emacs}
+@c file (@pxref{(emacs)Init File}).
+この関数は保存時に毎回実行するようにしておくと簡単でいいでしょう．これ
+は @code{(add-hook 'write-file-functions 'copyright-update)} を
+@file{~/.emacs} ファイルに追加 (@pxref{(emacs)Init File}) することで実
+現できます．
+
+@vindex copyright-query
+@c   The variable @code{copyright-query} controls whether to update the
+@c copyright or whether to ask about it.  When this is @code{nil} updating is
+@c only done with @kbd{M-x copyright-update}.  When this is @code{function}
+@c you are queried whenever @code{copyright-update} is called as a function,
+@c such as in the @code{write-file-functions} feature mentioned above.  Otherwise
+@c you are always queried.
+変数 @code{copyright-query} は著作権表示をアップデートするかを尋ねるか
+どうかを制御します．@code{nil} なら，@kbd{M-x copyright-update} を実行
+した時のみ更新されます．@code{function} なら，
+@code{write-file-functions} のように @code{copyright-update}
+が関数として呼ばれた時はいつでも更新されます．もしそうでなければ，確認
+されます．
+
+@node Executables, Timestamps, Copyrights, Top
+@c @chapter Making Interpreter Scripts Executable
+@chapter スクリプトインタプリタの作成
+@cindex executables
+
+@vindex executable-prefix
+@vindex executable-chmod
+@c   Various interpreter modes such as Shell script mode or AWK mode will
+@c automatically insert or update the buffer's magic number, a special
+@c comment on the first line that makes the @code{exec} systemcall know
+@c how to execute the script.  To this end the script is automatically
+@c made executable upon saving, with @code{executable-chmod} as argument
+@c to the system @code{chmod} command.  The magic number is prefixed by
+@c the value of @code{executable-prefix}.
+Shell スクリプトモードや AWK モードのようにさまざまなインタプリタモー
+ドは自動的にバッファのマジックナンバや最初の行に置かれ @code{exec} シ
+ステムコールにスクリプトを実行させる方法を教えるための特別なコメントを
+挿入や更新します．保存時には自動的に @code{executable-chmod} を引数と
+してシステムの @code{chmod} コマンドを実行します．マジックナンバーは
+@code{executable-prefix} の値が置かれます．
+
+@vindex executable-magicless-file-regexp
+@c   Any file whose name matches @code{executable-magicless-file-regexp} is not
+@c furnished with a magic number, nor is it made executable.  This is mainly
+@c intended for resource files, which are only meant to be read in.
+ファイル名が @code{executable-magicless-file-regexp} に一致するものは
+マジックナンバーがなく，実行可能にもしません．これは主にリソースファイ
+ル向けのもので，読み込み用のファイルに適用されます．
+
+@vindex executable-insert
+@c   The variable @code{executable-insert} says what to do when
+@c @code{executable-set-magic} is called non-interactively, e.g. when file has no
+@c or the wrong magic number:
+変数 @code{executable-insert} は @code{executable-set-magic} が非対話
+的に実行された時(ファイルにマジックナンバが無い時や間違っていた時など)
+にどう処理するかを決定しています．
+@table @asis
+@item @code{nil}
+@c Do nothing.
+何もしません．
+@item @code{t}
+@c Insert or update magic number.
+マジックナンバを挿入し更新します．
+@item other
+@c Insert or update magic number, but mark as unmodified.
+マジックナンバを挿入し更新しますは，未更新のままとします．
+@end table
+
+@findex executable-set-magic
+@vindex executable-query
+@c   The variable @code{executable-query} controls whether to ask about
+@c inserting or updating the magic number.  When this is @code{nil} updating
+@c is only done with @kbd{M-x executable-set-magic}.  When this is
+@c @code{function} you are queried whenever @code{executable-set-magic} is
+@c called as a function, such as when Emacs puts a buffer in Shell script
+@c mode.  Otherwise you are alway queried.
+変数 @code{executable-query} はマジックナンバーを挿入や更新する際に確
+認するかどうかを制御します．@code{nil} であれば，@kbd{M-x
+executable-set-magic} で実行した時のみ更新します．@code{function} であ
+れば， @code{executable-set-magic} が shellスクリプトモードで呼ばれた
+時のように関数として実行された時はいつでも確認します．そうでなければ，
+いつでも確認します．
+
+@findex executable-self-display
+  @kbd{M-x executable-self-display} adds a magic number to the buffer, which
+will turn it into a self displaying text file, when called as a Un*x command.
+The ``interpreter'' used is @code{executable-self-display} with argument
+@samp{+2}.
+
+@node Timestamps, QuickURL, Executables, Top
+@c @chapter Maintaining Timestamps in Modified Files
+@chapter ファイルの変更時間を更新
+@cindex timestamps
+
+@findex time-stamp
+@vindex write-file-functions
+@c The @code{time-stamp} command can be used to update automatically a
+@c template in a file with a new time stamp every time you save the file.
+@c Customize the hook @code{write-file-functions} to add the function
+@c @code{time-stamp} to arrange this.
+@code{time-stamp} はファイルを保存する時に新しい更新時間を自動的にある
+書式で更新するためのものです．@code{write-file-functions} に関数
+@code{time-stamp} を追加するようにカスタマイズします．
+
+@vindex time-stamp-active
+@vindex time-stamp-format
+@vindex time-stamp-start
+@c The time stamp is updated only if the customizable variable
+@c @code{time-stamp-active} is on, which it is by default; the command
+@c @code{time-stamp-toggle-active} can be used to toggle it.  The format of
+@c the time stamp is set by the customizable variable
+@c @code{time-stamp-format}.
+更新時間は @code{time-stamp-active} がオンの時(デフォルト)のみ更新され
+ます．@code{time-stamp-toggle-active} はこれをオン/オフできます．更新
+時間の書式は変数 @code{time-stamp-format} をカスタマイッズすることで変
+更できます．
+
+@vindex time-stamp-line-limit
+@vindex time-stamp-end
+@vindex time-stamp-count
+@vindex time-stamp-inserts-lines
+@c The variables @code{time-stamp-line-limit}, @code{time-stamp-start},
+@c @code{time-stamp-end}, @code{time-stamp-count}, and
+@c @code{time-stamp-inserts-lines} control finding the template.  Do not
+@c change these in your init file or you will be incompatible with other
+@c people's files.  If you must change them, do so only in the local
+@c variables section of the file itself.
+変数 @code{time-stamp-line-limit}，@code{time-stamp-start}，
+@code{time-stamp-end}，@code{time-stamp-count}，
+@code{time-stamp-inserts-lines} はテンプレートを探す方法を制御します．
+これらの変数は初期化ファイル(.emacs)で変更しない方がいいでしょう．さも
+ないと，他の人が作成したファイルを編集する際に問題となります．変更する
+場合には，ファイルのローカル変数で変更しなければなりません．
+
+@c Normally the template must appear in the first 8 lines of a file and
+@c look like one of the following:
+通常は，テンプレートはファイルの8行目までに以下のような書式がなければ
+なりません．
+
+@example
+Time-stamp: <>
+Time-stamp: " "
+@end example
+
+@c The time stamp is written between the brackets or quotes:
+更新時間は括弧や引用符の間に記入されます．
+
+@example
+Time-stamp: <1998-02-18 10:20:51 gildea>
+@end example
+
+@node QuickURL, Tempo, Timestamps, Top
+@c @chapter QuickURL: Inserting URLs Based on Text at Point
+@chapter QuickURL: ポイント位置のテキストに応じてURL挿入
+@vindex quickurl-url-file
+@findex quickurl
+@cindex URLs
+@c @kbd{M-x quickurl} can be used to insert a URL into a buffer based on
+@c the text at point.  The URLs are stored in an external file defined by
+@c the variable @code{quickurl-url-file} as a list of either cons cells of
+@c the form @code{(@var{key} . @var{URL})} or
+@c lists of the form @code{(@var{key} @var{URL} @var{comment})}.  These
+@c specify that @kbd{M-x quickurl} should insert @var{URL} if the word
+@c @var{key} is at point, for example:
+@kbd{M-x quickurl} はポイント付近のテキストに応じてテキストを挿入する
+ことができます．URL は変数 @code{quickurl-url-file} で設定されたファイ
+ルで定義されており，@code{(@var{key} . @var{URL})} という cons cells
+か @code{(@var{key} @var{URL} @var{comment})} というリストになっていま
+す．ポイント位置の単語が@var{key} であれば，@kbd{M-x quickurl} は
+@var{URL} を挿入します．例えば，以下のような設定が可能です．
+
+@example
+(("FSF"      "http://www.fsf.org/" "The Free Software Foundation")
+ ("emacs"  . "http://www.emacs.org/")
+ ("hagbard"  "http://www.hagbard.demon.co.uk" "Hagbard's World"))
+@end example
+
+@findex quickurl-add-url
+@findex quickurl-list
+@c @kbd{M-x quickurl-add-url} can be used to add a new @var{key}/@var{URL}
+@c pair.  @kbd{M-x quickurl-list} provides interactive editing of the URL
+@c list.
+@kbd{M-x quickurl-add-url} は新規に @var{key}/@var{URL} のペアを追加で
+きます．@kbd{M-x quickurl-list} で URL リストの対話的編集ができます．
+
+@node Tempo, Hippie Expand, QuickURL, Top
+@c @chapter Tempo: Flexible Template Insertion
+@chapter Tempo: 柔軟なテンプレート挿入
+
+@cindex templates
+@c The Tempo package provides a simple way to define powerful templates, or
+@c macros, if you wish.  It is mainly intended for, but not limited to,
+@c programmers to be used for creating shortcuts for editing
+@c certain kinds of documents.
+Tempo パッケージは機能的なテンプレートやマクロを簡単に定義できます．主
+にある種のドキュメントを簡単に編集できる方法を作るプログラマを意図して
+います(それに限定しているわけではありませんが)．
+
+@findex tempo-backward-mark
+@findex tempo-forward-mark
+@c A template is defined as a list of items to be inserted in the current
+@c buffer at point.  Some can be simple strings, while others can control
+@c formatting or define special points of interest in the inserted text.
+@c @kbd{M-x tempo-backward-mark} and @kbd{M-x tempo-forward-mark} can be
+@c used to jump between such points.
+テンプレートはポイント位置に挿入されるべきアイテムのリストとして定義さ
+れます．単純な文字列もあれば，書式を制御するようなものや挿入したテキス
+トのある箇所を定義するようなものもあります．@kbd{M-x
+tempo-backward-mark} と @kbd{M-x tempo-forward-mark} でそうしたポイン
+トを順番に移動していくことができます．
+
+@c More flexible templates can be created by including lisp symbols, which
+@c will be evaluated as variables, or lists, which will be evaluated
+@c as lisp expressions.  Automatic completion of specified tags to expanded
+@c templates can be provided.
+より柔軟なテンプレートとして Lisp シンボルを含むこともできます．その
+Lisp シンボルは変数やリスト，Lisp 式として評価されます．特定のタグの自
+動補完機能も用意されています．
+
+@findex tempo-define-template
+@c See the documentation for @code{tempo-define-template} for the different
+@c items that can be used to define a tempo template with a command for
+@c inserting it.
+Tempo テンプレートを定義するために使われる他の要素は
+@code{tempo-define-template} のドキュメントを参照ください．
+
+@c See the commentary in @file{tempo.el} for more information on using the
+@c Tempo package.
+Tempo に関する詳細は @file{tempo.el} のコメントを参照ください．
+
+@node Hippie Expand, Concept Index, Tempo, Top
+@c @chapter `Hippie' Expansion @emph{(2004/01/15)}
+@chapter `Hippie' 展開
+
+@findex hippie-expand
+@kindex M-/
+@vindex hippie-expand-try-functions-list
+@c @kbd{M-x hippie-expand} is a single command providing a variety of
+@c completions and expansions.  Called repeatedly, it tries all possible
+@c completions in succession.
+@kbd{M-x hippie-expand} は1つのコマンドでさまざまな補完や展開を行うこ
+とができます。繰り返し実行すると、すべての候補を連続で展開できます。
+
+@c Which ones to try, and in which order, is determined by the contents of
+@c the customizable option @code{hippie-expand-try-functions-list}.  Much
+@c customization of the expansion behavior can be made by changing the
+@c order of, removing, or inserting new functions in this list.  Given a
+@c positive numeric argument, @kbd{M-x hippie-expand} jumps directly that
+@c number of functions forward in this list.  Given some other argument (a
+@c negative argument or just @kbd{C-u}) it undoes the tried completion.
+どの方法をどういう順番で実行するかは 変数
+@code{hippie-expand-try-functions-list} で決まります。カスタマイズする
+ことで、順番を変えたり、ある方法を削除したり、新しい方法を追加したりで
+きます。数引数を与えると、@kbd{M-x hippie-expand} は
+@code{hippie-expand-try-functions-list} で「数引数」番目にある関数が実
+行されます。他の引数 (負引数や @kbd{C-u} のみ) 補完されたテキストを元
+に戻します。
+
+@c See the commentary in @file{hippie-exp.el} for more information on the
+@c possibilities.
+より詳しいことは@file{hippie-exp.el}のコメントを参照してください。
+
+@c Typically you would bind @code{hippie-expand} to @kbd{M-/} with
+@c @code{dabbrev-expand}, the standard binding of @kbd{M-/}, providing one
+@c of the expansion possibilities.
+一般的には @code{hippie-expand} を @code{dabbrev-expand} が割り当てら
+れている @kbd{M-/} にバインドします。そして、@code{dabbrev-expand} は
+補完する関数の1つ(@code{try-expand-dabbrev} などが容易されています) に
+しておくのです。
+
+@node Concept Index, Command Index, Hippie Expand, Top
+@c @unnumbered Concept Index
+@unnumbered 概念索引
+@printindex cp
+
+@node Command Index, Variable Index, Concept Index, Top
+@c @unnumbered Command Index
+@unnumbered コマンド索引
+@printindex fn
+
+@node Variable Index,  , Command Index, Top
+@c @unnumbered Variable Index
+@unnumbered 変数索引
+@printindex vr
+
+@setchapternewpage odd
+@contents
+@bye
+
+@ignore
+   arch-tag: 54001b27-5ef8-4a9d-a199-905d650fafba
+@end ignore

@@ -1,0 +1,2395 @@
+@c =============================================================
+@c = 元 翻 訳: 粕川正充＠お茶の水女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Calendar/Diary, Gnus, Dired, Top
+@c @chapter The Calendar and the Diary
+@chapter 暦と日誌
+@c @cindex calendar
+@cindex カレンダー
+@cindex 暦
+@findex calendar
+
+@c   Emacs provides the functions of a desk calendar, with a diary of
+@c planned or past events.  To enter the calendar, type @kbd{M-x calendar};
+@c this displays a three-month calendar centered on the current month, with
+@c point on the current date.  With a numeric argument, as in @kbd{C-u M-x
+@c calendar}, it prompts you for the month and year to be the center of the
+@c three-month calendar.  The calendar uses its own buffer, whose major
+@c mode is Calendar mode.
+Emacsには、過去や将来の予定を記録する日誌の機能を持つ
+カレンダー機能があります。
+カレンダーに入るには@kbd{M-x calendar}と打ちます。
+すると、今月を中央月として3か月分のカレンダーが表示され、
+ポイントは今日の日付に置かれます。
+@kbd{C-u M-x calendar}のように数引数を指定すると、
+3か月分のカレンダーの中央に表示する月と年を聞いてきます。
+カレンダーは専用のバッファを使い、
+そのメジャーモードはカレンダー（calendar）モードです。
+
+@c   @kbd{Mouse-2} in the calendar brings up a menu of operations on a
+@c particular date; @kbd{C-Mouse-3} brings up a menu of commonly used
+@c calendar features that are independent of any particular date.  To exit
+@c the calendar, type @kbd{q}.  @xref{Calendar, Customizing the Calendar
+@c and Diary,, elisp, The Emacs Lisp Reference Manual}, for customization
+@c information about the calendar and diary.
+カレンダー内で@kbd{Mouse-2}をクリックすると、
+その日付で使用できる機能のメニューが表示されます。
+@kbd{C-Mouse-3}をクリックすると、
+特定の日付に関わらずに使える機能のメニューが表示されます。
+カレンダーから抜けるには@kbd{q}と打ちます。
+カレンダーと日誌のカスタマイズに関しては、
+@xref{Calendar,, カレンダーと日誌のカスタマイズ, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@menu
+* Calendar Motion::     Moving through the calendar; selecting a date.
+* Scroll Calendar::     Bringing earlier or later months onto the screen.
+* Counting Days::       How many days are there between two dates?
+* General Calendar::    Exiting or recomputing the calendar.
+* LaTeX Calendar::      Print a calendar using LaTeX.
+* Holidays::            Displaying dates of holidays.
+* Sunrise/Sunset::      Displaying local times of sunrise and sunset.
+* Lunar Phases::        Displaying phases of the moon.
+* Other Calendars::     Converting dates to other calendar systems.
+* Diary::               Displaying events from your diary.
+* Appointments::	Reminders when it's time to do something.
+* Daylight Savings::    How to specify when daylight savings time is active.
+@end menu
+
+@node Calendar Motion
+@c @section Movement in the Calendar
+@section カレンダー内の移動
+
+@c @cindex moving inside the calendar
+@cindex カレンダー内の移動
+@c   Calendar mode lets you move through the calendar in logical units of
+@c time such as days, weeks, months, and years.  If you move outside the
+@c three months originally displayed, the calendar display ``scrolls''
+@c automatically through time to make the selected date visible.  Moving to
+@c a date lets you view its holidays or diary entries, or convert it to other
+@c calendars; moving longer time periods is also useful simply to scroll the
+@c calendar.
+カレンダー（calendar）モードでは、
+日、週、月、年といった論理的単位で移動します。
+始めに表示された3か月の外に移動すると、
+カレンダーは自動的に『スクロール』して
+指定された日付の箇所が表示されるようにします。
+ある日付へ移動すると、祝祭日の名称や日誌記録を見たり、
+その日付を別の暦に変換したりできます。
+カレンダーを単にスクロールすれば、大きな時間単位での移動に便利です。
+
+@menu
+* Calendar Unit Motion::      Moving by days, weeks, months, and years.
+* Move to Beginning or End::  Moving to start/end of weeks, months, and years.
+* Specified Dates::           Moving to the current date or another
+                                specific date.
+@end menu
+
+@node Calendar Unit Motion
+@c @subsection Motion by Standard Lengths of Time
+@subsection 日／週／月／年単位の移動
+
+@c   The commands for movement in the calendar buffer parallel the
+@c commands for movement in text.  You can move forward and backward by
+@c days, weeks, months, and years.
+カレンダー内を移動するコマンドはテキスト内を移動するコマンドに対比できます。
+日、週、月、年を単位として前後に移動できます。
+
+@table @kbd
+@item C-f
+@c Move point one day forward (@code{calendar-forward-day}).
+1日後にポイントを進める（@code{calendar-forward-day}）。
+@item C-b
+@c Move point one day backward (@code{calendar-backward-day}).
+1日前にポイントを戻す（@code{calendar-backward-day}）。
+@item C-n
+@c Move point one week forward (@code{calendar-forward-week}).
+1週間後にポイントを進める（@code{calendar-forward-week}）。
+@item C-p
+@c Move point one week backward (@code{calendar-backward-week}).
+1週間前にポイントを戻す（@code{calendar-backward-week}）。
+@item M-@}
+@c Move point one month forward (@code{calendar-forward-month}).
+1か月後にポイントを進める（@code{calendar-forward-month}）。
+@item M-@{
+@c Move point one month backward (@code{calendar-backward-month}).
+1か月前にポイントを戻す（@code{calendar-backward-month}）。
+@item C-x ]
+@c Move point one year forward (@code{calendar-forward-year}).
+1年後にポイントを進める（@code{calendar-forward-year}）。
+@item C-x [
+@c Move point one year backward (@code{calendar-backward-year}).
+1年前にポイントを戻す（@code{calendar-backward-year}）。
+@end table
+
+@c @kindex C-f @r{(Calendar mode)}
+@kindex C-f @r{（カレンダーモード）}
+@findex calendar-forward-day
+@c @kindex C-b @r{(Calendar mode)}
+@kindex C-b @r{（カレンダーモード）}
+@findex calendar-backward-day
+@c @kindex C-n @r{(Calendar mode)}
+@kindex C-n @r{（カレンダーモード）}
+@findex calendar-forward-week
+@c @kindex C-p @r{(Calendar mode)}
+@kindex C-p @r{（カレンダーモード）}
+@findex calendar-backward-week
+@c   The day and week commands are natural analogues of the usual Emacs
+@c commands for moving by characters and by lines.  Just as @kbd{C-n}
+@c usually moves to the same column in the following line, in Calendar
+@c mode it moves to the same day in the following week.  And @kbd{C-p}
+@c moves to the same day in the previous week.
+日や週を単位とした移動は、Emacsの通常の文字単位や行単位の移動の類推です。
+@kbd{C-n}は通常はつぎの行の同じ桁に移動しますが、
+カレンダー（calendar）モードでは
+つぎの週の同じ曜日に移動します。
+また、@kbd{C-p}はまえの週の同じ曜日に移動します。
+
+@c   The arrow keys are equivalent to @kbd{C-f}, @kbd{C-b}, @kbd{C-n} and
+@c @kbd{C-p}, just as they normally are in other modes.
+矢印キーは他のモードと同様に、それぞれ、
+@kbd{C-f}、@kbd{C-b}、@kbd{C-n}、@kbd{C-p}に等価です。
+
+@c @kindex M-@} @r{(Calendar mode)}
+@kindex M-@} @r{（カレンダーモード）}
+@findex calendar-forward-month
+@c @kindex M-@{ @r{(Calendar mode)}
+@kindex M-@{ @r{（カレンダーモード）}
+@findex calendar-backward-month
+@c @kindex C-x ] @r{(Calendar mode)}
+@kindex C-x ] @r{（カレンダーモード）}
+@findex calendar-forward-year
+@c @kindex C-x [ @r{(Calendar mode)}
+@kindex C-x [ @r{（カレンダーモード）}
+@findex calendar-forward-year
+@c   The commands for motion by months and years work like those for
+@c weeks, but move a larger distance.  The month commands @kbd{M-@}} and
+@c @kbd{M-@{} move forward or backward by an entire month's time.  The
+@c year commands @kbd{C-x ]} and @w{@kbd{C-x [}} move forward or backward a
+@c whole year.
+月単位や年単位の移動コマンドは週単位の移動と同じように働きますが、
+より大きな単位での移動です。
+月単位の移動コマンド@kbd{M-@}}と@kbd{M-@{}は、それぞれ、
+翌月、前月に移動します。
+年単位の移動コマンド@kbd{C-x ]}と@w{@kbd{C-x [}}は、
+それぞれ、1年後、1年前に移動します。
+
+@c   The easiest way to remember these commands is to consider months and
+@c years analogous to paragraphs and pages of text, respectively.  But the
+@c commands themselves are not quite analogous.  The ordinary Emacs paragraph
+@c commands move to the beginning or end of a paragraph, whereas these month
+@c and year commands move by an entire month or an entire year, which usually
+@c involves skipping across the end of a month or year.
+これらのコマンドを簡単に覚えるには、それぞれ、
+月と年を段落とページに対比させることです。
+しかし、コマンド自体は同じではありません。
+Emacsの通常の段落移動コマンドは段落の先頭か末尾に移動しますが、
+月単位や年単位の移動コマンドは1か月分や1年分で移動しますから、
+月や年の区切りを普通は飛び越します。
+
+@c   All these commands accept a numeric argument as a repeat count.
+@c For convenience, the digit keys and the minus sign specify numeric
+@c arguments in Calendar mode even without the Meta modifier.  For example,
+@c @kbd{100 C-f} moves point 100 days forward from its present location.
+これらのコマンドはすべて数引数を反復回数として扱います。
+簡単のために、カレンダー（calendar）モードでは
+Meta修飾なしでも数字とマイナス記号で数引数を指定できます。
+たとえば、@kbd{100 C-f}は100日後の日付にポイントを進めます。
+
+@node Move to Beginning or End
+@c @subsection Beginning or End of Week, Month or Year
+@subsection 週／月／年の始めと終り
+
+@c   A week (or month, or year) is not just a quantity of days; we think of
+@c weeks (months, years) as starting on particular dates.  So Calendar mode
+@c provides commands to move to the beginning or end of a week, month or
+@c year:
+週（または、月、年）というのは、単に1日1日が集まったものではありません。
+週（月、年）は特定の日で始まると考えます。
+そこで、カレンダー（calendar）モードには、
+週、月、年の始めや終りに移動するコマンドがあります。
+
+@table @kbd
+@c @kindex C-a @r{(Calendar mode)}
+@kindex C-a @r{（カレンダーモード）}
+@findex calendar-beginning-of-week
+@item C-a
+@c Move point to start of week (@code{calendar-beginning-of-week}).
+週の始めにポイントを移動する（@code{calendar-beginning-of-week}）。
+@c @kindex C-e @r{(Calendar mode)}
+@kindex C-e @r{（カレンダーモード）}
+@findex calendar-end-of-week
+@item C-e
+@c Move point to end of week (@code{calendar-end-of-week}).
+週の終りにポイントを移動する（@code{calendar-end-of-week}）。
+@c @kindex M-a @r{(Calendar mode)}
+@kindex M-a @r{（カレンダーモード）}
+@findex calendar-beginning-of-month
+@item M-a
+@c Move point to start of month (@code{calendar-beginning-of-month}).
+月の始めにポイントを移動する（@code{calendar-beginning-of-month}）。
+@c @kindex M-e @r{(Calendar mode)}
+@kindex M-e @r{（カレンダーモード）}
+@findex calendar-end-of-month
+@item M-e
+@c Move point to end of month (@code{calendar-end-of-month}).
+月の終りにポイントを移動する（@code{calendar-end-of-month}）。
+@c @kindex M-< @r{(Calendar mode)}
+@kindex M-< @r{（カレンダーモード）}
+@findex calendar-beginning-of-year
+@item M-<
+@c Move point to start of year (@code{calendar-beginning-of-year}).
+年の始めにポイントを移動する（@code{calendar-beginning-of-year}）。
+@c @kindex M-> @r{(Calendar mode)}
+@kindex M-> @r{（カレンダーモード）}
+@findex calendar-end-of-year
+@item M->
+@c Move point to end of year (@code{calendar-end-of-year}).
+年の終りにポイントを移動する（@code{calendar-end-of-year}）。
+@end table
+
+@c   These commands also take numeric arguments as repeat counts, with the
+@c repeat count indicating how many weeks, months, or years to move
+@c backward or forward.
+これらのコマンドは数引数を反復回数と扱い、
+何週、何か月、何年だけ前後に移動するのかを指定します。
+
+@vindex calendar-week-start-day
+@c @cindex weeks, which day they start on
+@c @cindex calendar, first day of week
+@cindex 週の始め
+@cindex カレンダー、週の始め
+@c   By default, weeks begin on Sunday.  To make them begin on Monday
+@c instead, set the variable @code{calendar-week-start-day} to 1.
+デフォルトでは、週は日曜から始まります。
+月曜から始めるには、変数@code{calendar-week-start-day}に1を設定します。
+@footnote{【訳注】
+この変数はどの曜日を週の始めにするかを示しており、
+5を設定すると金曜日から始まる。}
+
+@node Specified Dates
+@c @subsection Specified Dates
+@subsection 特定の日付
+
+@c   Calendar mode provides commands for moving to a particular date
+@c specified in various ways.
+カレンダー（calendar）モードには、
+さまざまな方法で指定した特定の日付へ移動するコマンドがあります。
+
+@table @kbd
+@item g d
+@c Move point to specified date (@code{calendar-goto-date}).
+指定した日付へポイントを移動する（@code{calendar-goto-date}）。
+@item o
+@c Center calendar around specified month (@code{calendar-other-month}).
+指定した月をカレンダーの中央月にする（@code{calendar-other-month}）。
+@item .
+@c Move point to today's date (@code{calendar-goto-today}).
+ポイントを今日の日付に移動する（@code{calendar-goto-today}）。
+@end table
+
+@c @kindex g d @r{(Calendar mode)}
+@kindex g d @r{（カレンダーモード）}
+@findex calendar-goto-date
+@c   @kbd{g d} (@code{calendar-goto-date}) prompts for a year, a month, and a day
+@c of the month, and then moves to that date.  Because the calendar includes all
+@c dates from the beginning of the current era, you must type the year in its
+@c entirety; that is, type @samp{1990}, not @samp{90}.
+@kbd{g d}（@code{calendar-goto-date}）は、
+年、月、日を読み取ってその日付に移動します。
+カレンダーには西暦紀元がすべて含まれているため、
+西暦年を略さずに打つ必要があります。
+つまり、@samp{90}ではなく@samp{1990}です。
+
+@c @kindex o @r{(Calendar mode)}
+@kindex o @r{（カレンダーモード）}
+@findex calendar-other-month
+@c   @kbd{o} (@code{calendar-other-month}) prompts for a month and year,
+@c then centers the three-month calendar around that month.
+@kbd{o}（@code{calendar-other-month}）は、
+月と年を読み取って、その月を中央月として3か月分のカレンダーを表示します。
+
+@c @kindex . @r{(Calendar mode)}
+@kindex . @r{（カレンダーモード）}
+@findex calendar-goto-today
+@c   You can return to today's date with @kbd{.}@:
+@c (@code{calendar-goto-today}).
+@kbd{.}（@code{calendar-goto-today}）で、今日の日付に戻ることができます。
+
+@node Scroll Calendar
+@c @section Scrolling in the Calendar
+@section カレンダーのスクロール
+
+@c @cindex scrolling in the calendar
+@cindex カレンダーのスクロール
+@c   The calendar display scrolls automatically through time when you move out
+@c of the visible portion.  You can also scroll it manually.  Imagine that the
+@c calendar window contains a long strip of paper with the months on it.
+@c Scrolling it means moving the strip so that new months become visible in
+@c the window.
+見えている範囲を越えて移動するとカレンダーは自動的にスクロールします。
+手動でスクロールすることもできます。
+カレンダーを表示しているウィンドウでは、
+長い長い紙に月を印刷したものの一部が見えているのだと考えてください。
+カレンダーをスクロールするとは、
+新しい月が見えるようにこの紙を動かすことに相当します。
+
+@table @kbd
+@item C-x <
+@c Scroll calendar one month forward (@code{scroll-calendar-left}).
+カレンダーを1か月後にスクロールする（@code{scroll-calendar-left}）。
+@item C-x >
+@c Scroll calendar one month backward (@code{scroll-calendar-right}).
+カレンダーを1か月前にスクロールする（@code{scroll-calendar-right}）。
+@item C-v
+@itemx @key{NEXT}
+@c Scroll calendar three months forward
+@c (@code{scroll-calendar-left-three-months}).
+カレンダーを3か月後にスクロールする
+（@code{scroll-calendar-left-three-months}）。
+@item M-v
+@itemx @key{PRIOR}
+@c Scroll calendar three months backward
+@c (@code{scroll-calendar-right-three-months}).
+カレンダーを3か月前にスクロールする
+（@code{scroll-calendar-right-three-months}）。
+@end table
+
+@c @kindex C-x < @r{(Calendar mode)}
+@kindex C-x < @r{（カレンダーモード）}
+@findex scroll-calendar-left
+@c @kindex C-x > @r{(Calendar mode)}
+@kindex C-x > @r{（カレンダーモード）}
+@findex scroll-calendar-right
+@c   The most basic calendar scroll commands scroll by one month at a
+@c time.  This means that there are two months of overlap between the
+@c display before the command and the display after.  @kbd{C-x <} scrolls
+@c the calendar contents one month to the left; that is, it moves the
+@c display forward in time.  @kbd{C-x >} scrolls the contents to the
+@c right, which moves backwards in time.
+カレンダーをスクロールするもっとも基本的なコマンドは、
+一度に1か月分スクロールします。
+つまり、コマンドの実行前後の表示を比べると、2か月分重複しています。
+@kbd{C-x <}はカレンダーを1か月分左にスクロールします。
+つまり、時間的に1か月後を表示します。
+@kbd{C-x >}コマンドはカレンダーを右にスクロールし、
+時間的に1か月前に戻します。
+
+@c @kindex C-v @r{(Calendar mode)}
+@kindex C-v @r{（カレンダーモード）}
+@findex scroll-calendar-left-three-months
+@c @kindex M-v @r{(Calendar mode)}
+@kindex M-v @r{（カレンダーモード）}
+@findex scroll-calendar-right-three-months
+@c   The commands @kbd{C-v} and @kbd{M-v} scroll the calendar by an entire
+@c ``screenful''---three months---in analogy with the usual meaning of
+@c these commands.  @kbd{C-v} makes later dates visible and @kbd{M-v} makes
+@c earlier dates visible.  These commands take a numeric argument as a
+@c repeat count; in particular, since @kbd{C-u} multiplies the next command
+@c by four, typing @kbd{C-u C-v} scrolls the calendar forward by a year and
+@c typing @kbd{C-u M-v} scrolls the calendar backward by a year.
+コマンド@kbd{C-v}と@kbd{M-v}は、
+カレンダーを『1画面分』、つまり、3か月分スクロールします。
+これは、通常のモードでのこれらのコマンドと意味的に同じになっています。
+@kbd{C-v}は将来の日付を見えるようにし、
+@kbd{M-v}は過去の日付を見えるようにします。
+これらのコマンドは数引数を反復回数として扱います。
+たとえば、@kbd{C-u}は後続のコマンドを4回反復するので、
+@kbd{C-u C-v}と打てば1年分先へカレンダーをスクロールし、
+@kbd{C-u M-v}と打てば1年分前へカレンダーをスクロールします。
+
+@c   The function keys @key{NEXT} and @key{PRIOR} are equivalent to
+@c @kbd{C-v} and @kbd{M-v}, just as they are in other modes.
+ファンクションキー@key{NEXT}と@key{PRIOR}は、
+他のモードと同様に、それぞれ、@kbd{C-v}と@kbd{M-v}に等価です。
+
+@node Counting Days
+@c @section Counting Days
+@section 日数計算
+
+@table @kbd
+@item M-=
+@c Display the number of days in the current region
+@c (@code{calendar-count-days-region}).
+カレントリージョン内の日数を表示する
+（@code{calendar-count-days-region}）。
+@end table
+
+@c @kindex M-= @r{(Calendar mode)}
+@kindex M-= @r{（カレンダーモード）}
+@findex calendar-count-days-region
+@c   To determine the number of days in the region, type @kbd{M-=}
+@c (@code{calendar-count-days-region}).  The numbers of days printed is
+@c @emph{inclusive}; that is, it includes the days specified by mark and
+@c point.
+リージョン内の日数を調べるには、
+@kbd{M-=}（@code{calendar-count-days-region}）と打ちます。
+このコマンドで表示される日数は、
+マークとポイントで指定した両日を@emph{含んだ}日数です。
+
+@node General Calendar
+@c @section Miscellaneous Calendar Commands
+@section その他のカレンダーコマンド
+
+@table @kbd
+@item p d
+@c Display day-in-year (@code{calendar-print-day-of-year}).
+通年日（1年のうちの何日目の日か）を表示する
+（@code{calendar-print-day-of-year}）。
+@item C-c C-l
+@c Regenerate the calendar window (@code{redraw-calendar}).
+カレンダーを表示しているウィンドウを再表示する（@code{redraw-calendar}）。
+@c @item SPC
+@item @key{SPC}
+@c Scroll the next window (@code{scroll-other-window}).
+別のウィンドウをスクロールする
+（@code{scroll-other-window}）。
+@item q
+@c Exit from calendar (@code{exit-calendar}).
+カレンダーから抜ける（@code{exit-calendar}）。
+@end table
+
+@c @kindex p d @r{(Calendar mode)}
+@kindex p d @r{（カレンダーモード）}
+@c @cindex day of year
+@cindex 通年日
+@findex calendar-print-day-of-year
+@c   To print the number of days elapsed since the start of the year, or
+@c the number of days remaining in the year, type the @kbd{p d} command
+@c (@code{calendar-print-day-of-year}).  This displays both of those
+@c numbers in the echo area.  The number of days elapsed includes the
+@c selected date.  The number of days remaining does not include that
+@c date.
+年始から数えた日数、あるいは、1年の残り日数を表示するには、
+@kbd{p d}（@code{calendar-print-day-of-year}）コマンドを打ちます。
+すると、上の2つの日数をエコー領域に表示します。
+年始からの日数には指定した日が含まれます。
+また、残りの日数には指定した日は含まれません。
+
+@c @kindex C-c C-l @r{(Calendar mode)}
+@kindex C-c C-l @r{（カレンダーモード）}
+@findex redraw-calendar
+@c   If the calendar window text gets corrupted, type @kbd{C-c C-l}
+@c (@code{redraw-calendar}) to redraw it.  (This can only happen if you use
+@c non-Calendar-mode editing commands.)
+カレンダーのウィンドウのテキストが壊れた場合には、
+@kbd{C-c C-l}（@code{redraw-calendar}）と打って再表示させます。
+（カレンダー（calendar）モード以外の編集用コマンドを使った場合に限り、
+表示がおかしくなる。）
+
+@c @kindex SPC @r{(Calendar mode)}
+@kindex SPC @r{（カレンダーモード）}
+@c   In Calendar mode, you can use @kbd{SPC} (@code{scroll-other-window})
+@c to scroll the other window.  This is handy when you display a list of
+@c holidays or diary entries in another window.
+カレンダー（calendar）モードでは、
+@key{SPC}（@code{scroll-other-window}）を使って
+別のウィンドウをスクロールできます。
+このコマンドは、
+別のウィンドウに祝祭日や日誌記録の一覧を表示しているときに便利です。
+
+@c @kindex q @r{(Calendar mode)}
+@kindex q @r{（カレンダーモード）}
+@findex exit-calendar
+@c   To exit from the calendar, type @kbd{q} (@code{exit-calendar}).  This
+@c buries all buffers related to the calendar, selecting other buffers.
+@c (If a frame contains a dedicated calendar window, exiting from the
+@c calendar iconifies that frame.)
+カレンダーから抜けるには、
+@kbd{q}（@code{exit-calendar}）と打ちます。
+このコマンドはカレンダーに関係したすべてのバッファを閉じ、
+別のバッファを選択します。
+（カレンダー関連のウィンドウ専用のフレームであった場合には、
+カレンダーを終了するとそのフレームをアイコン化する。）
+
+@node LaTeX Calendar
+@c @section LaTeX Calendar
+@section LaTeXカレンダー
+@c @cindex calendar and La@TeX{}
+@cindex カレンダーとLa@TeX{}
+
+@c    The Calendar La@TeX{} commands produce a buffer of La@TeX{} code that
+@c prints as a calendar.  Depending on the command you use, the printed
+@c calendar covers the day, week, month or year that point is in.
+カレンダーLa@TeX{}コマンドは、
+カレンダーを印刷するLa@TeX{}コードのバッファに作成します。
+使用するコマンドに依存して、ポイント位置の日、週、月、年の
+いずれかを含んだカレンダーを印刷できます。
+
+@c @kindex t @r{(Calendar mode)}
+@kindex t @r{（カレンダーモード）}
+@table @kbd
+@item t m
+@c Generate a one-month calendar (@code{cal-tex-cursor-month}).
+1か月分のカレンダーを生成する（@code{cal-tex-cursor-month}）。
+@item t M
+@c Generate a sideways-printing one-month calendar
+@c (@code{cal-tex-cursor-month-landscape}).
+横づかいで1か月分のカレンダーを生成する
+（@code{cal-tex-cursor-month-landscape}）。
+@item t d
+@c Generate a one-day calendar
+@c (@code{cal-tex-cursor-day}).
+1日分のカレンダーを生成する（@code{cal-tex-cursor-day}）。
+@item t w 1
+@c Generate a one-page calendar for one week
+@c (@code{cal-tex-cursor-week}).
+1週間分の1ページのカレンダーを生成する（@code{cal-tex-cursor-week}）。
+@item t w 2
+@c Generate a two-page calendar for one week
+@c (@code{cal-tex-cursor-week2}).
+1週間分の2ページのカレンダーを生成する（@code{cal-tex-cursor-week2}）。
+@item t w 3
+@c Generate an ISO-style calendar for one week
+@c (@code{cal-tex-cursor-week-iso}).
+1週間分のISOスタイルのカレンダーを生成する（@code{cal-tex-cursor-week-iso}）。
+@item t w 4
+@c Generate a calendar for one Monday-starting week
+@c (@code{cal-tex-cursor-week-monday}).
+月曜から始まる1週間分のカレンダーを生成する
+（@code{cal-tex-cursor-week-monday}）。
+@item t f w
+@c Generate a Filofax-style two-weeks-at-a-glance calendar
+@c (@code{cal-tex-cursor-filofax-2week}).
+ファイロファックス（システム手帳）スタイルの見開き2週間分のカレンダーを生成する
+（@code{cal-tex-cursor-filofax-2week}）。
+@item t f W
+@c Generate a Filofax-style one-week-at-a-glance calendar
+@c (@code{cal-tex-cursor-filofax-week}).
+ファイロファックス（システム手帳）スタイルの見開き1週間分のカレンダーを生成する
+（@code{cal-tex-cursor-filofax-week}）。
+@item t y
+@c Generate a calendar for one year
+@c (@code{cal-tex-cursor-year}).
+1年分のカレンダーを生成する（@code{cal-tex-cursor-year}）。
+@item t Y
+@c Generate a sideways-printing calendar for one year
+@c (@code{cal-tex-cursor-year-landscape}).
+横づかいで1年分のカレンダーを生成する
+（@code{cal-tex-cursor-year-landscape}）。
+@item t f y
+@c Generate a Filofax-style calendar for one year
+@c (@code{cal-tex-cursor-filofax-year}).
+ファイロファックス（システム手帳）スタイルの1年分のカレンダーを生成する
+（@code{cal-tex-cursor-filofax-year}）。
+@end table
+
+@c   Some of these commands print the calendar sideways (in ``landscape
+@c mode''), so it can be wider than it is long.  Some of them use Filofax
+@c paper size (3.75in x 6.75in).  All of these commands accept a prefix
+@c argument which specifies how many days, weeks, months or years to print
+@c (starting always with the selected one).
+これらのコマンドのいくつかは、横づかい（つまり、『ランドスケープ』）の
+カレンダーを印刷し、横長になります。
+いくつかのコマンドでは、ファイロファックス（システム手帳）
+サイズ（3.75インチ×6.75インチ、約95.25mm×171.45mm）を使います。
+これらのコマンドはすべて、印刷する日数、週数、月数、年数を
+数引数で指定できます（つねに選択した日から始まる）。
+
+@c   If the variable @code{cal-tex-holidays} is non-@code{nil} (the
+@c default), then the printed calendars show the holidays in
+@c @code{calendar-holidays}.  If the variable @code{cal-tex-diary} is
+@c non-@code{nil} (the default is @code{nil}), diary entries are included
+@c also (in weekly and monthly calendars only).
+変数@code{cal-tex-holidays}が@code{nil}以外（デフォルト）ならば、
+印刷されるカレンダーには@code{calendar-holidays}の祝祭日が表示されます。
+変数@code{cal-tex-diary}が@code{nil}以外
+（デフォルトは@code{nil}）ならば、
+日誌記録も一緒に印刷されます（週間および月間カレンダーの場合だけ）。
+
+@node Holidays
+@c @section Holidays
+@section 祝祭日
+@c @cindex holidays
+@cindex 祝祭日
+
+@c   The Emacs calendar knows about all major and many minor holidays,
+@c and can display them.
+Emacsのカレンダーはすべての祝祭日を把握しており、
+それらをカレンダーに表示できます。
+
+@table @kbd
+@item h
+@c Display holidays for the selected date
+@c (@code{calendar-cursor-holidays}).
+選択された日付の祝祭日を表示する（@code{calendar-cursor-holidays}）。
+@item Mouse-2 Holidays
+@c Display any holidays for the date you click on.
+マウスでクリックした日付の祝祭日を表示する。
+@item x
+@c Mark holidays in the calendar window (@code{mark-calendar-holidays}).
+カレンダーウィンドウの祝祭日に印を付ける
+（@code{mark-calendar-holidays}）。
+@item u
+@c Unmark calendar window (@code{calendar-unmark}).
+カレンダーウィンドウの印を消す（@code{calendar-unmark}）。
+@item a
+@c List all holidays for the displayed three months in another window
+@c (@code{list-calendar-holidays}).
+表示中の3か月分のカレンダーの
+すべての祝祭日を別のウィンドウに表示する
+（@code{list-calendar-holidays}）。
+@item M-x holidays
+@c List all holidays for three months around today's date in another
+@c window.
+今日を中心とした3か月間のすべての祝祭日を別のウィンドウに表示する。
+@item M-x list-holidays
+@c List holidays in another window for a specified range of years.
+指定した範囲の年の祝祭日を別のウィンドウに表示する。
+@end table
+
+@c @kindex h @r{(Calendar mode)}
+@kindex h @r{（カレンダーモード）}
+@findex calendar-cursor-holidays
+@c   To see if any holidays fall on a given date, position point on that
+@c date in the calendar window and use the @kbd{h} command.  Alternatively,
+@c click on that date with @kbd{Mouse-2} and then choose @kbd{Holidays}
+@c from the menu that appears.  Either way, this displays the holidays for
+@c that date, in the echo area if they fit there, otherwise in a separate
+@c window.
+カレンダー上のある日付が祝祭日かどうかを知るには、
+その日付にポイントを動かし@kbd{h}コマンドを使います。
+あるいは、その日付を@kbd{Mouse-2}でクリックし、
+立ち上がったメニューから@kbd{Holidays}を選択します。
+いずれの方法でも、その日付に関する祝祭日情報が、
+エコー領域に収まればエコー領域に、あるいは、別のウィンドウに表示されます。
+
+@c @kindex x @r{(Calendar mode)}
+@kindex x @r{（カレンダーモード）}
+@findex mark-calendar-holidays
+@c @kindex u @r{(Calendar mode)}
+@kindex u @r{（カレンダーモード）}
+@findex calendar-unmark
+@c   To view the distribution of holidays for all the dates shown in the
+@c calendar, use the @kbd{x} command.  This displays the dates that are
+@c holidays in a different face (or places a @samp{*} after these dates, if
+@c display with multiple faces is not available).  The command applies both
+@c to the currently visible months and to other months that subsequently
+@c become visible by scrolling.  To turn marking off and erase the current
+@c marks, type @kbd{u}, which also erases any diary marks (@pxref{Diary}).
+カレンダーに表示されている期間内にどれだけの祝祭日があるかを知るには、
+@kbd{x}コマンドを使います。
+祝祭日である日を異なるフェイスで（複数のフェイスを使えなければ、
+日付のあとに@samp{*}を付けて）表示します。
+このコマンドは、画面に見えている期間だけでなく、
+スクロールすると見えてくる期間にも適用されます。
+印を消してもとの状態に戻るには@kbd{u}コマンドを使いますが、
+日誌の印も同時に消えます。
+（@pxref{Diary}）。
+
+@c @kindex a @r{(Calendar mode)}
+@kindex a @r{（カレンダーモード）}
+@findex list-calendar-holidays
+@c   To get even more detailed information, use the @kbd{a} command, which
+@c displays a separate buffer containing a list of all holidays in the
+@c current three-month range.  You can use @key{SPC} in the calendar window
+@c to scroll that list.
+より詳しい情報を得るには、@kbd{a}コマンドを使います。
+これは、現在の3か月間に含まれるすべての祝祭日の一覧を別のバッファに表示します。
+カレンダーのウィンドウで@key{SPC}を使うと、
+その一覧をスクロールできます。
+
+@findex holidays
+@c   The command @kbd{M-x holidays} displays the list of holidays for the
+@c current month and the preceding and succeeding months; this works even
+@c if you don't have a calendar window.  If you want the list of holidays
+@c centered around a different month, use @kbd{C-u M-x holidays}, which
+@c prompts for the month and year.
+コマンド@kbd{M-x holidays}は、今月を中央月として前後1か月に含まれる
+祝祭日の一覧を表示します。
+カレンダーウィンドウがなくてもこのコマンドを使えます。
+別の月を中央月とした祝祭日の一覧が必要な場合は、
+@kbd{C-u M-x holidays}を使います。
+（中央月の）月と年を聞いてきます。
+
+@c   The holidays known to Emacs include United States holidays and the
+@c major Christian, Jewish, and Islamic holidays; also the solstices and
+@c equinoxes.
+Emacsが知っている祝祭日は、
+アメリカ合衆国の祝祭日、キリスト教の祝祭日、
+ユダヤ教の祝祭日、イスラム教の祝祭日、夏至、冬至、春分、秋分です。
+
+@findex list-holidays
+@c    The command @kbd{M-x list-holidays} displays the list of holidays for
+@c a range of years.  This function asks you for the starting and stopping
+@c years, and allows you to choose all the holidays or one of several
+@c categories of holidays.  You can use this command even if you don't have
+@c a calendar window.
+コマンド@kbd{M-x list-holidays}は、
+指定した数年間の祝祭日の一覧を表示します。
+始めの年と終りの年を聞いてくるので、
+すべての祝祭日、ある特定の種類の祝祭日を選べます。
+カレンダーウィンドウがなくてもこのコマンドを使えます。
+
+@c   The dates used by Emacs for holidays are based on @emph{current
+@c practice}, not historical fact.  Historically, for instance, the start
+@c of daylight savings time and even its existence have varied from year to
+@c year, but present United States law mandates that daylight savings time
+@c begins on the first Sunday in April.  When the daylight savings rules
+@c are set up for the United States, Emacs always uses the present
+@c definition, even though it is wrong for some prior years.
+Emacsが祝祭日を決定するために用いる暦は、
+歴史的な事実に基づくものではなく、
+@emph{現在用いている}ものです。
+たとえば、歴史的には夏時間
+@footnote{【訳注】
+主に高緯度地域で夏期に時計を進める習慣。
+日本でも戦後すぐに一度使われた。
+現在、省エネルギーなどを名目に再導入が検討されているようだが…。}
+（daylight savings time）を始める時期や施行するかどうかは、
+年ごとにばらばらでした。
+現在の合衆国の法律では4月の最初の日曜から始めると定めています。
+合衆国の夏時間を適用するかどうかを
+Emacsは現在の定義に基づいて決定しますので、
+昔の年代については誤りである場合もあります。
+
+@node Sunrise/Sunset
+@c @section Times of Sunrise and Sunset
+@section 日出入時刻
+@c @cindex sunrise and sunset
+@cindex 日の出と日の入
+
+@c   Special calendar commands can tell you, to within a minute or two, the
+@c times of sunrise and sunset for any date.
+カレンダーの特別なコマンドで、
+任意の日付の日出入時刻を2分以内の精度で調べられます。
+
+@table @kbd
+@item S
+@c Display times of sunrise and sunset for the selected date
+@c (@code{calendar-sunrise-sunset}).
+選択した日付の日出入時刻を表示する
+（@code{calendar-sunrise-sunset}）。
+@item Mouse-2 Sunrise/Sunset
+@c Display times of sunrise and sunset for the date you click on.
+クリックした日付の日出入時刻を表示する。
+@item M-x sunrise-sunset
+@c Display times of sunrise and sunset for today's date.
+今日の日出入時刻を表示する。
+@item C-u M-x sunrise-sunset
+@c Display times of sunrise and sunset for a specified date.
+指定した日付の日出入時刻を表示する
+@end table
+
+@c @kindex S @r{(Calendar mode)}
+@kindex S @r{（カレンダーモード）}
+@findex calendar-sunrise-sunset
+@findex sunrise-sunset
+@c   Within the calendar, to display the @emph{local times} of sunrise and
+@c sunset in the echo area, move point to the date you want, and type
+@c @kbd{S}.  Alternatively, click @kbd{Mouse-2} on the date, then choose
+@c @kbd{Sunrise/Sunset} from the menu that appears.  The command @kbd{M-x
+@c sunrise-sunset} is available outside the calendar to display this
+@c information for today's date or a specified date.  To specify a date
+@c other than today, use @kbd{C-u M-x sunrise-sunset}, which prompts for
+@c the year, month, and day.
+カレンダー内で@emph{地方時}（local times）で日出入時刻を表示するには、
+目的の日付にポイントを移動してから@kbd{S}と打ちます。
+あるいは、目的の日付を@kbd{Mouse-2}でクリックすると
+メニューが立ち上がるのでその中から@kbd{Sunrise/Sunset}を選びます。
+カレンダーの外からでも、
+今日や指定した日付の日出入時刻を
+@kbd{M-x sunrise-sunset}コマンドで調べられます。
+今日以外の日付を指定するには、
+@kbd{C-u M-x sunrise-sunset}コマンドを使います。
+すると、年月日を聞いてきます。
+
+@c   You can display the times of sunrise and sunset for any location and
+@c any date with @kbd{C-u C-u M-x sunrise-sunset}.  This asks you for a
+@c longitude, latitude, number of minutes difference from Coordinated
+@c Universal Time, and date, and then tells you the times of sunrise and
+@c sunset for that location on that date.
+@kbd{C-u C-u M-x sunrise-sunset}で、
+任意の場所の任意の日付の日出入時刻を表示できます。
+経度、緯度、協定世界時@footnote{【訳注】
+グリニッジ標準時と呼称していたものに相当。}
+からの分単位のずれ、日付の指定を聞いてきます。
+すると、その場所でのその日付の日出入時刻が表示されます。
+
+@c   Because the times of sunrise and sunset depend on the location on
+@c earth, you need to tell Emacs your latitude, longitude, and location
+@c name before using these commands.  Here is an example of what to set:
+日出入時刻は、地球上の場所に依存しますので、
+これらのコマンドを使うまえにEmacsに現在いる場所の緯度／経度と土地の名前を
+教えなければなりません。
+これにはつぎのようにします。
+
+@vindex calendar-location-name
+@vindex calendar-longitude
+@vindex calendar-latitude
+@example
+(setq calendar-latitude 40.1)
+(setq calendar-longitude -88.2)
+(setq calendar-location-name "Urbana, IL")
+@end example
+
+@noindent
+@c Use one decimal place in the values of @code{calendar-latitude} and
+@c @code{calendar-longitude}.
+変数@code{calendar-latitude}と@code{calendar-longitude}の値には、
+小数点以下1桁まで指定します。
+
+@c   Your time zone also affects the local time of sunrise and sunset.
+@c Emacs usually gets time zone information from the operating system, but
+@c if these values are not what you want (or if the operating system does
+@c not supply them), you must set them yourself.  Here is an example:
+タイムゾーンは、地方時で表した日出入時刻に影響します。
+通常、Emacsはオペレーティングシステムからタイムゾーンを取得しますが、
+それがまちがっている場合（あるいは、オペレーティングシステムが
+その情報を与えない場合）には、自分で設定する必要があります。
+つぎは設定例です。
+
+@vindex calendar-time-zone
+@vindex calendar-standard-time-zone-name
+@vindex calendar-daylight-time-zone-name
+@example
+(setq calendar-time-zone -360)
+(setq calendar-standard-time-zone-name "CST")
+(setq calendar-daylight-time-zone-name "CDT")
+@end example
+
+@noindent
+@c The value of @code{calendar-time-zone} is the number of minutes
+@c difference between your local standard time and Coordinated Universal
+@c Time (Greenwich time).  The values of
+@c @code{calendar-standard-time-zone-name} and
+@c @code{calendar-daylight-time-zone-name} are the abbreviations used in
+@c your time zone.  Emacs displays the times of sunrise and sunset
+@c @emph{corrected for daylight savings time}.  @xref{Daylight Savings},
+@c for how daylight savings time is determined.
+@code{calendar-time-zone}の値は、協定世界時（グリニッジ標準時）と
+地方標準時との差を分単位で表したものです。
+@code{calendar-standard-time-zone-name}と
+@code{calendar-daylight-time-zone-name}は、
+現在いる場所のタイムゾーンの省略名称です。
+Emacsは@emph{夏時間を補正して}日出入時刻を表示します。
+夏時間をどのように決定するかは、
+@xref{Daylight Savings}。
+
+@c   As a user, you might find it convenient to set the calendar location
+@c variables for your usual physical location in your @file{.emacs} file.
+@c And when you install Emacs on a machine, you can create a
+@c @file{default.el} file which sets them properly for the typical location
+@c of most users of that machine.  @xref{Init File}.
+ユーザーとしては、個人の@file{.emacs}ファイルで
+カレンダーの位置関連の変数に普段いる場所の値を設定すると便利でしょう。
+あるいは、Emacsをマシンにインストールするときに、
+そのマシンの大部分のユーザー用に典型的な場所に関する
+情報を@file{default.el}ファイルに設定してもかまいません。
+@xref{Init File}。
+
+@node Lunar Phases
+@c @section Phases of the Moon
+@section 朔弦望（新月、上弦、満月、下弦）
+@c @cindex phases of the moon
+@c @cindex moon, phases of
+@cindex 朔弦望（新月、上弦、満月、下弦）
+
+@c   These calendar commands display the dates and times of the phases of
+@c the moon (new moon, first quarter, full moon, last quarter).  This
+@c feature is useful for debugging problems that ``depend on the phase of
+@c the moon.''
+以下のコマンドは、朔弦望（新月、上弦、満月、下弦）の日付と時刻を表示します。
+これらの機能は、『朔弦望に依存する』問題をデバッグするときに重宝します。
+
+@table @kbd
+@item M
+@c Display the dates and times for all the quarters of the moon for the
+@c three-month period shown (@code{calendar-phases-of-moon}).
+表示してある3か月間の朔弦望の日付／時刻の一覧を表示する
+（@code{calendar-phases-of-moon}）。
+@item M-x phases-of-moon
+@c Display dates and times of the quarters of the moon for three months around
+@c today's date.
+今日を中央にした3か月間の朔弦望の日付／時刻の一覧を表示する。
+@end table
+
+@c @kindex M @r{(Calendar mode)}
+@kindex M @r{（カレンダーモード）}
+@findex calendar-phases-of-moon
+@c   Within the calendar, use the @kbd{M} command to display a separate
+@c buffer of the phases of the moon for the current three-month range.  The
+@c dates and times listed are accurate to within a few minutes.
+カレンダー内で@kbd{M}コマンドを使うと、
+現在の3か月間の朔弦望の日付／時刻を別のバッファに表示します。
+一覧内の日付／時刻は数分以内の精度です。
+
+@findex phases-of-moon
+@c   Outside the calendar, use the command @kbd{M-x phases-of-moon} to
+@c display the list of the phases of the moon for the current month and the
+@c preceding and succeeding months.  For information about a different
+@c month, use @kbd{C-u M-x phases-of-moon}, which prompts for the month and
+@c year.
+カレンダーの外からでも、
+@kbd{M-x phases-of-moon}コマンドを使って、
+今月を中央月として前後1か月の朔弦望の日付／時刻を
+表示できます。
+別の期間に関して調べるには@kbd{C-u M-x phases-of-moon}を使います。
+すると、月と年を聞いてきます。
+
+@c   The dates and times given for the phases of the moon are given in
+@c local time (corrected for daylight savings, when appropriate); but if
+@c the variable @code{calendar-time-zone} is void, Coordinated Universal
+@c Time (the Greenwich time zone) is used.  @xref{Daylight Savings}.
+朔弦望の日付／時刻は（必要ならば夏時間を補正して）地方時で与えられます。
+しかし、変数@code{calendar-time-zone}が設定されていなければ、
+協定世界時（グリニッジ標準時）が使われます。
+@xref{Daylight Savings}。
+
+@node Other Calendars
+@c @section Conversion To and From Other Calendars
+@section 他の暦との相互変換
+
+@c @cindex Gregorian calendar
+@cindex グレゴリオ暦
+@c   The Emacs calendar displayed is @emph{always} the Gregorian calendar,
+@c sometimes called the ``new style'' calendar, which is used in most of
+@c the world today.  However, this calendar did not exist before the
+@c sixteenth century and was not widely used before the eighteenth century;
+@c it did not fully displace the Julian calendar and gain universal
+@c acceptance until the early twentieth century.  The Emacs calendar can
+@c display any month since January, year 1 of the current era, but the
+@c calendar displayed is the Gregorian, even for a date at which the
+@c Gregorian calendar did not exist.
+Emacsのカレンダーは@emph{つねに}
+グレゴリオ暦（Gregorian calendar）で表示します。
+この暦は『新暦』とも呼ばれ、今日では世界の大部分で使われています。
+しかし、この暦は16世紀以前には存在せず、
+18世紀になるまでは普及していませんでした。
+ユリウス暦（Julian calendar）に置き替って
+世界的に受け入れられたのは20世紀初頭になってからです。
+Emacsのカレンダーは西暦1年1月以降の任意のカレンダーを表示できますが、
+グレゴリオ暦が存在しなかった時代に関しても
+グレゴリオ暦に基づいた暦を表示します。
+
+@c   While Emacs cannot display other calendars, it can convert dates to
+@c and from several other calendars.
+Emacsは他の暦を表示することはできませんが、
+指定した日付と他の暦の日付とを相互に変換できます。 
+
+@menu
+* Calendar Systems::	   The calendars Emacs understands
+			     (aside from Gregorian).
+* To Other Calendar::	   Converting the selected date to various calendars.
+* From Other Calendar::	   Moving to a date specified in another calendar.
+* Mayan Calendar::	   Moving to a date specified in a Mayan calendar.
+@end menu
+
+@node Calendar Systems
+@c @subsection Supported Calendar Systems
+@subsection 参照可能な暦
+
+@c @cindex ISO commercial calendar
+@cindex ISO商用暦
+@c   The ISO commercial calendar is used largely in Europe.
+ISO商用暦はヨーロッパで広く使われています。
+
+@c @cindex Julian calendar
+@cindex ユリウス暦
+@c   The Julian calendar, named after Julius Caesar, was the one used in Europe
+@c throughout medieval times, and in many countries up until the nineteenth
+@c century.
+ユリウス暦は、ジュリアス・シーザー（ユリウス・カエサル、Julius Caesar）に
+因んで命名されたもので、
+中世から19世紀にかけてヨーロッパ中で使われていました。
+
+@c @cindex Julian day numbers
+@c @cindex astronomical day numbers
+@cindex ユリウス日
+@cindex 天文通算日
+@c   Astronomers use a simple counting of days elapsed since noon, Monday,
+@c January 1, 4713 B.C. on the Julian calendar.  The number of days elapsed
+@c is called the @emph{Julian day number} or the @emph{Astronomical day number}.
+天文学者は、ユリウス暦紀元前4713年1月1日月曜の正午からの経過日数を使います。
+この経過日数を@emph{ユリウス日}（Julian day number）とか
+@emph{天文通算日}（Astronomical day number）と呼びます。
+
+@c @cindex Hebrew calendar
+@cindex ヘブライ暦
+@c   The Hebrew calendar is used by tradition in the Jewish religion.  The
+@c Emacs calendar program uses the Hebrew calendar to determine the dates
+@c of Jewish holidays.  Hebrew calendar dates begin and end at sunset.
+ヘブライ暦は昔からユダヤ教で使われてきました。
+Emacsのカレンダープログラムは、ユダヤの祝祭日がどの日付かを
+決定するのにヘブライ暦を使います。
+ヘブライ暦では1日は日没から始まり日没で終ります。
+@footnote{【訳注】
+蛇足ですが、クリスマスは本来ユダヤ教の祝祭日で、
+12月24日の日没から始まる。
+これがクリスマスイブを祝う本当の理由。}
+
+@c @cindex Islamic calendar
+@cindex イスラム暦
+@c   The Islamic calendar is used in many predominantly Islamic countries.
+@c Emacs uses it to determine the dates of Islamic holidays.  There is no
+@c universal agreement in the Islamic world about the calendar; Emacs uses
+@c a widely accepted version, but the precise dates of Islamic holidays
+@c often depend on proclamation by religious authorities, not on
+@c calculations.  As a consequence, the actual dates of observance can vary
+@c slightly from the dates computed by Emacs.  Islamic calendar dates begin
+@c and end at sunset.
+イスラム暦は多くのイスラム教の国々で使われています。
+Emacsはイスラム暦を用いてイスラム教の祝祭日を決定します。
+イスラムの世界ではカレンダーについての世界的な取り決めが存在しません。
+Emacsは広く受け入れられているものを使用していますが、
+イスラム教の祝祭日の正確な日付は、計算によってではなく
+宗教上の権威筋の布告によってしばしば決定されます。
+そのため、実際の日付とEmacsが計算した日付には少々違いがあります。
+イスラム暦の1日は日没から始まり日没で終ります。
+
+@c @cindex French Revolutionary calendar
+@cindex フランス革命暦
+@c   The French Revolutionary calendar was created by the Jacobins after the 1789
+@c revolution, to represent a more secular and nature-based view of the annual
+@c cycle, and to install a 10-day week in a rationalization measure similar to
+@c the metric system.  The French government officially abandoned this
+@c calendar at the end of 1805.
+フランス革命暦は、1789年の大革命以降にジャコバン党によって作成されました。
+より永続的で自然に準じて年周期を捉えることを目的に、
+度量衡に類似した合理的な尺度ということで1週間を10日にしています。
+フランス政府は、この暦を1805年の終りに公式に放棄しました。
+
+@c @cindex Mayan calendar
+@cindex マヤ暦
+@c   The Maya of Central America used three separate, overlapping calendar
+@c systems, the @emph{long count}, the @emph{tzolkin}, and the @emph{haab}.
+@c Emacs knows about all three of these calendars.  Experts dispute the
+@c exact correlation between the Mayan calendar and our calendar; Emacs uses the
+@c Goodman-Martinez-Thompson correlation in its calculations.
+中央アメリカのマヤでは、3種類の別だが重複している暦の体系、
+@emph{ロングカウント}（long count）、@emph{ゾルキン}（tzolkin）、
+@emph{ハアブ}（haab）を使っていました。
+Emacsはこれらの3つの暦をすべて知っています。
+専門家はマヤ暦とわれわれの暦が正確にはどのように関連しているか
+議論している最中です。
+Emacsは、グッドマン・マーチンス・トンプソンの関連付けを用いて計算します。
+
+@c @cindex Coptic calendar
+@c @cindex Ethiopic calendar
+@cindex コプト暦
+@cindex エチオピア暦
+@c   The Copts use a calendar based on the ancient Egyptian solar calendar.
+@c Their calendar consists of twelve 30-day months followed by an extra
+@c five-day period.  Once every fourth year they add a leap day to this
+@c extra period to make it six days.  The Ethiopic calendar is identical in
+@c structure, but has different year numbers and month names.
+コプト教徒は古代エジプト太陽暦に基づく暦を使っています。
+この暦は、おのおの30日からなる12個の月と、それに続く余分の5日間で構成されます。
+4年に一度、余分の5日間に閏日（1日間）を付け加えて6日間とします。
+エチオピア暦は構造的にはコプト暦と同一ですが、
+コプト暦とは異なった年数と月の名前を用いています。
+
+@c @cindex Persian calendar
+@cindex ペルシア暦
+@c   The Persians use a solar calendar based on a design of Omar Khayyam.
+@c Their calendar consists of twelve months of which the first six have 31
+@c days, the next five have 30 days, and the last has 29 in ordinary years
+@c and 30 in leap years.  Leap years occur in a complicated pattern every
+@c four or five years.
+ペルシア人はオマール・カイヤーム（Omar Khayyam）
+@footnote{【訳注】
+ペルシアの数学者・天文学者・詩人}が
+作った暦に基づいた太陽暦を使っています。
+この暦は、12個の月から成り、最初の6個の月は31日、
+つぎの5個の月は30日、最後の1個の月は平年は29日で閏年には30日となります。
+閏年は4年か5年に一度入る複雑なパターンで起こります。
+@c = 大木さんかASCIIのほうで、Khayyamはペルシア語で何にあたるか調べてもらえません
+@c = か？おそらく、商売の名前の筈で、ペルシアでは伝統的にそのように名前を
+@c = 付けている筈です。
+
+@c @cindex Chinese calendar
+@cindex 中国歴
+@c   The Chinese calendar is a complicated system of lunar months arranged
+@c into solar years.  The years go in cycles of sixty, each year containing
+@c either twelve months in an ordinary year or thirteen months in a leap
+@c year; each month has either 29 or 30 days.  Years, ordinary months, and
+@c days are named by combining one of ten ``celestial stems'' with one of
+@c twelve ``terrestrial branches'' for a total of sixty names that are
+@c repeated in a cycle of sixty.
+中国暦は、朔望月を太陽年に埋め込んだ複雑なものです。
+年は60を単位として一周し、平年は12個の月ですが、閏年は13個の月です。
+各月は29日か30日です。
+年、平月、日は、10の天の主節@footnote{【訳注】十干。
+五行（木、火、土、金、水）に兄、弟を付け加えた
+甲（きのえ）、乙（きのと）、丙（ひのえ）、
+丁（ひのと）、戊（つちのえ）、己（つちのと）、
+庚（かのえ）、辛（かのと）、壬（みずのえ）、癸（みずのと）からなる。}と
+12の地の副節@footnote{【訳注】十二支。
+子（ね）、丑（うし）、寅（とら）、卯（う）、辰（たつ）、巳（み）、
+午（うま）、未（ひつじ）、申（さる）、
+酉（とり）、戌（いぬ）、亥（い）からなる。}
+に従って名付けられ、
+60を周期として巡回します。
+@footnote{【訳注】
+甲子（きのえね）、乙丑、丙寅、…、癸亥（みずのとい）までの
+60通り（12と10の最小公倍数）になる。
+辛亥革命の辛亥、壬申の乱の壬申などは年を表している。}
+
+@node To Other Calendar
+@c @subsection Converting To Other Calendars
+@subsection 他の暦への変換
+
+@c   The following commands describe the selected date (the date at point)
+@c in various other calendar systems:
+以下のコマンドは選択した日（ポイントがある日）を他の暦で表示します。
+
+@table @kbd
+@item Mouse-2  Other Calendars
+@c Display the date that you click on, expressed in various other calendars.
+クリックした日が、他のさまざまな暦ではどうなるかを表示する。
+@c @kindex p @r{(Calendar mode)}
+@kindex p @r{（カレンダーモード）}
+@findex calendar-print-iso-date
+@item p c
+@c Display ISO commercial calendar equivalent for selected day
+@c (@code{calendar-print-iso-date}).
+選択した日をISO商用暦の日付で表示する
+（@code{calendar-print-iso-date}）。
+@findex calendar-print-julian-date
+@item p j
+@c Display Julian date for selected day (@code{calendar-print-julian-date}).
+選択した日をユリウス暦の日付で表示する
+（@code{calendar-print-julian-date}）。
+@findex calendar-print-astro-day-number
+@item p a
+@c Display astronomical (Julian) day number for selected day
+@c (@code{calendar-print-astro-day-number}).
+選択した日を天文通算日（ユリウス日）で表示する
+（@code{calendar-print-astro-day-number}）。
+@findex calendar-print-hebrew-date
+@item p h
+@c Display Hebrew date for selected day (@code{calendar-print-hebrew-date}).
+選択した日をヘブライ暦の日付で表示する
+（@code{calendar-print-hebrew-date}）。
+@findex calendar-print-islamic-date
+@item p i
+@c Display Islamic date for selected day (@code{calendar-print-islamic-date}).
+選択した日をイスラム暦の日付で表示する
+（@code{calendar-print-islamic-date}）。
+@findex calendar-print-french-date
+@item p f
+@c Display French Revolutionary date for selected day
+@c (@code{calendar-print-french-date}).
+選択した日をフランス革命暦の日付で表示する
+（@code{calendar-print-french-date}）。
+@findex calendar-print-chinese-date
+@item p C
+@c Display Chinese date for selected day
+@c (@code{calendar-print-chinese-date}).
+選択した日を中国暦の日付で表示する
+（@code{calendar-print-chinese-date}）。
+@findex calendar-print-coptic-date
+@item p k
+@c Display Coptic date for selected day
+@c (@code{calendar-print-coptic-date}).
+選択した日をコプト暦の日付で表示する
+（@code{calendar-print-coptic-date}）。
+@findex calendar-print-ethiopic-date
+@item p e
+@c Display Ethiopic date for selected day
+@c (@code{calendar-print-ethiopic-date}).
+選択した日をエチオピア暦の日付で表示する
+（@code{calendar-print-ethiopic-date}）。
+@findex calendar-print-persian-date
+@item p p
+@c Display Persian date for selected day
+@c (@code{calendar-print-persian-date}).
+選択した日をペルシア暦の日付で表示する
+（@code{calendar-print-persian-date}）。
+@findex calendar-print-mayan-date
+@item p m
+@c Display Mayan date for selected day (@code{calendar-print-mayan-date}).
+選択した日をマヤ暦の日付で表示する（@code{calendar-print-mayan-date}）。
+@end table
+
+@c   If you are using X, the easiest way to translate a date into other
+@c calendars is to click on it with @kbd{Mouse-2}, then choose @kbd{Other
+@c Calendars} from the menu that appears.  This displays the equivalent
+@c forms of the date in all the calendars Emacs understands, in the form of
+@c a menu.  (Choosing an alternative from this menu doesn't actually do
+@c anything---the menu is used only for display.)
+XウィンドウシステムでEmacsを使っている場合には、
+ある日付を他の暦での日付に変換する
+いちばん簡単な方法は、その日付を@kbd{Mouse-2}でクリックし、
+立ち上がったメニューから@kbd{Other Calendars}を選びます。
+対応する日付をEmacsが知っているすべての暦でメニューに表示します。
+（このメニューは単なる表示用なので、項目を選んでも何も起こらない。）
+
+@c   Put point on the desired date of the Gregorian calendar, then type the
+@c appropriate keys.  The @kbd{p} is a mnemonic for ``print'' since Emacs
+@c ``prints'' the equivalent date in the echo area.
+グレゴリオ暦の目的の日付にポイントを動かして適切なキーを打ちます。
+@kbd{p}はprintの意味で、
+Emacsはその日を指定された暦でエコー領域に表示します。
+
+@node From Other Calendar
+@c @subsection Converting From Other Calendars
+@subsection 他の暦からの変換
+
+@c   You can use the other supported calendars to specify a date to move
+@c to.  This section describes the commands for doing this using calendars
+@c other than Mayan; for the Mayan calendar, see the following section.
+Emacsが扱える暦で日付を指定して、カレンダーの対応する日に移動できます。
+本節では、マヤ暦を除く暦でこれを行うコマンドを説明します。
+マヤ暦については、これに続く節を参照してください。
+
+@c @kindex g @var{char} @r{(Calendar mode)}
+@kindex g @var{char} @r{（カレンダーモード）}
+@findex calendar-goto-iso-date
+@findex calendar-goto-julian-date
+@findex calendar-goto-astro-day-number
+@findex calendar-goto-hebrew-date
+@findex calendar-goto-islamic-date
+@findex calendar-goto-french-date
+@findex calendar-goto-chinese-date
+@findex calendar-goto-persian-date
+@findex calendar-goto-coptic-date
+@findex calendar-goto-ethiopic-date
+@table @kbd
+@item g c
+@c Move to a date specified in the ISO commercial calendar
+@c (@code{calendar-goto-iso-date}).
+ISO商用暦で指定した日付に移動する（@code{calendar-goto-iso-date}）。
+@item g j
+@c Move to a date specified in the Julian calendar
+@c (@code{calendar-goto-julian-date}).
+ユリウス暦で指定した日付に移動する（@code{calendar-goto-julian-date}）。
+@item g a
+@c Move to a date specified in astronomical (Julian) day number
+@c (@code{calendar-goto-astro-day-number}).
+天文通算日（ユリウス日）で指定した日付に移動する
+（@code{calendar-goto-astro-day-number}）。
+@item g h
+@c Move to a date specified in the Hebrew calendar
+@c (@code{calendar-goto-hebrew-date}).
+ヘブライ暦で指定した日付に移動する（@code{calendar-goto-hebrew-date}）。
+@item g i
+@c Move to a date specified in the Islamic calendar
+@c (@code{calendar-goto-islamic-date}).
+イスラム暦で指定した日付に移動する（@code{calendar-goto-islamic-date}）。
+@item g f
+@c Move to a date specified in the French Revolutionary calendar
+@c (@code{calendar-goto-french-date}).
+フランス革命暦で指定した日付に移動する（@code{calendar-goto-french-date}）。
+@item g C
+@c Move to a date specified in the Chinese calendar
+@c (@code{calendar-goto-chinese-date}).
+中国暦で指定した日付に移動する（@code{calendar-goto-chinese-date}）。
+@item g p
+@c Move to a date specified in the Persian calendar
+@c (@code{calendar-goto-persian-date}).
+ペルシア暦で指定した日付に移動する（@code{calendar-goto-persian-date}）。
+@item g k
+@c Move to a date specified in the Coptic calendar
+@c (@code{calendar-goto-coptic-date}).
+コプト暦で指定した日付に移動する（@code{calendar-goto-coptic-date}）。
+@item g e
+@c Move to a date specified in the Ethiopic calendar
+@c (@code{calendar-goto-ethiopic-date}).
+エチオピア暦で指定した日付に移動する（@code{calendar-goto-ethiopic-date}）。
+@end table
+
+@c   These commands ask you for a date on the other calendar, move point to
+@c the Gregorian calendar date equivalent to that date, and display the
+@c other calendar's date in the echo area.  Emacs uses strict completion
+@c (@pxref{Completion}) whenever it asks you to type a month name, so you
+@c don't have to worry about the spelling of Hebrew, Islamic, or French names.
+これらのコマンドは、それぞれの暦での日付を聞いてきて、
+それに対応するグレゴリオ暦の日付にポイントを移動します。
+また、エコー領域には指定した暦の日付を表示します。
+Emacsは月の名前をユーザーに聞くときに強い補完（@pxref{Completion}）
+を使うので、ヘブライ暦／イスラム暦／フランス革命暦などの月の名前の綴りを
+気にする必要はないでしょう。
+
+@findex list-yahrzeit-dates
+@c @cindex yahrzeits
+@cindex 追悼記念祭
+@c   One common question concerning the Hebrew calendar is the computation
+@c of the anniversary of a date of death, called a ``yahrzeit.''  The Emacs
+@c calendar includes a facility for such calculations.  If you are in the
+@c calendar, the command @kbd{M-x list-yahrzeit-dates} asks you for a
+@c range of years and then displays a list of the yahrzeit dates for those
+@c years for the date given by point.  If you are not in the calendar,
+@c this command first asks you for the date of death and the range of
+@c years, and then displays the list of yahrzeit dates.
+ヘブライ暦で問題となるのが追悼記念祭『ヤールツァイト』（yahrzeit）と
+呼ばれる命日の計算です。
+Emacsのカレンダーにはその計算機能があります。
+カレンダー内にカーソルがあるときに@kbd{M-x list-yahrzeit-dates}コマンドを
+実行すると年の範囲を聞いてきます。
+そして、ポイントがある日付に対応した追悼記念祭の日付を指定した範囲の年に
+ついて一覧表示します。
+カレンダー内にいないときにこのコマンドを使うと、
+まず死亡年月日を聞いてから年の範囲を聞いてきます。
+そして、追悼記念祭の日付の一覧を表示します。
+
+@node Mayan Calendar
+@c @subsection Converting from the Mayan Calendar
+@subsection マヤ暦からの変換
+
+@c   Here are the commands to select dates based on the Mayan calendar:
+以下はマヤ暦で日付を指定する方法です。
+
+@table @kbd
+@item g m l
+@c Move to a date specified by the long count calendar
+@c (@code{calendar-goto-mayan-long-count-date}).
+ロングカウント暦で指定した日付に移動する
+（@code{calendar-goto-mayan-long-count-date}）。
+@item g m n t
+@c Move to the next occurrence of a place in the
+@c tzolkin calendar (@code{calendar-next-tzolkin-date}).
+ゾルキン暦のつぎの周期の日に進む
+（@code{calendar-next-tzolkin-date}）。
+@item g m p t
+@c Move to the previous occurrence of a place in the
+@c tzolkin calendar (@code{calendar-previous-tzolkin-date}).
+ゾルキン暦のまえの周期の日に戻る
+（@code{calendar-previous-tzolkin-date}）。
+@item g m n h
+@c Move to the next occurrence of a place in the
+@c haab calendar (@code{calendar-next-haab-date}).
+ハアブ暦のつぎの周期の日に進む
+（@code{calendar-next-haab-date}）。
+@item g m p h
+@c Move to the previous occurrence of a place in the
+@c haab calendar (@code{calendar-previous-haab-date}).
+ハアブ暦のまえの周期の日に戻る
+（@code{calendar-previous-haab-date}）。
+@item g m n c
+@c Move to the next occurrence of a place in the
+@c calendar round (@code{calendar-next-calendar-round-date}).
+マヤのカレンダーラウンドのつぎの周期の日に進む
+（@code{calendar-next-calendar-round-date}）。
+@item g m p c
+@c Move to the previous occurrence of a place in the
+@c calendar round (@code{calendar-previous-calendar-round-date}).
+マヤのカレンダーラウンドのまえの周期の日に戻る
+（@code{calendar-previous-calendar-round-date}）。
+@end table
+
+@c @cindex Mayan long count
+@cindex マヤ暦ロングカウント
+@c   To understand these commands, you need to understand the Mayan calendars.
+@c The @dfn{long count} is a counting of days with these units:
+これらのコマンドを理解するには、
+マヤ暦を理解しておく必要があります。
+@dfn{ロングカウント}は以下の単位に基づいて日付を計算したものです。
+
+@display
+@c 1 kin = 1 day@ @ @ 1 uinal = 20 kin@ @ @ 1 tun = 18 uinal
+@c 1 katun = 20 tun@ @ @ 1 baktun = 20 katun
+1キン（kin） = 1日@ @ @ 1ユイナル（uinal） = 20キン
+1タン（tun） = 18ユイナル@ @ @ 1カタン（katun） = 20タン
+1バクタン（baktun） = 20カタン
+@end display
+
+@c @kindex g m @r{(Calendar mode)}
+@kindex g m @r{（カレンダーモード）}
+@findex calendar-goto-mayan-long-count-date
+@noindent
+@c Thus, the long count date 12.16.11.16.6 means 12 baktun, 16 katun, 11
+@c tun, 16 uinal, and 6 kin.  The Emacs calendar can handle Mayan long
+@c count dates as early as 7.17.18.13.1, but no earlier.  When you use the
+@c @kbd{g m l} command, type the Mayan long count date with the baktun,
+@c katun, tun, uinal, and kin separated by periods.
+したがって、ロングカウントの12.16.11.16.6は、
+12バクタン、16カタン、11タン、16ユイナル、6キンを表しています。
+Emacsのカレンダーはマヤ暦ロングカウント7.17.18.13.1
+@footnote{【訳注】この日は西暦1年1月1日で、
+Emacsのカレンダーは紀元前を扱えない。}
+まで遡ることができますが、
+それ以前は扱えません。
+@kbd{g m l}コマンドを使ってマヤ暦ロングカウントの日付を入力するときには、
+バクタン、カタン、タン、ユイナル、キンをピリオドで区切ってください。
+
+@findex calendar-previous-tzolkin-date
+@findex calendar-next-tzolkin-date
+@c @cindex Mayan tzolkin calendar
+@cindex マヤ暦ゾルキン
+@c   The Mayan tzolkin calendar is a cycle of 260 days formed by a pair of
+@c independent cycles of 13 and 20 days.  Since this cycle repeats
+@c endlessly, Emacs provides commands to move backward and forward to the
+@c previous or next point in the cycle.  Type @kbd{g m p t} to go to the
+@c previous tzolkin date; Emacs asks you for a tzolkin date and moves point
+@c to the previous occurrence of that date.  Similarly, type @kbd{g m n t}
+@c to go to the next occurrence of a tzolkin date.
+マヤ暦ゾルキンは、独立した13日と20日の周期からなる260日周期です。
+この周期が永遠に繰り返されるため、
+Emacsには、つぎの周期へ進んだりまえの周期へ戻るコマンドがあります。
+@kbd{g m p t}と打つと、ゾルキン暦のまえの周期の日に戻ります。
+このコマンドは、ゾルキン暦の日付を聞いてきて、
+その日付のまえの周期の日にポイントを戻します。
+同様に、@kbd{g m n t}は、ゾルキン暦のつぎの周期の日に進めます。
+
+@findex calendar-previous-haab-date
+@findex calendar-next-haab-date
+@c @cindex Mayan haab calendar
+@cindex マヤ暦ハアブ
+@c   The Mayan haab calendar is a cycle of 365 days arranged as 18 months
+@c of 20 days each, followed a 5-day monthless period.  Like the tzolkin
+@c cycle, this cycle repeats endlessly, and there are commands to move
+@c backward and forward to the previous or next point in the cycle.  Type
+@c @kbd{g m p h} to go to the previous haab date; Emacs asks you for a haab
+@c date and moves point to the previous occurrence of that date.
+@c Similarly, type @kbd{g m n h} to go to the next occurrence of a haab
+@c date.
+マヤ暦ハアブは365日の周期で、20日からなる18個の月と
+月に属さない5日間からなっています。
+ゾルキン暦の周期と同様に、この周期が永遠に繰り返されるため、
+Emacsにはつぎの周期の日へ進んだりまえの周期の日に戻るコマンドがあります。
+@kbd{g m p h}と打つと、ハアブ暦のまえの周期に日に戻ります。
+このコマンドは、ハアブ暦の日付を聞いてきて、
+その日付のまえの周期の日にポイントを戻します。
+同様に、@kbd{g m n h}は、ハアブ暦のつぎの周期の日に進めます。
+
+@c This is omitted because it is too long for smallbook format.
+@c @findex calendar-previous-calendar-round-date
+@findex calendar-next-calendar-round-date
+@c @cindex Mayan calendar round
+@cindex マヤ暦カレンダーラウンド
+@c   The Maya also used the combination of the tzolkin date and the haab
+@c date.  This combination is a cycle of about 52 years called a
+@c @emph{calendar round}.  If you type @kbd{g m p c}, Emacs asks you for
+@c both a haab and a tzolkin date and then moves point to the previous
+@c occurrence of that combination.  Use @kbd{g m n c} to move point to the
+@c next occurrence of a combination.  These commands signal an error if the
+@c haab/tzolkin date combination you have typed is impossible.
+マヤではゾルキン暦とハアブ暦を組み合わせた暦も使われていました。
+組み合わせの1周期は約52年で@emph{カレンダーラウンド}と呼ばれます。
+@kbd{g m p c}と打つと、
+Emacsはハアブ暦の日付とゾルキン暦の日付を聞いてきます。
+そして、まえの組み合わせ周期の日にポイントを戻します。
+つぎの組み合わせ周期の日にポイントを進めるには
+@kbd{g m n c}を使います。
+これらのコマンドは、指定したハアブ暦／ゾルキン暦の日付の組み合わせが不可能であると
+エラーを通知します。
+
+@c   Emacs uses strict completion (@pxref{Strict Completion}) whenever it
+@c asks you to type a Mayan name, so you don't have to worry about
+@c spelling.
+Emacsはマヤ暦の名前の入力では強い補完（@pxref{Strict Completion}）を
+使うので、綴りを気にする必要はありません。
+
+@node Diary
+@c @section The Diary
+@section 日誌
+@c @cindex diary
+@cindex 日誌
+
+@c   The Emacs diary keeps track of appointments or other events on a daily
+@c basis, in conjunction with the calendar.  To use the diary feature, you
+@c must first create a @dfn{diary file} containing a list of events and
+@c their dates.  Then Emacs can automatically pick out and display the
+@c events for today, for the immediate future, or for any specified
+@c date.
+Emacsの日誌機能は、カレンダーと連動して、
+1日を単位に約束やその他の予定を管理します。
+日誌機能を使うには、用事と日付を書き込んだ
+@dfn{日誌ファイル}（diary file）をまず作っておく必要があります。
+そうしておくと、Emacsは自動的にこのファイルを取り込んで、
+今日／数日先／指定した日付の予定を表示します。
+
+@c   By default, Emacs uses @file{~/diary} as the diary file.  This is the
+@c same file that the @code{calendar} utility uses.  A sample
+@c @file{~/diary} file is:
+デフォルトでは、Emacsは日誌ファイルとして@file{~/diary}を使います。
+これは@code{calendar}プログラムが使うファイルと同じです。
+以下に@file{~/diary}ファイルの例を示します。
+
+@example
+@c 12/22/1988  Twentieth wedding anniversary!!
+@c &1/1.       Happy New Year!
+@c 10/22       Ruth's birthday.
+@c * 21, *:    Payday
+@c Tuesday--weekly meeting with grad students at 10am
+@c          Supowit, Shen, Bitner, and Kapoor to attend.
+@c 1/13/89     Friday the thirteenth!!
+@c &thu 4pm    squash game with Lloyd.
+@c mar 16      Dad's birthday
+@c April 15, 1989 Income tax due.
+@c &* 15       time cards due.
+12/22/1988  20回目の結婚記念日！
+&1/1.       新年おめでとう！
+10/22       ルースの誕生日
+* 21, *:    給料日
+Tuesday  10時から院生たちと週間ミーティング
+         スポウイット、シェン、ビットナー、カポールと約束
+1/13/89     13日の金曜日！！
+&thu 4pm    ロイドとスカッシュをする
+mar 16      親父の誕生日
+April 15, 1989 所得税の納付期限
+&* 15       勤務表の提出期限
+@end example
+
+@noindent
+@c This example uses extra spaces to align the event descriptions of most
+@c of the entries.  Such formatting is purely a matter of taste.
+この例では、大部分の予定の項目に余分な空白を入れて整列してありますが、
+これは純粋に好みの問題です。 
+
+@c   Although you probably will start by creating a diary manually, Emacs
+@c provides a number of commands to let you view, add, and change diary
+@c entries.
+日誌を手で作成しようとしているかもしれませんが、
+Emacsには、日誌の項目を眺めたり、追加したり、変更したりする
+コマンドが数多くあります。
+
+@menu
+* Diary Commands::         Viewing diary entries and associated calendar dates.
+* Format of Diary File::   Entering events in your diary.
+* Date Formats::	   Various ways you can specify dates.
+* Adding to Diary::	   Commands to create diary entries.
+* Special Diary Entries::  Anniversaries, blocks of dates, cyclic entries, etc.
+@end menu
+
+@node Diary Commands
+@c @subsection Commands Displaying Diary Entries
+@subsection 日誌項目の表示コマンド
+
+@c   Once you have created a @file{~/diary} file, you can use the calendar
+@c to view it.  You can also view today's events outside of Calendar mode.
+いったん@file{~/diary}ファイルを作成しておけば、
+カレンダーを使ってこれを眺めることができます。
+また、カレンダー（calendar）モードの外からでも、
+今日の予定を参照できます。
+
+@table @kbd
+@item d
+@c Display all diary entries for the selected date
+@c (@code{view-diary-entries}).
+選択した日付のすべての日誌項目を表示する（@code{view-diary-entries}）。
+@item Mouse-2 Diary
+@c Display all diary entries for the date you click on.
+クリックした日付のすべての日誌項目を表示する。
+@item s
+@c Display the entire diary file (@code{show-all-diary-entries}).
+日誌ファイル全体を表示する（@code{show-all-diary-entries}）。
+@item m
+@c Mark all visible dates that have diary entries
+@c (@code{mark-diary-entries}).
+日誌項目が登録されているすべての日付に印を付ける
+（@code{mark-diary-entries}）。
+@item u
+@c Unmark the calendar window (@code{calendar-unmark}).
+カレンダーウィンドウの印を消す（@code{calendar-unmark}）。
+@item M-x print-diary-entries
+@c Print hard copy of the diary display as it appears.
+現在表示している日誌項目をそのまま印刷する。
+@item M-x diary
+@c Display all diary entries for today's date.
+今日の日付の日誌項目すべてを表示する。
+@item M-x diary-mail-entries
+@c Mail yourself email reminders about upcoming diary entries.
+これからの予定を自分自身にメイルする。
+@end table
+
+@c @kindex d @r{(Calendar mode)}
+@kindex d @r{（カレンダーモード）}
+@findex view-diary-entries
+@c   Displaying the diary entries with @kbd{d} shows in a separate window
+@c the diary entries for the selected date in the calendar.  The mode line
+@c of the new window shows the date of the diary entries and any holidays
+@c that fall on that date.  If you specify a numeric argument with @kbd{d},
+@c it shows all the diary entries for that many successive days.  Thus,
+@c @kbd{2 d} displays all the entries for the selected date and for the
+@c following day.
+@kbd{d}で日誌項目を表示すると、
+別のウィンドウに選択した日付の日誌項目が表示されます。
+新しいウィンドウのモード行には、
+日誌項目の日付とその日付の祝祭日情報が表示されます。
+@kbd{d}に数引数を指定すると、指定した日数の期間の日誌項目を表示します。
+したがって、@kbd{2 d}は、選択した日とそのつぎの日のすべての項目を表示します。
+
+@c   Another way to display the diary entries for a date is to click
+@c @kbd{Mouse-2} on the date, and then choose @kbd{Diary} from the menu
+@c that appears.
+ある日付の日誌項目を表示する別の方法として、
+日付を@kbd{Mouse-2}でクリックし、
+立ち上がったメニューから項目@kbd{Diary}を選ぶことです。
+
+@c @kindex m @r{(Calendar mode)}
+@kindex m @r{（カレンダーモード）}
+@findex mark-diary-entries
+@c   To get a broader view of which days are mentioned in the diary, use
+@c the @kbd{m} command.  This displays the dates that have diary entries
+@c in a different face (or places a @samp{+} after these dates, if
+@c display with multiple faces is not available).  The command applies both
+@c to the currently visible months and to other months that subsequently
+@c become visible by scrolling.  To turn marking off and erase the current
+@c marks, type @kbd{u}, which also turns off holiday marks
+@c (@pxref{Holidays}).
+日誌が記載されている日付を知るには@kbd{m}コマンドを使います。
+このコマンドは、日誌が記載されている日付を別のフェイスで
+（複数のフェイスを使えなければ、
+日付のあとに@samp{+}を付けて）表示します。
+このコマンドは、画面に見えている期間だけでなく、
+スクロールすると見えてくる期間にも適用されます。
+印を消してもとの状態に戻るには@kbd{u}コマンドを使いますが、
+祝祭日の印も同時に消えます。
+（@pxref{Holidays}）。
+
+@c @kindex s @r{(Calendar mode)}
+@kindex s @r{（カレンダーモード）}
+@findex show-all-diary-entries
+@c   To see the full diary file, rather than just some of the entries, use
+@c the @kbd{s} command.
+日誌ファイル内の数項目ではなく全体を見るには、
+@kbd{s}コマンドを使います。
+
+@c   Display of selected diary entries uses the selective display feature
+@c to hide entries that don't apply.
+選択した日誌項目だけを表示するには、
+選択表示機能を用いて他の項目を隠します。
+
+@c   The diary buffer as you see it is an illusion, so simply printing the
+@c buffer does not print what you see on your screen.  There is a special
+@c command to print hard copy of the diary buffer @emph{as it appears};
+@c this command is @kbd{M-x print-diary-entries}.  It sends the data
+@c directly to the printer.  You can customize it like @code{lpr-region}
+@c (@pxref{Hardcopy}).
+画面で見ている日誌用バッファは幻でしかありません。
+そのため、単純にバッファを印刷しても
+画面に表示されているようには印刷できません。
+画面に表示されている日誌項目を@emph{あるがまま}に印刷するには専用のコマンド
+@kbd{M-x print-diary-entries}を使う必要があります。
+このコマンドはデータをプリンタに直接送ります。
+@code{lpr-region}のようにカスタマイズできます
+（@pxref{Hardcopy}）。
+
+@findex diary
+@c   The command @kbd{M-x diary} displays the diary entries for the current
+@c date, independently of the calendar display, and optionally for the next
+@c few days as well; the variable @code{number-of-diary-entries} specifies
+@c how many days to include.  @xref{Calendar, Customizing the Calendar
+@c and Diary,, elisp, The Emacs Lisp Reference Manual}.
+コマンド@kbd{M-x diary}は、現在のカレンダー表示とは関係なしに、
+場合によっては数日後までを含めて今日の日誌を表示します。
+変数@code{number-of-diary-entries}には何日間まで含めるか指定します。
+@xref{Calendar,, カレンダーと日誌のカスタマイズ, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@c   If you put @code{(diary)} in your @file{.emacs} file, this
+@c automatically displays a window with the day's diary entries, when you
+@c enter Emacs.  The mode line of the displayed window shows the date and
+@c any holidays that fall on that date.
+個人の@file{.emacs}ファイルに@code{(diary)}と書けば、
+Emacsを実行すると自動的に当日の日誌項目をウィンドウに表示します。
+そのウィンドウのモード行には、日付と祝祭日情報が表示されます。
+
+@findex diary-mail-entries
+@vindex diary-mail-days
+@c   Many users like to receive notice of events in their diary as email.
+@c To send such mail to yourself, use the command @kbd{M-x
+@c diary-mail-entries}.  A prefix argument specifies how many days
+@c (starting with today) to check; otherwise, the variable
+@c @code{diary-mail-days} says how many days.
+多くのユーザーは、日誌に記載した予定を電子メイルで受け取ることを好みます。
+自分自身にそのようなメイルを送るには、
+コマンド@kbd{M-x diary-mail-entries}を使います。
+数引数で（今日から始めて）何日間を含めるか指定します。
+数引数を指定しなければ、変数@code{diary-mail-days}が日数を指定します。
+
+@node Format of Diary File
+@c @subsection The Diary File
+@subsection 日誌ファイル
+@c @cindex diary file
+@cindex 日誌ファイル
+
+@vindex diary-file
+@c   Your @dfn{diary file} is a file that records events associated with
+@c particular dates.  The name of the diary file is specified by the
+@c variable @code{diary-file}; @file{~/diary} is the default.  The
+@c @code{calendar} utility program supports a subset of the format allowed
+@c by the Emacs diary facilities, so you can use that utility to view the
+@c diary file, with reasonable results aside from the entries it cannot
+@c understand.
+個人の日誌ファイルは、用事と日付の対応付けを記録したファイルです。
+日誌ファイルの名前は、変数@code{diary-file}で指定します。
+デフォルトは@file{~/diary}です。
+@code{calendar}プログラムは、
+Emacsの日誌機能が扱う形式を部分的に扱えます。
+そのため、@code{calendar}プログラムでもそれなりに
+日誌ファイルを眺められますが、正しく解釈されない項目もあるでしょう。
+
+@c   Each entry in the diary file describes one event and consists of one
+@c or more lines.  An entry always begins with a date specification at the
+@c left margin.  The rest of the entry is simply text to describe the
+@c event.  If the entry has more than one line, then the lines after the
+@c first must begin with whitespace to indicate they continue a previous
+@c entry.  Lines that do not begin with valid dates and do not continue a
+@c preceding entry are ignored.
+日誌ファイルの各項目は、1つの用事を表し、1行以上の行から成ります。
+項目はつねに行頭の日付指定で始まります。
+項目の残りの部分は用事を説明する単なるテキストです。
+項目が1行に収まらないときには、後続行の行頭を白文字で始めて
+直前の項目の続きであることを示します。
+正しい日付指定で始まらない行や
+直前の項目の続きの行でないものは無視されます。
+
+@c   You can inhibit the marking of certain diary entries in the calendar
+@c window; to do this, insert an ampersand (@samp{&}) at the beginning of
+@c the entry, before the date.  This has no effect on display of the entry
+@c in the diary window; it affects only marks on dates in the calendar
+@c window.  Nonmarking entries are especially useful for generic entries
+@c that would otherwise mark many different dates.
+カレンダーのウィンドウ内で特定の日誌項目に印を付けないようにできます。
+それには、項目の日付指定のまえにアンパーサンド（@samp{&}）を付けます。
+これは、日誌ウィンドウに項目を表示するのには影響ありません。
+カレンダーウィンドウの日付の印だけに影響します。
+印付けを禁止した項目は一般的な項目としては便利で、
+こうしないと印が付いた日が多くなりすぎます。
+
+@c   If the first line of a diary entry consists only of the date or day
+@c name with no following blanks or punctuation, then the diary window
+@c display doesn't include that line; only the continuation lines appear.
+@c For example, this entry:
+項目の最初の行が日付指定や曜日だけの場合には、
+最初の行は日誌ウィンドウに表示されません。
+後続の行だけが表示されます。
+たとえば、つぎの項目は、日誌ウィンドウでは先頭に日付の行は表示されません。
+
+@example
+02/11/1989
+@c       Bill B. visits Princeton today
+@c       2pm Cognitive Studies Committee meeting
+@c       2:30-5:30 Liz at Lawrenceville
+@c       4:00pm Dentist appt
+@c       7:30pm Dinner at George's
+@c       8:00-10:00pm concert
+     本日B. ビルがプリンストンに来る
+     2pm 認知研究委員会の会合
+     2:30-5:30 ローレンスビルにリズ
+     4:00pm 歯医者予約
+     7:30pm ジョージの所で夕食
+     8:00-10:00pm コンサート
+@end example
+
+@noindent
+@c appears in the diary window without the date line at the beginning.
+@c This style of entry looks neater when you display just a single day's
+@c entries, but can cause confusion if you ask for more than one day's
+@c entries.
+この流儀だと1日分の予定を表示する限りはきちんと見えるのですが、
+2日分以上の場合には混乱しかねません。
+
+@c   You can edit the diary entries as they appear in the window, but it is
+@c important to remember that the buffer displayed contains the @emph{entire}
+@c diary file, with portions of it concealed from view.  This means, for
+@c instance, that the @kbd{C-f} (@code{forward-char}) command can put point
+@c at what appears to be the end of the line, but what is in reality the
+@c middle of some concealed line.
+ウィンドウに表示された日誌項目は編集できますが、
+表示されたバッファには日誌ファイル@emph{全体}が含まれていて、
+ある部分が隠されいるのだということを忘れてはなりません。
+たとえば、@kbd{C-f}（@code{forward-char}）コマンドで
+表示上の行末にポイントを置けますが、
+実際には隠された行の途中にいるのかもしれません。
+
+@c   @emph{Be careful when editing the diary entries!}  Inserting
+@c additional lines or adding/deleting characters in the middle of a
+@c visible line cannot cause problems, but editing at the end of a line may
+@c not do what you expect.  Deleting a line may delete other invisible
+@c entries that follow it.  Before editing the diary, it is best to display
+@c the entire file with @kbd{s} (@code{show-all-diary-entries}).
+@emph{日誌項目を編集するときには注意してください！}@code{ }
+項目に余分な行を追加したり見えている行の途中に文字を追加／削除しても
+問題は生じませんが、行末で編集すると予期しないことが起こる可能性があります。
+行を削除すると今は見えていない後続の他の項目を
+削除してしまうかもしれません。
+日誌を編集するまえには、@kbd{s}（@code{show-all-diary-entries}）で
+ファイル全体を表示させるのが最良です。
+
+@node Date Formats
+@c @subsection Date Formats
+@subsection 日付指定の形式
+
+@c   Here are some sample diary entries, illustrating different ways of
+@c formatting a date.  The examples all show dates in American order
+@c (month, day, year), but Calendar mode supports European order (day,
+@c month, year) as an option.
+以下は日誌項目の例で、
+使用可能ないくつかの日付指定形式を示しています。
+この例では日付をアメリカ形式（月、日、年）で指定していますが、
+カレンダー（calendar）モードではオプションで
+ヨーロッパ形式（日、月、年）も使用できます。
+
+@example
+@c 4/20/93  Switch-over to new tabulation system
+@c apr. 25  Start tabulating annual results
+@c 4/30  Results for April are due
+@c */25  Monthly cycle finishes
+@c Friday  Don't leave without backing up files
+4/20/93  新しい計算システムへ切換
+apr. 25  年ごとの計算開始 
+4/30     4月分の処理完了〆切
+*/25     月ごとのサイクル完了
+Friday   ファイルのバックアップを忘れないこと
+@end example
+
+@c   The first entry appears only once, on April 20, 1993.  The second and
+@c third appear every year on the specified dates, and the fourth uses a
+@c wildcard (asterisk) for the month, so it appears on the 25th of every
+@c month.  The final entry appears every week on Friday.
+最初の項目は1993年4月20日に一度だけ表示されます。
+2番目と3番目は毎年指定した日付に表示され、
+4番目は月の指定にワイルドカード（アスタリスク、@code{*}）を使っているため、
+毎月25日に表示されます。
+最後の項目は毎週金曜日に表示されます。
+
+@c   You can use just numbers to express a date, as in
+@c @samp{@var{month}/@var{day}} or @samp{@var{month}/@var{day}/@var{year}}.
+@c This must be followed by a nondigit.  In the date itself, @var{month}
+@c and @var{day} are numbers of one or two digits.  The optional @var{year}
+@c is also a number, and may be abbreviated to the last two digits; that
+@c is, you can use @samp{11/12/1989} or @samp{11/12/89}.
+日付には、@samp{@var{month}/@var{day}}や
+@samp{@var{month}/@var{day}/@var{year}}のように数字だけを使ってもかまいません。
+この場合、あとに続く文字は数字であってはいけません。
+日付自体の@var{month}（月）と@var{day}（日）は1桁か2桁の数字です。
+@var{year}（年）は省いてもかまいませんが、これも数字で、
+最後の2桁だけに省略してもかまいません。
+つまり、@samp{11/12/1989}と書いても@samp{11/12/89}と書いても同じです。
+
+@c   Dates can also have the form @samp{@var{monthname} @var{day}} or
+@c @samp{@var{monthname} @var{day}, @var{year}}, where the month's name can
+@c be spelled in full or abbreviated to three characters (with or without a
+@c period).  Case is not significant.
+日付を、@samp{@var{monthname} @var{day}}や
+@samp{@var{monthname} @var{day}, @var{year}}と書くこともできます。
+ここで、@var{monthname}は英語の月の名前で
+3文字の省略形（ピリオドがあってもなくてもよい）でもかまいません。
+大文字小文字は区別しません。
+
+@c   A date may be @dfn{generic}; that is, partially unspecified.  Then the
+@c entry applies to all dates that match the specification.  If the date
+@c does not contain a year, it is generic and applies to any year.
+@c Alternatively, @var{month}, @var{day}, or @var{year} can be a @samp{*};
+@c this matches any month, day, or year, respectively.  Thus, a diary entry
+@c @samp{3/*/*} matches any day in March of any year; so does @samp{march
+@c *}.
+日付の指定は@dfn{総称的}であってもかまいません。
+つまり、特定しない部分があってもかまいません。
+そうすると、その指定に一致するすべての日付にその項目が適用されます。
+年を指定しなければ、それは総称的であり、その項目は毎年に適用されます。
+あるいは、@var{month}、@var{day}、@var{year}のそれぞれに
+@samp{*}を指定できます。
+これは、それぞれ、任意の月、任意の日、任意の年に一致します。
+したがって、@samp{3/*/*}という日誌項目は、
+任意の年の3月のどの日にも一致します。
+@samp{march *}も同じことです。
+
+@vindex european-calendar-style
+@findex european-calendar
+@findex american-calendar
+@c   If you prefer the European style of writing dates---in which the day
+@c comes before the month---type @kbd{M-x european-calendar} while in the
+@c calendar, or set the variable @code{european-calendar-style} to @code{t}
+@c @emph{before} using any calendar or diary command.  This mode interprets
+@c all dates in the diary in the European manner, and also uses European
+@c style for displaying diary dates.  (Note that there is no comma after
+@c the @var{monthname} in the European style.)  To go back to the (default)
+@c American style of writing dates, type @kbd{M-x american-calendar}.
+もし、月のまえに日を書くヨーロッパ形式で日付を指定したいときには、
+カレンダー中で@kbd{M-x european-calendar}と打ちます。
+あるいは、カレンダー／日誌コマンドを使う@emph{まえ}に
+変数@code{european-calendar-style}に@code{t}を設定します。
+この状態では、日誌の中のすべての日付指定をヨーロッパ形式で解釈します。
+また、日誌の日付を表示するときもヨーロッパ形式です。
+（ヨーロッパ形式では、@var{monthname}のあとにはコンマは付けない。）
+（デフォルトの）アメリカ形式の日付に戻るには、
+@kbd{M-x american-calendar}と打ちます。
+
+@c   You can use the name of a day of the week as a generic date which
+@c applies to any date falling on that day of the week.  You can abbreviate
+@c the day of the week to three letters (with or without a period) or spell
+@c it in full; case is not significant.
+ある曜日を指定する総称的な日付として曜日の名前を使えます。
+曜日の名前は英語で綴り、3文字の省略形
+（ピリオドがあってもなくてもよい）でもかまいません。
+大文字小文字は問いません。
+
+@node Adding to Diary
+@c @subsection Commands to Add to the Diary
+@subsection 日誌への追加コマンド
+
+@c   While in the calendar, there are several commands to create diary
+@c entries:
+カレンダー（calendar）モードの中には、
+日誌の項目を作成するコマンドがいくつかあります。
+
+@table @kbd
+@item i d
+@c Add a diary entry for the selected date (@code{insert-diary-entry}).
+選択した日に日誌項目を追加する（@code{insert-diary-entry}）。
+@item i w
+@c Add a diary entry for the selected day of the week (@code{insert-weekly-diary-entry}).
+選択した曜日に日誌項目を追加する（@code{insert-weekly-diary-entry}）。
+@item i m
+@c Add a diary entry for the selected day of the month (@code{insert-monthly-diary-entry}).
+選択した月の日に日誌項目を追加する（@code{insert-monthly-diary-entry}）。
+@item i y
+@c Add a diary entry for the selected day of the year (@code{insert-yearly-diary-entry}).
+選択した年の日に日誌項目を追加する（@code{insert-yearly-diary-entry}）。
+@end table
+
+@c @kindex i d @r{(Calendar mode)}
+@kindex i d @r{（カレンダーモード）}
+@findex insert-diary-entry
+@c   You can make a diary entry for a specific date by selecting that date
+@c in the calendar window and typing the @kbd{i d} command.  This command
+@c displays the end of your diary file in another window and inserts the
+@c date; you can then type the rest of the diary entry.
+カレンダーウィンドウ内で日を選択して@kbd{i d}コマンドを打てば、
+選択した日に日誌項目を作成できます。
+このコマンドは、別のウィンドウに日誌ファイルの末尾を表示し、
+日付を挿入します。
+そうしたら、日誌項目の残りの部分を打ち込みます。
+
+@c @kindex i w @r{(Calendar mode)}
+@kindex i w @r{（カレンダーモード）}
+@findex insert-weekly-diary-entry
+@c @kindex i m @r{(Calendar mode)}
+@kindex i m @r{（カレンダーモード）}
+@findex insert-monthly-diary-entry
+@c @kindex i y @r{(Calendar mode)}
+@kindex i y @r{（カレンダーモード）}
+@findex insert-yearly-diary-entry
+@c   If you want to make a diary entry that applies to a specific day of
+@c the week, select that day of the week (any occurrence will do) and type
+@c @kbd{i w}.  This inserts the day-of-week as a generic date; you can then
+@c type the rest of the diary entry.  You can make a monthly diary entry in
+@c the same fashion.  Select the day of the month, use the @kbd{i m}
+@c command, and type rest of the entry.  Similarly, you can insert a yearly
+@c diary entry with the @kbd{i y} command.
+特定の曜日に日誌項目を作成したい場合には、
+その曜日を選択して（どの場所でもよい）@kbd{i w}と打ちます。
+これで、総称的な日付として曜日名が挿入されます。
+そうしたら、日誌項目の残りの部分を打ち込みます。
+同様にして、月の特定の日を選択してから@kbd{i m}コマンドを打って、
+項目の残りの部分を打ち込みます。
+同じように、@kbd{i y}コマンドで、
+毎年の特定の日に項目を挿入できます。
+
+@c   All of the above commands make marking diary entries by default.  To
+@c make a nonmarking diary entry, give a numeric argument to the command.
+@c For example, @kbd{C-u i w} makes a nonmarking weekly diary entry.
+これらのコマンドはすべて、デフォルトでは印付けされる項目を作成します。
+印付け禁止の項目を作成するには、コマンドに数引数を指定します。
+たとえば、@kbd{C-u i w}は毎週の印付け禁止項目を作ります。
+
+@c   When you modify the diary file, be sure to save the file before
+@c exiting Emacs.
+日誌ファイルを修正したときには、
+Emacsを終了するまえにファイルを必ず保存してください。
+
+@node Special Diary Entries
+@c @subsection Special Diary Entries
+@subsection 特別な日誌項目
+
+@c   In addition to entries based on calendar dates, the diary file can
+@c contain @dfn{sexp entries} for regular events such as anniversaries.
+@c These entries are based on Lisp expressions (sexps) that Emacs evaluates
+@c as it scans the diary file.  Instead of a date, a sexp entry contains
+@c @samp{%%} followed by a Lisp expression which must begin and end with
+@c parentheses.  The Lisp expression determines which dates the entry
+@c applies to.
+カレンダーの日付に基づいて項目を追加する以外に、
+毎年の記念日などを表す@dfn{S式項目}（sexp entries）を
+日誌ファイルに入れることができます。
+これらの項目は、Emacsが日誌ファイルを読み込むときに
+Lisp式（S式、sexp）を評価することに基づいています。
+S式項目では日付のかわりに、@samp{%%}に続けて括弧で括ったLisp式があります。
+Lisp式が項目を適用する日付を決定します。
+
+@c   Calendar mode provides commands to insert certain commonly used
+@c sexp entries:
+カレンダー（calendar）モードには、
+よく使われるS式項目を追加するコマンドがあります。
+
+@table @kbd
+@item i a
+@c Add an anniversary diary entry for the selected date
+@c (@code{insert-anniversary-diary-entry}).
+指定した日付の毎年の記念日の日誌項目を追加する
+（@code{insert-anniversary-diary-entry}）。
+@item i b
+@c Add a block diary entry for the current region
+@c (@code{insert-block-diary-entry}).
+カレントリージョンに対してブロック日誌項目を追加する
+（@code{insert-block-diary-entry}）。
+@item i c
+@c Add a cyclic diary entry starting at the date
+@c (@code{insert-cyclic-diary-entry}).
+指定した日から始まる定期的に巡ってくる日誌項目を追加する
+（@code{insert-cyclic-diary-entry}）。
+@end table
+
+@c @kindex i a @r{(Calendar mode)}
+@kindex i a @r{（カレンダーモード）}
+@findex insert-anniversary-diary-entry
+@c   If you want to make a diary entry that applies to the anniversary of a
+@c specific date, move point to that date and use the @kbd{i a} command.
+@c This displays the end of your diary file in another window and inserts
+@c the anniversary description; you can then type the rest of the diary
+@c entry.  The entry looks like this:
+ある特定の日を毎年の記念日に指定したい場合には、
+その日付にポイントを移動してから@kbd{i a}コマンドを使います。
+このコマンドは、別のウィンドウに日誌ファイルの末尾を表示し、
+記念日を指定するS式を挿入します。
+そうしたら、日誌項目の残りの部分を打ち込みます。
+以下はその例です。
+
+@findex diary-anniversary
+@example
+@c %%(diary-anniversary 10 31 1948) Arthur's birthday
+%%(diary-anniversary 10 31 1948) アーサーの誕生日
+@end example
+
+@noindent
+@c This entry applies to October 31 in any year after 1948; @samp{10 31
+@c 1948} specifies the date.  (If you are using the European calendar
+@c style, the month and day are interchanged.)  The reason this expression
+@c requires a beginning year is that advanced diary functions can use it to
+@c calculate the number of elapsed years.
+この項目は、1948年以降の毎年10月31日に適用されます。
+@samp{10 31 1948}は日付を指定します。
+（ヨーロッパ形式の日付を使っている場合には、
+@samp{31}と@samp{10}が入れ替わる。）
+この式に開始年が必要なのは、日誌関数で経過年数の計算に使うからです。
+
+@c   A @dfn{block} diary entry applies to a specified range of consecutive
+@c dates.  Here is a block diary entry that applies to all dates from June
+@c 24, 1990 through July 10, 1990:
+@dfn{ブロック}日誌項目は、指定した期間に適用されます。
+以下は、1990年6月24日から1990年7月10日までに適用される
+ブロック日誌項目の例です。
+
+@findex diary-block
+@example
+@c %%(diary-block 6 24 1990 7 10 1990) Vacation
+%%(diary-block 6 24 1990 7 10 1990) 休暇
+@end example
+
+@noindent
+@c The @samp{6 24 1990} indicates the starting date and the @samp{7 10 1990}
+@c indicates the stopping date.  (Again, if you are using the European calendar
+@c style, the month and day are interchanged.)
+@samp{6 24 1990}は開始日付を表し、@samp{7 10 1990}は終了日付を表します。
+（ヨーロッパ形式を使っている場合は、月と日が入れ替わる。）
+
+@c @kindex i b @r{(Calendar mode)}
+@kindex i b @r{（カレンダーモード）}
+@findex insert-block-diary-entry
+@c   To insert a block entry, place point and the mark on the two
+@c dates that begin and end the range, and type @kbd{i b}.  This command
+@c displays the end of your diary file in another window and inserts the
+@c block description; you can then type the diary entry.
+ブロック項目を追加するには、
+ポイントとマークを期間の開始日付と終了日付に設定してから
+@kbd{i b}と打ちます。
+このコマンドは、日誌ファイルの末尾を別のウィンドウに表示して、
+ブロック項目指定を追加します。
+そうしたら、日誌項目の残りの部分を打ち込みます。
+
+@c @kindex i c @r{(Calendar mode)}
+@kindex i c @r{（カレンダーモード）}
+@findex insert-cyclic-diary-entry
+@c    @dfn{Cyclic} diary entries repeat after a fixed interval of days.  To
+@c create one, select the starting date and use the @kbd{i c} command.  The
+@c command prompts for the length of interval, then inserts the entry,
+@c which looks like this:
+@dfn{周期的}な日誌項目は、一定間隔で繰り返します。
+これを作るには、開始日を選択して@kbd{i c}コマンドを使います。
+このコマンドは、間隔を聞いてきます。
+そうしたら、項目を挿入します。
+以下のようになります。
+
+@findex diary-cyclic
+@example
+@c %%(diary-cyclic 50 3 1 1990) Renew medication
+%%(diary-cyclic 50 3 1 1990) つぎの投薬
+@end example
+
+@noindent
+@c This entry applies to March 1, 1990 and every 50th day following;
+@c @samp{3 1 1990} specifies the starting date.  (If you are using the
+@c European calendar style, the month and day are interchanged.)
+この項目は1990年3月1日から始まり、50日ごとに適用されます。
+@samp{3 1 1990}はこの開始日を指定しています
+（ヨーロッパ形式を使っている場合は、月と日が入れ替わる。）
+
+@c   All three of these commands make marking diary entries.  To insert a
+@c nonmarking entry, give a numeric argument to the command.  For example,
+@c @kbd{C-u i a} makes a nonmarking anniversary diary entry.
+これら3つのコマンドはいずれも印付けされる項目を作成します。
+印付け禁止項目を挿入する場合には、コマンドに数引数を指定します。
+たとえば、@kbd{C-u i a}は、印付け禁止の記念日の項目を作ります。
+
+@c   Marking sexp diary entries in the calendar is @emph{extremely}
+@c time-consuming, since every date visible in the calendar window must be
+@c individually checked.  So it's a good idea to make sexp diary entries
+@c nonmarking (with @samp{&}) when possible.
+日誌のS式項目をカレンダーに印付けするのは@emph{非常に}時間がかかります。
+なぜなら、カレンダーのウィンドウに見えているすべての日付について
+1つ1つ調べる必要があるからです。
+したがって、S式項目を登録する際にはできる限り（@samp{&}を付けて）
+印付け禁止の日誌項目にするのがよいでしょう。
+
+@c   Another sophisticated kind of sexp entry, a @dfn{floating} diary entry,
+@c specifies a regularly occurring event by offsets specified in days,
+@c weeks, and months.  It is comparable to a crontab entry interpreted by
+@c the @code{cron} utility.  Here is a nonmarking, floating diary entry
+@c that applies to the last Thursday in November:
+S式項目の別の利用方法には、@dfn{流動型}日誌項目があります。
+これは毎年定期に起きることがらを日数や週数や月数のオフセットで表したものです。
+これは@code{cron}プログラムが解釈するcrontabの項目と互換性があります。
+以下は、毎年11月の最終木曜日に印付け禁止の流動型日誌項目を指定する例です。
+
+@findex diary-float
+@example
+@c &%%(diary-float 11 4 -1) American Thanksgiving
+&%%(diary-float 11 4 -1) アメリカの感謝祭
+@end example
+
+@noindent
+@c The 11 specifies November (the eleventh month), the 4 specifies Thursday
+@c (the fourth day of the week, where Sunday is numbered zero), and the
+@c @minus{}1 specifies ``last'' (1 would mean ``first,'' 2 would mean
+@c ``second,'' @minus{}2 would mean ``second-to-last,'' and so on).  The
+@c month can be a single month or a list of months.  Thus you could change
+@c the 11 above to @samp{'(1 2 3)} and have the entry apply to the last
+@c Thursday of January, February, and March.  If the month is @code{t}, the
+@c entry applies to all months of the year.@refill
+この11は11月を表し、4は木曜（日曜を0として週の4番目の日）を表します。
+@minus{}1は『最後』を表します
+（1は『最初』、2は『2番目『、@minus{}2は『最後の1つまえ』などなど）。
+月の指定は1個の月でも月のリストでもかまいません。
+たとえば、上の11を@samp{'(1 2 3)}に変更すると、
+1月、2月、3月の最終木曜日に適用する項目になります。
+月の指定が@code{t}ならば、すべての月に適用されます。
+
+@c   Most generally, sexp diary entries can perform arbitrary
+@c computations to determine when they apply.  @xref{Sexp Diary Entries,,
+@c Sexp Diary Entries, elisp, The Emacs Lisp Reference Manual}.
+もっとも一般的には、
+日誌のS式項目は適用する日付を決定するために、どんな計算でもできます。
+@xref{Sexp Diary Entries,, S式項目と装飾日誌表示, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@node Appointments
+@c @section Appointments
+@section 約束
+@c @cindex appointment notification
+@cindex 約束の通知
+
+@c   If you have a diary entry for an appointment, and that diary entry
+@c begins with a recognizable time of day, Emacs can warn you, several
+@c minutes beforehand, that that appointment is pending.  Emacs alerts you
+@c to the appointment by displaying a message in the mode line.
+日誌項目に約束が入っていて、
+Emacsが認識可能な形で時刻が指定されている場合には、
+その予定の何分かまえに「約束がありますよ。」と警告を出す機能があります。
+Emacsはモード行に約束がある旨の警告メッセージを表示します。
+
+@vindex diary-hook
+@findex appt-make-list
+@c   To enable appointment notification, you must enable the time display
+@c feature of Emacs, @kbd{M-x display-time} (@pxref{Mode Line}).  You must
+@c also add the function @code{appt-make-list} to the
+@c @code{diary-hook}, like this:
+約束の警告表示を行わせるには、
+まずEmacsの時刻表示機能をオンにする必要があります。
+@kbd{M-x display-time}（@pxref{Mode Line}）と打ちます。
+さらに、関数@code{appt-make-list}を以下のようにして
+@code{diary-hook}に追加する必要があります。
+
+@example
+(add-hook 'diary-hook 'appt-make-list)
+@end example
+
+@noindent
+@c Adding this text to your @file{.emacs} file does the whole job:
+個人の@file{.emacs}ファイルに以下のテキストを追加すれば、
+これまでのことを行えます。
+
+@example
+(display-time)
+(add-hook 'diary-hook 'appt-make-list)
+(diary 0)
+@end example
+
+@c   With these preparations done, when you display the diary (either with
+@c the @kbd{d} command in the calendar window or with the @kbd{M-x diary}
+@c command), it sets up an appointment list of all the diary entries found
+@c with recognizable times of day, and reminds you just before each of
+@c them.
+このように準備しておくと、（カレンダーのウィンドウで@kbd{d}コマンドを使うか、
+@kbd{M-x diary}コマンドを使うかして）
+日誌を表示したときに、Emacsが認識できる時刻指定のある約束をすべて取り込み、
+それらのおのおのについて指定された時刻よりも少しまえに警告を表示します。
+
+@c   For example, suppose the diary file contains these lines:
+たとえば、日誌ファイルに以下のような項目があるとします。
+
+@example
+Monday
+@c   9:30am Coffee break
+@c  12:00pm Lunch        
+  9:30am 休憩
+ 12:00pm 昼食
+@end example
+
+@noindent
+@c Then on Mondays, after you have displayed the diary, you will be
+@c reminded at 9:20am about your coffee break and at 11:50am about lunch.
+すると、毎週月曜には、日誌を表示していると午前9時20分に
+もうすぐ休憩だと表示を出し、午前11時50分には昼食時間だと表示を出します。
+
+@c   You can write times in am/pm style (with @samp{12:00am} standing
+@c for midnight and @samp{12:00pm} standing for noon), or 24-hour
+@c European/military style.  You need not be consistent; your diary file
+@c can have a mixture of the two styles.
+時刻指定は、@samp{9:00am}のようにam/pmスタイルでも
+（@samp{12:00am}は夜中の12時、@samp{12:00pm}はお昼の12時を表す）、
+ヨーロッパや軍隊流の24時間制でもかまいません。
+また、一貫している必要もなく、
+日誌ファイルにこれらが混在していてもかまいません。
+
+@vindex appt-display-diary
+@c   Emacs updates the appointments list automatically just after
+@c midnight.  This also displays the next day's diary entries in the diary
+@c buffer, unless you set @code{appt-display-diary} to @code{nil}.
+Emacsはこれらの約束リストを夜中の12時過ぎに更新します。
+変数@code{appt-display-diary}に@code{nil}を設定していない限り、
+日誌用バッファにつぎの日の予定を表示します。
+
+@findex appt-add
+@findex appt-delete
+@c @cindex alarm clock
+@cindex 目覚し時計
+@c   You can also use the appointment notification facility like an alarm
+@c clock.  The command @kbd{M-x appt-add} adds entries to the appointment
+@c list without affecting your diary file.  You delete entries from the
+@c appointment list with @kbd{M-x appt-delete}.
+約束の警告表示を目覚し時計として利用することもできます。
+コマンド@kbd{M-x appt-add}は、個人の日誌ファイルを変更せずに
+約束リストに項目を追加します。
+@kbd{M-x appt-delete}は、約束リストから項目を削除します。
+
+@vindex appt-issue-message
+@c   You can turn off the appointment notification feature at any time by
+@c setting @code{appt-issue-message} to @code{nil}.
+変数@code{appt-issue-message}に@code{nil}を設定すれば、
+約束の警告表示はいつでもオフにできます。
+
+@node Daylight Savings
+@c @section Daylight Savings Time
+@section 夏時間
+@c @cindex daylight savings time
+@cindex 夏時間
+
+@c   Emacs understands the difference between standard time and daylight
+@c savings time---the times given for sunrise, sunset, solstices,
+@c equinoxes, and the phases of the moon take that into account.  The rules
+@c for daylight savings time vary from place to place and have also varied
+@c historically from year to year.  To do the job properly, Emacs needs to
+@c know which rules to use.
+Emacsは標準時と夏時間の違いを理解していて、
+日出入、夏至、冬至、春分、秋分、朔弦望の時刻ではこれを補正しています。
+夏時間の規則は、地域によっても、また、歴史的にもさまざまです。
+補正を正しく行うには、使用する規則をEmacsに与えておく必要があります。
+
+@vindex calendar-daylight-savings-starts
+@vindex calendar-daylight-savings-ends
+@c   Some operating systems keep track of the rules that apply to the place
+@c where you are; on these systems, Emacs gets the information it needs
+@c from the system automatically.  If some or all of this information is
+@c missing, Emacs fills in the gaps with the rules currently used in
+@c Cambridge, Massachusetts.  If the resulting rules are not what you want,
+@c you can tell Emacs the rules to use by setting certain variables:
+@c @code{calendar-daylight-savings-starts} and
+@c @code{calendar-daylight-savings-ends}.
+オペレーティングシステムのなかには、
+その設置場所で適用する規則を記録しているものもあります。
+このようなシステムでは、Emacsは自動的に必要な情報をシステムから取得します。
+情報の一部や全部が欠けている場合には、現在マサチューセッツ州ケンブリッジで
+使われている規則でEmacsは欠落部分を補おうとします。
+その結果が正しくないならば、
+変数@code{calendar-daylight-savings-starts}と
+@code{calendar-daylight-savings-ends}を設定し、
+規則をEmacsに与える必要があります。
+
+@c   These values should be Lisp expressions that refer to the variable
+@c @code{year}, and evaluate to the Gregorian date on which daylight
+@c savings time starts or (respectively) ends, in the form of a list
+@c @code{(@var{month} @var{day} @var{year})}.  The values should be
+@c @code{nil} if your area does not use daylight savings time.
+これらの変数の値は、変数@code{year}を参照するLisp式である必要があり、
+評価すると、グレゴリオ暦での夏時間の開始日や終了日を表す
+@code{(@var{month} @var{day} @var{year})}という形のリストになる必要があります。
+在住地方で夏時間を採用していない場合には、
+これらの値は@code{nil}にしておきます。
+
+@c   Emacs uses these expressions to determine the starting date of
+@c daylight savings time for the holiday list and for correcting times of
+@c day in the solar and lunar calculations.
+Emacsはこれらの式を用いて夏時間の開始日を決定し、
+祝祭日一覧や太陽や月に関する計算の時刻補正に使います。
+
+@c   The values for Cambridge, Massachusetts are as follows:
+マサチューセッツ州ケンブリッジの値は以下のとおりです。
+
+@example
+(calendar-nth-named-day 1 0 4 year)
+(calendar-nth-named-day -1 0 10 year)
+@end example
+
+@noindent
+@c That is, the first 0th day (Sunday) of the fourth month (April) in
+@c the year specified by @code{year}, and the last Sunday of the tenth month
+@c (October) of that year.  If daylight savings time were
+@c changed to start on October 1, you would set
+@c @code{calendar-daylight-savings-starts} to this:
+@code{year}で指定される年の4月の最初の日曜日（0番目）から始まり、
+その年の10月の最後の月曜まで続くことを表します。
+夏時間の開始日が10月1日に変更されたならば、
+変数@code{calendar-daylight-savings-starts}には以下のように設定します。
+
+@example
+(list 10 1 year)
+@end example
+
+@c   If there is no daylight savings time at your location, or if you want
+@c all times in standard time, set @code{calendar-daylight-savings-starts}
+@c and @code{calendar-daylight-savings-ends} to @code{nil}.
+読者の地方で夏時間を採用していなかったり、
+すべての時刻を標準時で扱いたい場合には、
+変数@code{calendar-daylight-savings-starts}と
+変数@code{calendar-daylight-savings-ends}には@code{nil}を設定してください。
+
+@vindex calendar-daylight-time-offset
+@c   The variable @code{calendar-daylight-time-offset} specifies the
+@c difference between daylight savings time and standard time, measured in
+@c minutes.  The value for Cambridge, Massachusetts is 60.
+変数@code{calendar-daylight-time-offset}は、
+夏時間と標準時の差を分単位で指定します。
+マサチューセッツ州ケンブリッジでは60（分）です。
+
+@c @vindex calendar-daylight-savings-starts-time  too long!
+@vindex calendar-daylight-savings-ends-time
+@c   The two variables @code{calendar-daylight-savings-starts-time} and
+@c @code{calendar-daylight-savings-ends-time} specify the number of minutes
+@c after midnight local time when the transition to and from daylight
+@c savings time should occur.  For Cambridge, Massachusetts both variables'
+@c values are 120.
+2つの変数@code{calendar-daylight-savings-starts-time}と
+変数@code{calendar-daylight-savings-ends-time}は、
+夏時間の開始／終了が地方時の真夜中の0時から何分ずれるかを指定します。
+マサチューセッツ州ケンブリッジではどちらも120（分）です。

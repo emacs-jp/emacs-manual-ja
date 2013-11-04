@@ -1,0 +1,993 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 97, 00, 2001
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Minibuffer, M-x, Basic, Top
+@c @chapter The Minibuffer
+@chapter ミニバッファ @emph{(2005/05/02)}
+@c @cindex minibuffer
+@cindex ミニバッファ
+
+@c   The @dfn{minibuffer} is the facility used by Emacs commands to read
+@c arguments more complicated than a single number.  Minibuffer arguments
+@c can be file names, buffer names, Lisp function names, Emacs command
+@c names, Lisp expressions, and many other things, depending on the command
+@c reading the argument.  You can use the usual Emacs editing commands in
+@c the minibuffer to edit the argument text.
+@dfn{ミニバッファ}は、単純な数よりも複雑な引数をEmacsコマンドが
+読み取るために用いる機構です。
+ミニバッファ引数は、ファイル名、バッファ名、Lisp関数名、Emacsコマンド名、
+Lisp式など、引数を読み取るコマンドに応じて多種多様です。
+ミニバッファでは、通常のバッファと同様の編集機能を用いて
+引数のテキストを編集できます。
+
+@c @cindex prompt
+@cindex プロンプト
+@c   When the minibuffer is in use, it appears in the echo area, and the
+@c terminal's cursor moves there.  The beginning of the minibuffer line
+@c displays a @dfn{prompt} which says what kind of input you should supply and
+@c how it will be used.  Often this prompt is derived from the name of the
+@c command that the argument is for.  The prompt normally ends with a colon.
+ミニバッファが使われているときには、ミニバッファはエコー領域に表示されて、
+端末のカーソルもエコー領域に移動します。
+ミニバッファの行の先頭には@dfn{プロンプト}（prompt）が表示されます。
+プロンプトにより、何を入力しそれがどのように使われるかを
+知ることができます。
+プロンプトは、引数を要求しているコマンドの名前から導かれることが多いです。
+プロンプトは通常コロンで終ります。
+
+@c @cindex default argument
+@cindex デフォルト引数
+@c   Sometimes a @dfn{default argument} appears in parentheses after the
+@c colon; it too is part of the prompt.  The default will be used as the
+@c argument value if you enter an empty argument (that is, just type
+@c @key{RET}).  For example, commands that read buffer names always show a
+@c default, which is the name of the buffer that will be used if you type
+@c just @key{RET}.
+コロンのあとの括弧の中に@dfn{デフォルト引数}（default argument）が
+表示されることもあります。
+これもプロンプトの一部です。
+（たとえば、@key{RET}だけを打って）空の引数を入力したときには、
+デフォルトが引数として使われます。
+たとえば、バッファ名を読み取るコマンドは、つねに、デフォルトを表示しますが、
+それは@key{RET}だけを打ったときに使われるバッファ名です。
+
+@c   The simplest way to enter a minibuffer argument is to type the text
+@c you want, terminated by @key{RET} which exits the minibuffer.  You can
+@c cancel the command that wants the argument, and get out of the
+@c minibuffer, by typing @kbd{C-g}.
+ミニバッファ引数を入力するもっとも簡単な方法は、
+目的のテキストを入力してから、
+ミニバッファから抜ける@key{RET}で終えることです。
+@kbd{C-g}を打てば、引数を必要とするコマンドを取り消して、
+ミニバッファを抜けることができます。
+
+@c   Since the minibuffer uses the screen space of the echo area, it can
+@c conflict with other ways Emacs customarily uses the echo area.  Here is how
+@c Emacs handles such conflicts:
+ミニバッファは画面のエコー領域を使うため、
+習慣的にエコー領域を使用するEmacsの機能と衝突する可能性があります。
+Emacsは、そのような衝突を以下のように扱います。
+
+@itemize @bullet
+@item
+@c If a command gets an error while you are in the minibuffer, this does
+@c not cancel the minibuffer.  However, the echo area is needed for the
+@c error message and therefore the minibuffer itself is hidden for a
+@c while.  It comes back after a few seconds, or as soon as you type
+@c anything.
+ミニバッファを使用中にコマンドがエラーを起こしても、
+ミニバッファを取り消すことはない。
+しかしながら、エラーメッセージを表示するためにエコー領域が必要なので、
+しばらくのあいだミニバッファを隠す。
+数秒経過するか、何かを打つと、ただちにミニバッファを表示する。
+
+@item
+@c If in the minibuffer you use a command whose purpose is to display a
+@c message in the echo area, such as @kbd{C-x =}, the message hides the
+@c minibuffer for a while.  The minibuffer contents come back after a few
+@c seconds, or as soon as you type anything.
+@kbd{C-x =}のように、エコー領域にメッセージを表示するコマンドを
+ミニバッファで実行すると、メッセージは
+しばらくのあいだミニバッファを隠す。
+数秒経過するか、何かを打つと、ただちにミニバッファを表示する。
+
+@item
+@c Echoing of keystrokes does not take place while the minibuffer is in
+@c use.
+ミニバッファを使用中は、キー入力をエコーしない。
+@end itemize
+
+@menu
+* File: Minibuffer File.  Entering file names with the minibuffer.
+* Edit: Minibuffer Edit.  How to edit in the minibuffer.
+* Completion::		  An abbreviation facility for minibuffer input.
+* Minibuffer History::    Reusing recent minibuffer arguments.
+* Repetition::		  Re-executing commands that used the minibuffer.
+@end menu
+
+@node Minibuffer File
+@c @section Minibuffers for File Names
+@section ファイル名入力用のミニバッファ @emph{(2005/03/24)}
+
+@c   Sometimes the minibuffer starts out with text in it.  For example, when
+@c you are supposed to give a file name, the minibuffer starts out containing
+@c the @dfn{default directory}, which ends with a slash.  This is to inform
+@c you which directory the file will be found in if you do not specify a
+@c directory.
+最初からテキストを伴って始まるミニバッファもあります。
+たとえば、ファイル名を指定しなければならない場合、
+ミニバッファはスラッシュで終る@dfn{デフォルトディレクトリ}
+（default directory）を含んでいます。
+これにより、ディレクトリを指定しなくても、
+どのディレクトリからファイルを探すかわかります。
+
+@c Separate paragraph to clean up ugly page break--rms
+@need 1500
+@c   For example, the minibuffer might start out with these contents:
+たとえば、ミニバッファがつぎのような内容で始まったとしましょう。
+
+@example
+Find File: /u2/emacs/src/
+@end example
+
+@noindent
+@c where @samp{Find File:@: } is the prompt.  Typing @kbd{buffer.c} as
+@c input specifies the file @file{/u2/emacs/src/buffer.c}.  To find files
+@c in nearby directories, use @kbd{..}; thus, if you type
+@c @kbd{../lisp/simple.el}, you will get the file named
+@c @file{/u2/emacs/lisp/simple.el}.  Alternatively, you can kill with
+@c @kbd{M-@key{DEL}} the directory names you don't want (@pxref{Words}).
+ここで、@samp{Find File:@: }がプロンプトです。
+@kbd{buffer.c} と打てば、
+ファイル@file{/u2/emacs/src/buffer.c}を指定したことになります。
+付近のディレクトリのファイルを指定するには、@kbd{..}を使います。
+したがって、@kbd{../lisp/simple.el}と打てば、
+@file{/u2/emacs/lisp/simple.el}という名前のファイルになります。
+あるいは、不要なディレクトリ名であれば、
+@kbd{M-@key{DEL}}でキルできます（@pxref{Words}）。
+
+@c   If you don't want any of the default, you can kill it with @kbd{C-a
+@c C-k}.  But you don't need to kill the default; you can simply ignore it.
+@c Insert an absolute file name, one starting with a slash or a tilde,
+@c after the default directory.  For example, to specify the file
+@c @file{/etc/termcap}, just insert that name, giving these minibuffer
+@c contents:
+デフォルトディレクトリをまったく使いたくない場合は、
+@kbd{C-a C-k}と打ってキルできます。
+しかし、デフォルトをキルする必要はありません。
+単に無視すればよいのです。
+スラッシュやティルダで始まる絶対ファイル名を挿入します。
+たとえば、ファイル@file{/etc/termcap}を指定するには、
+そのファイル名を挿入して、ミニバッファがつぎの内容になるようにします。
+
+@example
+Find File: /u2/emacs/src//etc/termcap
+@end example
+
+@noindent
+@c @cindex // in file name
+@c @cindex double slash in file name
+@c @cindex slashes repeated in file name
+@cindex ファイル名中の//
+@cindex ファイル名中のスラッシュ2個
+@cindex ファイル名中のスラッシュの繰り返し
+@c GNU Emacs gives a special meaning to a double slash (which is not
+@c normally a useful thing to write): it means, ``ignore everything before
+@c the second slash in the pair.''  Thus, @samp{/u2/emacs/src/} is ignored
+@c in the example above, and you get the file @file{/etc/termcap}.
+GNU Emacsでは、（普通は意味のある書き方ではない）
+連続した2個のスラッシュに特別な意味を与えています。
+『2番目のスラッシュよりまえの文字はすべて無視する』という意味になります。
+したがって、先の例では、@samp{/u2/emacs/src/}は無視され、
+@file{/etc/termcap}というファイル名になります。
+
+@c   If you set @code{insert-default-directory} to @code{nil}, the default
+@c directory is not inserted in the minibuffer.  This way, the minibuffer
+@c starts out empty.  But the name you type, if relative, is still
+@c interpreted with respect to the same default directory.
+@code{insert-default-directory}に@code{nil}を設定すると、
+ミニバッファにはデフォルトディレクトリを挿入しません。
+つまり、ミニバッファは空で始まります。
+しかし、入力したファイル名が相対的なものであれば、
+同じデフォルトディレクトリ相対に解釈されます。
+
+@node Minibuffer Edit
+@c @section Editing in the Minibuffer
+@section ミニバッファでの編集 @emph{(2005/03/24)}
+
+@c   The minibuffer is an Emacs buffer (albeit a peculiar one), and the usual
+@c Emacs commands are available for editing the text of an argument you are
+@c entering.
+ミニバッファは（少々特殊だが）普通のEmacsバッファなので、
+通常のEmacsコマンドを使って、入力中の引数のテキストを編集できます。
+
+@c   Since @key{RET} in the minibuffer is defined to exit the minibuffer,
+@c you can't use it to insert a newline in the minibuffer.  To do that,
+@c type @kbd{C-o} or @kbd{C-q C-j}.  (Recall that a newline is really the
+@c character control-J.)
+ミニバッファでは、@key{RET}はミニバッファから抜けるように定義されているので、
+ミニバッファで改行を挿入するために@key{RET}を使うことはできません。
+改行を挿入するには、@kbd{C-o}や@kbd{C-q C-j}とします。
+（改行とは実は文字「コントロールJ」。）
+
+@c   The minibuffer has its own window which always has space on the screen
+@c but acts as if it were not there when the minibuffer is not in use.  When
+@c the minibuffer is in use, its window is just like the others; you can
+@c switch to another window with @kbd{C-x o}, edit text in other windows and
+@c perhaps even visit more files, before returning to the minibuffer to submit
+@c the argument.  You can kill text in another window, return to the
+@c minibuffer window, and then yank the text to use it in the argument.
+@c @xref{Windows}.
+ミニバッファには独自のウィンドウがあり、
+そのウィンドウは画面上の場所を占有しています。
+しかし、ミニバッファが使われていないときには、
+あたかも何もないかのようにふるまいます。
+ミニバッファが使われているときは、
+そのウィンドウは他のウィンドウと同様になります。
+ミニバッファで引数を入力し終えるまでは、
+@kbd{C-x o}で他のウィンドウに切り替えて、
+そこでテキストを編集したり他のファイルを訪問したりもできます。
+他のウィンドウでテキストをキルしてから、
+ミニバッファウィンドウに戻ってそのテキストを
+ヤンクして引数として使うこともできます。
+@xref{Windows}。
+
+@c @cindex height of minibuffer
+@c @cindex size of minibuffer
+@c @cindex growing minibuffer
+@c @cindex resizing minibuffer
+@cindex ミニバッファの高さ
+@cindex ミニバッファのサイズ
+@cindex ミニバッファの拡大
+@cindex ミニバッファのリサイズ
+@c   There are some restrictions on the use of the minibuffer window,
+@c however.  You cannot switch buffers in it---the minibuffer and its
+@c window are permanently attached.  Also, you cannot split or kill the
+@c minibuffer window.  But you can make it taller in the normal fashion
+@c with @kbd{C-x ^}.
+しかし、ミニバッファウィンドウの使用にはいくつかの制限があります。
+ミニバッファウィンドウではバッファを切り替えられません。
+ミニバッファとそのウィンドウは恒久的に結び付いています。
+また、ミニバッファウィンドウを分割したり消去したりすることもできません。
+しかし、@kbd{C-x ^}を使う通常の方法で、
+ウィンドウの高さを大きくすることは可能です。
+
+@vindex resize-mini-windows
+@c   The minibuffer window expands vertically as necessary to hold the
+@c text that you put in the minibuffer, if @code{resize-mini-windows} is
+@c non-@code{nil}.  If @code{resize-mini-windows} is @code{t}, the window
+@c is always resized to fit the size of the text it displays.  If
+@c @code{resize-mini-windows} is the symbol @code{grow-only}, the window
+@c grows when the size of displayed text increases, but shrinks (back to
+@c the normal size) only when the minibuffer becomes inactive.
+もし @code{resize-mini-windows} が非-@code{nil} であれば，ミニバッファに入力した
+テキストを表示するのに必要なだけ、ミニバッファウィンドウは縦に広がります。
+@code{resize-mini-windows} が @code{t} であれば，ミニバッファウィンドウは表示する
+テキストのサイズに合わせて，常に調節されます．@code{resize-mini-windows} が
+@code{grow-only} であれば，ミニバッファに表示するテキストが増えた時だけ広がり，不
+活性になった時にだけ縮みます(通常のサイズに戻ります)．
+
+@vindex max-mini-window-height
+@c   The variable @code{max-mini-window-height} controls the maximum
+@c height for resizing the minibuffer window: a floating-point number
+@c specifies a fraction of the frame's height; an integer specifies the
+@c maximum number of lines; @code{nil} means do not resize the minibuffer
+@c window automatically.  The default value is 0.25.
+変数 @code{max-mini-window-height} でミニバッファの最大高さを制御できます．小数
+点で指定すると，フレームの高さに対するミニバッファの高さの比になります．整数で指
+定すると，最大の行数になります．@code{nil} では，自動的にミニバッファを調整しな
+いことを意味します．デフォルトは 0.25 です
+
+@c   If while in the minibuffer you issue a command that displays help text
+@c of any sort in another window, you can use the @kbd{C-M-v} command while
+@c in the minibuffer to scroll the help text.  This lasts until you exit
+@c the minibuffer.  This feature is especially useful when you display
+@c a buffer listing possible completions.  @xref{Other Window}.
+ミニバッファの中で別のウィンドウにある種のヘルプテキストを
+表示するようなコマンドを実行したときには、
+@kbd{C-M-v}を使って
+ミニバッファの中からヘルプテキストをスクロールできます。
+これは、ミニバッファを抜けるまで有効です。
+この機能は、補完をしているミニバッファが、
+補完候補を別のウィンドウに表示するような場合に特に便利です。
+@xref{Other Window}。
+
+@vindex enable-recursive-minibuffers
+@c   Emacs normally disallows most commands that use the minibuffer while
+@c the minibuffer is active.  This rule is to prevent recursive minibuffers
+@c from confusing novice users.  If you want to be able to use such
+@c commands in the minibuffer, set the variable
+@c @code{enable-recursive-minibuffers} to a non-@code{nil} value.
+Emacsでは、通常、ミニバッファを使っている最中には、
+ミニバッファを用いるコマンドの多くを実行できないようにしています。
+これは、再帰的なミニバッファの使用で初心者が混乱するのを避けるためです。
+このようなコマンドをミニバッファから利用できるようにするには、
+変数@code{enable-recursive-minibuffers}に@code{nil}以外を設定します。
+
+@node Completion
+@c @section Completion
+@section 補完 @emph{(2005/03/24)}
+@c @cindex completion
+@cindex 補完
+
+@c   For certain kinds of arguments, you can use @dfn{completion} to enter
+@c the argument value.  Completion means that you type part of the
+@c argument, then Emacs visibly fills in the rest, or as much as
+@c can be determined from the part you have typed.
+ある種の引数では、引数の値の入力に@dfn{補完}（completion）を利用できます。
+補完とは、引数の一部分を打つと、Emacsがその残りの部分をすべて、
+あるいは既存の入力部分から決定可能な限り残りの部分を補う機能です。
+
+@c   When completion is available, certain keys---@key{TAB}, @key{RET}, and
+@c @key{SPC}---are rebound to complete the text in the minibuffer before point
+@c into a longer string that it stands for, by matching it against a set of
+@c @dfn{completion alternatives} provided by the command reading the
+@c argument.  @kbd{?} is defined to display a list of possible completions
+@c of what you have inserted.
+補完を使えるときには、@key{TAB}、@key{RET}、@key{SPC}の各キーは、
+ミニバッファ内のテキストをそれを含むより長い文字列に
+ポイントの前に補完するように再定義してあります。
+補完は、引数を読み取るコマンドが用意した
+@dfn{補完候補}群（completion alternatives）に対して
+入力されたテキストとの一致をとることで行われます。
+@kbd{?}キーは、入力から補完可能な候補一覧を表示するように定義してあります。
+
+@c   For example, when @kbd{M-x} uses the minibuffer to read the name of a
+@c command, it provides a list of all available Emacs command names to
+@c complete against.  The completion keys match the minibuffer text
+@c against all the command names, find any additional name characters
+@c implied by the ones already present in the minibuffer, and add those
+@c characters to the ones you have given.  This is what makes it possible
+@c to type @kbd{M-x ins @key{SPC} b @key{RET}} instead of @kbd{M-x
+@c insert-buffer @key{RET}} (for example).
+たとえば、@kbd{M-x}がコマンド名を読み取るためにミニバッファを使っている場合、
+@kbd{M-x}は、補完に備えて、
+使用可能なすべてのEmacsコマンド名の一覧を用意します。
+補完キーは、ミニバッファのテキストをすべてのコマンド名に照らし合わせて、
+ミニバッファの既存の名前から導かれる名前の追加文字列を探し出して、
+その文字列をそれまでに入力してあるテキストに付け加えます。
+これにより、@kbd{M-x insert-buffer @key{RET}}と打つかわりに、
+@kbd{M-x ins @key{SPC} b @key{RET}}と打つことが可能になるのです。
+
+@c   Case is normally significant in completion, because it is significant
+@c in most of the names that you can complete (buffer names, file names and
+@c command names).  Thus, @samp{fo} does not complete to @samp{Foo}.
+@c Completion does ignore case distinctions for certain arguments in which
+@c case does not matter.
+補完では、大文字小文字を区別します。
+というのは、補完対象となる名前（バッファ名、ファイル名、コマンド名）の
+ほとんどでは、大文字小文字を区別しているからです。
+したがって、@samp{fo}を、@samp{Foo}とは補完しません。
+大文字小文字を区別しない引数に対しては、補完も両者を区別しません。
+
+@menu
+* Example: Completion Example.
+* Commands: Completion Commands.
+* Strict Completion::
+* Options: Completion Options.
+@end menu
+
+@node Completion Example
+@c @subsection Completion Example
+@subsection 補完の例
+
+@c @kindex TAB @r{(completion)}
+@kindex TAB @r{（補完）}
+@findex minibuffer-complete
+@c   A concrete example may help here.  If you type @kbd{M-x au @key{TAB}},
+@c the @key{TAB} looks for alternatives (in this case, command names) that
+@c start with @samp{au}.  There are several, including
+@c @code{auto-fill-mode} and @code{auto-save-mode}---but they are all the
+@c same as far as @code{auto-}, so the @samp{au} in the minibuffer changes
+@c to @samp{auto-}.@refill
+具体的な例で考えてみましょう。
+@kbd{M-x au @key{TAB}}と打つと、
+@key{TAB}は@samp{au}で始まる候補（この場合はコマンド名）を探します。
+@samp{au}で始まるものには、@code{auto-fill-mode}と@code{auto-save-mode}を
+含めていくつかありますが、どれも少なくとも@code{auto-}までは同じです。
+そこで、ミニバッファ内の@samp{au}は@samp{auto-}に変わります。
+
+@c   If you type @key{TAB} again immediately, there are multiple
+@c possibilities for the very next character---it could be any of
+@c @samp{cfilrs}---so no more characters are added; instead, @key{TAB}
+@c displays a list of all possible completions in another window.
+ここでただちに@key{TAB}をもう一度打っても、
+つぎにくる文字の候補が複数、つまり、@samp{cfilrs}のどれかなので、
+さらに文字が追加されることはありません。
+そのかわり、@key{TAB}は補完候補の一覧を別のウィンドウに表示します。
+
+@c   If you go on to type @kbd{f @key{TAB}}, this @key{TAB} sees
+@c @samp{auto-f}.  The only command name starting this way is
+@c @code{auto-fill-mode}, so completion fills in the rest of that.  You now
+@c have @samp{auto-fill-mode} in the minibuffer after typing just @kbd{au
+@c @key{TAB} f @key{TAB}}.  Note that @key{TAB} has this effect because in
+@c the minibuffer it is bound to the command @code{minibuffer-complete}
+@c when completion is available.
+続けて@kbd{f @key{TAB}}と打つと、
+今度の@key{TAB}は文字列@samp{auto-f}を探します。
+@samp{auto-f}から始まるコマンド名は@code{auto-fill-mode}だけなので、
+補完は残りの部分を補います。
+これで、@kbd{au @key{TAB} f @key{TAB}}と打つだけで、
+ミニバッファには@samp{auto-fill-mode}が入ります。
+@key{TAB}キーがこのような効果を持つのは、
+このキーがミニバッファ内ではコマンド@code{minibuffer-complete}に
+バインドしてあるからだということに注意してください。
+
+@node Completion Commands
+@c @subsection Completion Commands
+@subsection 補完コマンド @emph{(2005/03/24)}
+
+@c   Here is a list of the completion commands defined in the minibuffer
+@c when completion is available.
+補完を使えるミニバッファでは、
+つぎのような補完コマンドを定義してあります。
+
+@table @kbd
+@item @key{TAB}
+@c Complete the text before point in the minibuffer as much as possible
+@c (@code{minibuffer-complete}).
+ミニバッファのテキストを可能な限りポイントの前に補完する（@code{minibuffer-complete}）。
+@item @key{SPC}
+@c Complete the minibuffer text before point, but don't go beyond one word
+@c (@code{minibuffer-complete-word}).
+ミニバッファのテキストを1語だけポイントの前に補完する（@code{minibuffer-complete-word}）。
+@item @key{RET}
+@c Submit the text in the minibuffer as the argument, possibly completing
+@c first as described below (@code{minibuffer-complete-and-exit}).
+可能な限り補完したあと、ミニバッファのテキストを引数として渡す
+（@code{minibuffer-complete-and-exit}）。
+@item ?
+@c Display a list of all possible completions of the text in the minibuffer
+@c (@code{minibuffer-list-completions}).
+ミニバッファのテキストから補完可能な候補の一覧を表示する
+（@code{minibuffer-list-completions}）。
+@end table
+
+@kindex SPC
+@findex minibuffer-complete-word
+@c   @key{SPC} completes much like @key{TAB}, but never goes beyond the
+@c next hyphen or space.  If you have @samp{auto-f} in the minibuffer and
+@c type @key{SPC}, it finds that the completion is @samp{auto-fill-mode},
+@c but it stops completing after @samp{fill-}.  This gives
+@c @samp{auto-fill-}.  Another @key{SPC} at this point completes all the
+@c way to @samp{auto-fill-mode}.  The command that implements this
+@c behavior is called @code{minibuffer-complete-word}.
+@key{SPC}は@key{TAB}とほぼ同じように補完しますが、
+つぎのハイフンや空白を超えて補完することはありません。
+ミニバッファの文字が@samp{auto-f}であるとしましょう。
+ここで@key{SPC}を打つと、@key{SPC}は@samp{auto-fill-mode}に補完できることを
+探しだしますが、@samp{fill-}までで補完を止めます。
+その結果、@samp{auto-fill-}となります。
+ここでもう一度@key{SPC}を打つと、
+今度は@samp{auto-fill-mode}まで完全に補完します。このような振舞いをするコマンド
+は @code{minibuffer-complete-word} を実行しています。
+
+@c   Here are some commands you can use to choose a completion from a
+@c window that displays a list of completions:
+補完候補一覧を表示しているウィンドウから補完を選ぶには、
+つぎのコマンドを使えます。
+
+@table @kbd
+@findex mouse-choose-completion
+@item Mouse-2
+@c Clicking mouse button 2 on a completion in the list of possible
+@c completions chooses that completion (@code{mouse-choose-completion}).
+@c You normally use this command while point is in the minibuffer, but you
+@c must click in the list of completions, not in the minibuffer itself.
+補完候補一覧の候補上でマウスボタン2をクリックすると、
+その補完を選択する（@code{mouse-choose-completion}）。
+通常は、ポイントがミニバッファ内にあるときにこのコマンドを使うだろうが、
+ミニバッファではなく候補一覧でクリックする必要がある。
+
+@findex switch-to-completions
+@item @key{PRIOR}
+@itemx M-v
+@c Typing @key{PRIOR} or @key{PAGE-UP}, or @kbd{M-v}, while in the
+@c minibuffer, selects the window showing the completion list buffer
+@c (@code{switch-to-completions}).  This paves the way for using the
+@c commands below.  (Selecting that window in the usual ways has the same
+@c effect, but this way is more convenient.)
+ミニバッファで、@key{PRIOR}、@key{PAGE-UP}、@kbd{M-v}のいずれかを打つと、
+補完候補一覧のバッファを表示しているウィンドウを選択できる
+（@code{switch-to-completions}）。
+この機能は、以下のコマンドの利用を簡単にする。
+（通常の方法でもそのウィンドウを選択できるが、この方法のほうが便利であろう。）
+
+@findex choose-completion
+@item @key{RET}
+@c Typing @key{RET} @emph{in the completion list buffer} chooses the
+@c completion that point is in or next to (@code{choose-completion}).  To
+@c use this command, you must first switch windows to the window that shows
+@c the list of completions.
+@emph{補完候補一覧のバッファで}@key{RET}を打つと、
+ポイント位置にある補完かポイントに続く補完を選択する
+（@code{choose-completion}）。
+このコマンドを使う場合、
+補完候補一覧を表示しているウィンドウにまず移動する必要がある。
+
+@findex next-completion
+@item @key{RIGHT}
+@c Typing the right-arrow key @key{RIGHT} @emph{in the completion list
+@c buffer} moves point to the following completion (@code{next-completion}).
+@emph{補完候補一覧のバッファで}右向き矢印キー@key{RIGHT}を打つと、
+ポイントはつぎの補完候補に移動する（@code{next-completion}）。
+
+@findex previous-completion
+@item @key{LEFT}
+@c Typing the left-arrow key @key{LEFT} @emph{in the completion list
+@c buffer} moves point toward the beginning of the buffer, to the previous
+@c completion (@code{previous-completion}).
+@emph{補完候補一覧のバッファで}左向き矢印キー@key{LEFT}を打つと、
+ポイントはまえの補完候補に移動する（@code{previous-completion}）。
+@end table
+
+@node Strict Completion
+@c @subsection Strict Completion
+@subsection 強い補完
+
+@c   There are three different ways that @key{RET} can work in completing
+@c minibuffers, depending on how the argument will be used.
+ミニバッファでの補完において、
+@key{RET}は引数の使われ方に依存して3種類の異なる動作を示します。
+
+@itemize @bullet
+@item
+@c @dfn{Strict} completion is used when it is meaningless to give any
+@c argument except one of the known alternatives.  For example, when
+@c @kbd{C-x k} reads the name of a buffer to kill, it is meaningless to
+@c give anything but the name of an existing buffer.  In strict
+@c completion, @key{RET} refuses to exit if the text in the minibuffer
+@c does not complete to an exact match.
+@dfn{強い}補完（strict completion）は、
+既知の補完候補以外を引数に与えると意味がない場合に使われる。
+たとえば、@kbd{C-x k}が削除するバッファ名を読み取るとき、
+既存のバッファ名以外を与えても意味がない。
+強い補完では、ミニバッファのテキストを補完して
+候補の1つに完全に一致しないと@key{RET}で終了できない。
+
+@item
+@c @dfn{Cautious} completion is similar to strict completion, except that
+@c @key{RET} exits only if the text was an exact match already, not
+@c needing completion.  If the text is not an exact match, @key{RET} does
+@c not exit, but it does complete the text.  If it completes to an exact
+@c match, a second @key{RET} will exit.
+@dfn{慎重な}補完（cautious completion）は、強い補完に似ているが、
+テキストがすでに完全に一致していて補完の必要がない場合にのみ、
+@key{RET}で終了できる点が異なる。
+テキストが完全に一致していない場合は、
+@key{RET}は終了せずにテキストを補完する。
+完全に一致すれば、2度目の@key{RET}で終了できる。
+
+@c Cautious completion is used for reading file names for files that must
+@c already exist.
+慎重な補完は、既存でなければならない
+ファイルの名前を読み取るような場合に使われる。
+
+@item
+@c @dfn{Permissive} completion is used when any string whatever is
+@c meaningful, and the list of completion alternatives is just a guide.
+@c For example, when @kbd{C-x C-f} reads the name of a file to visit, any
+@c file name is allowed, in case you want to create a file.  In
+@c permissive completion, @key{RET} takes the text in the minibuffer
+@c exactly as given, without completing it.
+@dfn{弱い}補完（permissive completion）は、
+どんな文字列でも意味を持つような場合に使われ、
+補完候補一覧は単なる目安でしかない。
+たとえば、@kbd{C-x C-f}が訪問するファイル名を読み取るとき、
+新規作成ならばどんなファイル名でも許される。
+弱い補完では、@key{RET}はミニバッファのテキストを補完することなく、
+そのまま受理する。
+@end itemize
+
+@c   The completion commands display a list of all possible completions in
+@c a window whenever there is more than one possibility for the very next
+@c character.  Also, typing @kbd{?} explicitly requests such a list.  If
+@c the list of completions is long, you can scroll it with @kbd{C-M-v}
+@c (@pxref{Other Window}).
+補完コマンドは、つぎにくる文字として複数の可能性がある場合、
+補完可能な全候補一覧をウィンドウに表示します。
+また、@kbd{?}と打てば、このような一覧を表示できます。
+補完候補一覧が長いときには、
+@kbd{C-M-v}でスクロールできます（@pxref{Other Window}）。
+
+@node Completion Options
+@c @subsection Completion Options
+@subsection 補完のオプション @emph{(2005/03/24)}
+
+@vindex completion-ignored-extensions
+@cindex ignored file names, in completion
+@cindex 補完で無視されるファイル名
+@c   When completion is done on file names, certain file names are usually
+@c ignored.  The variable @code{completion-ignored-extensions} contains a
+@c list of strings; a file whose name ends in any of those strings is
+@c ignored as a possible completion.  The standard value of this variable
+@c has several elements including @code{".o"}, @code{".elc"}, @code{".dvi"}
+@c and @code{"~"}.  The effect is that, for example, @samp{foo} can
+@c complete to @samp{foo.c} even though @samp{foo.o} exists as well.
+@c However, if @emph{all} the possible completions end in ``ignored''
+@c strings, then they are not ignored.  Ignored extensions do not apply to
+@c lists of completions---those always mention all possible completions.
+ファイル名の補完を行う場面では、ある種のファイル名を通常無視します。
+変数@code{completion-ignored-extensions}は、文字列のリストを保持します。
+これらの文字列の1つで終る名前のファイルは、補完候補としては無視します。
+この変数の標準値には、@code{".o"}、@code{".elc"}、@code{".dvi"}、
+@code{"~"}が含まれます。
+この効果は、たとえば、@samp{foo}は、@samp{foo.o}が存在したとしても、
+@samp{foo.c}に補完されます。
+ただし、補完候補の@emph{すべて}が無視すべき文字列で終るものである場合には、
+これらの候補を無視しません。
+無視した拡張子を持つものが補完候補一覧に入ることはありません。
+一覧にはつねに補完可能な候補のすべてを表示します。
+
+@c   If an element of the list in @code{completion-ignored-extensions} ends
+@c in a slash @file{/}, it indicates a subdirectory that should be ignored
+@c when completing file names.  (Elements of
+@c @code{completion-ignored-extensions} which do not end in a slash are
+@c never considered when a completion candidate is a directory; thus,
+@c completion returns directories whose names end in @file{.elc} even
+@c though there's an element @code{".elc"} in the list.)
+もし @code{completion-ignored-extensions} のリストの要素がスラッシュ @file{/} で
+終わっていれば，名前を補完する時にサブディレクトリが無視されるべきであるという意
+味になります(スラッシュで終わっていない @code{completion-ignored-extensions}
+の要素は，補完候補がディレクトリである時には考慮されない．したがって，たとえリストに
+@code{".elc"} という要素があっても，@file{.elc} で終わる名前を持つディレクトリが
+補完候補に入ることになります)．
+
+@vindex completion-auto-help
+@c   Normally, a completion command that cannot determine even one
+@c additional character automatically displays a list of all possible
+@c completions.  If the variable @code{completion-auto-help} is set to
+@c @code{nil}, this automatic display is disabled, so you must type
+@c @kbd{?} to display the list of completions.
+通常、補完コマンドは、次の1文字を決定できない場合には、
+自動的にすべての補完候補一覧を表示します。
+変数@code{completion-auto-help}に@code{nil}が設定されていると、
+補完候補の自動表示はされません。このため，補完候補を表示するために、@kbd{?}を打
+つ必要があります．
+
+@cindex Partial Completion mode
+@vindex partial-completion-mode
+@findex partial-completion-mode
+@c   Partial Completion mode implements a more powerful kind of
+@c completion that can complete multiple words in parallel.  For example,
+@c it can complete the command name abbreviation @code{p-b} into
+@c @code{print-buffer}, because no other command starts with two words
+@c whose initials are @samp{p} and @samp{b}.
+分割補完(Partial Completion)は、
+平行して複数の単語を補完できる、より強力な補完機能を提供します。
+たとえば、@code{p-b}と省略されたコマンド名を
+@code{print-buffer}と補完できます。
+というのは、頭文字が@samp{p}と@samp{b}である2つの単語で
+始まるコマンドが他にはないからです。
+
+@c   Partial completion of directories in file names uses @samp{*} to
+@c indicate the places for completion; thus, @file{/u*/b*/f*} might
+@c complete to @file{/usr/bin/foo}.
+ディレクトリの分割補完では補完する場所を示すために， @samp{*} を使います．例えば，
+@file{/u*/b*/f*} は @file{/usr/bin/foo} のように補完されるかもしれません．
+
+@c   To enable this mode, use the command @kbd{M-x
+@c partial-completion-mode}, or customize the option
+@c @code{partial-completion-mode}.  This binds the partial completion
+@c commands to @key{TAB}, @key{SPC}, @key{RET}, and @kbd{?}.  The usual
+@c completion commands are available on @kbd{M-@key{TAB}},
+@c @kbd{M-@key{SPC}}, @kbd{M-@key{RET}} and @kbd{M-?}.
+このモードを有効にするためには，コマンド @kbd{M-x partial-completion-mode} を使
+うか，変数 @code{partial-completion-mode} をカスタマイズします．すると，
+@key{TAB}，@key{SPC}，@key{RET}，@kbd{?} を分割補完機能に割り当てます．通常の補
+完は @kbd{M-@key{TAB}}，@kbd{M-@key{SPC}}，@kbd{M-@key{RET}}，@kbd{M-?}で利用で
+きます．
+
+@vindex PC-include-file-path
+@vindex PC-disable-includes
+@c   Another feature of Partial Completion mode is to extend
+@c @code{find-file} so that the @samp{<@var{include}>} stands for the
+@c file named @var{include} in some directory in the path
+@c @code{PC-include-file-path}.  If you set @code{PC-disable-includes} to
+@c non-@code{nil}, this feature is disabled.
+分割補完モードの他の機能は @code{find-file} を拡張することです．それにより，
+@samp{<@var{include}>} は @code{PC-include-file-path} で設定されたディレクトリに
+ある @var{include} という名前のファイルを表します．もし
+@code{PC-disable-includes} を非-@code{nil}に設定していれば，この機能は無効になり
+ます．
+
+@c @cindex Icomplete mode
+@findex icomplete-mode
+@cindex 補完示唆モード（Icomplete mode）
+@cindex モード、Icomplete
+@c   Icomplete mode presents a constantly-updated display that tells you
+@c what completions are available for the text you've entered so far.  The
+@c command to enable or disable this minor mode is @kbd{M-x
+@c icomplete-mode}.
+補完示唆（icomplete）モードでは、
+それまでに入力したテキストから補完できるものを常時更新して表示します。
+このマイナモードをオン／オフするコマンドは@kbd{M-x icomplete-mode}です。
+
+@node Minibuffer History
+@c @section Minibuffer History
+@section ミニバッファ履歴 @emph{(2005/05/02)}
+@c @cindex minibuffer history
+@c @cindex history of minibuffer input
+@cindex ミニバッファ履歴
+@cindex ミニバッファ入力履歴
+@cindex 履歴、ミニバッファ入力
+
+@c   Every argument that you enter with the minibuffer is saved on a
+@c @dfn{minibuffer history list} so that you can use it again later in
+@c another argument.  Special commands load the text of an earlier argument
+@c in the minibuffer.  They discard the old minibuffer contents, so you can
+@c think of them as moving through the history of previous arguments.
+ミニバッファで入力した引数はすべて@dfn{ミニバッファ履歴リスト}
+（minibuffer history list）に保存され、
+あとで別の引数中で使うことができます。
+特別のコマンドで、以前に使った引数のテキストをミニバッファに入れます。
+これらは、ミニバッファの古い内容を破棄するので、
+過去の引数の履歴の中を動き廻っていると考えることができます。
+
+@table @kbd
+@item @key{UP}
+@itemx M-p
+@c Move to the next earlier argument string saved in the minibuffer history
+@c (@code{previous-history-element}).
+ミニバッファ履歴中の1つまえ（古い）の引数文字列に移動する
+（@code{previous-history-element}）。
+@item @key{DOWN}
+@itemx M-n
+@c Move to the next later argument string saved in the minibuffer history
+@c (@code{next-history-element}).
+ミニバッファ履歴中の1つつぎ（新しい）の引数文字列に移動する
+（@code{next-history-element}）。
+@item M-r @var{regexp} @key{RET}
+@c Move to an earlier saved argument in the minibuffer history that has a
+@c match for @var{regexp} (@code{previous-matching-history-element}).
+ミニバッファ履歴中の引数文字列を古いほうへ遡って
+@var{regexp}に一致するものに移動する
+（@code{previous-matching-history-element}）。
+@item M-s @var{regexp} @key{RET}
+@c Move to a later saved argument in the minibuffer history that has a
+@c match for @var{regexp} (@code{next-matching-history-element}).
+ミニバッファ履歴中の引数文字列を新しいほうへ辿って
+@var{regexp}に一致するものに移動する
+（@code{next-matching-history-element}）。
+@end table
+
+@c @kindex M-p @r{(minibuffer history)}
+@c @kindex M-n @r{(minibuffer history)}
+@kindex M-p @r{（ミニバッファ履歴）}
+@kindex M-n @r{（ミニバッファ履歴）}
+@findex next-history-element
+@findex previous-history-element
+@c   The simplest way to reuse the saved arguments in the history list is
+@c to move through the history list one element at a time.  While in the
+@c minibuffer, use @kbd{M-p} or up-arrow (@code{previous-history-element})
+@c to ``move to'' the next earlier minibuffer input, and use @kbd{M-n} or
+@c down-arrow (@code{next-history-element}) to ``move to'' the next later
+@c input.
+履歴リストに保存されている引数を再利用するもっとも簡単な方法は、
+履歴リストの中を1つ1つ移動していくことです。
+ミニバッファの中では、1つまえ（古い）のミニバッファの入力内容に
+『移動する』には@kbd{M-p}（@code{previous-history-element}）を、
+1つあと（新しい）の入力内容に移動するには
+@kbd{M-n}（@code{next-history-element}）を打ちます。
+
+@c   The previous input that you fetch from the history entirely replaces
+@c the contents of the minibuffer.  To use it as the argument, exit the
+@c minibuffer as usual with @key{RET}.  You can also edit the text before
+@c you reuse it; this does not change the history element that you
+@c ``moved'' to, but your new argument does go at the end of the history
+@c list in its own right.
+ミニバッファの内容は、履歴から持ってきた以前の入力内容で完全に
+置き換えられます。
+この内容を引数として使うには、
+通常と同じように@key{RET}でミニバッファを抜けます。
+引数として再使用するまえに、テキストを編集してもかまいません。
+編集してもミニバッファに『持ってきた』履歴のもともとの要素は変更されません。
+ただし、当然、新しい引数は履歴リストの最後に追加されます。
+
+@c   For many minibuffer arguments there is a ``default'' value.  In some
+@c cases, the minibuffer history commands know the default value.  Then you
+@c can insert the default value into the minibuffer as text by using
+@c @kbd{M-n} to move ``into the future'' in the history.  Eventually we
+@c hope to make this feature available whenever the minibuffer has a
+@c default value.
+多くのミニバッファ引数には、デフォルト値があります。
+ミニバッファ履歴操作コマンドが、
+これらのデフォルト値を知っている場合もあります。
+その場合、@kbd{M-n}で履歴中の『未来』へ移動する
+@footnote{【訳注】履歴として残っている文字列データの
+最後尾よりさらに先に移動すること。}
+ことで、このデフォルト値をテキストとしてミニバッファに挿入できます。
+将来的には、ミニバッファにデフォルト値がある場合には、
+つねにこの機能を利用できるようにしたいと考えています。
+
+@findex previous-matching-history-element
+@findex next-matching-history-element
+@c @kindex M-r @r{(minibuffer history)}
+@c @kindex M-s @r{(minibuffer history)}
+@kindex M-r @r{（ミニバッファ履歴）}
+@kindex M-s @r{（ミニバッファ履歴）}
+@c   There are also commands to search forward or backward through the
+@c history; they search for history elements that match a regular
+@c expression that you specify with the minibuffer.  @kbd{M-r}
+@c (@code{previous-matching-history-element}) searches older elements in
+@c the history, while @kbd{M-s} (@code{next-matching-history-element})
+@c searches newer elements.  By special dispensation, these commands can
+@c use the minibuffer to read their arguments even though you are already
+@c in the minibuffer when you issue them.  As with incremental searching,
+@c an upper-case letter in the regular expression makes the search
+@c case-sensitive (@pxref{Search Case}).
+履歴の中を前向きや後向きに探索するコマンドもあります。
+これらのコマンドは、ミニバッファで指定した正規表現に
+一致する履歴要素を探索します。
+@kbd{M-r}（@code{previous-matching-history-element}）は、
+履歴のより古い要素を探します。
+一方、@kbd{M-s}（@code{next-matching-history-element}）は、
+より新しい要素を探します。
+特例なのですが、
+これらのコマンドは、コマンドを呼び出す時点で
+すでにミニバッファに入っているにも関わらず、
+ミニバッファから引数を読み取ります。
+インクリメンタルサーチの場合と同様に、
+正規表現に大文字を使うと、大文字小文字を区別して探索します
+（@pxref{Search Case}）。
+
+@ignore
+  We may change the precise way these commands read their arguments.
+Perhaps they will search for a match for the string given so far in the
+minibuffer; perhaps they will search for a literal match rather than a
+regular expression match; perhaps they will only accept matches at the
+beginning of a history element; perhaps they will read the string to
+search for incrementally like @kbd{C-s}.  To find out what interface is
+actually available, type @kbd{C-h f previous-matching-history-element}.
+@end ignore
+
+@c   All uses of the minibuffer record your input on a history list, but
+@c there are separate history lists for different kinds of arguments.  For
+@c example, there is a list for file names, used by all the commands that
+@c read file names.  (As a special feature, this history list records
+@c the absolute file name, no more and no less, even if that is not how
+@c you entered the file name.)
+ミニバッファを使えば入力は必ず履歴リストに記録されますが、
+引数の種類ごとに別々の履歴リストがあります。
+たとえば、ファイル名に関する履歴リストは、
+ファイル名を読み取るすべてのコマンドで使われます。
+（特別な機能として、この履歴リストには、
+絶対ファイル名を入力しなくても絶対ファイル名が記録される。）
+
+@c   There are several other very specific history lists, including one for
+@c command names read by @kbd{M-x}, one for buffer names, one for arguments
+@c of commands like @code{query-replace}, and one for compilation commands
+@c read by @code{compile}.  Finally, there is one ``miscellaneous'' history
+@c list that most minibuffer arguments use.
+特定目的用の履歴リストがいくつかあります。
+@kbd{M-x}が読むコマンド名用、バッファ名用、
+@code{query-replace}のようなコマンドの引数用、
+@code{compile}が読むコンパイルコマンド用などです。
+さらに、ほとんどのミニバッファ引数が利用する
+『その他』の履歴リストも1つあります。
+
+@vindex history-length
+@c   The variable @code{history-length} specifies the maximum length of a
+@c minibuffer history list; once a list gets that long, the oldest element
+@c is deleted each time an element is added.  If the value of
+@c @code{history-length} is @code{t}, though, there is no maximum length
+@c and elements are never deleted.
+変数@code{history-length}は、ミニバッファ履歴リストの最大長を指定します。
+履歴リストが設定された長さに達すると、
+そのあとは、新しい要素を追加するたびに最古の要素を削除します。
+ただし、変数@code{history-length}の値が@code{t}であると、
+長さの制限はなくなり要素を削除しません。
+
+@node Repetition
+@c @section Repeating Minibuffer Commands
+@section ミニバッファコマンドの繰り返し @emph{(2005/05/02)}
+@c @cindex command history
+@c @cindex history of commands
+@cindex コマンド履歴
+@cindex 履歴、コマンド
+
+@c   Every command that uses the minibuffer at least once is recorded on a
+@c special history list, together with the values of its arguments, so that
+@c you can repeat the entire command.  In particular, every use of
+@c @kbd{M-x} is recorded there, since @kbd{M-x} uses the minibuffer to read
+@c the command name.
+ミニバッファを少なくとも1回使ったコマンドは、
+その引数の値とともにすべて特別な履歴リストに記録されますから、
+コマンド全体を繰り返すことができます。
+特に、@kbd{M-x}はコマンド名を読み取るためにミニバッファを使うので、
+必ず履歴に記録されます。
+
+@findex list-command-history
+@table @kbd
+@item C-x @key{ESC} @key{ESC}
+@c Re-execute a recent minibuffer command (@code{repeat-complex-command}).
+最近のミニバッファコマンドを再実行する（@code{repeat-complex-command}）。
+@item M-x list-command-history
+@c Display the entire command history, showing all the commands
+@c @kbd{C-x @key{ESC} @key{ESC}} can repeat, most recent first.
+@kbd{C-x @key{ESC} @key{ESC}}で繰り返せるすべてのコマンドを
+新しいものから順に並べたコマンド履歴全体を表示する。
+@end table
+
+@kindex C-x ESC ESC
+@findex repeat-complex-command
+@c   @kbd{C-x @key{ESC} @key{ESC}} is used to re-execute a recent
+@c minibuffer-using command.  With no argument, it repeats the last such
+@c command.  A numeric argument specifies which command to repeat; one
+@c means the last one, and larger numbers specify earlier ones.
+@kbd{C-x @key{ESC} @key{ESC}}は、
+ミニバッファを利用した最近のコマンドを再度実行します。
+引数を指定しなければ、そのような最後のコマンドを繰り返します。
+数引数は、どのコマンドを繰り返すかを指定します。
+1は最後のコマンドを指し、大きい数ほどより以前のコマンドを指します。
+
+@c   @kbd{C-x @key{ESC} @key{ESC}} works by turning the previous command
+@c into a Lisp expression and then entering a minibuffer initialized with
+@c the text for that expression.  If you type just @key{RET}, the command
+@c is repeated as before.  You can also change the command by editing the
+@c Lisp expression.  Whatever expression you finally submit is what will be
+@c executed.  The repeated command is added to the front of the command
+@c history unless it is identical to the most recently executed command
+@c already there.
+@kbd{C-x @key{ESC} @key{ESC}}は、過去のコマンドをLisp式に変換し、
+その式のテキストで初期化したミニバッファに入ります。
+@key{RET}だけを打てば、コマンドは以前とまったく同様に繰り返されます。
+Lisp式を編集してコマンドを変更してもかまいません。
+最終的な式が何であれ、その式を実行します。
+繰り返したコマンドは、
+履歴リスト内に既存の最後に実行したコマンドと同一でない限り、
+コマンド履歴の先頭に追加されます。
+
+@c   Even if you don't understand Lisp syntax, it will probably be obvious
+@c which command is displayed for repetition.  If you do not change the
+@c text, it will repeat exactly as before.
+Lisp構文が理解できないとしても、
+繰り返しのためにどのコマンドが表示されたか、たぶんわかるでしょう。
+テキストを変更しなければ、以前とまったく同じに繰り返されます。
+
+@c   Once inside the minibuffer for @kbd{C-x @key{ESC} @key{ESC}}, you can
+@c use the minibuffer history commands (@kbd{M-p}, @kbd{M-n}, @kbd{M-r},
+@c @kbd{M-s}; @pxref{Minibuffer History}) to move through the history list
+@c of saved entire commands.  After finding the desired previous command,
+@c you can edit its expression as usual and then resubmit it by typing
+@c @key{RET} as usual.
+@kbd{C-x @key{ESC} @key{ESC}}でいったんミニバッファに入ってしまえば、
+ミニバッファ履歴リストコマンド
+（@kbd{M-p}、@kbd{M-n}、@kbd{M-r}、@kbd{M-s}、@pxref{Minibuffer History}）
+を使って、保存されたすべてのコマンドの履歴リストの中を動き廻れます。
+目的のコマンドを捜しあてたら、通常の方法でその式を編集できますし、
+これも通常と同じように@key{RET}を打てば実行できます。
+
+@vindex isearch-resume-enabled
+@c   Incremental search does not, strictly speaking, use the minibuffer,
+@c but it does something similar, so normally it is treated as a complex
+@c command and it appears in the history list for @kbd{C-x @key{ESC}
+@c @key{ESC}}.  You can disable that by setting
+@c @code{isearch-resume-enabled} to @code{nil}.
+インクリメンタルサーチは，厳密に言うと，ミニバッファを使いません．しかし，大抵は
+複合されたコマンドとして使われるので，似たような動作をします．そして，そのコマン
+ドは @kbd{C-x @key{ESC} @key{ESC}} で利用できる履歴に追加されます．
+@code{isearch-resume-enabled} を @code{nil} にすることで，これを無効化できます．
+
+@vindex command-history
+@c   The list of previous minibuffer-using commands is stored as a Lisp
+@c list in the variable @code{command-history}.  Each element is a Lisp
+@c expression which describes one command and its arguments.  Lisp programs
+@c can re-execute a command by calling @code{eval} with the
+@c @code{command-history} element.
+ミニバッファを使った過去のコマンド一覧は、
+Lispのリストとして変数@code{command-history}に格納されます。
+各要素はそれぞれ1つのコマンドとその引数を表すLisp式です。
+Lispプログラムからは、
+@code{command-history}の要素を引数として
+@code{eval}を呼べばコマンドを再実行できます。
+
+@ignore
+   arch-tag: ba913cfd-b70e-400f-b663-22b2c309227f
+@end ignore

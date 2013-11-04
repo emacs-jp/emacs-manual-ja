@@ -1,0 +1,503 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@iftex
+@c @chapter Characters, Keys and Commands
+@chapter 文字、キー、コマンド
+
+@c   This chapter explains the character sets used by Emacs for input
+@c commands and for the contents of files, and also explains the concepts
+@c of @dfn{keys} and @dfn{commands}, which are fundamental for understanding
+@c how Emacs interprets your keyboard and mouse input.
+本章では、Emacsが入力コマンドやファイルの内容に対して用いる
+文字集合について説明します。
+また、@dfn{キー}（keys）と@dfn{コマンド}
+（commands）の概念についても説明します。
+キーやコマンドは、キーボード入力やマウス入力を
+Emacsがどのように解釈するのかを理解するうえでの基礎となります。
+@end iftex
+
+@node User Input, Entering Emacs, Screen, Top
+@c @section Kinds of User Input
+@section ユーザー入力の種類 
+@c @cindex input with the keyboard
+@c @cindex keyboard input
+@c @cindex character set (keyboard)
+@cindex キーボードからの入力
+@cindex キーボード入力
+@cindex 文字集合（キーボード）
+@cindex ASCII
+@cindex C-
+@c @cindex Control
+@c @cindex control characters
+@cindex コントロール
+@cindex コントロール文字
+
+@c   GNU Emacs uses an extension of the ASCII character set for keyboard
+@c input; it also accepts non-character input events including function
+@c keys and mouse button actions.
+GNU Emacsは、キーボード入力に対しては拡張ASCII文字集合を使います。
+また、ファンクションキーやマウスボタン操作のような文字以外の
+入力イベントも受け付けます。
+
+@c   ASCII consists of 128 character codes.  Some of these codes are
+@c assigned graphic symbols such as @samp{a} and @samp{=}; the rest are
+@c control characters, such as @kbd{Control-a} (usually written @kbd{C-a}
+@c for short).  @kbd{C-a} gets its name from the fact that you type it by
+@c holding down the @key{CTRL} key while pressing @kbd{a}.
+ASCIIは、128の文字コードから成ります。
+これらのコードの中には、@samp{a}や@samp{=}のような
+図形記号に割り当てられているものもあります。
+それ以外は、@kbd{Control-a}のようなコントロール文字です
+（通常、@kbd{C-a}と略記）。
+@kbd{C-a}の名前は、@key{CTRL}キーを押し下げたまま@kbd{a}を
+押すことからきています。
+
+@c   Some ASCII control characters have special names, and most terminals
+@c have special keys you can type them with: for example, @key{RET},
+@c @key{TAB}, @key{DEL} and @key{ESC}.  The space character is usually
+@c referred to below as @key{SPC}, even though strictly speaking it is a
+@c graphic character whose graphic happens to be blank.  Some keyboards
+@c have a key labeled ``linefeed'' which is an alias for @kbd{C-j}.
+ASCIIコントロール文字の中には、特別な名前が付いたものもあります。
+多くの端末では、コントロール文字を打つための特別なキーを備えています。
+たとえば、@key{RET}、@key{TAB}、@key{DEL}、@key{ESC}がそうです。
+空白文字は、以下では普通@key{SPC}と表記します。
+厳密にいえば、表示した図形が空白である図形文字です。
+@kbd{C-j}に対する別名である『linefeed』（ラインフィード）
+@footnote{【訳注】同じ意味で、改行（newline）も使う。}という
+ラベルが付いたキーを備えたキーボードもあります。
+
+@c   Emacs extends the ASCII character set with thousands more printing
+@c characters (@pxref{International}), additional control characters, and a
+@c few more modifiers that can be combined with any character.
+Emacsでは、数千の印字文字（@pxref{International}）、
+追加のコントロール文字、任意の文字と組み合わせ可能な修飾子を導入して、
+ASCII文字集合を拡張しています。
+
+@c   On ASCII terminals, there are only 32 possible control characters.
+@c These are the control variants of letters and @samp{@@[]\^_}.  In
+@c addition, the shift key is meaningless with control characters:
+@c @kbd{C-a} and @kbd{C-A} are the same character, and Emacs cannot
+@c distinguish them.
+ASCII端末では、利用可能なコントロール文字は32個しかありません。
+これらは、英字と@samp{@@[]\^_}のコントロール変種です。
+さらに、コントロール文字では、シフトキーは意味を持ちません。
+つまり、@kbd{C-a}と@kbd{C-A}は同じ文字であり、Emacsは区別できません。
+
+@c   But the Emacs character set has room for control variants of all
+@c printing characters, and for distinguishing between @kbd{C-a} and
+@c @kbd{C-A}.  X Windows makes it possible to enter all these characters.
+@c For example, @kbd{C--} (that's Control-Minus) and @kbd{C-5} are
+@c meaningful Emacs commands under X.
+しかし、Emacsの文字集合自体には、
+すべての印字文字にコントロール変種を用意する余地があり、
+@kbd{C-a}と@kbd{C-A}を区別できます。
+Xウィンドウシステムでは、これらすべての文字を入力できます。
+たとえば、@kbd{C--}（コントロールマイナス）と@kbd{C-5}は、
+Xウィンドウシステム上では意味を持つEmacsコマンドです。
+
+@c   Another Emacs character-set extension is additional modifier bits.
+@c Only one modifier bit is commonly used; it is called Meta.  Every
+@c character has a Meta variant; examples include @kbd{Meta-a} (normally
+@c written @kbd{M-a}, for short), @kbd{M-A} (not the same character as
+@c @kbd{M-a}, but those two characters normally have the same meaning in
+@c Emacs), @kbd{M-@key{RET}}, and @kbd{M-C-a}.  For reasons of tradition,
+@c we usually write @kbd{C-M-a} rather than @kbd{M-C-a}; logically
+@c speaking, the order in which the modifier keys @key{CTRL} and @key{META}
+@c are mentioned does not matter.
+Emacsの文字集合に対するもう1つの拡張は、修飾ビットの追加です。
+通常は1ビットの修飾ビットだけを使い、
+このビットをメタ（Meta）と呼びます。
+すべての文字にはメタ変種があります。
+たとえば、@kbd{Meta-a}（通常は@kbd{M-a}と略記）や
+@kbd{M-A}（@kbd{M-a}とは異なる文字だが、Emacsでは通常、同じ意味）、
+@kbd{M-@key{RET}}、@kbd{M-C-a}です。
+伝統的な理由で、通常、@kbd{M-C-a}よりむしろ@kbd{C-M-a}と書きます。
+論理的には、2つの修飾キー@key{CTRL}と@key{META}の順序は関係ありません。
+
+@c @cindex Meta
+@cindex メタ
+@cindex M-
+@c @cindex @key{ESC} replacing @key{META} key
+@cindex @key{META}キーにかわる@key{ESC}
+@c   Some terminals have a @key{META} key, and allow you to type Meta
+@c characters by holding this key down.  Thus, @kbd{Meta-a} is typed by
+@c holding down @key{META} and pressing @kbd{a}.  The @key{META} key works
+@c much like the @key{SHIFT} key.  Such a key is not always labeled
+@c @key{META}, however, as this function is often a special option for a key
+@c with some other primary purpose.@refill
+端末の中には@key{META}キーを備えたものもあり、
+このキーを押し下げることでメタ文字を打てます。
+たとえば、@kbd{Meta-a}は、@key{META}を押し下げたまま
+@kbd{a}を押して入力します。
+@key{META}キーは@key{SHIFT}キーと同じように働きます。
+しかし、このようなキーのラベルがつねに@key{META}であるとは限りません。
+というのは、この機能は、別の主目的を持つキーとするための
+特別なオプションであることがままあるからです。
+
+@c   If there is no @key{META} key, you can still type Meta characters
+@c using two-character sequences starting with @key{ESC}.  Thus, to enter
+@c @kbd{M-a}, you could type @kbd{@key{ESC} a}.  To enter @kbd{C-M-a}, you
+@c would type @kbd{@key{ESC} C-a}.  @key{ESC} is allowed on terminals with
+@c @key{META} keys, too, in case you have formed a habit of using it.
+@key{META}キーがなくても、@key{ESC}で始まる2文字列を使って
+メタ文字を入力できます。
+つまり、@kbd{M-a}を入力するには、
+@kbd{@key{ESC} a}と打ちます。
+@kbd{C-M-a}を入力するには、@kbd{@key{ESC} C-a}と打ちます。
+この方法に慣れているのであれば、
+@key{META}がある端末でも、@key{ESC}を使ってかまいません。
+  
+@c   X Windows provides several other modifier keys that can be applied to
+@c any input character.  These are called @key{SUPER}, @key{HYPER} and
+@c @key{ALT}.  We write @samp{s-}, @samp{H-} and @samp{A-} to say that a
+@c character uses these modifiers.  Thus, @kbd{s-H-C-x} is short for
+@c @kbd{Super-Hyper-Control-x}.  Not all X terminals actually provide keys
+@c for these modifier flags---in fact, many terminals have a key labeled
+@c @key{ALT} which is really a @key{META} key.  The standard key bindings
+@c of Emacs do not include any characters with these modifiers.  But you
+@c can assign them meanings of your own by customizing Emacs.
+Xウィンドウシステムには、他にもいくつかの修飾キーがあり、
+すべての入力文字に適用できます。
+これらは、@key{SUPER}、@key{HYPER}、@key{ALT}と呼ばれます。
+文字にこれらの修飾子が付いていることを示す意味で、
+@samp{s-}、@samp{H-}、@samp{A-}と書きます。
+つまり、@kbd{s-H-C-x}は、@kbd{Super-Hyper-Control-x}を省略したものです。
+すべてのX端末に、実際にこれらの修飾子用のキーがあるわけではありません。
+実際、@key{ALT}とラベルされているにも関わらず、
+実は@key{META}として機能するキーを持つ端末が多くあります。
+Emacsの標準キーバインディングには、
+これらの修飾子が付いた文字はありません。
+しかし、Emacsをカスタマイズして、それらに独自の意味を割り当てることができます。
+
+@c   Keyboard input includes keyboard keys that are not characters at all:
+@c for example function keys and arrow keys.  Mouse buttons are also
+@c outside the gamut of characters.  You can modify these events with the
+@c modifier keys @key{CTRL}, @key{META}, @key{SUPER}, @key{HYPER} and
+@c @key{ALT}, just like keyboard characters.
+キーボード入力には、
+ファンクションキーや矢印キーのような文字以外のキーも含まれます。
+マウスボタンも文字の範囲には入りません。
+これらのイベントも、修飾キー@key{CTRL}、@key{META}、
+@key{SUPER}、@key{HYPER}、@key{ALT}を使って、
+キーボード文字と同じように修飾できます。
+
+@c @cindex input event
+@cindex 入力イベント
+@c   Input characters and non-character inputs are collectively called
+@c @dfn{input events}.  @xref{Input Events,,, elisp, The Emacs Lisp
+@c Reference Manual}, for more information.  If you are not doing Lisp
+@c programming, but simply want to redefine the meaning of some characters
+@c or non-character events, see @ref{Customization}.
+文字入力と非文字入力の両者を合わせて、
+@dfn{入力イベント}（input events）と呼びます。
+より詳しくは、
+@xref{Input Events,, 入力イベント, elisp,
+Emacs Lisp リファレンスマニュアル}。
+Lispのプログラミング抜きに、
+文字イベントや非文字イベントの意味を再定義したい場合には、
+@ref{Customization}を参照してください。
+
+@c   ASCII terminals cannot really send anything to the computer except
+@c ASCII characters.  These terminals use a sequence of characters to
+@c represent each function key.  But that is invisible to the Emacs user,
+@c because the keyboard input routines recognize these special sequences
+@c and convert them to function key events before any other part of Emacs
+@c gets to see them.
+ASCII端末では、ASCII文字だけしかコンピュータに送れません。
+これらの端末では、文字の並びを使って各ファンクションキーを表現します。
+ただし、キーボード入力ルーチンがこれらの特別な文字の並びを認識して、
+Emacsの他の部分に渡すまえにファンクションキーイベントに変換してしまうので、
+これらの文字の並びがEmacsユーザーの目にふれることはありません。
+
+@node Keys, Commands, User Input, Top
+@c @section Keys
+@section キー
+
+@c @cindex key sequence
+@c @cindex key
+@cindex キー列
+@cindex キー
+@c   A @dfn{key sequence} (@dfn{key}, for short) is a sequence of input
+@c events that are meaningful as a unit---as ``a single command.''
+@c Some Emacs command sequences are just one character or one event; for
+@c example, just @kbd{C-f} is enough to move forward one character.  But
+@c Emacs also has commands that take two or more events to invoke.
+@dfn{キー列}（key sequence）（@dfn{キー}と略記）は、
+一塊で『1つのコマンド』としての意味を持つ入力イベントの列です。
+Emacsのコマンド列の中には、1文字のみ、つまり、
+1イベントのみであるものもあります。
+たとえば、@kbd{C-f}はポイントを1文字先へ進めます。
+しかし、なかには、起動に2つ以上のイベントを必要とするコマンドもあります。
+
+@c @cindex complete key
+@c @cindex prefix key
+@cindex 完結キー
+@cindex プレフィックスキー
+@c   If a sequence of events is enough to invoke a command, it is a
+@c @dfn{complete key}.  Examples of complete keys include @kbd{C-a},
+@c @kbd{X}, @key{RET}, @key{NEXT} (a function key), @key{DOWN} (an arrow
+@c key), @kbd{C-x C-f}, and @kbd{C-x 4 C-f}.  If it isn't long enough to be
+@c complete, we call it a @dfn{prefix key}.  The above examples show that
+@c @kbd{C-x} and @kbd{C-x 4} are prefix keys.  Every key sequence is either
+@c a complete key or a prefix key.
+あるイベント列が1つのコマンドを起動するのに十分である場合、
+それらを@dfn{完結キー}（complete key）と呼びます。
+完結キーの例としては、@kbd{C-a}、@kbd{X}、@key{RET}、
+@key{NEXT}（ファンクションキーの1つ）、@key{DOWN}（矢印キー）、@kbd{C-x C-f}、
+@kbd{C-x 4 C-f}があります。
+完結するほど十分に長くないイベント列を、
+@dfn{プレフィックスキー}（prefix key）と呼びます。
+上の例では、@kbd{C-x}や@kbd{C-x 4}が、プレフィックスキーです。
+すべてのキー入力列は、完結キーかプレフィックスキーのどちらかです。
+
+@c   Most single characters constitute complete keys in the standard Emacs
+@c command bindings.  A few of them are prefix keys.  A prefix key combines
+@c with the following input event to make a longer key sequence, which may
+@c itself be complete or a prefix.  For example, @kbd{C-x} is a prefix key,
+@c so @kbd{C-x} and the next input event combine to make a two-character
+@c key sequence.  Most of these key sequences are complete keys, including
+@c @kbd{C-x C-f} and @kbd{C-x b}.  A few, such as @kbd{C-x 4} and @kbd{C-x
+@c r}, are themselves prefix keys that lead to three-character key
+@c sequences.  There's no limit to the length of a key sequence, but in
+@c practice people rarely use sequences longer than four events.
+Emacs標準のコマンド割り当てでは、ほとんどの1文字は完結キーです。
+残りの少数はプレフィックスキーです。
+プレフィックスキーは、後続の入力イベントと結び付いて、
+それ自体が完結キーやプレフィックスキーとなる、
+さらに長いキーの列を作ります。
+たとえば、@kbd{C-x}はプレフィックスキーなので、
+@kbd{C-x}に続く入力イベントと結び付いて2文字のキー列を作ります。
+@kbd{C-x C-f}や@kbd{C-x b}を含めて、
+これらのキー列のほとんどは完結キーになります。
+@kbd{C-x 4}や@kbd{C-x r}のように、
+いくつかのキー列はそれ自体がプレフィックスキーとなり、
+3文字のキー列を作ります。
+キー列の長さに制限はありませんが、
+実用上は4文字を超える長さのキー列を使うことはめったにありません。
+
+@c   By contrast, you can't add more events onto a complete key.  For
+@c example, the two-character sequence @kbd{C-f C-k} is not a key, because
+@c the @kbd{C-f} is a complete key in itself.  It's impossible to give
+@c @kbd{C-f C-k} an independent meaning as a command.  @kbd{C-f C-k} is two
+@c key sequences, not one.@refill
+これに対して、完結キーには入力イベントを付け加えることができません。
+たとえば、2文字の列@kbd{C-f C-k}はキーではありません。
+というのは、@kbd{C-f}がそれ自体で完結キーだからです。
+@kbd{C-f C-k}にコマンドとしての独立した意味付けをすることは不可能です。
+@kbd{C-f C-k}は、2つのキー列であって、1つのキー列ではありません。
+
+@c   All told, the prefix keys in Emacs are @kbd{C-c}, @kbd{C-h},
+@c @kbd{C-x}, @kbd{C-x @key{RET}}, @kbd{C-x @@}, @kbd{C-x a}, @kbd{C-x n}, @w{@kbd{C-x
+@c r}}, @kbd{C-x v}, @kbd{C-x 4}, @kbd{C-x 5}, @kbd{C-x 6}, @key{ESC},
+@c @kbd{M-g} and @kbd{M-j}.  But this list is not cast in concrete; it is
+@c just a matter of Emacs's standard key bindings.  If you customize Emacs,
+@c you can make new prefix keys, or eliminate these.  @xref{Key Bindings}.
+Emacsのプレフィックスキーは、@kbd{C-c}、@kbd{C-h}、@kbd{C-x}、
+@kbd{C-x @key{RET}}、@kbd{C-x @@}、@kbd{C-x a}、@kbd{C-x n}、
+@w{@kbd{C-x r}}、@kbd{C-x v}、@kbd{C-x 4}、@kbd{C-x 5}、
+@kbd{C-x 6}、@key{ESC}、@kbd{M-g}、@kbd{M-j}です。
+しかし、これらは固定されているわけではなく、
+Emacsのキー割り当ての標準設定となっているだけです。
+Emacsをカスタマイズすれば、新しいプレフィックスキーを設定したり、
+これらを解除したりできます。
+@xref{Key Bindings}。
+
+@c   If you do make or eliminate prefix keys, that changes the set of
+@c possible key sequences.  For example, if you redefine @kbd{C-f} as a
+@c prefix, @kbd{C-f C-k} automatically becomes a key (complete, unless you
+@c define it too as a prefix).  Conversely, if you remove the prefix
+@c definition of @kbd{C-x 4}, then @kbd{C-x 4 f} (or @kbd{C-x 4
+@c @var{anything}}) is no longer a key.
+プレフィックスキーを設定したり解除したりすると、
+可能なキー列の集合を変えることになります。
+たとえば、@kbd{C-f}をプレフィックスキーとして再定義すると、
+@kbd{C-f C-k}は自動的に
+（これをさらにプレフィックスとして定義しない限り完結した）キーになります。
+逆に、@kbd{C-x 4}をプレフィックスでなくすると、@kbd{C-x 4 f}
+（または@kbd{C-x 4 @var{anything}}）は、もはやキーではなくなります。
+
+@c   Typing the help character (@kbd{C-h} or @key{F1}) after a prefix
+@c character displays a list of the commands starting with that prefix.
+@c There are a few prefix characters for which @kbd{C-h} does not
+@c work---for historical reasons, they have other meanings for @kbd{C-h}
+@c which are not easy to change.  But @key{F1} should work for all prefix
+@c characters.
+プレフィックスキーのあとにヘルプ文字（@kbd{C-h}や@key{F1}）を打つと、
+そのプレフィックスで始まるコマンド一覧を表示できます。
+歴史的な背景から、@kbd{C-h}が機能しないプレフィックス文字も存在します。
+これらの文字では、@kbd{C-h}が別の意味に割り当てられていて、
+容易には変更できないのです。
+しかし、@key{F1}はすべてのプレフィックスに対して使えるはずです。
+  
+@node Commands, Text Characters, Keys, Top
+@c @section Keys and Commands
+@section キーとコマンド
+
+@c @cindex binding
+@c @cindex function
+@c @cindex command
+@c @cindex function definition
+@cindex バインディング
+@cindex 関数
+@cindex コマンド
+@cindex 関数定義
+@c   This manual is full of passages that tell you what particular keys
+@c do.  But Emacs does not assign meanings to keys directly.  Instead,
+@c Emacs assigns meanings to named @dfn{commands}, and then gives keys
+@c their meanings by @dfn{binding} them to commands.
+本書は、特定のキーの機能を詳しく説明したページばかりです。
+しかし、Emacsは直接キーに意味を与えてはいません。
+そのかわりに、Emacsは名前を付けた@dfn{コマンド}（commands）に意味を持たせ、
+キーとコマンドを@dfn{バインディング}（binding、結び付ける）
+することによって、キーに意味を与えています。
+
+@c   Every command has a name chosen by a programmer.  The name is usually
+@c made of a few English words separated by dashes; for example,
+@c @code{next-line} or @code{forward-word}.  A command also has a
+@c @dfn{function definition} which is a Lisp program; this is what makes
+@c the command do what it does.  In Emacs Lisp, a command is actually a
+@c special kind of Lisp function; one which specifies how to read arguments
+@c for it and call it interactively.  For more information on commands and
+@c functions, see @ref{What Is a Function,, What Is a Function, elisp, The
+@c Emacs Lisp Reference Manual}.  (The definition we use in this manual is
+@c simplified slightly.)
+すべてのコマンドには、プログラマが選んだ名前が付いています。
+その名前は、たいていダッシュで区切った数語の英単語です。
+たとえば、@code{next-line}や@code{forward-word}がそうです。
+コマンドは、Lispプログラムである@dfn{関数定義}
+（function definition、defun）を持ちます。
+これが、コマンドが行うべきことを行えるようにしています。
+Emacs Lispでは、コマンドは実際には特別な種類の関数です。
+つまり、引数の読み取り方や対話的な呼び出し方が規定されたLisp関数です。
+コマンドと関数に関してより詳しくは、
+@ref{What Is a Function,, 関数とは何か, elisp,
+Emacs Lisp リファレンスマニュアル}を
+参照してください。（本書での定義は少々簡易化してある。）
+
+@c   The bindings between keys and commands are recorded in various tables
+@c called @dfn{keymaps}.  @xref{Keymaps}.
+キーとコマンドのバインディングは、
+@dfn{キーマップ}（keymaps）という表に記録されています。
+@xref{Keymaps}。
+
+@c   When we say that ``@kbd{C-n} moves down vertically one line'' we are
+@c glossing over a distinction that is irrelevant in ordinary use but is vital
+@c in understanding how to customize Emacs.  It is the command
+@c @code{next-line} that is programmed to move down vertically.  @kbd{C-n} has
+@c this effect @emph{because} it is bound to that command.  If you rebind
+@c @kbd{C-n} to the command @code{forward-word} then @kbd{C-n} will move
+@c forward by words instead.  Rebinding keys is a common method of
+@c customization.@refill
+『@kbd{C-n}は垂直方向に1行下がる』という表現では、
+Emacsのカスタマイズ方法を理解するうえでは非常に重要であっても、
+普段の使い方では意味のない「区別」をあえて無視しています。
+下がるようにプログラムされているのは@code{next-line}というコマンドです。
+@kbd{C-n}がそのコマンドにバインドされているので、
+そのような効果を発揮するのです。
+@kbd{C-n}をコマンド@code{forward-word}にバインドし直すと、
+@kbd{C-n}は、かわりに1単語ずつ先へ進むようになります。
+キーの再バインディングは、カスタマイズの一般的な方法です。
+
+@c   In the rest of this manual, we usually ignore this subtlety to keep
+@c things simple.  To give the information needed for customization, we
+@c state the name of the command which really does the work in parentheses
+@c after mentioning the key that runs it.  For example, we will say that
+@c ``The command @kbd{C-n} (@code{next-line}) moves point vertically
+@c down,'' meaning that @code{next-line} is a command that moves vertically
+@c down and @kbd{C-n} is a key that is standardly bound to it.
+本書では、今後、話を単純にするために、
+普段はこの違いを無視することにします。
+カスタマイズに必要な情報を示す場合、
+コマンドを実行するキーを記したあとに、
+実際にその動作を行うコマンドの名前を括弧に括って示します。
+たとえば、『コマンド@kbd{C-n}（@code{next-line}）は、
+ポイントを下向きに移動する』という表現では、
+下向きに移動するコマンドは@code{next-line}であり、
+標準ではキー@kbd{C-n}にバインドされていることを意味します。
+
+@c   While we are on the subject of information for customization only,
+@c it's a good time to tell you about @dfn{variables}.  Often the
+@c description of a command will say, ``To change this, set the variable
+@c @code{mumble-foo}.''  A variable is a name used to remember a value.
+@c Most of the variables documented in this manual exist just to facilitate
+@c customization: some command or other part of Emacs examines the variable
+@c and behaves differently according to the value that you set.  Until you
+@c are interested in customizing, you can ignore the information about
+@c variables.  When you are ready to be interested, read the basic
+@c information on variables, and then the information on individual
+@c variables will make sense.  @xref{Variables}.
+これまでカスタマイズに関して述べてきましたので、
+@dfn{変数}についてふれておく時期でしょう。
+コマンドの説明では、
+『これを変更するには、変数@code{mumble-foo}を設定する』と
+記述することがあります。
+変数とは、値を記憶しておくために使う名前のことです。
+本書に記載された変数の大部分は、カスタマイズのために使われます。
+いくつかのコマンドやEmacsの他の部分では、
+変数を調べて設定された値に従ってそのふるまいを変えていきます。
+カスタマイズに興味が出てくるまでは、
+変数に関する記述は無視してかまいません。
+カスタマイズしてみたいと思ったら、
+変数に関する基礎を読んでください。
+そうすれば、個々の変数に関する情報を理解できるでしょう。
+@xref{Variables}。
+
+@node Text Characters, Entering Emacs, Commands, Top
+@c @section Character Set for Text
+@section テキスト用の文字集合
+@c @cindex characters (in text)
+@cindex 文字（テキスト中の）
+
+@c   Text in Emacs buffers is a sequence of 8-bit bytes.  Each byte can
+@c hold a single ASCII character.  Both ASCII control characters (octal
+@c codes 000 through 037, and 0177) and ASCII printing characters (codes
+@c 040 through 0176) are allowed; however, non-ASCII control characters
+@c cannot appear in a buffer.  The other modifier flags used in keyboard
+@c input, such as Meta, are not allowed in buffers either.
+Emacsバッファ内のテキストは、1バイト8ビットのバイトの列です。
+各バイトで、1つのASCII文字を表現できます。
+ASCIIコントロール文字（8進数000〜037、0177）と
+ASCII印字文字（8進数040〜0176）の両方を使えます。
+しかし、非ASCIIコントロール文字はバッファには現れません。
+メタのようなキーボード入力で用いられるその他の修飾フラグも
+バッファ内では許されません。
+
+@c   Some ASCII control characters serve special purposes in text, and have
+@c special names.  For example, the newline character (octal code 012) is
+@c used in the buffer to end a line, and the tab character (octal code 011)
+@c is used for indenting to the next tab stop column (normally every 8
+@c columns).  @xref{Text Display}.
+いくつかのASCIIコントロール文字は、
+テキスト中では特別な目的のために用いられていて、特別な名前が付いています。
+たとえば、改行文字（8進数012）は、バッファ内の1行の終りに使われます。
+また、タブ文字（8進数011）は、つぎのタブストップ位置（通常8桁ごと）まで
+テキストを字下げするために使われます。
+@xref{Text Display}。
+
+@c   Non-ASCII printing characters can also appear in buffers.  When
+@c multibyte characters are enabled, you can use any of the non-ASCII
+@c printing characters that Emacs supports.  They have character codes
+@c starting at 256, octal 0400, and each one is represented as a sequence
+@c of two or more bytes.  @xref{International}.
+非ASCII印字文字もバッファ内に存在できます。
+マルチバイト文字を使用可にしてあれば、
+Emacsが扱える任意の非ASCII印字文字を使えます。
+それらの文字の文字コードは256（8進で0400）から始まり、
+各文字は2バイト、あるいはそれ以上のバイト列として表現されます。
+@xref{International}。
+
+@c   If you disable multibyte characters, then you can use only one
+@c alphabet of non-ASCII characters, but they all fit in one byte.  They
+@c use codes 0200 through 0377.  @xref{Single-Byte European Support}.
+マルチバイト文字を使用不可にしている場合、
+非ASCII文字のうちの1種類のアルファベットだけを使えますが、
+それらはすべて1バイトに収まるものです。
+文字コードは0200から0377を使います。
+@xref{Single-Byte European Support}。

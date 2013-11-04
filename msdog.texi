@@ -1,0 +1,1471 @@
+@c =============================================================
+@c = 元 翻 訳: 田中聡＠東京女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/14
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,1997,2000,2001
+@c  Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node MS-DOS, Manifesto, Mac OS, Top
+@c @appendix Emacs and MS-DOS 
+@appendix EmacsとMS-DOS @emph{(2005/09/19)}
+@cindex MS-DOG
+@c @cindex MS-DOS peculiarities
+@cindex MS-DOSの癖
+
+@c   This section briefly describes the peculiarities of using Emacs under
+@c the MS-DOS ``operating system'' (also known as ``MS-DOG'').  If you
+@c build Emacs for MS-DOS, the binary will also run on Windows 3.X, Windows
+@c NT, Windows 9X/ME, Windows 2000, or OS/2 as a DOS application; the
+@c information in this chapter applies for all of those systems, if you use
+@c an Emacs that was built for MS-DOS.
+ここでは、（『MS-DOG』とも呼ばれる）MS-DOS『オペレーティングシステム』で
+稼働するEmacsの癖について簡単にふれます。
+MS-DOS用に作成したEmacsのバイナリは、
+Windows 3.x、Windows NT、Windows 9X/ME, Windows 2000、OS-2上で
+DOSアプリケーションとしても動作します。
+MS-DOS用に作成したEmacsを使っている限り、
+本章の情報はこれらすべてのシステムにあてはまります。
+
+@c   Note that it is possible to build Emacs specifically for Windows NT/2K
+@c or Windows 9X/ME.  If you do that, most of this chapter does not apply;
+@c instead, you get behavior much closer to what is documented in the rest
+@c of the manual, including support for long file names, multiple frames,
+@c scroll bars, mouse menus, and subprocesses.  However, the section on
+@c text files and binary files does still apply.  There are also two
+@c sections at the end of this chapter which apply specifically for the
+@c Windows version.
+Windows NT/MEやWindows 9X/MEに専用のEmacsを作ることも可能です。
+その場合には、本章のほとんどは関係ありません。
+長いファイル名、複数のフレーム、スクロールバー、マウスメニュー、
+サブプロセスの利用を含めて、本書の他の部分で説明した動作に
+近い動作をします。
+しかし、テキストファイルとバイナリファイルに関する節は適用できます。
+また、本章の最後の2つの節は、Windows 版だけに適用できます。
+
+@menu
+* Input: MS-DOS Input.         Keyboard and mouse usage on MS-DOS.
+* Display: MS-DOS Display.     Fonts, frames and display size on MS-DOS.
+* Files: MS-DOS File Names.    File name conventions on MS-DOS.
+* Text and Binary::            Text files on MS-DOS use CRLF to separate lines.
+* Printing: MS-DOS Printing.   How to specify the printer on MS-DOS.
+* I18N: MS-DOS and MULE.       Support for internationalization on MS-DOS.
+* Processes: MS-DOS Processes. Running subprocesses on MS-DOS.
+* Windows Processes::          Running subprocesses on Windows.
+* Windows System Menu::        Controlling what the ALT key does.
+@end menu
+
+@node MS-DOS Input
+@c @section Keyboard and Mouse on MS-DOS
+@section MS-DOSのキーボードとマウス @emph{(2005/05/08)}
+
+@c @cindex Meta (under MS-DOS)
+@c @cindex Hyper (under MS-DOS)
+@c @cindex Super (under MS-DOS)
+@cindex Meta （MS-DOS）
+@cindex Hyper （MS-DOS）
+@cindex Super （MS-DOS）
+@vindex dos-super-key
+@vindex dos-hyper-key
+@c   The PC keyboard maps use the left @key{ALT} key as the @key{META} key.
+@c You have two choices for emulating the @key{SUPER} and @key{HYPER} keys:
+@c choose either the right @key{CTRL} key or the right @key{ALT} key by
+@c setting the variables @code{dos-hyper-key} and @code{dos-super-key} to 1
+@c or 2 respectively.  If neither @code{dos-super-key} nor
+@c @code{dos-hyper-key} is 1, then by default the right @key{ALT} key is
+@c also mapped to the @key{META} key.  However, if the MS-DOS international
+@c keyboard support program @file{KEYB.COM} is installed, Emacs will
+@c @emph{not} map the right @key{ALT} to @key{META}, since it is used for
+@c accessing characters like @kbd{~} and @kbd{@@} on non-US keyboard
+@c layouts; in this case, you may only use the left @key{ALT} as @key{META}
+@c key.
+PCのキーボードの左側の@key{ALT}キーは、@key{META}キーに割り当てられます。
+@key{SUPER}キーと@key{HYPER}キーのエミュレーションには、選択肢が2つあります。
+変数@code{dos-hyper-key}と@code{dos-super-key}を1にすれば、
+右側の@key{CTRL}キーを選びます。
+変数@code{dos-hyper-key}と@code{dos-super-key}を2にすれば、
+右側の@key{ALT}キーを選びます。
+@code{dos-super-key}と@code{dos-hyper-key}のいずれも1でなければ、
+デフォルトで右側の@key{ALT}キーも@key{META}に割り当てられます。
+しかし、MS-DOSの国際化キーボード用プログラム
+@file{KEYB.COM}をインストールしてある場合は、
+右側の@key{ALT}を@key{META}には割り当て@emph{ません}。 
+というのは、米国配列のキーボードでない場合、
+右側の@key{ALT}は@kbd{~}や@kbd{@@}として使われるからです。
+この場合には、左側の@key{ALT}のみを@key{META}として使えます。
+
+@c @kindex C-j @r{(MS-DOS)}
+@kindex C-j @r{（MS-DOS）}
+@vindex dos-keypad-mode
+@c   The variable @code{dos-keypad-mode} is a flag variable that controls
+@c what key codes are returned by keys in the numeric keypad.  You can also
+@c define the keypad @key{ENTER} key to act like @kbd{C-j}, by putting the
+@c following line into your @file{_emacs} file:
+変数@code{dos-keypad-mode}は、
+数字キーパッド上のキーが返すキーコードを制御する変数です。
+ファイル@file{_emacs}につぎの行を入れておけば、
+@key{ENTER}キーが@kbd{C-j}として働くように定義できます。
+
+@smallexample
+;; @r{Make the @key{ENTER} key from the numeric keypad act as @kbd{C-j}.}
+;; @r{数字キーパッドの@key{Enter}キーを@kbd{C-j}として動作させる。}
+(define-key function-key-map [kp-enter] [?\C-j])
+@end smallexample
+
+@c @kindex DEL @r{(MS-DOS)}
+@c @kindex BS @r{(MS-DOS)}
+@kindex DEL @r{（MS-DOS）}
+@kindex BS @r{（MS-DOS）}
+@c   The key that is called @key{DEL} in Emacs (because that's how it is
+@c designated on most workstations) is known as @key{BS} (backspace) on a
+@c PC.  That is why the PC-specific terminal initialization remaps the
+@c @key{BS} key to act as @key{DEL}; the @key{DEL} key is remapped to act
+@c as @kbd{C-d} for the same reasons.
+（ほとんどのワークステーションでの呼称から）
+Emacsで@key{DEL}と呼ばれるキーは、PCでは@key{BS}（バックスペース）です。
+このため、PC特有の端末初期化においては、
+@key{BS}キーは@key{DEL}として動作するようにしています。
+同じ理由から、@key{DEL}キーは @key{C-d}として動作するようにしてあります。
+
+@c @kindex C-g @r{(MS-DOS)}
+@c @kindex C-BREAK @r{(MS-DOS)}
+@c @cindex quitting on MS-DOS
+@kindex C-g @r{（MS-DOS）}
+@kindex C-BREAK @r{（MS-DOS）}
+@cindex MS-DOS上での中断
+@c   Emacs built for MS-DOS recognizes @kbd{C-@key{BREAK}} as a quit
+@c character, just like @kbd{C-g}.  This is because Emacs cannot detect
+@c that you have typed @kbd{C-g} until it is ready for more input.  As a
+@c consequence, you cannot use @kbd{C-g} to stop a running command
+@c (@pxref{Quitting}).  By contrast, @kbd{C-@key{BREAK}} @emph{is} detected
+@c as soon as you type it (as @kbd{C-g} is on other systems), so it can be
+@c used to stop a running command and for emergency escape
+@c (@pxref{Emergency Escape}).
+MS-DOS用のEmacsでは、
+@kbd{C-@key{BREAK}}を@kbd{C-g}のような中断文字として認識します。
+これは、Emacsが入力を読もうとしないと
+@kbd{C-g}が打鍵されたことを検出できないからです。
+そのため、動作中のコマンドを止めるために@kbd{C-g}を使えません
+（@pxref{Quitting}）。
+対照的に、@kbd{C-@key{BREAK}}は
+（他のシステムでの@kbd{C-g}のように）打鍵するとすぐに検出@emph{される}ので、
+動作中のコマンドを停止したり緊急脱出したりするために使えます
+（@pxref{Emergency Escape}）。
+
+@c @cindex mouse support under MS-DOS
+@cindex MS-DOSでのマウスの利用
+@c   Emacs on MS-DOS supports a mouse (on the default terminal only).
+@c The mouse commands work as documented, including those that use menus
+@c and the menu bar (@pxref{Menu Bar}).  Scroll bars don't work in
+@c MS-DOS Emacs.  PC mice usually have only two buttons; these act as
+@c @kbd{Mouse-1} and @kbd{Mouse-2}, but if you press both of them
+@c together, that has the effect of @kbd{Mouse-3}.  If the mouse does have
+@c 3 buttons, Emacs detects that at startup, and all the 3 buttons function
+@c normally, as on X.
+MS-DOS用Emacsは、（デフォルトの端末だけで）マウスを使えます。
+メニューやメニューバー（@pxref{Menu Bar}）の利用を含めて、
+マウスコマンドはドキュメントどおりに動作します。
+MS-DOS用Emacsではスクロールバーは使えません。
+PCのマウスには、通常、2つのボタンしかありません。
+これらは@kbd{Mouse-1}と@kbd{Mouse-2}として動作しますが、
+2つのボタンを同時に押せば@kbd{Mouse-3}として動作します。もしマウスに3ボタンがあ
+れば，Emacs は起動時に認識し，3つのボタンに X と同様の機能を割り当てます．
+
+@c   Help strings for menu-bar and pop-up menus are displayed in the echo
+@c area when the mouse pointer moves across the menu items.
+@c Highlighting of mouse-sensitive text (@pxref{Mouse References}) is also
+@c supported.
+メニューバーやポップアップメニューで表示されるヘルプはそれぞれのメニュー上にマウ
+スポインタを置くとエコー領域に表示されます．マウスを置くと，強調表示されるテキス
+ト (@pxref{Mouse References}) もサポートされています．
+
+@cindex mouse, set number of buttons
+@findex msdos-set-mouse-buttons
+@c   Some versions of mouse drivers don't report the number of mouse
+@c buttons correctly.  For example, mice with a wheel report that they
+@c have 3 buttons, but only 2 of them are passed to Emacs; the clicks on
+@c the wheel, which serves as the middle button, are not passed.  In
+@c these cases, you can use the @kbd{M-x msdos-set-mouse-buttons} command
+@c to tell Emacs how many mouse buttons to expect.  You could make such a
+@c setting permanent by adding this fragment to your @file{_emacs} init
+@c file:
+いくつかのマウスドライバはマウスのボタン数を正しく報告しません．例えば，あるホイー
+ルマウスは3つのボタンを持っているのですが，Emacs には2つしかないと伝えられます．
+ホイールを押せば，中ボタンとして機能するのですが，それが伝わらないのです．こういっ
+た場合には，コマンド @kbd{M-x msdos-set-mouse-buttons} を使って Emacs にいくつの
+マウスボタンがあるか伝えることができます．この設定を永続的に有効にさせるためには
+初期化ファイル @file{_emacs} に以下を追加します．
+
+@example
+@c ;; @r{Treat the mouse like a 2-button mouse.}
+;; @r{2ボタンマウスとして扱う}
+(msdos-set-mouse-buttons 2)
+@end example
+
+@c @cindex Windows clipboard support
+@c   Emacs built for MS-DOS supports clipboard operations when it runs on
+@c Windows.  Commands that put text on the kill ring, or yank text from the
+@c ring, check the Windows clipboard first, just as Emacs does on the X
+@c Window System (@pxref{Mouse Commands}).  Only the primary selection and
+@c the cut buffer are supported by MS-DOS Emacs on Windows; the secondary
+@c selection always appears as empty.
+@cindex Windowsのクリップボードの利用
+MS-DOS用EmacsがWindows上で動作している場合には、
+クリップボードの操作を利用できます。
+キルリングにテキストを置いたり、
+キルリングからテキストをヤンクしたりするコマンドでは、
+Xウィンドウシステムの場合と同様に、
+まずWindowsのクリップボードを調べます（@pxref{Mouse Commands}）。
+Windows上のMS-DOS用Emacsは、
+一次セレクションとカットバッファのみを利用し、
+二次セレクションはつねに空です。
+
+@c   Due to the way clipboard access is implemented by Windows, the
+@c length of text you can put into the clipboard is limited by the amount
+@c of free DOS memory that is available to Emacs.  Usually, up to 620KB of
+@c text can be put into the clipboard, but this limit depends on the system
+@c configuration and is lower if you run Emacs as a subprocess of
+@c another program.  If the killed text does not fit, Emacs outputs a
+@c message saying so, and does not put the text into the clipboard.
+Windowsで実装されているクリップボードの参照方法のため、
+クリップボードに置けるテキストの長さは、
+Emacsが利用できるDOSの空きメモリ量に制限されます。
+通常、620Kバイトまでのテキストをクリップボードに置けますが、
+この上限はシステムの設定に依存し、
+他のプログラムのサブプロセスとしてEmacsを実行しているときには少なくなります。
+削除したテキストがクリップボードに入りきらなければ、
+Emacsはその旨のメッセージを出力して、
+テキストをクリップボードへ置きません。
+
+@c   Null characters also cannot be put into the Windows clipboard.  If the
+@c killed text includes null characters, Emacs does not put such text into
+@c the clipboard, and displays in the echo area a message to that effect.
+Windowsのクリップボードにはナル文字を入れられません。
+キルしたテキストにナル文字が含まれる場合には、
+Emacsはそのようなテキストをクリップボードへ置きません。
+さらに、エコー領域には、その旨、メッセージを表示します。
+
+@vindex dos-display-scancodes
+@c   The variable @code{dos-display-scancodes}, when non-@code{nil},
+@c directs Emacs to display the @acronym{ASCII} value and the keyboard scan code of
+@c each keystroke; this feature serves as a complement to the
+@c @code{view-lossage} command, for debugging.
+変数@code{dos-display-scancodes}の値が@code{nil}以外のときには、
+キーを打つたびに、Emacsは各キーの@acronym{ASCII}（コードの）値と
+キーボードスキャンコードを出力します。
+この機能は、デバッグ用のコマンド@code{view-lossage}を補佐します。
+
+@node MS-DOS Display
+@c @section Display on MS-DOS
+@c @cindex faces under MS-DOS
+@c @cindex fonts, emulating under MS-DOS
+@section MS-DOSの画面 @emph{(2005/05/08)}
+@cindex フェイス（MS-DOS）
+@cindex フォントのエミュレーション（MS-DOS）
+
+@c   Display on MS-DOS cannot use font variants, like bold or italic,
+@c but it does support
+@c multiple faces, each of which can specify a foreground and a background
+@c color.  Therefore, you can get the full functionality of Emacs packages
+@c that use fonts (such as @code{font-lock}, Enriched Text mode, and
+@c others) by defining the relevant faces to use different colors.  Use the
+@c @code{list-colors-display} command (@pxref{Frame Parameters}) and the
+@c @code{list-faces-display} command (@pxref{Faces}) to see what colors and
+@c faces are available and what they look like.
+MS-DOSの画面では、ボールド体（太字体）やイタリック体（斜体）などの
+フォントの変種を使えませんが、
+個々に前景色と背景色を指定できるフェイスを複数個使えます。
+したがって、関連するフェイスに異なる表示色を定義すれば、
+（@code{font-lock}、エンリッチ（enriched）モードなどの）
+フォントを用いるEmacsのパッケージの全機能を利用できます。
+コマンド@code{list-colors-display}（@pxref{Frame Parameters}）と
+コマンド@code{list-faces-display}（@pxref{Faces}）を使えば、
+利用可能なフェイスと表示色、それらの見え方を知ることができます。
+
+@c   @xref{MS-DOS and MULE}, later in this chapter, for information on
+@c how Emacs displays glyphs and characters that aren't supported by the
+@c native font built into the DOS display.
+本章の@ref{MS-DOS and MULE}では、
+DOSの画面に組み込まれたフォントでは表せない
+字形や文字をEmacsがどのように表示するかを説明します。
+
+@cindex cursor shape on MS-DOS
+@c   When Emacs starts, it changes the cursor shape to a solid box.  This
+@c is for compatibility with other systems, where the box cursor is the
+@c default in Emacs.  This default shape can be changed to a bar by
+@c specifying the @code{cursor-type} parameter in the variable
+@c @code{default-frame-alist} (@pxref{Creating Frames}).  The MS-DOS
+@c terminal doesn't support a vertical-bar cursor, so the bar cursor is
+@c horizontal, and the @code{@var{width}} parameter, if specified by the
+@c frame parameters, actually determines its height.  For this reason,
+@c the @code{bar} and @code{hbar} cursor types produce the same effect on
+@c MS-DOS.  As an extension, the bar cursor specification can include the
+@c starting scan line of the cursor as well as its width, like this:
+Emacs が起動すると，カーソル形状を四角に変えます．これは，ボックスカーソルがデフォ
+ルトである他のシステムと同じです．このデフォルト形状は
+@code{default-frame-alist} のパラメータ @code{cursor-type} を変更することで縦線
+に変更することができます (@pxref{Creating Frames})．MS-DOS 端末は縦棒カーソルを
+サポートしませんので，カーソルは水平であり，フレームパラメータで設定されていれば，
+パラメータ @code{@var{width}} が高さを決定します．このため，@code{bar} と
+@code{hbar} カーソルは MS-DOS では同じ効果になります．延長として，バーカーソルは
+幅だけでなく，カーソルの開始位置も設定できます．
+
+@example
+ '(cursor-type bar @var{width} . @var{start})
+@end example
+
+@noindent
+@c In addition, if the @var{width} parameter is negative, the cursor bar
+@c begins at the top of the character cell.
+加えて，@var{width} がマイナスであれば，カーソルバーは文字の頂上から始まります．
+
+@c @cindex frames on MS-DOS
+@cindex フレーム（MS-DOS）
+@c   The MS-DOS terminal can only display a single frame at a time.  The
+@c Emacs frame facilities work on MS-DOS much as they do on text-only
+@c terminals (@pxref{Frames}).  When you run Emacs from a DOS window on
+@c MS-Windows, you can make the visible frame smaller than the full
+@c screen, but Emacs still cannot display more than a single frame at a
+@c time.
+MS-DOS 端末では1度に1つのフレームだけを表示できます．Emacs のフレーム機能は
+MS-DOS 上ではテキスト端末と同じように動作します(@pxref{Frames})．Emacs を
+MS-Windows の DOSから起動すると，見えているフレームを画面全体より小さくはできま
+すが，それでも、一度に1つのフレームしか表示できません。
+
+@c @cindex frame size under MS-DOS
+@cindex フレームサイズ（MS-DOS）
+@findex mode4350
+@findex mode25
+@c   The @code{mode4350} command switches the display to 43 or 50
+@c lines, depending on your hardware; the @code{mode25} command switches
+@c to the default 80x25 screen size.
+コマンド@code{mode4350}は43行表示と50行表示を切り替えますが、
+ハードウェアに依存します。
+コマンド@code{mode25}は、デフォルトの80x25の画面サイズに切り替えます。
+
+@c   By default, Emacs only knows how to set screen sizes of 80 columns by
+@c 25, 28, 35, 40, 43 or 50 rows.  However, if your video adapter has
+@c special video modes that will switch the display to other sizes, you can
+@c have Emacs support those too.  When you ask Emacs to switch the frame to
+@c @var{n} rows by @var{m} columns dimensions, it checks if there is a
+@c variable called @code{screen-dimensions-@var{n}x@var{m}}, and if so,
+@c uses its value (which must be an integer) as the video mode to switch
+@c to.  (Emacs switches to that video mode by calling the BIOS @code{Set
+@c Video Mode} function with the value of
+@c @code{screen-dimensions-@var{n}x@var{m}} in the @code{AL} register.)
+@c For example, suppose your adapter will switch to 66x80 dimensions when
+@c put into video mode 85.  Then you can make Emacs support this screen
+@c size by putting the following into your @file{_emacs} file:
+デフォルトでは、Emacsは80桁で、25行、28行、35行、40行、43行、50行の
+画面サイズしか知りません。
+しかし、ビデオアダプタに別の画面サイズに切り替える特別な
+ビデオモードがあれば、Emacsでもそれらを利用できます。
+Emacsにフレームサイズを@var{n}行@var{m}桁に切り替える指示をすると、
+@code{screen-dimensions-@var{n}x@var{m}}という変数があるかどうか調べます。
+変数があれば、その値（整数である必要がある）を
+切り替え先のビデオモードとして使います。
+（Emacsは、
+@code{screen-dimensions-@var{n}x@var{m}}の値をレジスタ@code{AL}に入れ、
+BIOSの関数@code{Set Video Mode}を呼び出し、ビデオモードを切り替えます。）
+たとえば、ビデオモードを85にすると66x80の画面に切り替わるアダプタがあるとします。
+@file{_emacs}につぎの行を加えれば、
+Emacsでこの画面サイズを使えるようになります。
+
+@example
+(setq screen-dimensions-66x80 85)
+@end example
+
+@c   Since Emacs on MS-DOS can only set the frame size to specific
+@c supported dimensions, it cannot honor every possible frame resizing
+@c request.  When an unsupported size is requested, Emacs chooses the next
+@c larger supported size beyond the specified size.  For example, if you
+@c ask for 36x80 frame, you will get 40x80 instead.
+MS-DOS用Emacsでは、
+フレームサイズは利用可能な特定のサイズにしか設定できませんから、
+フレームサイズの変更要求すべてに答えられるわけではありません。
+使えないサイズが要求されると、
+Emacsは指定されたサイズのつぎに大きいサイズを選びます。
+たとえば、36x80のフレームを要求すると、かわりに、40x80になります。
+
+@c   The variables @code{screen-dimensions-@var{n}x@var{m}} are used only
+@c when they exactly match the specified size; the search for the next
+@c larger supported size ignores them.  In the above example, even if your
+@c VGA supports 38x80 dimensions and you define a variable
+@c @code{screen-dimensions-38x80} with a suitable value, you will still get
+@c 40x80 screen when you ask for a 36x80 frame.  If you want to get the
+@c 38x80 size in this case, you can do it by setting the variable named
+@c @code{screen-dimensions-36x80} with the same video mode value as
+@c @code{screen-dimensions-38x80}.
+変数@code{screen-dimensions-@var{n}x@var{m}}は、
+指定サイズに正確に一致するときだけ使われます。
+利用可能なつぎに大きなサイズの候補を探すときには無視します。
+上述の例では、VGAで38x80を使えて、
+変数@code{screen-dimensions-38x80}に適切な値を定義したとしても、
+36x80のフレームを要求した場合には、40x80の画面になってしまいます。
+このような場合に38x80のサイズにしたければ、
+変数@code{screen-dimensions-36x80}にも
+@code{screen-dimensions-38x80}と同じビデオモードの値を入れます。
+
+@c   Changing frame dimensions on MS-DOS has the effect of changing all the
+@c other frames to the new dimensions.
+MS-DOSでは、フレームサイズを変更すると、
+他のすべてのフレームのサイズも変更してしまいます。
+
+@node MS-DOS File Names
+@c @section File Names on MS-DOS
+@c @cindex file names under MS-DOS
+@c @cindex init file, default name under MS-DOS
+@section MS-DOSにおけるファイル名 @emph{(2005/05/08)}
+@cindex ファイル名（MS-DOS）
+@cindex 初期化ファイル、デフォルト名（MS-DOS）
+
+@c   MS-DOS normally uses a backslash, @samp{\}, to separate name units
+@c within a file name, instead of the slash used on other systems.  Emacs
+@c on MS-DOS permits use of either slash or backslash, and also knows
+@c about drive letters in file names.
+他のシステムではファイル名の構成要素の区切りにはスラッシュを使いますが、
+MS-DOSでは、普通、バックスラッシュ@samp{\}を使います。
+MS-DOS用Emacsでは、スラッシュもバックスラッシュも使えて、
+さらに、ファイル名に含まれるドライブ名も理解します。
+
+@c   On MS-DOS, file names are case-insensitive and limited to eight
+@c characters, plus optionally a period and three more characters.  Emacs
+@c knows enough about these limitations to handle file names that were
+@c meant for other operating systems.  For instance, leading dots @samp{.}
+@c in file names are invalid in MS-DOS, so Emacs transparently converts
+@c them to underscores @samp{_}; thus your default init file (@pxref{Init
+@c File}) is called @file{_emacs} on MS-DOS.  Excess characters before or
+@c after the period are generally ignored by MS-DOS itself; thus, if you
+@c visit the file @file{LongFileName.EvenLongerExtension}, you will
+@c silently get @file{longfile.eve}, but Emacs will still display the long
+@c file name on the mode line.  Other than that, it's up to you to specify
+@c file names which are valid under MS-DOS; the transparent conversion as
+@c described above only works on file names built into Emacs.
+MS-DOSでは、ファイル名に大文字小文字の区別はなく
+8文字に制限されますが、ピリオドとさらに3文字を付加できます。
+Emacsは他のシステム向けのファイル名を扱ううえで、
+これらの制限を熟知しています。
+たとえば、ドット@samp{.}で始まるファイル名は、
+MS-DOSでは正しくないので、Emacsはそれを透過的に下線@samp{_}に変換します。
+したがって、デフォルトの初期化ファイル（@pxref{Init File}）は、
+MS-DOSでは@file{_emacs}と呼ばれます。
+ピリオドの前後の文字数制限を越えた部分は、
+通常、MS-DOSが無視します。
+したがって、ファイル@file{LongFileName.EvenLongerExtension}を訪れると、
+実際には@file{longfile.eve}を訪れることになりますが、
+モード行にはもとの長い名前が表示されます。
+これ以外には、MS-DOSにおいて正しいファイル名を指定するのは、
+ユーザーの責任です。
+上述した透過的な変換は、Emacsに組み込まれたファイル名にのみに作用します。
+
+@c @cindex backup file names on MS-DOS
+@cindex バックアップファイルの名前（MS-DOS）
+@c   The above restrictions on the file names on MS-DOS make it almost
+@c impossible to construct the name of a backup file (@pxref{Backup
+@c Names}) without losing some of the original file name characters.  For
+@c example, the name of a backup file for @file{docs.txt} is
+@c @file{docs.tx~} even if single backup is used.
+MS-DOSでの上述のファイル名の制限のために、
+もとのファイル名の文字をいくつか捨てずに
+バックアップファイル（@pxref{Backup Names}）の名前を構成することは不可能です。
+たとえば、バックアップを1つしか使っていなくても、
+@file{docs.txt}のバックアップファイルの名前は
+@file{docs.tx~}となります。
+
+@c @cindex file names under Windows 95/NT
+@c @cindex long file names in DOS box under Windows 95/NT
+@cindex ファイル名（Windows 95/NT）
+@cindex 長いファイル名（Windows 95/NT下のDOSボックス）
+@c   If you run Emacs as a DOS application under Windows 9X, Windows ME, or
+@c Windows 2000, you can turn on support for long file names.  If you do
+@c that, Emacs doesn't truncate file names or convert them to lower case;
+@c instead, it uses the file names that you specify, verbatim.  To enable
+@c long file name support, set the environment variable @env{LFN} to
+@c @samp{y} before starting Emacs.  Unfortunately, Windows NT doesn't allow
+@c DOS programs to access long file names, so Emacs built for MS-DOS will
+@c only see their short 8+3 aliases.
+Windows 9x，Windows ME，Windows 2000上のDOSアプリケーションとしてEmacsを実行する場合には、
+長いファイル名の使用を有効にできます。
+そうすると、Emacsは、ファイル名を切り詰めたり小文字に変換したりせずに、
+指定したとおりのファイル名をそのまま使います。
+長いファイル名の使用を有効にするには、
+Emacsを起動するまえに、環境変数@env{LFN}に@samp{y}と設定します。
+残念ながら、Windows NTではDOSプログラムから長いファイル名を使えませんので、
+MS-DOS用Emacsからは短い8+3の別名しか見えません。
+
+@c @cindex @env{HOME} directory under MS-DOS
+@cindex ホームディレクトリ（MS-DOS）
+  MS-DOS has no notion of home directory, so Emacs on MS-DOS pretends
+that the directory where it is installed is the value of @env{HOME}
+environment variable.  That is, if your Emacs binary,
+@file{emacs.exe}, is in the directory @file{c:/utils/emacs/bin}, then
+Emacs acts as if @env{HOME} were set to @samp{c:/utils/emacs}.  In
+particular, that is where Emacs looks for the init file @file{_emacs}.
+With this in mind, you can use @samp{~} in file names as an alias for
+the home directory, as you would on GNU or Unix.  You can also set
+@env{HOME} variable in the environment before starting Emacs; its
+value will then override the above default behavior.
+MS-DOSにはホームディレクトリという概念がないので、
+MS-DOS用Emacsでは、Emacsをインストールしてあるディレクトリを
+環境変数@env{HOME}の値であるということにします。
+つまり、Emacsのバイナリ@file{emacs.exe}が
+ディレクトリ@file{c:/utils/emacs/bin}に置いてあるとすれば、
+Emacsは、環境変数@env{HOME}が@samp{c:/utils/emacs}と
+設定されているかのようにふるまいます。
+特に、ここが初期化ファイル@file{_emacs}を探す場所となります。
+このことを心に留めておけば、GNU や UNIXでのように、
+ホームディレクトリの別名としてファイル名に@samp{~}を使えます。
+Emacsを起動するまえに環境変数@env{HOME}を設定することもでき、
+その場合には、上述のデフォルトのふるまいに優先します。
+
+@c   Emacs on MS-DOS handles the directory name @file{/dev} specially,
+@c because of a feature in the emulator libraries of DJGPP that pretends
+@c I/O devices have names in that directory.  We recommend that you avoid
+@c using an actual directory named @file{/dev} on any disk.
+DJGPPのエミュレーションライブラリの機能では
+入出力装置はディレクトリ@file{/dev}に置かれていると仮定するので、
+MS-DOS用Emacsはディレクトリ名@file{/dev}を特別扱いします。
+いかなるディスク上でも@file{/dev}というディレクトリ名を使わないように
+忠告しておきます。
+
+@node Text and Binary
+@c @section Text Files and Binary Files
+@c @cindex text and binary files on MS-DOS/MS-Windows
+@section テキストファイルとバイナリファイル @emph{(2005/05/08)}
+@cindex テキストファイルとバイナリファイル（MS-DOS）
+
+@c   GNU Emacs uses newline characters to separate text lines.  This is the
+@c convention used on GNU and Unix.
+GNU Emacsでは、テキスト行の区切りとして改行文字を使います。
+これは、GNU や UNIXでの習慣です．
+
+@c @cindex end-of-line conversion on MS-DOS/MS-Windows
+@c   MS-DOS and MS-Windows normally use carriage-return linefeed, a
+@c two-character sequence, to separate text lines.  (Linefeed is the same
+@c character as newline.)  Therefore, convenient editing of typical files
+@c with Emacs requires conversion of these end-of-line (EOL) sequences.
+@c And that is what Emacs normally does: it converts carriage-return
+@c linefeed into newline when reading files, and converts newline into
+@c carriage-return linefeed when writing files.  The same mechanism that
+@c handles conversion of international character codes does this conversion
+@c also (@pxref{Coding Systems}).
+@cindex 行末変換（MS-DOS/MS-Windows）
+MS-DOSとMS-Windowsでは、テキスト行の区切りとして、
+通常、復帰・行送りの2文字列を使います。
+（行送りは改行と同じ文字です。）
+したがって、Emacs において典型的なファイルを便利に編集するには、
+これらの行末（end-of-line、EOL）文字列を変換する必要があります。
+Emacsは通常つぎのようにします。
+ファイルを読み込むときには復帰・行送りを改行に変換し、
+ファイルを書き出すときには改行を復帰・行送りに変換します。
+国際文字コードの変換を扱う機構でもこの変換を行います
+（@pxref{Coding Systems}）。
+
+@c @cindex cursor location, under MS-DOS
+@c @cindex point location, under MS-DOS
+@cindex カーソル位置（MS-DOS）
+@cindex ポイント位置（MS-DOS）
+@c   One consequence of this special format-conversion of most files is
+@c that character positions as reported by Emacs (@pxref{Position Info}) do
+@c not agree with the file size information known to the operating system.
+ほとんどのファイルにおけるこの特別な書式変換のために、
+Emacsが報告する文字位置（@pxref{Position Info}）は、
+オペレーティングシステム上でのファイルサイズ情報と食い違います。
+
+@c   In addition, if Emacs recognizes from a file's contents that it uses
+@c newline rather than carriage-return linefeed as its line separator, it
+@c does not perform EOL conversion when reading or writing that file.
+@c Thus, you can read and edit files from GNU and Unix systems on MS-DOS
+@c with no special effort, and they will retain their Unix-style
+@c end-of-line convention after you edit them.
+さらに、Emacsは、ファイルの内容から行区切りとして
+復帰・行送りでなく改行を用いていると判断すると、
+ファイルの読み書きにおいて変換を行いません。
+したがって、特に努力しなくても、
+GNUとUNIXシステムからのファイルをMS-DOS上で読んだり編集でき、
+それらのファイルの行末は編集した後もUNIX流の行末のままです。
+
+@c   The mode line indicates whether end-of-line translation was used for
+@c the current buffer.  If MS-DOS end-of-line translation is in use for the
+@c buffer, a backslash @samp{\} is displayed after the coding system
+@c mnemonic near the beginning of the mode line (@pxref{Mode Line}).  If no
+@c EOL translation was performed, the string @samp{(Unix)} is displayed
+@c instead of the backslash, to alert you that the file's EOL format is not
+@c the usual carriage-return linefeed.
+モード行にはカレントバッファで行末変換を行ったかどうか表示されます。MS-DOS の行
+末をバッファで使っている時には，モードラインの先頭付近の文字コードの後にバックス
+ラッシュ @samp{\} が表示されます (@pxref{Mode Line})．行末変換が実行されなければ，
+バックスラッシュの代わりに @samp{(Unix)} が表示され，通常の復帰・行送りではない
+ことを知らせます．
+
+@cindex DOS-to-Unix conversion of files
+@c   To visit a file and specify whether it uses DOS-style or Unix-style
+@c end-of-line, specify a coding system (@pxref{Specify Coding}).  For
+@c example, @kbd{C-x @key{RET} c unix @key{RET} C-x C-f foobar.txt}
+@c visits the file @file{foobar.txt} without converting the EOLs; if some
+@c line ends with a carriage-return linefeed pair, Emacs will display
+@c @samp{^M} at the end of that line.  Similarly, you can direct Emacs to
+@c save a buffer in a specified EOL format with the @kbd{C-x @key{RET} f}
+@c command.  For example, to save a buffer with Unix EOL format, type
+@c @kbd{C-x @key{RET} f unix @key{RET} C-x C-s}.  If you visit a file
+@c with DOS EOL conversion, then save it with Unix EOL format, that
+@c effectively converts the file to Unix EOL style, like @code{dos2unix}.
+ファイルを開き，行末のスタイルが DOS か Unix であるかを指定するには，文字コード
+を指定します (@pxref{Specify Coding})．例えば，@kbd{C-x @key{RET} c unix
+@key{RET} C-x C-f foobar.txt} とすると，ファイル @file{foobar.txt} を行末の指定
+無しで開きます．もし，いくつかの行が復帰・行送りであれば，Emacs はその行の終わり
+に @samp{^M} を表示します．同様に，@kbd{C-x @key{RET} f} を使って，Emacs に行末
+を指定して保存させることができます．例えば，Unix の行末でバッファを保存したい時
+には，@kbd{C-x @key{RET} f unix @key{RET} C-x C-s} とします．もし，DOS の行末を
+持つファイルを開いているのであれば，Unixの行末に変換されて，保存されます．このコ
+マンドは @code{dos2unix} のように効率的に Unix の行末に変換します．
+
+@c @cindex untranslated file system
+@cindex 無変換のファイルシステム
+@findex add-untranslated-filesystem
+@c   When you use NFS or Samba to access file systems that reside on
+@c computers using GNU or Unix systems, Emacs should not perform
+@c end-of-line translation on any files in these file systems--not even
+@c when you create a new file.  To request this, designate these file
+@c systems as @dfn{untranslated} file systems by calling the function
+@c @code{add-untranslated-filesystem}.  It takes one argument: the file
+@c system name, including a drive letter and optionally a directory.  For
+@c example,
+NFSやSambaを用いてGNUやUNIXシステムを使った
+コンピュータ上のファイルシステムを参照するとき、
+これらのファイルシステム上のどのファイルに対しては、
+新規作成時でなくても、Emacsは行末変換を行うべきではありません。
+こうするためには、
+該当するファイルシステムを@dfn{無変換}の
+ファイルシステムと指定するために、
+関数@code{add-untranslated-filesystem}を呼びます。
+この関数は、ファイルシステム名である引数を1つとりますが、
+これにはドライブ名やディレクトリ名を含めることもできます。
+たとえば、
+
+@example
+(add-untranslated-filesystem "Z:")
+@end example
+
+@noindent
+@c designates drive Z as an untranslated file system, and
+は、ドライブZを無変換のファイルシステムとして指定しますし、
+
+@example
+(add-untranslated-filesystem "Z:\\foo")
+@end example
+
+@noindent
+@c designates directory @file{\foo} on drive Z as an untranslated file
+@c system.
+は、ドライブZ上のディレクトリ@file{\foo}を
+無変換のファイルシステムとして指定します。
+
+@c   Most often you would use @code{add-untranslated-filesystem} in your
+@c @file{_emacs} file, or in @file{site-start.el} so that all the users at
+@c your site get the benefit of it.
+個人の@file{_emacs}ファイルや
+サイトの全ユーザーに便利なように@file{site-start.el}の中で、
+@code{add-untranslated-filesystem}を使うことが多いでしょう。
+
+@findex remove-untranslated-filesystem
+@c   To countermand the effect of @code{add-untranslated-filesystem}, use
+@c the function @code{remove-untranslated-filesystem}.  This function takes
+@c one argument, which should be a string just like the one that was used
+@c previously with @code{add-untranslated-filesystem}.
+@code{add-untranslated-filesystem}の効果を取り消すには、
+関数@code{remote-untranslated-filesystem}を使います。
+この関数は、まえに@code{add-untranslated-filesystem}に使ったのと
+同じ文字列を引数としてとります。
+
+@c   Designating a file system as untranslated does not affect character
+@c set conversion, only end-of-line conversion.  Essentially, it directs
+@c Emacs to create new files with the Unix-style convention of using
+@c newline at the end of a line.  @xref{Coding Systems}.
+あるファイルシステムを無変換として指定すると文字コードだけでなく行末にも影響しま
+せん．特に，Emacs は 新しいファイルを作る時には Unix の行末で作成します．
+@xref{Coding Systems}．
+
+@vindex file-name-buffer-file-type-alist
+@cindex binary files, on MS-DOS/MS-Windows
+@c   Some kinds of files should not be converted at all, because their
+@c contents are not really text.  Therefore, Emacs on MS-DOS distinguishes
+@c certain files as @dfn{binary files}.  (This distinction is not part of
+@c MS-DOS; it is made by Emacs only.)  Binary files include executable
+@c programs, compressed archives, etc.  Emacs uses the file name to decide
+@c whether to treat a file as binary: the variable
+@c @code{file-name-buffer-file-type-alist} defines the file-name patterns
+@c that indicate binary files.  If a file name matches one of the patterns
+@c for binary files (those whose associations are of the type
+@c @code{(@var{pattern} . t)}, Emacs reads and writes that file using the
+@c @code{no-conversion} coding system (@pxref{Coding Systems}) which turns
+@c off @emph{all} coding-system conversions, not only the EOL conversion.
+@c @code{file-name-buffer-file-type-alist} also includes file-name patterns
+@c for files which are known to be DOS-style text files with
+@c carriage-return linefeed EOL format, such as @file{CONFIG.SYS}; Emacs
+@c always writes those files with DOS-style EOLs.
+内容がテキストではないある種のファイルは，変換すべきではありません．したがって，
+MS-DOS 用 Emacs はある種のファイルを@dfn{バイナリファイル} として区別します．(こ
+の区別はMS-DOSのものではなく、Emacsがもたらすものです)．バイナリファイルには実行
+プログラム，圧縮されたファイルなどがあります．Emacs はあるファイルをバイナリとし
+て認識するかどうかをファイル名を元に決定します．変数
+@code{file-name-buffer-file-type-alist} はバイナリファイルであるファイル名を決定
+します．もしファイル名がバイナリファイル名の1つに一致すれば (その連想リストが特
+定のタイプ @code{(@var{pattern} . t)} であると)，Emacs はそのファイルを文字コー
+ド @code{no-conversion} (@pxref{Coding Systems}) を使って読み書きし，行末変換だけでなく@emph{すべ
+ての}文字コード変換を無効にします．
+@code{file-name-buffer-file-type-alist} は @file{CONFIG.SYS} のようにDOS の復帰・
+行送りを持つテキストファイルも含みます．Emacs はそのファイルをいつも DOS の行末
+で書き込みます．
+
+@c   If a file which belongs to an untranslated file system matches one of
+@c the file-name patterns in @code{file-name-buffer-file-type-alist}, the
+@c EOL conversion is determined by @code{file-name-buffer-file-type-alist}.
+もし無変換のあるファイルが @code{file-name-buffer-file-type-alist} の1つに一致す
+れば，行末変換は @code{file-name-buffer-file-type-alist} で決定されます．
+
+@node MS-DOS Printing
+@c @section Printing and MS-DOS
+@section 印刷とMS-DOS
+
+@c   Printing commands, such as @code{lpr-buffer} (@pxref{Hardcopy}) and
+@c @code{ps-print-buffer} (@pxref{Postscript}) can work in MS-DOS and
+@c MS-Windows by sending the output to one of the printer ports, if a
+@c Unix-style @code{lpr} program is unavailable.  This behaviour is
+@c controlled by the same variables that control printing with @code{lpr}
+@c on Unix (@pxref{Hardcopy}, @pxref{Postscript Variables}), but the
+@c defaults for these variables on MS-DOS and MS-Windows are not the same
+@c as the defaults on Unix.
+@code{lpr-buffer}（@pxref{Hardcopy}）や
+@code{ps-print-buffer}（@pxref{Postscript}）のような印刷コマンドは、
+UNIX流のプログラム@code{lpr}がない場合には、
+プリンタポートに直接出力を送ればMS-DOSやMS-Windowsでも動作します。
+このふるまいは、UNIX上の@code{lpr}での印刷
+（@pxref{Hardcopy}、@pxref{Postscript Variables}）
+を制御する変数と同じ変数で制御されますが、
+MS-DOSやMS-Windows上でのこれらの変数のデフォルト値は、
+UNIX上での値と同じではありません。
+
+@c @vindex printer-name @r{(MS-DOS)}
+@vindex printer-name @r{（MS-DOS）}
+@c   If you want to use your local printer, printing on it in the usual DOS
+@c manner, then set the Lisp variable @code{lpr-command} to @code{""} (its
+@c default value) and @code{printer-name} to the name of the printer
+@c port---for example, @code{"PRN"}, the usual local printer port (that's
+@c the default), or @code{"LPT2"}, or @code{"COM1"} for a serial printer.
+@c You can also set @code{printer-name} to a file name, in which case
+@c ``printed'' output is actually appended to that file.  If you set
+@c @code{printer-name} to @code{"NUL"}, printed output is silently
+@c discarded (sent to the system null device).
+DOS流の通常の印刷のように、ローカルのプリンタを使いたい場合には、
+Lisp変数@code{lpr-command}に@code{""}（デフォルト値）を設定し、
+@code{printer-name}にはプリンタポートの名前を設定します。
+たとえば、ローカルのプリンタポートならば（デフォルト値の）@code{"PRN"}や
+@code{"LPT2"}、シリアルプリンタならば@code{"COM1"}です。
+@code{printer-name}にはファイル名も設定できます。
+その場合には、『印刷』結果は、そのファイルに追加書きされます。
+@code{printer-name}に@code{"NUL"}を設定すると、
+印刷結果は（システムの空デバイスに送られて）黙って捨てられます。
+
+@c   On MS-Windows, when the Windows network software is installed, you can
+@c also use a printer shared by another machine by setting
+@c @code{printer-name} to the UNC share name for that printer--for example,
+@c @code{"//joes_pc/hp4si"}.  (It doesn't matter whether you use forward
+@c slashes or backslashes here.)  To find out the names of shared printers,
+@c run the command @samp{net view} at a DOS command prompt to obtain a list
+@c of servers, and @samp{net view @var{server-name}} to see the names of printers
+@c (and directories) shared by that server.
+MS-Windowsでは、Windowsのネットワークソフトウェアをインストールしてあれば、
+@code{printer-name}に、他のマシンとの共用プリンタのUNC共用名
+（たとえば@code{"//joes_pc/hp4si"}）を設定すれば、
+そのプリンタを利用することもできます。
+（スラッシュでもバックスラッシュでもかまいません。）
+共用プリンタの名前を調べるには、
+DOSコマンドプロンプトで@samp{net view}を実行してサーバー一覧を取得してから、
+@samp{net view @var{server-name}}を実行して
+サーバーが共有するプリンタ（とディレクトリ）の名前を調べます。
+
+@c   If you set @code{printer-name} to a file name, it's best to use an
+@c absolute file name.  Emacs changes the working directory according to
+@c the default directory of the current buffer, so if the file name in
+@c @code{printer-name} is relative, you will end up with several such
+@c files, each one in the directory of the buffer from which the printing
+@c was done.
+@code{printer-name}にファイル名を設定するときには、
+絶対ファイル名を使うのが最良です。
+Emacsは、カレントバッファのデフォルトディレクトリに応じて
+作業ディレクトリを変更します。
+@code{printer-name}のファイル名が相対的であると、
+印刷を行ったバッファのディレクトリごとに、
+そのような名前のファイルができてしまいます。
+
+@c @findex print-buffer @r{(MS-DOS)}
+@c @findex print-region @r{(MS-DOS)}
+@c @vindex lpr-headers-switches @r{(MS-DOS)}
+@findex print-buffer @r{（MS-DOS）}
+@findex print-region @r{（MS-DOS）}
+@vindex lpr-headers-switches @r{（MS-DOS）}
+@c   The commands @code{print-buffer} and @code{print-region} call the
+@c @code{pr} program, or use special switches to the @code{lpr} program, to
+@c produce headers on each printed page.  MS-DOS and MS-Windows don't
+@c normally have these programs, so by default, the variable
+@c @code{lpr-headers-switches} is set so that the requests to print page
+@c headers are silently ignored.  Thus, @code{print-buffer} and
+@c @code{print-region} produce the same output as @code{lpr-buffer} and
+@c @code{lpr-region}, respectively.  If you do have a suitable @code{pr}
+@c program (for example, from GNU Textutils), set
+@c @code{lpr-headers-switches} to @code{nil}; Emacs will then call
+@c @code{pr} to produce the page headers, and print the resulting output as
+@c specified by @code{printer-name}.
+コマンド@code{print-buffer}や@code{print-region}は、
+各印刷ページに見出しを付けるために、
+@code{pr}プログラムを呼び出したり、
+@code{lpr}プログラムに対して特別なフラグを使います。
+MS-DOSやMS-Windowsには、通常、これらのコマンドはありませんから、
+デフォルトでは、変数@code{lpr-headers-switches}は、
+ページ見出しを付ける要求を無視するように設定してあります。
+したがって、@code{print-buffer}や@code{print-region}は、
+それぞれ、@code{lpr-buffer}や@code{lpr-region}と同じ出力になります。
+（たとえばGNU Textutilsなどの）適当な@code{pr}プログラムがあるならば、
+@code{lpr-headers-switches}に@code{nil}を設定します。
+すると、Emacsはページ見出しを付けるために@code{pr}を呼び出し、
+@code{printer-name}の指定に従って出力結果を印刷します。
+
+@c @vindex print-region-function @r{(MS-DOS)}
+@vindex print-region-function @r{（MS-DOS）}
+@c @cindex lpr usage under MS-DOS
+@c @vindex lpr-command @r{(MS-DOS)}
+@c @vindex lpr-switches @r{(MS-DOS)}
+@cindex MS-DOSにおけるlprの使い方
+@vindex lpr-command @r{（MS-DOS）}
+@vindex lpr-switches @r{（MS-DOS）}
+@c   Finally, if you do have an @code{lpr} work-alike, you can set the
+@c variable @code{lpr-command} to @code{"lpr"}.  Then Emacs will use
+@c @code{lpr} for printing, as on other systems.  (If the name of the
+@c program isn't @code{lpr}, set @code{lpr-command} to specify where to
+@c find it.)  The variable @code{lpr-switches} has its standard meaning
+@c when @code{lpr-command} is not @code{""}.  If the variable
+@c @code{printer-name} has a string value, it is used as the value for the
+@c @code{-P} option to @code{lpr}, as on Unix.
+@code{lpr}と同じ動作をする@code{lpr}がある場合には、
+変数@code{lpr-command}に@code{"lpr"}と設定できます。
+すると、他のシステムと同様に、Emacsは@code{lpr}を使って印刷します。
+（プログラム名が@code{lpr}でない場合には、
+@code{lpr-command}にはプログラムを探す場所を設定する。）
+@code{lpr-command}が@code{""}以外の場合には、
+変数@code{lpr-switches}には標準的な意味があります。
+変数@code{printer-name}の値が文字列である場合には、
+UNIXの場合と同様に、@code{lpr}のオプション@code{-P}の値として使われます。
+
+@c @findex ps-print-buffer @r{(MS-DOS)}
+@c @findex ps-spool-buffer @r{(MS-DOS)}
+@c @vindex ps-printer-name @r{(MS-DOS)}
+@c @vindex ps-lpr-command @r{(MS-DOS)}
+@c @vindex ps-lpr-switches @r{(MS-DOS)}
+@findex ps-print-buffer @r{（MS-DOS）}
+@findex ps-spool-buffer @r{（MS-DOS）}
+@vindex ps-printer-name @r{（MS-DOS）}
+@vindex ps-lpr-command @r{（MS-DOS）}
+@vindex ps-lpr-switches @r{（MS-DOS）}
+@c   A parallel set of variables, @code{ps-lpr-command},
+@c @code{ps-lpr-switches}, and @code{ps-printer-name} (@pxref{Postscript
+@c Variables}), defines how PostScript files should be printed.  These
+@c variables are used in the same way as the corresponding variables
+@c described above for non-PostScript printing.  Thus, the value of
+@c @code{ps-printer-name} is used as the name of the device (or file) to
+@c which PostScript output is sent, just as @code{printer-name} is used for
+@c non-PostScript printing.  (There are two distinct sets of variables in
+@c case you have two printers attached to two different ports, and only one
+@c of them is a PostScript printer.)
+同様の一連の変数、@code{ps-lpr-command}、@code{ps-lpr-switches}、
+@code{ps-printer-name}（@pxref{Postscript Variables}）は、
+PostScriptファイルの印刷方法を定義します。
+これらの変数は、上に述べた非PostScript印刷用の対応する変数と
+同じように使われます。
+つまり、@code{ps-printer-name}の値は、
+非PostScript印刷での@code{printer-name}の使い方と同様に、
+PostScript出力の送り先の装置（やファイル）の名前として使われます。
+（つまり、別々の2つのポートに2台のプリンタを接続してあり、
+その一方がPostScriptプリンタの場合、異なる2組の変数群を使える。）
+
+@c   The default value of the variable @code{ps-lpr-command} is @code{""},
+@c which causes PostScript output to be sent to the printer port specified
+@c by @code{ps-printer-name}, but @code{ps-lpr-command} can also be set to
+@c the name of a program which will accept PostScript files.  Thus, if you
+@c have a non-PostScript printer, you can set this variable to the name of
+@c a PostScript interpreter program (such as Ghostscript).  Any switches
+@c that need to be passed to the interpreter program are specified using
+@c @code{ps-lpr-switches}.  (If the value of @code{ps-printer-name} is a
+@c string, it will be added to the list of switches as the value for the
+@c @code{-P} option.  This is probably only useful if you are using
+@c @code{lpr}, so when using an interpreter typically you would set
+@c @code{ps-printer-name} to something other than a string so it is
+@c ignored.)
+変数@code{ps-lpr-command}のデフォルト値は@code{""}であり、
+PostScript出力を@code{ps-printer-name}で指定するプリンタポートへ
+送ることを意味します。
+しかし、@code{ps-lpr-command}には、PostScriptファイルを受理する
+プログラムの名前を設定してもかまいません。
+つまり、非PostScriptプリンタがある場合、
+この変数に（Ghostscriptなどの）PostScriptインタープリタプログラムの
+名前を設定できます。
+インタープリタプログラムに渡す必要があるオプションは、
+@code{ps-lpr-switches}を用いて指定します。
+（@code{ps-printer-name}の値が文字列の場合、その値は、
+オプション@code{-P}の値として、オプション列に付加される。
+これは、@code{lpr}を使う場合にだけ有用であろう。
+というのは、インタープリタを使う場合、典型的には、
+@code{ps-printer-name}には文字列以外を設定して無視させる。）
+
+@c   For example, to use Ghostscript for printing on an Epson printer
+@c connected to the @samp{LPT2} port, put this in your @file{_emacs} file:
+たとえば、ポート@samp{LPT2}に接続したEpsonプリンタに印刷するために
+Ghostscriptを使うには、つぎの内容を個人のファイル@file{_emacs}に入れます。
+
+@example
+@c (setq ps-printer-name t)  ; Ghostscript doesn't understand -P
+(setq ps-printer-name t)  ; Ghostscriptは -P を理解しない
+(setq ps-lpr-command "c:/gs/gs386")
+(setq ps-lpr-switches '("-q" "-dNOPAUSE"
+			"-sDEVICE=epson"
+			"-r240x72"
+			"-sOutputFile=LPT2"
+			"-Ic:/gs"))
+@end example
+
+@noindent
+@c (This assumes that Ghostscript is installed in the @file{"c:/gs"}
+@c directory.)
+（この例では、
+ディレクトリ@file{"c:/gs"}にGhostscriptをインストールしてあると仮定。）
+
+@vindex dos-printer
+@vindex dos-ps-printer
+@c   For backwards compatibility, the value of @code{dos-printer}
+@c (@code{dos-ps-printer}), if it has a value, overrides the value of
+@c @code{printer-name} (@code{ps-printer-name}), on MS-DOS and MS-Windows
+@c only.
+MS-DOSとMS-Windowsでは、後方互換のために、
+@code{dos-printer}（や@code{dos-ps-printer}）の値を設定してあると、
+@code{printer-name}（や@code{ps-printer-name}）の値を上書きします。
+
+
+@node MS-DOS and MULE
+@c @section International Support on MS-DOS
+@c @cindex international support @r{(MS-DOS)}
+@section MS-DOSでの国際化対応 @emph{(2005/09/18)}
+@cindex 国際化対応@r{（MS-DOS）}
+
+@c   Emacs on MS-DOS supports the same international character sets as it
+@c does on GNU, Unix and other platforms (@pxref{International}), including
+@c coding systems for converting between the different character sets.
+@c However, due to incompatibilities between MS-DOS/MS-Windows and other systems,
+@c there are several DOS-specific aspects of this support that you should
+@c be aware of.  This section describes these aspects.
+MS-DOS上のEmacsは、GNU や UNIX や他のプラットフォーム上と同じ
+国際化文字集合を扱えます（@pxref{International}）。
+これには、異なる文字集合のあいだの変換を行うコーディングシステムも含みます。
+しかしながら、MS-DOS/MS-Windowsと他のシステムとの非互換性に起因する
+DOSに固有な特色があり、理解しておく必要があります。
+本節では、これらの特色について述べます。
+
+@table @kbd
+@item M-x dos-codepage-setup
+@c Set up Emacs display and coding systems as appropriate for the current
+@c DOS codepage.
+Emacs画面とコーディングシステムを
+カレントDOSコードページに適したものに設定する。
+
+@item M-x codepage-setup
+@c Create a coding system for a certain DOS codepage.
+特定のDOSコードページ用のコーディングシステムを作成する。
+@end table
+
+@c @cindex codepage, MS-DOS
+@c @cindex DOS codepages
+@cindex コードページ、MS-DOS
+@cindex DOSコードページ
+@c   MS-DOS is designed to support one character set of 256 characters at
+@c any given time, but gives you a variety of character sets to choose
+@c from.  The alternative character sets are known as @dfn{DOS codepages}.
+@c Each codepage includes all 128 @acronym{ASCII} characters, but the other 128
+@c characters (codes 128 through 255) vary from one codepage to another.
+@c Each DOS codepage is identified by a 3-digit number, such as 850, 862,
+@c etc.
+MS-DOSは、一度には256文字から成る単一の文字集合を扱えるように
+設計されていますが、さまざまな文字集合から選択できます。
+代替文字集合は、@dfn{DOSコードページ}と呼ばれます。
+各コードページは、128個の全@acronym{ASCII}文字を含みますが、
+残りの128文字（コード128〜255）は、コードページごとに異なります。
+各DOSコードページは、850や862などの3桁の数字で識別します。
+
+@c   In contrast to X, which lets you use several fonts at the same time,
+@c MS-DOS normally doesn't allow use of several codepages in a single
+@c session.  MS-DOS was designed to load a single codepage at system
+@c startup, and require you to reboot in order to change
+@c it@footnote{Normally, one particular codepage is burnt into the display
+@c memory, while other codepages can be installed by modifying system
+@c configuration files, such as @file{CONFIG.SYS}, and rebooting.  While
+@c third-party software is known to exist that allows to change the
+@c codepage without rebooting, we describe here how a stock MS-DOS system
+@c behaves.}.  Much the same limitation applies when you run DOS
+@c executables on other systems such as MS-Windows.
+同時に複数のフォントを使えるXに比べると、
+MS-DOSでは普通1つのセッションでは複数のコードページを使えません。
+MS-DOSはシステムブート時に単一のコードページをロードするように設計されています。
+コードページを変更するためにMS-DOSをリブートする必要があります
+@footnote{通常、1つの特定のコードページはディスプレイメモリに組み込んであり、
+他のコードページは、@file{CONFIG.SYS}などの
+システム設定ファイルを変更してリブートするとインストールできる。サードパーティの
+ソフトウェアでは再起動をせずにコードページを変更できるものもありますが，ここで
+は，通常のMS-DOSについて書いています}。
+MS-Windowsなどの他のシステムでDOSプログラムを実行する場合にも、
+同様の制約が課せられます。
+
+@c @cindex unibyte operation @r{(MS-DOS)}
+@cindex unibyte operation @r{（MS-DOS）}
+@c   If you invoke Emacs on MS-DOS with the @samp{--unibyte} option
+@c (@pxref{Initial Options}), Emacs does not perform any conversion of
+@c non-@acronym{ASCII} characters.  Instead, it reads and writes any non-@acronym{ASCII}
+@c characters verbatim, and sends their 8-bit codes to the display
+@c verbatim.  Thus, unibyte Emacs on MS-DOS supports the current codepage,
+@c whatever it may be, but cannot even represent any other characters.
+MS-DOS上でオプション@samp{--unibyte}
+（@pxref{Initial Options}）を指定してEmacsを起動すると、
+Emacsは、いかなる変換も非@acronym{ASCII}文字には行いません。
+非@acronym{ASCII}文字はそのまま読み書きし、
+画面には8ビットコードをそのまま送ります。
+つまり、MS-DOS上のユニバイトEmacsは、
+なんであれカレントコードページを使いますが、
+それ以外の文字を表現することはできません。
+
+@vindex dos-codepage
+@c   For multibyte operation on MS-DOS, Emacs needs to know which
+@c characters the chosen DOS codepage can display.  So it queries the
+@c system shortly after startup to get the chosen codepage number, and
+@c stores the number in the variable @code{dos-codepage}.  Some systems
+@c return the default value 437 for the current codepage, even though the
+@c actual codepage is different.  (This typically happens when you use the
+@c codepage built into the display hardware.)  You can specify a different
+@c codepage for Emacs to use by setting the variable @code{dos-codepage} in
+@c your init file.
+MS-DOS上でのマルチバイト操作には、
+Emacsは、選択されているDOSコードページで表示できる文字群を
+知っておく必要があります。
+そのため、起動後、選択しているコードページ番号をシステムに問い合わせ、
+変数@code{dos-codepage}にその番号を保存します。
+実際に使っているコードページとは異なっていても、
+カレントコードページのデフォルト値437を返すシステムもあります。
+（典型的には、ディスプレイ装置に組み込まれたコードページを使用すると
+発生する。）
+個人の初期化ファイルで変数@code{dos-codepage}を設定すれば、
+Emacsが使うコードページ（番号）を別のものに指定できる。
+
+@c @cindex language environment, automatic selection on @r{MS-DOS}
+@cindex 言語環境、@r{MS-DOS}での自動選択
+@c   Multibyte Emacs supports only certain DOS codepages: those which can
+@c display Far-Eastern scripts, like the Japanese codepage 932, and those
+@c that encode a single ISO 8859 character set.
+マルチバイトEmacsは、特定のDOSコードページだけを扱えます。
+これらには、日本語用コードページ932のような極東の文字を表示できものや、
+単一のISO 8859文字集合を符号化できるものが含まれます。
+
+@c   The Far-Eastern codepages can directly display one of the MULE
+@c character sets for these countries, so Emacs simply sets up to use the
+@c appropriate terminal coding system that is supported by the codepage.
+@c The special features described in the rest of this section mostly
+@c pertain to codepages that encode ISO 8859 character sets.
+極東用コードページは、
+それらの国々用のMULE文字集合の1つを直接表示できますから、
+Emacsは、コードページで扱える
+適切な端末コーディングシステムを設定するだけです。
+本節の残りで述べる特別な機能は、
+ISO 8859文字集合を符号化するコードページに関することです。
+
+@c   For the codepages which correspond to one of the ISO character sets,
+@c Emacs knows the character set name based on the codepage number.  Emacs
+@c automatically creates a coding system to support reading and writing
+@c files that use the current codepage, and uses this coding system by
+@c default.  The name of this coding system is @code{cp@var{nnn}}, where
+@c @var{nnn} is the codepage number.@footnote{The standard Emacs coding
+@c systems for ISO 8859 are not quite right for the purpose, because
+@c typically the DOS codepage does not match the standard ISO character
+@c codes.  For example, the letter @samp{@,{c}} (@samp{c} with cedilla) has
+@c code 231 in the standard Latin-1 character set, but the corresponding
+@c DOS codepage 850 uses code 135 for this glyph.}
+ISO文字集合の1つに対応したコードページに対しては、
+Emacsはコードページ番号に基づいた文字集合名を知っています。
+Emacsは、カレントコードページを用いたファイルの読み書きを扱う
+コーディングシステムを自動的に作成し、
+デフォルトでこのコーディングシステムを使います。
+コードページ番号を@var{nnn}とすると、このようなコーディングシステムの
+名前は@code{cp@var{nnn}}です。
+@footnote{ISO 8859用のEmacsの標準コーディングシステムは、
+この目的には正しくない。
+というのは、典型的なDOSコードページは、標準のISO文字集合に一致しない。
+たとえば、文字@samp{@,{c}}（セディーユ付きの@samp{c}）は、
+標準のLatin-1文字集合ではコード231であるが、
+対応するDOSコードページ850ではこの文字はコード135である。}
+
+@c @cindex mode line @r{(MS-DOS)}
+@cindex モード行@r{（MS-DOS）}
+@c   All the @code{cp@var{nnn}} coding systems use the letter @samp{D} (for
+@c ``DOS'') as their mode-line mnemonic.  Since both the terminal coding
+@c system and the default coding system for file I/O are set to the proper
+@c @code{cp@var{nnn}} coding system at startup, it is normal for the mode
+@c line on MS-DOS to begin with @samp{-DD\-}.  @xref{Mode Line}.
+@c Far-Eastern DOS terminals do not use the @code{cp@var{nnn}} coding
+@c systems, and thus their initial mode line looks like the Emacs default.
+すべての@code{cp@var{nnn}}コーディングシステムは、
+モード行の表示に（『DOS』の）文字@samp{D}を使います。
+端末コーディングシステムとファイル入出力用のデフォルトの
+コーディングシステムは、起動時に、
+正しく@code{cp@var{nnn}}コーディングシステムに設定されますから、
+MS-DOSでは、モード行は普通@samp{-DD\-}で始まります。
+@xref{Mode Line}。
+極東用DOS端末は、@code{cp@var{nnn}}コーディングシステムを使用せず、
+そのため、初期のモード行はEmacsのデフォルトのようになります。
+
+@c   Since the codepage number also indicates which script you are using,
+@c Emacs automatically runs @code{set-language-environment} to select the
+@c language environment for that script (@pxref{Language Environments}).
+コードページ番号は、使用する文字群を指定しますから、
+Emacsは、その文字群用の言語環境を選択するために
+@code{set-language-environment}を自動的に実行します
+（@pxref{Language Environments}）。
+
+@c   If a buffer contains a character belonging to some other ISO 8859
+@c character set, not the one that the chosen DOS codepage supports, Emacs
+@c displays it using a sequence of @acronym{ASCII} characters.  For example, if the
+@c current codepage doesn't have a glyph for the letter @samp{@`o} (small
+@c @samp{o} with a grave accent), it is displayed as @samp{@{`o@}}, where
+@c the braces serve as a visual indication that this is a single character.
+@c (This may look awkward for some non-Latin characters, such as those from
+@c Greek or Hebrew alphabets, but it is still readable by a person who
+@c knows the language.)  Even though the character may occupy several
+@c columns on the screen, it is really still just a single character, and
+@c all Emacs commands treat it as one.
+バッファ内に異なるISO 8859文字集合に属する文字、
+すなわち、選択しているDOSコードページで扱えない文字が含まれる場合、
+Emacsはその文字を@acronym{ASCII}文字の列で表示します。
+たとえば、カレントコードページに文字@samp{@`o}
+（アクサングレーブ付きの小文字の@samp{o}）の字形がないときには、
+中括弧で囲って1文字であることを表して、
+@samp{@{`o@}}と表示します。
+（このようにすると、ギリシャ文字やヘブライ文字などの非Latin文字のなかには、
+とても見難くなるのもがあるが、その言語を知っている人には
+少なくとも読める。）
+1文字でも画面上は数桁を占めますが、
+実際には単一の文字であり、Emacsのすべてのコマンドも1文字として扱います。
+
+@cindex IBM graphics characters (MS-DOS)
+@cindex box-drawing characters (MS-DOS)
+@cindex line-drawing characters (MS-DOS)
+@c   Not all characters in DOS codepages correspond to ISO 8859
+@c characters---some are used for other purposes, such as box-drawing
+@c characters and other graphics.  Emacs maps these characters to two
+@c special character sets called @code{eight-bit-control} and
+@c @code{eight-bit-graphic}, and displays them as their IBM glyphs.
+@c However, you should be aware that other systems might display these
+@c characters differently, so you should avoid them in text that might be
+@c copied to a different operating system, or even to another DOS machine
+@c that uses a different codepage.
+DOSコードページ内のすべての文字がISO 8859文字に対応するわけではなく、
+箱を描くための文字や他の図形用文字もあります。Emacsではこれらの文字を
+@code{eight-bit-control} や @code{eight-bit-graphic} と呼ばれる2つの特別な
+文字に割り当てられます．そして，それらをIME字形として表示します．しかし，これら
+の文字は他のシステムでは違ったように表示されるかもしれないということに注意すべき
+です．したがって，異なるOSにコピーされるような場合や他のDOSマシンであっても異な
+る文字コードを使っているような場合には，テキストでそれらの文字の使用を避けるべ
+きです．
+
+@vindex dos-unsupported-character-glyph
+@c   Emacs supports many other characters sets aside from ISO 8859, but it
+@c cannot display them on MS-DOS.  So if one of these multibyte characters
+@c appears in a buffer, Emacs on MS-DOS displays them as specified by the
+@c @code{dos-unsupported-character-glyph} variable; by default, this glyph
+@c is an empty triangle.  Use the @kbd{C-u C-x =} command to display the
+@c actual code and character set of such characters.  @xref{Position Info}.
+Emacsは、ISO 8859以外の他の多く文字集合を扱えますが、
+それらをMS-DOS上では表示できません。
+そのようなマルチバイト文字がバッファ内にあると、
+MS-DOS上のEmacsは、変数@code{dos-unsupported-character-glyph}の
+指定どおりに表示します。
+デフォルトでは、その字形は、白抜きの三角形です。
+コマンド@kbd{C-u C-x =}を使って、そのような文字の
+実際の文字コードと文字集合を表示してください。
+@xref{Position Info}。
+
+@findex codepage-setup
+@c   By default, Emacs defines a coding system to support the current
+@c codepage.  To define a coding system for some other codepage (e.g., to
+@c visit a file written on a DOS machine in another country), use the
+@c @kbd{M-x codepage-setup} command.  It prompts for the 3-digit code of
+@c the codepage, with completion, then creates the coding system for the
+@c specified codepage.  You can then use the new coding system to read and
+@c write files, but you must specify it explicitly for the file command
+@c when you want to use it (@pxref{Specify Coding}).
+デフォルトでは、Emacsはカレントコードページを扱えるコーディングシステムを
+定義します。
+（他国のDOSマシンで書いたファイルを訪問するなどの）
+他のコードページ用のコーディングシステムを定義するには、
+コマンド@kbd{M-x codepage-setup}を使います。
+これは、3桁のコードページ番号を問い合わせてきますが、補完を使えます。
+そして、指定したコードページ用のコーディングシステムを作成します。
+これで、新たなコーディングシステムを使ってファイルを読み書きできますが、
+このコーディングシステムを使うには、
+ファイルコマンドで明示する必要があります（@pxref{Specify Coding}）。
+
+@c   These coding systems are also useful for visiting a file encoded using
+@c a DOS codepage, using Emacs running on some other operating system.
+これらのコーディングシステムは、
+DOSコードページで符号化したファイルを
+他のオペレーティングシステム上のEmacsで訪問する場合にも利用できます。
+
+@cindex MS-Windows codepages
+@c   MS-Windows provides its own codepages, which are different from the
+@c DOS codepages for the same locale.  For example, DOS codepage 850
+@c supports the same character set as Windows codepage 1252; DOS codepage
+@c 855 supports the same character set as Windows codepage 1251, etc.
+@c The MS-Windows version of Emacs uses the current codepage for display
+@c when invoked with the @samp{-nw} option.
+MS-Windows は独自のコードページを持ちます．これはDOSのコードページとは異なるもの
+です．例えば，DOSコードページの850はWindowsコードページの1252と同じ文字を提供し
+ます．DOSコードページの855はWindowsコードページの1251と同じ文字を提供するなど．
+MS-Windows版のEmacsは@samp{-nw}を付けて起動すると，表示に現在のコードページを使
+用します．
+
+@node MS-DOS Processes
+@c @section Subprocesses on MS-DOS
+@section サブプロセス（MS-DOS） @emph{(2005/09/19)}
+
+@c @cindex compilation under MS-DOS
+@c @cindex inferior processes under MS-DOS
+@cindex コンパイル（MS-DOS）
+@cindex 下位プロセス（MS-DOS）
+@c @findex compile @r{(MS-DOS)}
+@c @findex grep @r{(MS-DOS)}
+@findex compile @r{（MS-DOS）}
+@findex grep @r{（MS-DOS）}
+@c   Because MS-DOS is a single-process ``operating system,''
+@c asynchronous subprocesses are not available.  In particular, Shell
+@c mode and its variants do not work.  Most Emacs features that use
+@c asynchronous subprocesses also don't work on MS-DOS, including
+@c Shell mode and GUD.  When in doubt, try and see; commands that
+@c don't work output an error message saying that asynchronous processes
+@c aren't supported.
+MS-DOSはシングルプロセスの『オペレーティングシステム』なので、
+非同期なサブプロセスは利用できません。
+特に、シェル（shell）モードやその派生モードは動きません。
+shellモードやGUDなどの非同期のサブプロセスを用いたEmacsの機能のほとんどは、
+MS-DOSでは動きません。
+疑うならば試してみてください。
+動作不能なコマンドは、「非同期サブプロセスを使えない」旨の
+エラーメッセージを出力します。
+
+@c   Compilation under Emacs with @kbd{M-x compile}, searching files with
+@c @kbd{M-x grep} and displaying differences between files with @kbd{M-x
+@c diff} do work, by running the inferior processes synchronously.  This
+@c means you cannot do any more editing until the inferior process
+@c finishes.
+MS-DOS用Emacsでも、
+@kbd{M-x compile}によるコンパイル、
+@kbd{M-x grep}によるファイルの探索、
+@kbd{M-x diff}によるファイルの比較は動作しますが、
+これらは下位プロセスを同期して走らせます。
+つまり、下位プロセスが終了するまではいっさい編集はできません。
+
+@c   Spell checking also works, by means of special support for synchronous
+@c invocation of the @code{ispell} program.  This is slower than the
+@c asynchronous invocation on other platforms
+@code{ispell}を同期して走らせることでスペルチェックも動作します．他のプラットフォー
+ムで非同期で動作させるよりも遅くなります．
+
+@c   Instead of the Shell mode, which doesn't work on MS-DOS, you can use
+@c the @kbd{M-x eshell} command.  This invokes the Eshell package that
+@c implements a Posix-like shell entirely in Emacs Lisp.
+MS-DOSモードでは動作しないshellモードの代わりに，@kbd{M-x eshell}を利用できます．
+これにより，完全にEmacs Lispで書かれた Posix 風の Eshell パッケージを利用できま
+す．
+
+@c   By contrast, Emacs compiled as native Windows application
+@c @strong{does} support asynchronous subprocesses.  @xref{Windows
+@c Processes}.
+対照的に、Windows専用にコンパイルしたEmacsでは、
+非同期プロセスを使えます。
+@xref{Windows Processes}。
+
+@c @cindex printing under MS-DOS
+@cindex 印刷（MS-DOS）
+@c   Printing commands, such as @code{lpr-buffer} (@pxref{Hardcopy}) and
+@c @code{ps-print-buffer} (@pxref{PostScript}), work in MS-DOS by sending
+@c the output to one of the printer ports.  @xref{MS-DOS Printing}.
+@code{lpr-buffer}（@pxref{Hardcopy}）や
+@code{ps-print-buffer}（@pxref{Postscript}）のような印刷コマンドは、
+MS-DOSではプリンタポートの1つに出力を送ることで動作します。
+@xref{MS-DOS Printing}。
+
+@c   When you run a subprocess synchronously on MS-DOS, make sure the
+@c program terminates and does not try to read keyboard input.  If the
+@c program does not terminate on its own, you will be unable to terminate
+@c it, because MS-DOS provides no general way to terminate a process.
+@c Pressing @kbd{C-c} or @kbd{C-@key{BREAK}} might sometimes help in these
+@c cases.
+MS-DOSで同期的にサブプロセスを動かす場合には、
+プログラムが確実に終了し、しかも、キーボードからまったく入力しないことを
+確認してください。
+MS-DOSにはプロセスを終了させる一般的な方法がないので、
+プログラムがみずから終了できない場合には、
+それを終了させることができなくなります。
+このような場合、
+@kbd{C-c}や@kbd{C-@key{BREAK}}を押すと助かる場合もあります。
+
+@c   Accessing files on other machines is not supported on MS-DOS.  Other
+@c network-oriented commands such as sending mail, Web browsing, remote
+@c login, etc., don't work either, unless network access is built into
+@c MS-DOS with some network redirector.
+MS-DOSでは、他のマシンのファイルを参照することはできません。
+MS-DOSにネットワーク機能が組み込まれていなければ、
+メイルの送信、Webの閲覧、リモートログインなどの
+ネットワーク向けのコマンドも使えません。
+
+@c @cindex directory listing on MS-DOS
+@c @vindex dired-listing-switches @r{(MS-DOS)}
+@cindex ディレクトリの一覧（MS-DOS）
+@vindex dired-listing-switches @r{（MS-DOS）}
+@c   Dired on MS-DOS uses the @code{ls-lisp} package where other
+@c platforms use the system @code{ls} command.  Therefore, Dired on
+@c MS-DOS supports only some of the possible options you can mention in
+@c the @code{dired-listing-switches} variable.  The options that work are
+@c @samp{-A}, @samp{-a}, @samp{-c}, @samp{-i}, @samp{-r}, @samp{-S},
+@c @samp{-s}, @samp{-t}, and @samp{-u}.
+MS-DOSでのdiredは、
+他のシステムではシステムの@code{ls}コマンドを使う場面で
+パッケージ@code{ls-lisp}を使います。
+したがって、MS-DOSのdiredでは
+変数@code{dired-listing-switches}に設定できるオプションは限られます。
+使えるオプションは、
+@samp{-A}、@samp{-a}、@samp{-c}、@samp{-i}、@samp{-r}、@samp{-S}、
+@samp{-s}、@samp{-t}、@samp{-u}です。
+
+@node Windows Processes
+@c @section Subprocesses on Windows 9X/ME and Windows NT/2K
+@section サブプロセス（Windows 9X/ME ，Windows NT/2K） @emph{(2005/09/19)}
+
+@c Emacs compiled as a native Windows application (as opposed to the DOS
+@c version) includes full support for asynchronous subprocesses.
+@c In the Windows version, synchronous and asynchronous subprocesses work
+@c fine on both
+@c Windows 9X and Windows NT/2K as long as you run only 32-bit Windows
+@c applications.  However, when you run a DOS application in a subprocess,
+@c you may encounter problems or be unable to run the application at all;
+@c and if you run two DOS applications at the same time in two
+@c subprocesses, you may have to reboot your system.
+（DOS版と対比して）Windows専用にコンパイルしたEmacsでは、
+非同期のサブプロセスを完全に使えます。
+Windows版では、Windows 9X ，Windows NT/2Kで32ビットのWindowsアプリケーションを実行している限りは、
+同期であれ非同期であれサブプロセスはうまく動作します。
+しかし、サブプロセスでDOSアプリケーションを実行すると、
+アプリケーションの実行に問題を生じたり実行できなかったりします。
+さらに、2つのDOSアプリケーションを同時に2つのサブプロセスで実行すると、
+システムをリブートしなければならなくなります。
+
+@c Since the standard command interpreter (and most command line utilities)
+@c on Windows 95 are DOS applications, these problems are significant when
+@c using that system.  But there's nothing we can do about them; only
+@c Microsoft can fix them.
+Windows 95の標準のコマンドインタープリタ
+（および、ほとんどのコマンド行ユーティリティ）はDOSアプリケーションなので、
+この種のシステムを使う場合には上記の問題は重要になります。
+しかし、これに関してわれわれにできることは何もなく、
+Microsoftだけが修正できるのです。
+
+@c If you run just one DOS application subprocess, the subprocess should
+@c work as expected as long as it is ``well-behaved'' and does not perform
+@c direct screen access or other unusual actions.  If you have a CPU
+@c monitor application, your machine will appear to be 100% busy even when
+@c the DOS application is idle, but this is only an artifact of the way CPU
+@c monitors measure processor load.
+DOSアプリケーションのサブプロセスを1つだけ実行するならば、
+『行儀がよく』て、しかも、画面を直接操作するなどの
+非標準的な動作をしない限りは、サブプロセスは予想どおりに動作するはずです。
+CPUモニタ（監視）アプリケーションを使うと、
+DOSアプリケーションが停止しているときでさえも、
+マシンは100%ビジーになりますが、
+これはCPUモニタがプロセッサの負荷を調べる方法に起因します。
+
+@c You must terminate the DOS application before you start any other DOS
+@c application in a different subprocess.  Emacs is unable to interrupt or
+@c terminate a DOS subprocess.  The only way you can terminate such a
+@c subprocess is by giving it a command that tells its program to exit.
+別のサブプロセスでDOSアプリケーションを実行する場合には、
+まえもってDOSアプリケーションを終了しておく必要があります。
+Emacsは、DOSのサブプロセスに割り込んだり停止させることができません。
+このようなサブプロセスを終了する唯一の方法は、
+そのプログラムに終了を指示するコマンドを与えることです。
+
+@c If you attempt to run two DOS applications at the same time in separate
+@c subprocesses, the second one that is started will be suspended until the
+@c first one finishes, even if either or both of them are asynchronous.
+別々のサブプロセスにおいて2つのDOSアプリケーションを同時に実行しようとすると、
+一方あるいは両方が非同期であるとしても、
+2番目に起動したものは最初のものが終了するまで休止してしまいます。
+
+@c If you can go to the first subprocess, and tell it to exit, the second
+@c subprocess should continue normally.  However, if the second subprocess
+@c is synchronous, Emacs itself will be hung until the first subprocess
+@c finishes.  If it will not finish without user input, then you have no
+@c choice but to reboot if you are running on Windows 9X.  If you are
+@c running on Windows NT/2K, you can use a process viewer application to kill
+@c the appropriate instance of ntvdm instead (this will terminate both DOS
+@c subprocesses).
+最初のサブプロセスを操作できて終了を指示できるならば、
+2番目のサブプロセスは正常に実行を継続するはずです。
+しかし、2番目が同期サブプロセスであれば、
+最初のサブプロセスが終了するまではEmacs自体が固まってしまいます。
+ユーザー入力なしに終了できない場合には、
+Windows 9Xを使っている限りリブート以外の選択はありません。
+Windows NT/2Kであれば、プロセスを調べるアプリケーションを使って、
+適当なntvdmを終了させます（するとDOSの2つのサブプロセスも終了します）。
+
+@c If you have to reboot Windows 9X in this situation, do not use the
+@c @code{Shutdown} command on the @code{Start} menu; that usually hangs the
+@c system.  Instead, type @kbd{CTL-ALT-@key{DEL}} and then choose
+@c @code{Shutdown}.  That usually works, although it may take a few minutes
+@c to do its job.
+このような状況でWindows 9Xをリブートすることが必要になったときには、
+@code{Start}メニューの中の@code{Shutdown}コマンドを使ってはいけません。
+たいていの場合、システムが固まってしまいます。
+かわりに、@kbd{CTL-ALT-@key{DEL}}を打鍵して@code{Shutdown}を選びます。
+処理に数分かかる場合もありますが、多くの場合、機能してくれます。
+
+@node Windows System Menu
+@c @section Using the System Menu on Windows
+@section Windowsのシステムメニューの利用 @emph{(2005/05/08)}
+
+@c Emacs compiled as a native Windows application normally turns off the
+@c Windows feature that tapping the @key{ALT}
+@c key invokes the Windows menu.  The reason is that the @key{ALT} also
+@c serves as @key{META} in Emacs.  When using Emacs, users often press the
+@c @key{META} key temporarily and then change their minds; if this has the
+@c effect of bringing up the Windows menu, it alters the meaning of
+@c subsequent commands.  Many users find this frustrating. 
+Windows専用にコンパイルしたEmacsでは、
+@key{ALT}キーを押してWindowsのメニューを立ち上げる機能を切ってあります。
+これは、Emacsでは@key{ALT}は@key{META}の働きをするからです。
+Emacsを利用しているときには、
+ユーザーはしばしばいったん@key{META}キーを押してから何もせずに放します。
+この動作でWindowsのメニューが立ち上がってしまうと、
+以降のコマンドの意味が変ってしまいます。
+多くのユーザーにはこれでは邪魔でしょう。
+
+@vindex w32-pass-alt-to-system
+@c You can reenable Windows's default handling of tapping the @key{ALT} key
+@c by setting @code{w32-pass-alt-to-system} to a non-@code{nil} value.
+@code{w32-pass-alt-to-system}に@code{nil}以外の値を設定すれば、
+@key{ALT}キーを押したときの処理はWindowsのデフォルトに戻ります。
+
+@ignore
+   arch-tag: f39d2590-5dcc-4318-88d9-0eb73ca10fa2
+@end ignore

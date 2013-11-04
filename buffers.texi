@@ -1,0 +1,994 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 97, 2000, 2001
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Buffers, Windows, Files, Top
+@c @chapter Using Multiple Buffers
+@chapter 複数のバッファの使い方 @emph{(2004/07/16)}
+
+@c @cindex buffers
+@c   The text you are editing in Emacs resides in an object called a
+@c @dfn{buffer}.  Each time you visit a file, a buffer is created to hold the
+@c file's text.  Each time you invoke Dired, a buffer is created to hold the
+@c directory listing.  If you send a message with @kbd{C-x m}, a buffer named
+@c @samp{*mail*} is used to hold the text of the message.  When you ask for a
+@c command's documentation, that appears in a buffer called @samp{*Help*}.
+@cindex バッファ
+Emacs内で編集しているテキストは@dfn{バッファ}（buffer）と
+呼ばれるオブジェクトの中に存在します。
+ファイルを訪問するたびに、
+ファイルのテキストを保持するバッファを作ります。
+diredを起動するたびに、ディレクトリ一覧を保持するバッファを作ります。
+@kbd{C-x m}でメッセージを送信するときには、
+メッセージのテキストを保持するためにバッファ@samp{*mail*}が使われます。
+コマンドの説明文を求めると、@samp{*Help*}と呼ばれるバッファに説明文が現れます。
+
+@c @cindex selected buffer
+@c @cindex current buffer
+@cindex 選択されたバッファ
+@cindex カレントバッファ
+@c   At any time, one and only one buffer is @dfn{current}.  It is also
+@c called the @dfn{selected buffer}.  Often we say that a command operates on
+@c ``the buffer'' as if there were only one; but really this means that the
+@c command operates on the current buffer (most commands do).
+どんなときでも、1つのバッファだけが@dfn{カレント}になります．
+このバッファを@dfn{選択されたバッファ}とも呼びます。
+バッファが1つしかないかのように、
+コマンドが『バッファ』に作用するといういい方をよくします。
+しかし、実際には、コマンドがカレントバッファに作用するということです
+（多くのコマンドはそうする）。
+
+@c   When Emacs has multiple windows, each window has its own chosen
+@c buffer and displays it; at any time, only one of the windows is
+@c selected, and its chosen buffer is the current buffer.  Each window's
+@c mode line normally displays the name of the window's chosen buffer
+@c (@pxref{Windows}).
+複数のウィンドウがあるとき、
+各ウィンドウは選択しているバッファを持ち，それを表示しています．
+しかし，いつでもそれらのウィンドウのうち1つだけが選択されていて、
+そのウィンドウに表示されているバッファがカレントバッファになります。
+各ウィンドウのモード行は、
+通常そのウィンドウで選択されているバッファの名前を表示します（@pxref{Windows}）。
+
+@c   Each buffer has a name, which can be of any length, and you can select
+@c any buffer by giving its name.  Most buffers are made by visiting files,
+@c and their names are derived from the files' names.  But you can also create
+@c an empty buffer with any name you want.  A newly started Emacs has a buffer
+@c named @samp{*scratch*} which can be used for evaluating Lisp expressions in
+@c Emacs.  The distinction between upper and lower case matters in buffer
+@c names.
+各バッファにはどんな長さでもよい名前があり、
+バッファ名を指定してバッファを選択できます。
+多くのバッファはファイルを訪問することで作成され、
+それらの名前はファイル名から導き出します。
+好きな名前で空のバッファを作ることもできます。
+Emacsを新たに始めると、Emacs内でLisp式の評価に使える
+@samp{*scratch*}という名前のバッファができます。
+バッファ名では大文字小文字を区別します。
+
+@c   Each buffer records individually what file it is visiting, whether it is
+@c modified, and what major mode and minor modes are in effect in it
+@c (@pxref{Major Modes}).  Any Emacs variable can be made @dfn{local to} a
+@c particular buffer, meaning its value in that buffer can be different from
+@c the value in other buffers.  @xref{Locals}.
+各バッファは独立に、どのファイルを訪問しているか、
+変更されているか、どのメジャーモードとマイナモードを使っているか
+を記録しています。（@pxref{Major Modes}）。
+どのEmacs変数も各バッファに@dfn{ローカルに}することができます。
+つまり、あるバッファでの変数の値を
+他のバッファでのその変数の値とは違う値にできます。
+@xref{Locals}。
+
+@cindex buffer size, maximum
+@c   A buffer's size cannot be larger than some maximum, which is defined
+@c by the largest buffer position representable by the @dfn{Emacs integer}
+@c data type.  This is because Emacs tracks buffer positions using that
+@c data type.  For 32-bit machines, the largest buffer size is 128
+@c megabytes.
+バッファのサイズはいくつかの最大値よりも大きくなることはできません．最大サイズは
+データタイプ @dfn{Emacs integer} により表現できるバッファ位置により規定されます．
+これは，Emacs がバッファ位置をそのデータタイプを使って追跡しているためです．32ビッ
+トマシンでは最大バッファサイズは128MBになります．
+
+@menu
+* List Buffers::                Getting a list of buffers that exist.
+* Misc Buffer::                 Renaming; changing read-onlyness; copying text.
+* Kill Buffer::                 Killing buffers you no longer need.
+* Buffer Convenience::          Convenience and customization features for
+                          buffer handling.
+@end menu
+
+@node Select Buffer, List Buffers, Buffers, Buffers
+@c @section Creating and Selecting Buffers
+@c @cindex change buffers
+@c @cindex switch buffers
+@section バッファの作成と選択 @emph{(2004/07/16)}
+@cindex バッファの変更
+@cindex バッファの切り替え
+
+@table @kbd
+@item C-x b @var{buffer} @key{RET}
+@c Select or create a buffer named @var{buffer} (@code{switch-to-buffer}).
+@var{buffer}という名前のバッファを選択または作成する
+（@code{switch-to-buffer}）。
+@item C-x 4 b @var{buffer} @key{RET}
+@c Similar, but select @var{buffer} in another window
+@c (@code{switch-to-buffer-other-window}).
+同様だが、別のウィンドウで@var{buffer}を選択する
+（@code{switch-to-buffer-other-window}）。
+@item C-x 5 b @var{buffer} @key{RET}
+@c Similar, but select @var{buffer} in a separate frame
+@c (@code{switch-to-buffer-other-frame}).
+同様だが、別のフレームで@var{buffer}バッファを選択する
+（@code{switch-to-buffer-other-frame}）。
+@end table
+
+@kindex C-x b
+@findex switch-to-buffer
+@c   To select the buffer named @var{bufname}, type @kbd{C-x b @var{bufname}
+@c @key{RET}}.  This runs the command @code{switch-to-buffer} with argument
+@c @var{bufname}.  You can use completion on an abbreviation for the buffer
+@c name you want (@pxref{Completion}).  An empty argument to @kbd{C-x b}
+@c specifies the buffer that was current most recently among those not
+@c now displayed in any window.
+@var{bufname}という名前のバッファを選択するには、
+@kbd{C-x b @var{bufname} @key{RET}}と打ちます。
+これは、引数@var{bufname}でコマンド@code{switch-to-buffer}を実行します。
+バッファ名の略称形を補完することができます（@pxref{Completion}）。
+@kbd{C-x b}に空の引数を指定すると、
+どのウィンドウにも表示されていない最近選択したバッファを意味します。
+
+@kindex C-x 4 b
+@findex switch-to-buffer-other-window
+@vindex even-window-heights
+@c   To select a buffer in a window other than the current one, type
+@c @kbd{C-x 4 b @var{bufname} @key{RET}}.  This runs the command
+@c @code{switch-to-buffer-other-window} which displays the buffer
+@c @var{bufname} in another window.  By default, if displaying the buffer
+@c causes two vertically adjacent windows to be displayed, the heights of
+@c those windows are evened out; to countermand that and preserve the
+@c window configuration, set the variable @code{even-window-heights} to
+@c @code{nil}.
+現在とは異なるウィンドウでバッファを選択するには @kbd{C-x 4 b @var{bufname}
+@key{RET}} を入力します．これは，関数 @code{switch-to-buffer-other-window} を実
+行し，他のウィンドウで @var{bufname} のバッファを表示します．デフォルトでは，バッ
+ファを表示すると，隣接しているウィンドウに表示し，縦方向の高さを均等になるように
+調節します．この機能を無効にし，ウィンドウ設定を保存するようにするには，
+@code{even-window-heights} を @code{nil} にします．
+
+@kindex C-x 5 b
+@findex switch-to-buffer-other-frame
+@c   Similarly, @kbd{C-x 5 b @var{buffer} @key{RET}} runs the command
+@c @code{switch-to-buffer-other-frame} which selects a buffer in another
+@c frame.
+同様に @kbd{C-x 5 b @var{buffer} @key{RET}} は関数
+@code{switch-to-buffer-other-frame} を実行し，バッファを別フレームで選択します．
+
+@vindex display-buffer-reuse-frames
+@c   You can control how certain buffers are handled by these commands by
+@c customizing the variables @code{special-display-buffer-names},
+@c @code{special-display-regexps}, @code{same-window-buffer-names}, and
+@c @code{same-window-regexps}.  See @ref{Force Same Window}, and
+@c @ref{Special Buffer Frames}, for more about these variables.  In
+@c addition, if the value of @code{display-buffer-reuse-frames} is
+@c non-@code{nil}, and the buffer you want to switch to is already
+@c displayed in some frame, Emacs will raise that frame.
+@code{special-display-buffer-names}と
+@code{special-display-regexps}, @code{same-window-buffer-names},
+@code{same-window-regexps} をカスタマイズすることでこれらのコマンドがあるバッファ
+をどう扱うか制御できます．これらの変数の詳細は @ref{Force Same Window} と
+@ref{Special Buffer Frames} を参照ください．さらに，
+変数 @code{display-buffer-reuse-frames} が 非-@code{nil} で切り替えたいバッファ
+がすでにフレームで表示されているなら，Emacsはそのフレームを前面に出します．
+
+@c   Most buffers are created by visiting files, or by Emacs commands that
+@c want to display some text, but you can also create a buffer explicitly
+@c by typing @kbd{C-x b @var{bufname} @key{RET}}.  This makes a new, empty
+@c buffer that is not visiting any file, and selects it for editing.  Such
+@c buffers are used for making notes to yourself.  If you try to save one,
+@c you are asked for the file name to use.  The new buffer's major mode is
+@c determined by the value of @code{default-major-mode} (@pxref{Major
+@c Modes}).
+ほとんどのバッファは、ファイルを訪問することで作られるか、
+テキストを表示するようなEmacsコマンドによって作られますが、
+@kbd{C-x b @var{bufname} @key{RET}}と打って、
+明示的にバッファを作ることもできます。
+こうすると、ファイルを訪問していない新しい空のバッファを作り、
+編集できるようにそのバッファを選択します。
+このようなバッファは、自分用のメモを作るのに使います。
+これらのバッファを保存しようとすると、
+使用するファイル名を聞かれます。
+新しいバッファのメジャーモードは、
+@code{default-major-mode}の値で決まります（@pxref{Major Modes}）。
+
+@c   Note that @kbd{C-x C-f}, and any other command for visiting a file,
+@c can also be used to switch to an existing file-visiting buffer.
+@c @xref{Visiting}.
+@kbd{C-x C-f}やファイルを訪問する他のコマンドは、
+ファイルを訪問している既存のバッファへの切り替えにも使えることに
+注意してください。
+@xref{Visiting}。
+
+@c   Emacs uses buffer names that start with a space for internal purposes.
+@c It treats these buffers specially in minor ways---for example, by
+@c default they do not record undo information.  It is best to avoid using
+@c such buffer names yourself.
+Emacsは、内部目的用のバッファには、空白で始まるバッファ名を使います。
+Emacsは、これらのバッファを少々特別に扱います。
+たとえば、デフォルトでは、アンドゥ情報を記録しません。
+このようなバッファ名は避けるのが最良です。
+
+@node List Buffers, Misc Buffer, Buffers, Buffers
+@c @section Listing Existing Buffers
+@section 既存バッファの一覧 @emph{(2004/07/16)}
+
+@table @kbd
+@item C-x C-b
+@c List the existing buffers (@code{list-buffers}).
+既存バッファを一覧表示する（@code{list-buffers}）。
+@end table
+
+@c @cindex listing current buffers
+@cindex カレントバッファの一覧
+@kindex C-x C-b
+@findex list-buffers
+@c   To display a list of all the buffers that exist, type @kbd{C-x C-b}.
+@c Each line in the list shows one buffer's name, major mode and visited
+@c file.  The buffers are listed in the order that they were current; the
+@c buffers that were current most recently come first.
+既存のすべてのバッファを一覧表示するには、
+@kbd{C-x C-b}と打ちます。
+各行は、バッファ名、メジャーモード、訪問しているファイルを示します。
+バッファは選択された順に表示されます。
+もっとも最近に選択されたバッファが始めにきます。
+
+@c   @samp{*} in the first field of a line indicates the buffer is ``modified.''
+@c If several buffers are modified, it may be time to save some with @kbd{C-x s}
+@c (@pxref{Saving}).  @samp{%} indicates a read-only buffer.  @samp{.} marks the
+@c current buffer.  Here is an example of a buffer list:@refill
+最初のフィールドの@samp{*}は、バッファが『修正され』ていることを示します。
+いくつかのバッファが修正されているなら、
+@kbd{C-x s}でいくつかのバッファを保存する時期かもしれません
+（@pxref{Saving}）。
+@samp{%}は、読み出し専用バッファを示します。
+@samp{.}はカレントバッファに付けられます。
+つぎは、バッファ一覧の例です。
+
+@smallexample
+CRM Buffer                Size  Mode              File
+. * .emacs                3294  Emacs-Lisp        ~/.emacs
+ %  *Help*                 101  Help
+    search.c             86055  C                 ~/cvs/emacs/src/search.c
+ %  src                  20959  Dired by name     ~/cvs/emacs/src/
+  * *mail*                  42  Mail
+ %  HELLO                 1607  Fundamental       ~/cvs/emacs/etc/HELLO
+ %  NEWS                481184  Outline           ~/cvs/emacs/etc/NEWS
+    *scratch*              191  Lisp Interaction
+  * *Messages*            1554  Fundamental
+@end smallexample
+
+@noindent
+@c Note that the buffer @samp{*Help*} was made by a help request; it is not
+@c visiting any file.  The buffer @code{src} was made by Dired on the
+@c directory @file{~/cvs/emacs/src/}.  You can list only buffers that are
+@c visiting files by giving the command a prefix; for instance, by typing
+@c @kbd{C-u C-x C-b}.
+バッファ@samp{*Help*}は、ヘルプ要求で作られたものです。
+このバッファはファイルを訪問していません。
+バッファ@code{src}は、
+ディレクトリ@file{~/cvs/emacs/src/}に対してdiredが作ったものです。前置引数を付け
+ることで訪問しているファイルバッファのみを一覧できます．たとえば，@kbd{C-u C-x
+C-b} とすると可能です．
+
+@need 2000
+@node Misc Buffer, Kill Buffer, List Buffers, Buffers
+@c @section Miscellaneous Buffer Operations
+@section その他のバッファ操作 @emph{(2004/07/16)}
+
+@table @kbd
+@item C-x C-q
+@c Toggle read-only status of buffer (@code{toggle-read-only}).
+バッファの読み出し専用状態を切り替える
+（@code{toggle-read-only}）。
+@item M-x rename-buffer @key{RET} @var{name} @key{RET}
+@c Change the name of the current buffer.
+カレントバッファの名前を変更する。
+@item M-x rename-uniquely
+@c Rename the current buffer by adding @samp{<@var{number}>} to the end.
+名前の最後に@samp{<@var{number}>}を付加して
+カレントバッファ名を変更する。
+@item M-x view-buffer @key{RET} @var{buffer} @key{RET}
+@c Scroll through buffer @var{buffer}.
+バッファ@var{buffer}をスクロールする。
+@end table
+
+@kindex C-x C-q
+@vindex buffer-read-only
+@c @cindex read-only buffer
+@cindex 読み出し専用バッファ
+@c   A buffer can be @dfn{read-only}, which means that commands to change
+@c its contents are not allowed.  The mode line indicates read-only buffers
+@c with @samp{%%} or @samp{%*} near the left margin.  Read-only buffers are
+@c usually made by subsystems such as Dired and Rmail that have special
+@c commands to operate on the text; also by visiting a file whose access
+@c control says you cannot write it.
+バッファは、@dfn{読み出し専用}にもなります。
+そうすると、その内容を変更するコマンドは許されません。
+モード行では、左端付近に@samp{%%}や@samp{%*}を表示して、
+読み出し専用バッファであることを示します。
+通常、読み出し専用バッファは、テキストを操作する特別なコマンドを持つ
+diredやrmailなどのサブシステムが作ります。
+書き込みを禁止されたファイルを訪問しても
+読み出し専用バッファが作られます。
+
+@findex toggle-read-only
+@c   If you wish to make changes in a read-only buffer, use the command
+@c @kbd{C-x C-q} (@code{toggle-read-only}).  It makes a read-only buffer
+@c writable, and makes a writable buffer read-only.  This
+@c works by setting the variable @code{buffer-read-only}, which has a local
+@c value in each buffer and makes the buffer read-only if its value is
+@c non-@code{nil}.  If you have files under version control, you may find
+@c it convenient to bind @kbd{C-x C-q} to @code{vc-toggle-read-only}
+@c instead.  Then, typing @kbd{C-x C-q} not only changes the read-only
+@c flag, but it also checks the file in or out.  @xref{Version
+@c Control}.
+読み出し専用バッファで変更したいときには、
+コマンド@kbd{C-x C-q}を使います（@code{toggle-read-only}）。
+これは、読み出し専用バッファは書き込み可能にし、
+書き込み可能バッファは読み出し専用にします。
+これは変数@code{buffer-read-only}を設定することで動作します。
+この変数は各バッファでローカルな値を持ち、
+値が@code{nil}以外だとバッファは読み出し専用になります。
+版管理の下に置かれているファイルがある場合には、@kbd{C-x C-q} を
+@code{vc-toggle-read-only} にバインドした方が便利かもしれません．それなら，
+@kbd{C-x C-q} と入力することで，読み出し専用の変数を変更するだけでなく，ファイル
+の読み出し専用状態も確認します。@xref{Version Control}。
+
+@c @findex rename-buffer
+@c   @kbd{M-x rename-buffer} changes the name of the current buffer.  Specify
+@c the new name as a minibuffer argument.  There is no default.  If you
+@c specify a name that is in use for some other buffer, an error happens and
+@c no renaming is done.
+@kbd{M-x rename-buffer}は、カレントバッファの名前を変更します。
+ミニバッファ引数として新しい名前を指定します。
+デフォルトはありません。
+すでに他のバッファに使っている名前を指定すると、
+エラーになり、名前は変更されません。
+
+@c   @kbd{M-x rename-uniquely} renames the current buffer to a similar name
+@c with a numeric suffix added to make it both different and unique.  This
+@c command does not need an argument.  It is useful for creating multiple
+@c shell buffers: if you rename the @samp{*Shell*} buffer, then do @kbd{M-x
+@c shell} again, it makes a new shell buffer named @samp{*Shell*};
+@c meanwhile, the old shell buffer continues to exist under its new name.
+@c This method is also good for mail buffers, compilation buffers, and most
+@c Emacs features that create special buffers with particular names.
+@kbd{M-x rename-uniquely}は、
+他のどれとも違う唯一の名前にするために、
+カレントバッファ名に数字の接尾辞を付け加えて似た名前に変更します。
+このコマンドは引数を必要としません。
+このコマンドは複数のシェルバッファを作るのに便利です。
+バッファ@samp{*Shell*}を改名すれば、
+@kbd{M-x shell}をふたたび実行して
+バッファ名@samp{*Shell*}の新しいシェルバッファを作れます。
+一方、古いシェルバッファは、新しい名前で存在し続けます。
+この方法は、メイルバッファ、コンパイルバッファ、
+特定の名前のバッファを作るEmacsの多くの機能にも有効です。
+
+@findex view-buffer
+@c   @kbd{M-x view-buffer} is much like @kbd{M-x view-file} (@pxref{Misc
+@c File Ops}) except that it examines an already existing Emacs buffer.
+@c View mode provides commands for scrolling through the buffer
+@c conveniently but not for changing it.  When you exit View mode with
+@c @kbd{q}, that switches back to the buffer (and the position) which was
+@c previously displayed in the window.  Alternatively, if you exit View
+@c mode with @kbd{e}, the buffer and the value of point that resulted from
+@c your perusal remain in effect.
+@kbd{M-x view-buffer}は、既存のEmacsバッファを調べることを除けば、
+@kbd{M-x view-file}（@pxref{Misc File Ops}）によく似ています。
+閲覧（view）モードには、バッファを簡単にスクロールするための
+コマンドがありますが、変更するコマンドはありません。
+@kbd{q}で閲覧（view）モードから抜けると、
+ウィンドウにまえに表示していたバッファ（とその中での箇所）に切り替わります。
+あるいは、@kbd{e}で閲覧（view）モードから抜けると、
+閲覧していたバッファとそのポイント位置はそのまま残ります。
+
+@c   The commands @kbd{M-x append-to-buffer} and @kbd{M-x insert-buffer}
+@c can be used to copy text from one buffer to another.  @xref{Accumulating
+@c Text}.@refill
+コマンド、@kbd{M-x append-to-buffer}と@kbd{M-x insert-buffer}は、
+1つのバッファから別のバッファへテキストをコピーするのに使います。
+@xref{Accumulating Text}。
+
+@node Kill Buffer, Buffer Convenience, Misc Buffer, Buffers
+@c @section Killing Buffers
+@section バッファの消去 @emph{(2004/07/16)}
+
+@c @cindex killing buffers
+@cindex バッファの消去
+@c   If you continue an Emacs session for a while, you may accumulate a
+@c large number of buffers.  You may then find it convenient to @dfn{kill}
+@c the buffers you no longer need.  On most operating systems, killing a
+@c buffer releases its space back to the operating system so that other
+@c programs can use it.  Here are some commands for killing buffers:
+Emacsのセッションをしばらく続けると、
+たくさんの数のバッファが溜っているでしょう。
+もう必要としないバッファを@dfn{消去}したほうがよいと思うかもしれません。
+多くのオペレーティングシステムでは、
+バッファを消去するとそのメモリ領域を解放して
+オペレーティングシステムに返すので、
+他のプログラムが使えるようになります。
+バッファを消去するコマンドをいくつかあげます。
+
+@table @kbd
+@item C-x k @var{bufname} @key{RET}
+@c Kill buffer @var{bufname} (@code{kill-buffer}).
+バッファ@var{bufname}を消去する（@code{kill-buffer}）。
+@item M-x kill-some-buffers
+@c Offer to kill each buffer, one by one.
+1つ1つ各バッファを消去するかどうか聞いてくる。
+@end table
+
+@findex kill-buffer
+@findex kill-some-buffers
+@kindex C-x k
+
+@c   @kbd{C-x k} (@code{kill-buffer}) kills one buffer, whose name you
+@c specify in the minibuffer.  The default, used if you type just
+@c @key{RET} in the minibuffer, is to kill the current buffer.  If you
+@c kill the current buffer, another buffer becomes current: one that was
+@c current in the recent past but is not displayed in any window now.  If
+@c you ask to kill a file-visiting buffer that is modified (has unsaved
+@c editing), then you must confirm with @kbd{yes} before the buffer is
+@c killed.
+@kbd{C-x k}（@code{kill-buffer}）は、
+ミニバッファで指定した名前のバッファを消去します。
+ミニバッファで@key{RET}だけ打ったときに使われるデフォルトは、
+カレントバッファを消去することです。
+カレントバッファを消去すると、別のバッファがカレントバッファになります。
+どのウィンドウにも表示されていない、
+もっとも最近のカレントバッファです。
+ファイルを訪問して修正してある（編集後に保存していない）バッファを
+消去しようとすると、バッファを消去するまえに@kbd{yes}での確認を求めます。
+
+@c   The command @kbd{M-x kill-some-buffers} asks about each buffer, one by
+@c one.  An answer of @kbd{y} means to kill the buffer.  Killing the current
+@c buffer or a buffer containing unsaved changes selects a new buffer or asks
+@c for confirmation just like @code{kill-buffer}.
+コマンド@kbd{M-x kill-some-buffers}は、
+1つ1つ各バッファについて消去するか聞いてきます。
+@kbd{y}と答えると、そのバッファを消去します。
+カレントバッファや未保存の変更を含むバッファを消去しようとすると、
+新しいバッファを選択するか@code{kill-buffer}のように確認を求めてきます。
+
+@c   The buffer menu feature (@pxref{Several Buffers}) is also convenient
+@c for killing various buffers.
+バッファメニュー機能（@pxref{Several Buffers}）も、
+さまざまなバッファを削除するのに便利です。
+
+@vindex kill-buffer-hook
+@c   If you want to do something special every time a buffer is killed, you
+@c can add hook functions to the hook @code{kill-buffer-hook} (@pxref{Hooks}).
+バッファを削除するときに、毎回何か特別なことをしたいならば、
+フック@code{kill-buffer-hook}にフック関数を追加します（@pxref{Hooks}）。
+
+@findex clean-buffer-list
+@c   If you run one Emacs session for a period of days, as many people do,
+@c it can fill up with buffers that you used several days ago.  The command
+@c @kbd{M-x clean-buffer-list} is a convenient way to purge them; it kills
+@c all the unmodified buffers that you have not used for a long time.  An
+@c ordinary buffer is killed if it has not been displayed for three days;
+@c however, you can specify certain buffers that should never be killed
+@c automatically, and others that should be killed if they have been unused
+@c for a mere hour.
+多くの人々がやるように、何日にもわたってたった1つのEmacsセッションを
+実行する場合、数日前に使ったバッファで一杯になることがあります。
+コマンド@kbd{M-x clean-buffer-list}は、
+それらのバッファを消去する便利な方法です。
+長い期間にわたって使っていない未修正のバッファすべてを消去します。
+3日間表示していない普通のバッファは消去されます。
+しかし、特定のバッファを自動的には消去しないようにしたり、
+ほんの数時間使用しないだけで消去するようにも指定できます。
+
+@c @cindex Midnight mode
+@cindex 真夜中モード（Midnight mode）
+@vindex midnight-mode
+@vindex midnight-hook
+@c   You can also have this buffer purging done for you, every day at
+@c midnight, by enabling Midnight mode.  Midnight mode operates each day at
+@c midnight; at that time, it runs @code{clean-buffer-list}, or whichever
+@c functions you have placed in the normal hook @code{midnight-hook}
+@c (@pxref{Hooks}).
+真夜中（midnight）モードをオンにすれば、
+このようなバッファの消去を毎日真夜中に行わせることもできます。
+真夜中（midnight）モードは、毎日真夜中に動作します。
+真夜中に、@code{clean-buffer-list}、あるいは、
+ノーマルフック@code{midnight-hook}に指定した関数を実行します。
+
+@c   To enable Midnight mode, use the Customization buffer to set the
+@c variable @code{midnight-mode} to @code{t}.  @xref{Easy Customization}.
+真夜中（midnight）モードをオンにするには、
+カスタマイズ（customization）バッファを使って、
+変数@code{midnight-mode}に@code{t}を設定します。
+@xref{Easy Customization}。
+
+@node Several Buffers, Buffer Convenience, Kill Buffer, Buffers
+@c @section Operating on Several Buffers
+@c @cindex buffer menu
+@section 複数バッファの操作 @emph{(2004/07/16)}
+@cindex バッファメニュー
+
+@c   The @dfn{buffer-menu} facility is like a ``Dired for buffers''; it allows
+@c you to request operations on various Emacs buffers by editing an Emacs
+@c buffer containing a list of them.  You can save buffers, kill them
+@c (here called @dfn{deleting} them, for consistency with Dired), or display
+@c them.
+@dfn{バッファメニュー}（buffer-menu）機能は
+『バッファに対するdired』に似ています。
+このコマンドは、バッファ一覧を収めたEmacsバッファを編集することで、
+さまざまなEmacsバッファを操作できます。
+バッファの保存、消去（ここではdiredとの一貫性のために@dfn{削除}と呼ぶ）、
+表示を行うことができます。
+
+@table @kbd
+@item M-x buffer-menu
+@c Begin editing a buffer listing all Emacs buffers.
+すべてのEmacsバッファの一覧を収めたバッファを編集し始める。
+@item M-x buffer-menu-other-window.
+@c Similar, but do it in another window.
+似ていますが，他のウィンドウで行います．
+@end table
+
+@findex buffer-menu
+@findex buffer-menu-other-window
+@c   The command @code{buffer-menu} writes a list of all Emacs
+@c buffers@footnote{Buffers which don't visit files and whose names begin
+@c with a space are omitted: these are used internally by Emacs.} into the
+@c buffer @samp{*Buffer List*}, and selects that buffer in Buffer Menu
+@c mode.  The list in the @samp{*Buffer List*} buffer looks exactly as
+@c described in @ref{List Buffers}.  The buffer is read-only, and can be
+@c changed only through the special commands described in this section.
+@c The usual Emacs cursor motion commands can be used in the @samp{*Buffer
+@c List*} buffer.  The following commands apply to the buffer described on
+@c the current line.
+コマンド@code{buffer-menu}は、
+すべてのEmacsバッファの一覧をバッファ@samp{*Buffer List*}に書き @footnote{ファイ
+ルを訪問していないバッファや名前がスペースで始まるバッファは削除されます．これら
+のバッファは Emacs 内部で使われます}、
+そのバッファをバッファメニュー（buffer-menu）モードにして
+選択します。@samp{*Buffer List*} で表示されるリストは @ref{List Buffers} で述べ
+たものと全く同じように見えます．
+そのバッファは読み出し専用で、本節で述べる特別なコマンドでのみ変更できます。
+普通のEmacsカーソル移動コマンドは、@samp{*Buffer List*}バッファでも使えます。
+つぎにあげるコマンドは、現在行に書かれているバッファに作用します。
+
+@table @kbd
+@item d
+@c Request to delete (kill) the buffer, then move down.  The request
+@c shows as a @samp{D} on the line, before the buffer name.  Requested
+@c deletions take place when you type the @kbd{x} command.
+バッファを削除（消去）するように指示し、1行下へ移動する。
+この指示は、その行のバッファ名のまえに@samp{D}を表示する。
+指示した削除は、@kbd{x}コマンドを打ったときに実行される。
+@item C-d
+@c Like @kbd{d} but move up afterwards instead of down.
+@kbd{d}に似ているが、1行下へ移動するかわりに上へ移動する。
+@item s
+@c Request to save the buffer.  The request shows as an @samp{S} on the
+@c line.  Requested saves take place when you type the @kbd{x} command.
+@c You may request both saving and deletion for the same buffer.
+バッファを保存するように指示する。
+この指示により、行には@samp{S}が表示される。
+指示した保存は、@kbd{x}コマンドを打ったときに実行される。
+同じバッファに対して、保存と削除の両方を指示できる。
+@item x
+@c Perform previously requested deletions and saves.
+まえに指示した削除と保存を実行する。
+@item u
+@c Remove any request made for the current line, and move down.
+現在行に対する指示を消し、1行下へ移動する。
+@item @key{DEL}
+@c Move to previous line and remove any request made for that line.
+1つまえの行に移動し、その行に対するどんな指示も消す。
+@end table
+
+@c   The @kbd{d}, @kbd{C-d}, @kbd{s} and @kbd{u} commands to add or remove
+@c flags also move down (or up) one line.  They accept a numeric argument
+@c as a repeat count.
+@kbd{d}、@kbd{C-d}、@kbd{s}、@kbd{u}コマンドは、
+フラグを追加または削除して、1行下へ（あるいは上へ）移動します。
+これらのコマンドは、反復回数として数引数を取ります。
+
+@c   These commands operate immediately on the buffer listed on the current
+@c line:
+つぎにあげるコマンドは、現在行に書かれているバッファにただちに作用します。
+
+@table @kbd
+@item ~
+@c Mark the buffer ``unmodified.''  The command @kbd{~} does this
+@c immediately when you type it.
+バッファに『変更なし』と印を付ける。
+コマンド@kbd{~}を打つと、ただちに実行する。
+@item %
+@c Toggle the buffer's read-only flag.  The command @kbd{%} does
+@c this immediately when you type it.
+バッファの読み出し専用フラグをトグルする。
+コマンド@kbd{%}を打つと、ただちに実行する。
+@item t
+@c Visit the buffer as a tags table.  @xref{Select Tags Table}.
+タグテーブルとしてバッファを訪問する。
+@pxref{Select Tags Table}。
+@end table
+
+@c   There are also commands to select another buffer or buffers:
+他のバッファや複数のバッファを選択するコマンドもあります。
+
+@table @kbd
+@item q
+@c Quit the buffer menu---immediately display the most recent formerly
+@c visible buffer in its place.
+バッファメニューをやめる。
+このウィンドウには、ここに表示していたもっとも最近のバッファを表示する。
+@item @key{RET}
+@itemx f
+@c Immediately select this line's buffer in place of the @samp{*Buffer
+@c List*} buffer.
+@samp{*Buffer List*}のかわりに、この行のバッファをただちに選択する。
+@item o
+@c Immediately select this line's buffer in another window as if by
+@c @kbd{C-x 4 b}, leaving @samp{*Buffer List*} visible.
+@kbd{C-x 4 b}のように、別のウィンドウでこの行のバッファをただちに選択する。
+@samp{*Buffer List*}はそのまま。
+@item C-o
+@c Immediately display this line's buffer in another window, but don't
+@c select the window.
+別のウィンドウにこの行のバッファをただちに表示するが、
+そのウィンドウを選択しない。
+@item 1
+@c Immediately select this line's buffer in a full-screen window.
+この行のバッファを画面一杯のウィンドウにただちに選択する。
+@item 2
+@c Immediately set up two windows, with this line's buffer in one, and the
+@c previously current buffer (aside from the buffer @samp{*Buffer List*})
+@c in the other.
+ただちに2つのウィンドウにして、
+この行のバッファをその1つに、
+（@samp{*Buffer List*}バッファを除いて）まえのカレントバッファを
+もう1つに表示する。
+@item b
+@c Bury the buffer listed on this line.
+この行のバッファを一覧の最後に移す。
+@item m
+@c Mark this line's buffer to be displayed in another window if you exit
+@c with the @kbd{v} command.  The request shows as a @samp{>} at the
+@c beginning of the line.  (A single buffer may not have both a delete
+@c request and a display request.)
+@kbd{v}コマンドでバッファメニューをやめたときに、
+この行のバッファを別のウィンドウに表示するように印を付ける。
+この指示は、行頭に@samp{>} を表示する。
+（1つのバッファに、削除指示と表示指示の両方を付けることはできない。）
+@item v
+@c Immediately select this line's buffer, and also display in other windows
+@c any buffers previously marked with the @kbd{m} command.  If you have not
+@c marked any buffers, this command is equivalent to @kbd{1}.
+ただちにこの行のバッファを選択し、
+別のウィンドウ群には@kbd{m}コマンドで印を付けたバッファ群を表示する。
+印を付けたバッファがなければ、このコマンドは@kbd{1}コマンドと同じ。
+@end table
+
+@c   All that @code{buffer-menu} does directly is create and switch to a
+@c suitable buffer, and turn on Buffer Menu mode.  Everything else
+@c described above is implemented by the special commands provided in
+@c Buffer Menu mode.  One consequence of this is that you can switch from
+@c the @samp{*Buffer List*} buffer to another Emacs buffer, and edit there.
+@c You can reselect the @samp{*Buffer List*} buffer later, to perform the
+@c operations already requested, or you can kill it, or pay no further
+@c attention to it.
+@code{buffer-menu}が直接行うことは、
+適切なバッファを作成してそれに切り替えてから、
+バッファメニュー（buffer-menu）モードにすることです。
+それ以外の上に述べたことはすべて、
+バッファメニュー（buffer-menu）モードが用意した特別なコマンドで
+実装されています。
+その結果、@samp{*Buffer List*}バッファから別のEmacsバッファへ切り替えて、
+そこで編集できます。
+あとで@samp{*Buffer List*}バッファをふたたび選択してすでに指示した操作を実行したり、
+このバッファを削除したり、無視したりもできます。
+
+@c   The only difference between @code{buffer-menu} and @code{list-buffers}
+@c is that @code{buffer-menu} switches to the @samp{*Buffer List*} buffer
+@c in the selected window; @code{list-buffers} displays it in another
+@c window.  If you run @code{list-buffers} (that is, type @kbd{C-x C-b})
+@c and select the buffer list manually, you can use all of the commands
+@c described here.
+@code{buffer-menu}と@code{list-buffers}の唯一の違いは、
+@code{buffer-menu}は選択されたウィンドウで
+@samp{*Buffer List*}バッファに切り替えることです。
+@code{list-buffers}は別のウィンドウにこのバッファを表示するだけです。
+@code{list-buffers}を実行し（つまり、@kbd{C-x C-b}と打つ）、
+@samp{*Buffer List*}バッファを手動で選択すると、
+ここに述べたすべてのコマンドを使えます。
+
+@c   The buffer @samp{*Buffer List*} is not updated automatically when
+@c buffers are created and killed; its contents are just text.  If you have
+@c created, deleted or renamed buffers, the way to update @samp{*Buffer
+@c List*} to show what you have done is to type @kbd{g}
+@c (@code{revert-buffer}) or repeat the @code{buffer-menu} command.
+バッファを作成したり削除したりしても、
+バッファ@samp{*Buffer List*}は自動的に更新されません。
+その内容はただのテキストにすぎません。
+バッファを作成／削除／改名したら、
+現在のバッファの状態を見るために@samp{*Buffer List*}を更新する方法は、
+@kbd{g}（@code{revert-buffer}）を打つか、
+@code{buffer-menu}コマンドを再度実行することです。
+
+@c   The command @code{buffer-menu-other-window} works the same as
+@c @code{buffer-menu}, except that it displays the buffers list in
+@c another window.
+関数 @code{buffer-menu-other-window} は @code{buffer-menu} と同じように動作しま
+すが，バッファリストを別ウィンドウに表示することだけが異なります．
+
+@node Indirect Buffers, Buffer Convenience, Kill Buffer, Buffers
+@c @section Indirect Buffers
+@c @cindex indirect buffer
+@c @cindex base buffer
+@section 間接バッファ @emph{(2004/07/16)}
+@cindex 間接バッファ
+@cindex 基底バッファ
+
+@c   An @dfn{indirect buffer} shares the text of some other buffer, which
+@c is called the @dfn{base buffer} of the indirect buffer.  In some ways it
+@c is the analogue, for buffers, of a symbolic link between files.
+@dfn{間接バッファ}は、他のバッファとテキストを共有します。
+そのような他のバッファを間接バッファの@dfn{基底バッファ}と呼びます。
+ある意味で、ファイルのあいだのシンボリックリンクに似ています。
+
+@table @kbd
+@findex make-indirect-buffer
+@item M-x make-indirect-buffer @key{RET} @var{base-buffer} @key{RET} @var{indirect-name} @key{RET}
+@c Create an indirect buffer named @var{indirect-name} whose base buffer
+@c is @var{base-buffer}.
+@var{base-buffer}を基底バッファとする間接バッファ@var{indirect-name}を作る。
+
+@findex clone-indirect-buffer
+@item M-x clone-indirect-buffer @key{RET}
+@c Create an indirect buffer that is a twin copy of the current buffer.
+カレントバッファを双子のようなコピーとなる間接バッファを作る．
+
+@item C-x 4 c
+@kindex C-x 4 c
+@findex clone-indirect-buffer-other-window
+@c Create an indirect buffer that is a twin copy of the current buffer, and
+@c select it in another window (@code{clone-indirect-buffer-other-window}).
+カレントバッファの双子のようなコピーとなる間接バッファを作り，他のウィンドウで選
+択する (@code{clone-indirect-buffer-other-window}).
+@end table
+
+@c   The text of the indirect buffer is always identical to the text of its
+@c base buffer; changes made by editing either one are visible immediately
+@c in the other.  But in all other respects, the indirect buffer and its
+@c base buffer are completely separate.  They have different names,
+@c different values of point, different narrowing, different markers,
+@c different major modes, and different local variables.
+間接バッファのテキストは基底バッファのテキストと常に同一です．一方で編集された変
+更は，他方でも即座に見ることができます．しかし，他の観点では間接バッファと基底バッ
+ファは完全に分離しています．つまり，バッファ名もカーソル位置も，ナローイングも，
+マークもメジャーモードも，ローカル変数もすべて異なるのです．
+
+@c   An indirect buffer cannot visit a file, but its base buffer can.  If
+@c you try to save the indirect buffer, that actually works by saving the
+@c base buffer.  Killing the base buffer effectively kills the indirect
+@c buffer, but killing an indirect buffer has no effect on its base buffer.
+間接バッファはファイルを訪問できませんが，基底バッファはできます．もし間接バッファ
+を保存しようとすると，実際には基底バッファで保存処理が行われます．基底バッファを
+キルすると，事実上間接バッファもキルされます．しかし，間接バッファをキルしても基
+底バッファには何ら影響を与えません．
+
+@c   One way to use indirect buffers is to display multiple views of an
+@c outline.  @xref{Outline Views}.
+間接バッファを使う一つの方法はアウトラインで複数箇所を表示させることです．
+@xref{Outline Views}．
+
+@cindex multiple @samp{*info*} and @samp{*Help*} buffers
+@c   A quick and handy way to make an indirect buffer is with the command
+@c @kbd{M-x clone-indirect-buffer}.  It creates and selects an indirect
+@c buffer whose base buffer is the current buffer.  With a numeric
+@c argument, it prompts for the name of the indirect buffer; otherwise it
+@c defaults to the name of the current buffer, modifying it by adding a
+@c @samp{<@var{n}>} prefix if required.  @kbd{C-x 4 c}
+@c (@code{clone-indirect-buffer-other-window}) works like @kbd{M-x
+@c clone-indirect-buffer}, but it selects the cloned buffer in another
+@c window.  These commands come in handy if you want to create new
+@c @samp{*info*} or @samp{*Help*} buffers, for example.
+間接バッファを作る手っ取り早い方法は @kbd{M-x clone-indirect-buffer} を使うこと
+です．このコマンドは基底バッファがカレントバッファである間接バッファを作成し，選
+択します．前置引数があると，間接バッファの名前を問い合わせます．そうしなければ，
+バッファ名は，カレントバッファの名前に，@samp{<@var{n}>} を追加して作成されます．
+@kbd{C-x 4 c} (@code{clone-indirect-buffer-other-window}) は @kbd{M-x
+clone-indirect-buffer} のように動作しますが，他のウィンドウで間接バッファを選択
+します．例えば，新しい@samp{*info*} や @samp{*Help*} バッファを作成したい場合に
+は手軽なコマンドとなります．
+
+@c   The more general way is with the command @kbd{M-x
+@c make-indirect-buffer}.  It creates an indirect buffer from buffer
+@c @var{base-buffer}, under the name @var{indirect-name}.  It prompts for
+@c both @var{base-buffer} and @var{indirect-name} using the minibuffer.
+より一般的なコマンドは @kbd{M-x make-indirect-buffer}です．このコマンドは
+@var{base-buffer} の基底バッファから @var{indirect-name} の名前の間接バッファを
+作成します．@var{base-buffer} と @var{indirect-name} はミニバッファで入力します．
+
+@node Buffer Convenience,  , Kill Buffer, Buffers
+@c @section Convenience Features and Customization of Buffer Handling
+@section バッファに関連した便利な機能とカスタマイズ @emph{(2004/07/16)}
+
+@c    This section describes several modes and features that make it more
+@c convenient to switch between buffers.
+この節はバッファ切り替えをより便利にするようなモードや機能を紹介しています．
+
+@menu
+* Uniquify::                    Buffer names can contain directory parts.
+* Iswitchb::                    Switching between buffers with substrings.
+* Buffer Menus::                Configurable buffer menu.
+@end menu
+
+@node Uniquify, Iswitchb, Buffer Convenience, Buffer Convenience
+@c @subsection Making Buffer Names Unique
+@subsection バッファ名を分かりやすく @emph{(2004/07/16)}
+
+@cindex unique buffer names
+@cindex directories in buffer names
+@c   When several buffers visit identically-named files, Emacs must give
+@c the buffers distinct names.  The usual method for making buffer names
+@c unique adds @samp{<2>}, @samp{<3>}, etc. to the end of the buffer
+@c names (all but one of them).
+同一のファイル名を持つファイルを開きバッファを作成するためには，Emacs が区別でき
+るバッファ名が必要になります．通常はバッファ名の最後に @samp{<2>}，@samp{<3>} な
+どを付加することでバッファ名を区別できるようにしています．
+
+@vindex uniquify-buffer-name-style
+@c   Other methods work by adding parts of each file's directory to the
+@c buffer name.  To select one, customize the variable
+@c @code{uniquify-buffer-name-style} (@pxref{Easy Customization}).
+他の方法はバッファ名にそれぞれのディレクトリ名の一部を追加する方法です．ディレク
+トリの追加方法は @code{uniquify-buffer-name-style} (@pxref{Easy
+Customization}) をカスタマイズすることで設定できます．
+
+@c   For instance, the @code{forward} naming method puts part of the
+@c directory name at the beginning of the buffer name; using this method,
+@c buffers visiting @file{/u/mernst/tmp/Makefile} and
+@c @file{/usr/projects/zaphod/Makefile} would be named
+@c @samp{tmp/Makefile} and @samp{zaphod/Makefile}, respectively (instead
+@c of @samp{Makefile} and @samp{Makefile<2>}).
+例えば，@code{forward}を選択すると，バッファ名の最初にディレクトリ名の一部が付け
+られます．この方法で，@file{/u/mernst/tmp/Makefile} と
+@file{/usr/projects/zaphod/Makefile} を開くと，バッファ名はそれぞれ
+@samp{tmp/Makefile} と @samp{zaphod/Makefile} になります (デフォルトではそれぞれ
+@samp{Makefile} and @samp{Makefile<2>} となります)．
+
+@c   By contrast, the @code{post-forward} naming method would call the
+@c buffers @samp{Makefile|tmp} and @samp{Makefile|zaphod}, and the
+@c @code{reverse} naming method would call them @samp{Makefile\tmp} and
+@c @samp{Makefile\zaphod}.  The nontrivial difference between
+@c @code{post-forward} and @code{reverse} occurs when just one directory
+@c name is not enough to distinguish two files; then @code{reverse} puts
+@c the directory names in reverse order, so that @file{/top/middle/file}
+@c becomes @samp{file\middle\top}, while @code{post-forward} puts them in
+@c forward order after the file name, as in @samp{file|top/middle}.
+対照的に，@code{post-forward} は @samp{Makefile|tmp} と @samp{Makefile|zaphod}に，
+@code{reverse} は@samp{Makefile\tmp} と @samp{Makefile\zaphod} のようなバッファ
+名にします．@code{post-forward} と @code{reverse} の大きな違いが，1つのディレク
+トリ名では対応できない時です．@code{reverse} はディレクトリ名を逆順で追加してい
+きます．つまり，@file{/top/middle/file} が @samp{file\middle\top} になります．一
+方，@code{post-forward} はファイル名の後に @samp{file|top/middle} のように追加し
+ます．
+
+@c   Which rule to follow for putting the directory names in the buffer
+@c name is not very important if you are going to @emph{look} at the
+@c buffer names before you type one.  But as an experienced user, if you
+@c know the rule, you won't have to look.  And then you may find that one
+@c rule or another is easier for you to remember and utilize fast.
+どの方法を使っても，バッファ名を入力する際に，@emph{見て確認}するのであれば，方
+法は大して重要ではありません．しかし，熟練したユーザのように，ルールを熟知してい
+れば，見ることはないでしょう．そして，その場合，いずれかのルールでバッファ
+名が表示されていれば，思い出し利用するのが容易になることでしょう．
+
+@node Iswitchb, Buffer Menus, Uniquify, Buffer Convenience
+@c @subsection Switching Between Buffers using Substrings
+@subsection バッファ名検索でバッファを切り替える — iswitchb @emph{(2004/07/16)}
+
+@findex iswitchb-mode
+@cindex Iswitchb mode
+@cindex mode, Iswitchb
+@kindex C-x b @r{(Iswitchb mode)}
+@kindex C-x 4 b @r{(Iswitchb mode)}
+@kindex C-x 5 b @r{(Iswitchb mode)}
+@kindex C-x 4 C-o @r{(Iswitchb mode)}
+
+@c   Iswitchb global minor mode provides convenient switching between
+@c buffers using substrings of their names.  It replaces the normal
+@c definitions of @kbd{C-x b}, @kbd{C-x 4 b}, @kbd{C-x 5 b}, and @kbd{C-x
+@c 4 C-o} with alternative commands that are somewhat ``smarter.''
+グローバルマイナーモードである Iswitchb はバッファ名を文字で検索することで切り替
+えを便利にする機能です．この機能はデフォルトで @kbd{C-x b}, @kbd{C-x 4 b},
+@kbd{C-x 5 b} や@kbd{C-x 4 C-o} に割り当てられている機能をより便利な機能で代替し
+ます．
+
+@c   When one of these commands prompts you for a buffer name, you can
+@c type in just a substring of the name you want to choose.  As you enter
+@c the substring, Iswitchb mode continuously displays a list of buffers
+@c that match the substring you have typed.
+これらのコマンドはバッファ名の入力を求めます．その時，選択したい名前の一部だけを
+入力できます(最初から入力しなくていいのです)．一部の文字を入力すると，Iswitchb
+は入力した文字を含むバッファ名のリストを表示します．
+
+@c   At any time, you can type @key{RET} to select the first buffer in
+@c the list.  So the way to select a particular buffer is to make it the
+@c first in the list.  There are two ways to do this.  You can type more
+@c of the buffer name and thus narrow down the list, excluding unwanted
+@c buffers above the desired one.  Alternatively, you can use @kbd{C-s}
+@c and @kbd{C-r} to rotate the list until the desired buffer is first.
+リストの最初のバッファは @key{RET} で選択します．つまり，特定のバッファを選択し
+たければ，リストの先頭に持ってくればいいのです．これには2つの方法があります．1つ
+はさらに文字を入力して，不要なバッファを除外して，バッファ名のリストを絞り込むこ
+と．もう一つは，@kbd{C-s} と @kbd{C-r} で希望のバッファが先頭になるまで，リスト
+の順番を変更させることです．
+
+@c   @key{TAB} while entering the buffer name performs completion on the
+@c string you have entered, based on the displayed list of buffers.
+バッファ名を入力している間，@key{TAB} はバッファ名のリストをもとに補完する機能が
+あります．
+
+@c   To enable Iswitchb mode, type @kbd{M-x iswitchb-mode}, or customize
+@c the variable @code{iswitchb-mode} to @code{t} (@pxref{Easy
+@c Customization}).
+Iswitchb を有効にするには @kbd{M-x iswitchb-mode} を実行するか
+@code{iswitchb-mode} を @code{t} にカスタマイズ (@pxref{Easy Customization}) し
+ます．
+
+@node Buffer Menus,  , Iswitchb, Buffer Convenience
+@c @subsection Customizing Buffer Menus
+@subsection バッファメニューのカスタマイズ @emph{(2004/07/16)}
+
+@findex bs-show
+@cindex buffer list, customizable
+@table @kbd
+@item M-x bs-show
+@c Make a list of buffers similarly to @kbd{M-x list-buffers} but
+@c customizable.
+@kbd{M-x list-buffers} のバッファリストに似ているがカスタマイズが可能です．
+@end table
+
+@c   @kbd{M-x bs-show} pops up a buffer list similar to the one normally
+@c displayed by @kbd{C-x C-b} but which you can customize.  If you prefer
+@c this to the usual buffer list, you can bind this command to @kbd{C-x
+@c C-b}.  To customize this buffer list, use the @code{bs} Custom group
+@c (@pxref{Easy Customization}).
+@kbd{M-x bs-show} はカスタマイズは可能ですが，通常は @kbd{C-x C-b} で表示される
+ものと似た一覧を表示します．通常のものよりもこちらが良ければ，このコマンドを
+@kbd{C-x C-b} に割り当てることができます．バッファリストのカスタマイズはカスタマ
+イズグループの @code{bs} を利用できます (@pxref{Easy Customization})．
+
+@findex msb-mode
+@cindex mode, MSB
+@cindex MSB mode
+@cindex buffer menu
+@findex mouse-buffer-menu
+@kindex C-Down-Mouse-1
+@c   MSB global minor mode (``MSB'' stands for ``mouse select buffer'')
+@c provides a different and customizable mouse buffer menu which you may
+@c prefer.  It replaces the bindings of @code{mouse-buffer-menu},
+@c normally on @kbd{C-Down-Mouse-1}, and the menu bar buffer menu.  You
+@c can customize the menu in the @code{msb} Custom group.
+グローバルマイナーモードである MSB (MSBは「mouse select buffer」を表す) はポップ
+アップされるメニューをデフォルトとは異なるものにします．これは，
+通常 @kbd{C-Down-Mouse-1} に割り当てられている @code{mouse-buffer-menu} を置き換
+え，「buffer」メニューも置き換えます．カスタマイズはグループ @code{msb} でできま
+す．
+
+@ignore
+   arch-tag: 08c43460-f4f4-4b43-9cb5-1ea9ad991695
+@end ignore

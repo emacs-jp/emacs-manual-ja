@@ -1,0 +1,3870 @@
+@c =============================================================
+@c = 元 翻 訳: 久野靖＠大塚.筑波大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c = 20.5改訂: 大木敦雄＠大塚.筑波大学 = 1999/12/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 97, 2000, 2001
+@c   Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@iftex
+@c @chapter Miscellaneous Commands
+@chapter その他のコマンド @emph{(2005/05/08)}
+
+@c   This chapter contains several brief topics that do not fit anywhere
+@c else: reading netnews, running shell commands and shell subprocesses,
+@c using a single shared Emacs for utilities that expect to run an editor
+@c as a subprocess, printing hardcopy, sorting text, narrowing display to
+@c part of the buffer, editing double-column files and binary files, saving
+@c an Emacs session for later resumption, emulating other editors, and
+@c various diversions and amusements.
+本章では他の章に入れるのが適当でなかったいくつかの話題を取り上げます。
+具体的には、ネットニュースを読む、
+シェルコマンドやシェルサブプロセスを動かす、
+エディタをサブプロセスとして起動するプログラム間で1つの
+Emacsプロセスを共同利用する、印刷する、テキストをソートする、
+バッファの一部だけを表示するように制限する、
+2段組みファイルやバイナリファイルを編集する、
+Emacsセッションの状態を保存してあとでその状態に復帰する、
+他のエディタのエミュレーション、いろいろなお遊びです。
+
+@end iftex
+@node Gnus, Customization, Calendar/Diary, Top
+@c @section Gnus
+@c @cindex Gnus
+@c @cindex reading netnews
+@section gnus @emph{(2005/05/04)}
+@cindex gnus
+@cindex ネットニュースを読む
+
+@c Gnus is an Emacs package primarily designed for reading and posting
+@c Usenet news.  It can also be used to read and respond to messages from a
+@c number of other sources---mail, remote directories, digests, and so on.
+gnusは主にネットニュースを読んだり投稿するためのEmacsパッケージです。
+電子メイル、リモートディレクトリ、ダイジェストなどの
+ネットニュース以外のメッセージを読んだりそれらに応答するのにも使えます。
+
+@c Here we introduce Gnus and describe several basic features.
+以下ではgnusについて紹介し、いくつかの基本的な機能について説明します。
+@ifinfo
+@c For full details, see @ref{Top, Gnus,, gnus, The Gnus Manual}.
+詳しくは、@ref{Top, Gnus,, gnus, The Gnus Manual}を参照してください。
+@end ifinfo
+@iftex
+@c For full details on Gnus, type @kbd{M-x info} and then select the Gnus
+@c manual.
+gnusについて詳しく知るには、
+@kbd{M-x info}と打ってからgnusのマニュアルを選んでください。
+@end iftex
+
+@findex gnus
+@c To start Gnus, type @kbd{M-x gnus @key{RET}}.
+gnusを起動するには、@kbd{M-x gnus @key{RET}}と打ちます。
+
+@menu
+* Buffers of Gnus::	The group, summary, and article buffers.
+* Gnus Startup::	What you should know about starting Gnus.
+* Summary of Gnus::	A short description of the basic Gnus commands.
+@end menu
+
+@node Buffers of Gnus
+@c @subsection Gnus Buffers
+@subsection gnusのバッファ
+
+@c As opposed to most normal Emacs packages, Gnus uses a number of
+@c different buffers to display information and to receive commands.  The
+@c three buffers users spend most of their time in are the @dfn{group
+@c buffer}, the @dfn{summary buffer} and the @dfn{article buffer}.  
+ふつうのEmacsのパッケージと違って、
+gnusは多数の異なるバッファを使って情報を提示したり
+ユーザーのコマンドを受け取ります。
+ユーザーがもっとも多くの時間を使うことになるバッファは、
+@dfn{グループバッファ}、@dfn{サマリバッファ}、
+@dfn{記事バッファ}の3つです。
+
+@c The @dfn{group buffer} contains a list of groups.  This is the first
+@c buffer Gnus displays when it starts up.  It normally displays only the
+@c groups to which you subscribe and that contain unread articles.  Use
+@c this buffer to select a specific group.
+@dfn{グループバッファ}はニュースグループの一覧です。
+gnusが起動すると、まずこのバッファが表示されます。
+通常はユーザーが購読していて、かつ、
+未読記事が存在するグループだけが表示されます。
+このバッファでグループを選択します。
+
+@c The @dfn{summary buffer} lists one line for each article in a single
+@c group.  By default, the author, the subject and the line number are
+@c displayed for each article, but this is customizable, like most aspects
+@c of Gnus display.  The summary buffer is created when you select a group
+@c in the group buffer, and is killed when you exit the group.  Use this
+@c buffer to select an article.
+@dfn{サマリバッファ}は選択したグループ内の1つの記事につき
+1行の情報を表示します。
+デフォルトでは、各記事の投稿者、題目、行数が表示されますが、
+gnusのほとんどの表示内容と同様にこの表示内容はカスタマイズできます。
+グループバッファでグループを選択するとサマリバッファが作られ、
+グループから出ると削除されます。
+サマリバッファを使って記事を選択します。
+
+@c The @dfn{article buffer} displays the article.  In normal Gnus usage,
+@c you don't select this buffer---all useful article-oriented commands work
+@c in the summary buffer.  But you can select the article buffer, and
+@c execute all Gnus commands from that buffer, if you want to.
+@dfn{記事バッファ}は記事を表示します。
+gnusの普通の使い方では、このバッファを選択することはありません。
+記事を操作対象とするコマンド群はサマリバッファで動作します。
+しかし、望むなら、記事バッファに切り替えて、
+そこでgnusのコマンドを実行することも可能です。
+
+@node Gnus Startup
+@c @subsection When Gnus Starts Up
+@subsection gnusの起動時の動作
+
+@c At startup, Gnus reads your @file{.newsrc} news initialization file
+@c and attempts to communicate with the local news server, which is a
+@c repository of news articles.  The news server need not be the same
+@c computer you are logged in on.
+gnusが起動すると、個人のニュース初期化ファイル@file{.newsrc}を読み込み、
+ニュース記事を蓄えているローカルのニュースサーバーと通信しようとします。
+ニュースサーバーは、
+ユーザーがログインしているマシンと同じである必要はありません。
+
+@c If you start Gnus and connect to the server, but do not see any
+@c newsgroups listed in the group buffer, type @kbd{L} or @kbd{A k} to get
+@c a listing of all the groups.  Then type @kbd{u} to toggle
+@c subscription to groups.
+gnusを起動してニュースサーバーと通信したあとでも
+グループバッファにグループが1つも表示されないときは、
+@kbd{L}や@kbd{A k}と打ってすべてのグループを表示させます。
+つぎに各グループの行で@kbd{u}と打って
+個々のグループの購読／非購読を切り替えます。
+
+@c The first time you start Gnus, Gnus subscribes you to a few selected
+@c groups.  All other groups start out as @dfn{killed groups} for you; you
+@c can list them with @kbd{A k}.  All new groups that subsequently come to
+@c exist at the news server become @dfn{zombie groups} for you; type @kbd{A
+@c z} to list them.  You can subscribe to a group shown in these lists
+@c using the @kbd{u} command.
+初めてgnusを起動したときは、ごく少数の選ばれたグループのみが
+購読状態にあります。
+他のグループは@dfn{非購読グループ}（killed groups）になっていて、
+@kbd{A k}を使うと表示されます。
+最初の起動以後にニュースサーバー上に追加されたグループはすべて、
+@dfn{ゾンビグループ}（zombie groups）になっていて、
+@kbd{A z}を使うと表示されます。
+@kbd{u}を使えばこれらのグループを購読状態にできます。
+
+@c When you quit Gnus with @kbd{q}, it automatically records in your
+@c @file{.newsrc} and @file{.newsrc.eld} initialization files the
+@c subscribed or unsubscribed status of all groups.  You should normally
+@c not edit these files manually, but you may if you know how.
+@kbd{q}でgnusを終了すると、初期化ファイル@file{.newsrc}と
+@file{.newsrc.eld}にすべてのグループの購読／非購読を自動的に記録します。
+通常はこれらのファイルを手で編集すべきではありませんが、
+やりかたがわかっているならかまいません。
+
+@node Summary of Gnus
+@c @subsection Summary of Gnus Commands
+@subsection gnusコマンドのまとめ @emph{(2005/05/04)}
+
+@c Reading news is a two-step process:
+ニュースを読むにはつぎの2つの段階を踏みます。
+
+@enumerate
+@item
+@c Choose a group in the group buffer.
+グループバッファでグループを選択する。
+
+@item
+@c Select articles from the summary buffer.  Each article selected is
+@c displayed in the article buffer in a large window, below the summary
+@c buffer in its small window.
+サマリバッファで記事を選択する。
+記事を選択すると、サマリバッファの小さなウィンドウの下の
+大きめのウィンドウの中の記事バッファに選択した記事が表示される。
+@end enumerate
+
+@c   Each Gnus buffer has its own special commands; however, the meanings
+@c of any given key in the various Gnus buffers are usually analogous, even
+@c if not identical.  Here are commands for the group and summary buffers:
+gnusの各バッファにはそれぞれ独自のコマンドがあります。
+しかし、gnusのさまざまなバッファのどんなキーの意味も、
+等価ではないにせよ、だいたい同じです。
+以下は、グループバッファとサマリバッファのコマンドです。
+
+@table @kbd
+@c @kindex q @r{(Gnus Group mode)}
+@kindex q @r{（gnusグループモード）}
+@findex gnus-group-exit
+@item q
+@c In the group buffer, update your @file{.newsrc} initialization file
+@c and quit Gnus.
+グループバッファでは、初期化ファイル@file{.newsrc}を更新してgnusを終了する。
+
+@c In the summary buffer, exit the current group and return to the
+@c group buffer.  Thus, typing @kbd{q} twice quits Gnus.
+サマリバッファでは、
+カレントグループから抜け出てグループバッファに戻る。
+したがって、@kbd{q}を2回打つとgnusを終る。
+
+@c @kindex L @r{(Gnus Group mode)}
+@kindex L @r{（gnusグループモード）}
+@findex gnus-group-list-all-groups
+@item L
+@c In the group buffer, list all the groups available on your news
+@c server (except those you have killed).  This may be a long list!
+グループバッファでは、
+ニュースサーバーにある（非購読にしたもの以外の）
+すべてのグループを表示する。
+すごく長いリストになるかもしれないので注意！
+
+@c @kindex l @r{(Gnus Group mode)}
+@kindex l @r{（gnusグループモード）}
+@findex gnus-group-list-groups
+@item l
+@c In the group buffer, list only the groups to which you subscribe and
+@c which contain unread articles.
+グループバッファでは、購読中で未読記事があるグループのみを表示する。
+
+@c @kindex u @r{(Gnus Group mode)}
+@kindex u @r{（gnusグループモード）}
+@findex gnus-group-unsubscribe-current-group
+@c @cindex subscribe groups
+@c @cindex unsubscribe groups
+@cindex グループの購読
+@cindex グループの非購読化
+@item u
+@c In the group buffer, unsubscribe from (or subscribe to) the group listed
+@c in the line that point is on.  When you quit Gnus by typing @kbd{q},
+@c Gnus lists in your @file{.newsrc} file which groups you have subscribed
+@c to.  The next time you start Gnus, you won't see this group,
+@c because Gnus normally displays only subscribed-to groups.
+グループバッファでは、ポイントのある行のグループの購読／非購読を切り替える。
+@kbd{q}でgnusを終ると、gnusはこの状態を@file{.newsrc}ファイルに記録する。
+gnusは、通常、購読グループのみを表示するため、
+つぎにgnusを起動したときには非購読にしたグループは表示されない。
+
+@c @kindex C-k @r{(Gnus)}
+@kindex C-k @r{（gnus）}
+@findex gnus-group-kill-group
+@item C-k
+@c In the group buffer, ``kill'' the current line's group---don't
+@c even list it in @file{.newsrc} from now on.  This affects future
+@c Gnus sessions as well as the present session.
+グループバッファでは、ポイントのある行のグループを「抹消」する。
+すなわち、そのグループは以後@file{.newsrc}にも現れなくなる。
+このコマンドの効果は、現在のgnusセッションだけでなく
+将来のgnusセッションにも影響する。
+
+@c When you quit Gnus by typing @kbd{q}, Gnus writes information
+@c in the file @file{.newsrc} describing all newsgroups except those you
+@c have ``killed.''
+@kbd{q}でgnusを終了すると、
+gnusはファイル@file{.newsrc}に
+抹消したグループを除くすべてのグループの情報を書き出す。
+
+@c @kindex SPC @r{(Gnus)}
+@kindex SPC @r{（gnus）}
+@findex gnus-group-read-group
+@item @key{SPC}
+@c In the group buffer, select the group on the line under the cursor
+@c and display the first unread article in that group.
+グループバッファでは、ポイントのある行に対応するグループを選択し、
+そのグループの最初の未読記事を表示する。
+
+@need 1000
+@c In the summary buffer,
+サマリバッファでは、つぎのようになる。
+
+@itemize @bullet
+@item
+@c Select the article on the line under the cursor if none is selected.
+選択されている記事がなければ、
+ポイントのある行の記事を選択する。
+
+@item
+@c Scroll the text of the selected article (if there is one).
+（選択されている記事があれば）その記事のテキストを1画面分進める。
+
+@item
+@c Select the next unread article if at the end of the current article.
+選択されている記事の末尾にいる場合は、つぎの未読記事を選択する。
+@end itemize
+
+@c Thus, you can move through all the articles by repeatedly typing @key{SPC}.
+すなわち、繰り返し@key{SPC}を打と、すべての記事を順に見ていくことができる。
+
+@c @kindex DEL @r{(Gnus)}
+@kindex DEL @r{（gnus）}
+@item @key{DEL}
+@c In the group buffer, move point to the previous group containing
+@c unread articles.
+グループバッファでは、ポイントを未読記事がある1つまえのグループに移動する。
+
+@findex gnus-summary-prev-page
+@c In the summary buffer, scroll the text of the article backwards.
+サマリバッファでは、記事のテキストを1画面分戻す。
+
+@c @kindex n @r{(Gnus)}
+@kindex n @r{（gnus）}
+@findex gnus-group-next-unread-group
+@findex gnus-summary-next-unread-article
+@item n
+@c Move point to the next unread group, or select the next unread article.
+ポイントをつぎの未読グループに進めるか、
+または、つぎの未読記事を選択する。
+
+@c @kindex p @r{(Gnus)}
+@kindex p @r{（gnus）}
+@findex gnus-group-prev-unread-group
+@findex gnus-summary-prev-unread-article
+@item p
+@c Move point to the previous unread group, or select the previous
+@c unread article.
+ポイントをまえの未読グループへ戻すか、
+または、まえの未読記事を選択する。
+
+@c @kindex C-n @r{(Gnus Group mode)}
+@kindex C-n @r{（gnusグループモード）}
+@findex gnus-group-next-group
+@c @kindex C-p @r{(Gnus Group mode)}
+@kindex C-p @r{（gnusグループモード）}
+@findex gnus-group-prev-group
+@c @kindex C-n @r{(Gnus Summary mode)}
+@kindex C-n @r{（gnusサマリモード）}
+@findex gnus-summary-next-subject
+@c @kindex C-p @r{(Gnus Summary mode)}
+@kindex C-p @r{（gnusサマリモード）}
+@findex gnus-summary-prev-subject
+@item C-n
+@itemx C-p
+@c Move point to the next or previous item, even if it is marked as read.
+@c This does not select the article or group on that line.
+既読であってもポイントを1つあと／まえの項目に移動する。
+ポイントがある行の記事やグループを選択することはしない。
+
+@c @kindex s @r{(Gnus Summary mode)}
+@kindex s @r{（gnusサマリモード）}
+@findex gnus-summary-isearch-article
+@item s
+@c In the summary buffer, do an incremental search of the current text in
+@c the article buffer, just as if you switched to the article buffer and
+@c typed @kbd{C-s}.
+サマリバッファでは、記事バッファに切り替えて@kbd{C-s}を打ったかのように、
+記事バッファのテキストに対してインクリメンタルサーチを行う。
+
+@c @kindex M-s @r{(Gnus Summary mode)}
+@kindex M-s @r{（gnusサマリモード）}
+@findex gnus-summary-search-article-forward
+@item M-s @var{regexp} @key{RET}
+@c In the summary buffer, search forward for articles containing a match
+@c for @var{regexp}.
+サマリバッファでは、
+@var{regexp}に一致する記事がみつかるまで前向きに探索する。
+
+@end table
+
+@ignore
+@node Where to Look
+@subsection Where to Look Further
+
+@c Too many references to the name of the manual if done with xref in TeX!
+Gnus is powerful and customizable.  Here are references to a few
+@ifinfo
+additional topics:
+
+@end ifinfo
+@iftex
+additional topics in @cite{The Gnus Manual}:
+
+@itemize @bullet
+@item
+Follow discussions on specific topics.@*
+See section ``Threading.''
+
+@item
+Read digests.  See section ``Document Groups.''
+
+@item
+Refer to and jump to the parent of the current article.@*
+See section ``Finding the Parent.''
+
+@item
+Refer to articles by using Message-IDs included in the messages.@*
+See section ``Article Keymap.''
+
+@item
+Save articles.  See section ``Saving Articles.''
+
+@item
+Have Gnus score articles according to various criteria, like author
+name, subject, or string in the body of the articles.@*
+See section ``Scoring.''
+
+@item
+Send an article to a newsgroup.@*
+See section ``Composing Messages.''
+@end itemize
+@end iftex
+@ifinfo
+@itemize @bullet
+@item
+Follow discussions on specific topics.@*
+@xref{Threading, , Reading Based on Conversation Threads,
+gnus, The Gnus Manual}.
+
+@item
+Read digests. @xref{Document Groups, , , gnus, The Gnus Manual}.
+
+@item
+Refer to and jump to the parent of the current article.@*
+@xref{Finding the Parent, , , gnus, The Gnus Manual}.
+
+@item
+Refer to articles by using Message-IDs included in the messages.@*
+@xref{Article Keymap, , , gnus, The Gnus Manual}.
+
+@item
+Save articles. @xref{Saving Articles, , , gnus, The Gnus Manual}.
+
+@item
+Have Gnus score articles according to various criteria, like author
+name, subject, or string in the body of the articles.@*
+@xref{Scoring, , , gnus, The Gnus Manual}. 
+
+@item
+Send an article to a newsgroup.@*
+@xref{Composing Messages, , , gnus, The Gnus Manual}.
+@end itemize
+@end ifinfo
+@end ignore
+
+@node Shell, Emacs Server, Gnus, Top
+@c @section Running Shell Commands from Emacs
+@c @cindex subshell
+@c @cindex shell commands
+@section Emacsからシェルコマンドを実行する @emph{(2005/05/08)}
+@cindex サブシェル
+@cindex シェルコマンド
+
+@c   Emacs has commands for passing single command lines to inferior shell
+@c processes; it can also run a shell interactively with input and output
+@c to an Emacs buffer named @samp{*shell*} or run a shell inside a terminal
+@c emulator window.
+Emacsには、
+1つのコマンド行を下位のシェルプロセスに渡して実行させる機能があります。
+また、入出力を@samp{*shell*}という名前のEmacsバッファに接続して
+対話的にシェルを実行する機能やターミナルウィンドウ内でシェルを走らせる機能もあります。
+
+@c There is a shell implemented entirely in Emacs, documented in a separate
+@c manual.  @xref{Top,Eshell,Eshell, eshell, Eshell: The Emacs Shell}.
+完全に Emacs 内で実現された shell もあります．ドキュメントは別のマニュアルにあり
+ます．@xref{Top,Eshell,Eshell, eshell, Eshell: The Emacs Shell} を参照ください．
+
+@table @kbd
+@item M-! @var{cmd} @key{RET}
+@c Run the shell command line @var{cmd} and display the output
+@c (@code{shell-command}).
+シェルコマンド@var{cmd}を実行し、その結果を表示する
+（@code{shell-command}）。
+@item M-| @var{cmd} @key{RET}
+@c Run the shell command line @var{cmd} with region contents as input;
+@c optionally replace the region with the output
+@c (@code{shell-command-on-region}).
+リージョンの内容を入力としてシェルコマンド@var{cmd}を実行する。
+場合によっては、リージョンをシェルコマンドの出力で置き換える。
+（@code{shell-command-on-region}）。
+@item M-x shell
+@c Run a subshell with input and output through an Emacs buffer.
+@c You can then give commands interactively.
+入出力をEmacsバッファに接続してサブシェルを実行する。
+すると、対話的にコマンドを入力できる。
+@item M-x term
+@c Run a subshell with input and output through an Emacs buffer.
+@c You can then give commands interactively.
+@c Full terminal emulation is available.
+Emacs のバッファを通して入力や出力を行うサブシェルを実行します．対話的にコマンド
+を実行できます．完全な端末が利用できます．
+@item M-x eshell
+@findex eshell
+@c Start the Emacs shell.
+Emacs シェルを実行します．
+@end table
+
+@menu
+* Single Shell::           How to run one shell command and return.
+* Interactive Shell::      Permanent shell taking input via Emacs.
+* Shell Mode::             Special Emacs commands used with permanent shell.
+* History: Shell History.  Repeating previous commands in a shell buffer.
+* Directory Tracking::     Keeping track when the subshell changes directory.
+* Options: Shell Options.  Options for customizing Shell mode.
+* Terminal emulator::      An Emacs window as a terminal emulator.
+* Term Mode::              Special Emacs commands used in Term mode.
+* Paging in Term::         Paging in the terminal emulator.
+* Remote Host::            Connecting to another computer.
+@end menu
+
+@node Single Shell
+@c @subsection Single Shell Commands
+@subsection 単一のシェルコマンド @emph{(2005/05/04)}
+
+@kindex M-!
+@findex shell-command
+@c   @kbd{M-!} (@code{shell-command}) reads a line of text using the
+@c minibuffer and executes it as a shell command in a subshell made just
+@c for that command.  Standard input for the command comes from the null
+@c device.  If the shell command produces any output, the output appears
+@c either in the echo area (if it is short), or in an Emacs buffer named
+@c @samp{*Shell Command Output*}, which is displayed in another window
+@c but not selected (if the output is long).
+@kbd{M-!}（@code{shell-command}）は、新たに作ったサブシェルにて、
+ミニバッファで読み取った1行のテキストをシェルコマンドとして実行します。
+シェルコマンドの標準入力はnull装置（つまり空）です。
+シェルコマンドの出力があれば、エコー領域に表示される(もし出力が短かければ)か @samp{*Shell Command Output*}という名前の
+Emacsバッファに入れて別のウィンドウに表示しますが、
+（カレントバッファには）選択しません(もし出力が長ければ)．
+
+@c   For instance, one way to decompress a file @file{foo.gz} from Emacs
+@c is to type @kbd{M-! gunzip foo.gz @key{RET}}.  That shell command
+@c normally creates the file @file{foo} and produces no terminal output.
+例えば，Emacs からファイル @file{foo.gz} を解凍する方法として，@kbd{M-! gunzip
+foo.gz @key{RET}} を実行する方法があります．このシェルコマンドは普通ファイル
+@file{foo} 作り，出力は生成しません．
+
+@c   A numeric argument, as in @kbd{M-1 M-!}, says to insert terminal
+@c output into the current buffer instead of a separate buffer.  It puts
+@c point before the output, and sets the mark after the output.  For
+@c instance, @kbd{M-1 M-! gunzip < foo.gz @key{RET}} would insert the
+@c uncompressed equivalent of @file{foo.gz} into the current buffer.
+@kbd{M-1 M-!}のように数引数を指定すると、
+別バッファに表示するかわりに，シェルコマンドの出力をカレントバッファに挿入します。
+ポイントは（挿入された）出力の先頭に置かれ、マークは出力の末尾に置かれます。例え
+ば，@kbd{M-1 M-! gunzip < foo.gz @key{RET}} を実行すると，現在のバッファに
+@file{foo.gz} を解凍した内容が表示されます．
+
+@c   If the shell command line ends in @samp{&}, it runs asynchronously.
+@c For a synchronous shell command, @code{shell-command} returns the
+@c command's exit status (0 means success), when it is called from a Lisp
+@c program.  You do not get any status information for an asynchronous
+@c command, since it hasn't finished yet.
+シェルコマンドの末尾が@samp{&}になっていると、
+シェルコマンドは非同期に実行されます。
+同期実行のシェルコマンドでは、Lispプログラムから呼ばれたときには、
+@code{shell-command}はコマンドの終了状態（0は成功を意味する）を返します。非同期
+コマンドは，まだ終了していませんので，状態の情報は得られません．
+
+@kindex M-|
+@findex shell-command-on-region
+@c   @kbd{M-|} (@code{shell-command-on-region}) is like @kbd{M-!} but
+@c passes the contents of the region as the standard input to the shell
+@c command, instead of no input.  If a numeric argument is used, meaning
+@c insert the output in the current buffer, then the old region is deleted
+@c first and the output replaces it as the contents of the region.  It
+@c returns the command's exit status when it is called from a Lisp program.
+@kbd{M-|}（@code{shell-command-on-region}）は@kbd{M-!}と同様ですが、
+シェルコマンドの標準入力は空ではなくリージョンの内容が引き渡されます。
+数引数を指定すると、それまでのリージョンは削除され
+シェルコマンドの出力で置き換わり新たなリージョンになります。
+このコマンドは、Lispプログラムから呼ばれたときには、
+コマンドの終了状態を返します。
+
+@c   One use for @kbd{M-|} is to run @code{uudecode}.  For instance, if
+@c the buffer contains uuencoded text, type @kbd{C-x h M-| uudecode
+@c @key{RET}} to feed the entire buffer contents to the @code{uudecode}
+@c program.  That program will ignore everything except the encoded text,
+@c and will store the decoded output into the file whose name is
+@c specified in the encoded text.
+@kbd{M-|} の1つの使い方は @code{uudecode} を実行することです．例えば，バッファに
+uuencode されたテキストが含まれていれば， @kbd{C-x h M-| uudecode @key{RET}} を
+実行すると，バッファ全体の内容がプログラム @code{uudecode} に送られます．プログ
+ラムはエンコードされたテキスト以外はすべて無視をし，デコードされたテキストをエン
+コードされたテキストに特有な名前のファイルに保存されます．
+
+@vindex shell-file-name
+@c   Both @kbd{M-!} and @kbd{M-|} use @code{shell-file-name} to specify the
+@c shell to use.  This variable is initialized based on your @env{SHELL}
+@c environment variable when Emacs is started.  If the file name does not
+@c specify a directory, the directories in the list @code{exec-path} are
+@c searched; this list is initialized based on the environment variable
+@c @env{PATH} when Emacs is started.  Your @file{.emacs} file can override
+@c either or both of these default initializations.@refill
+@kbd{M-!}も@kbd{M-|}も、使用するシェルは@code{shell-file-name}で指定します。
+この変数は、Emacs起動時の環境変数@env{SHELL}をもとに初期設定されます。
+ファイル名にディレクトリが指定されていなければ、
+@code{exec-path}に指定されているディレクトリ群を探索します。
+@code{exec-path}の値は、Emacs起動時の環境変数 @env{PATH}を
+もとに初期設定されます。
+個人のファイル@file{.emacs}で
+これらの変数の初期値を自由に変更してかまいません。
+
+@c   Both @kbd{M-!} and @kbd{M-|} wait for the shell command to complete.
+@c To stop waiting, type @kbd{C-g} to quit; that terminates the shell
+@c command with the signal @code{SIGINT}---the same signal that @kbd{C-c}
+@c normally generates in the shell.  Emacs waits until the command actually
+@c terminates.  If the shell command doesn't stop (because it ignores the
+@c @code{SIGINT} signal), type @kbd{C-g} again; this sends the command a
+@c @code{SIGKILL} signal which is impossible to ignore.
+@kbd{M-!}も@kbd{M-|}もシェルコマンドの実行完了を待ち合わせます。
+待つのをやめたい場合は、@kbd{C-g}で中断できます。
+この場合、シェルコマンドはシグナル@code{SIGINT}で終了させられます。
+このシグナルは、シェルを使用中に@kbd{C-c}が普通に送るシグナルと同じです。
+Emacsはシェルコマンドが実際に終了するまで待ちます。
+シェルコマンドが（シグナル@code{SIGINT}を無視して）停止しない場合は、
+再度@kbd{C-g}を打ちます。
+すると、無視できないシグナル@code{SIGKILL}をシェルコマンドに送ります。
+
+@c   To specify a coding system for @kbd{M-!} or @kbd{M-|}, use the command
+@c @kbd{C-x @key{RET} c} immediately beforehand.  @xref{Specify Coding}.
+@kbd{M-!}や@kbd{M-|}で使用するコーディングシステムを指定するには、
+これらのコマンドの直前にコマンド@kbd{C-x @key{RET} c}を使います。
+@xref{Specify Coding}。
+
+@vindex shell-command-default-error-buffer
+@c   Error output from the command is normally intermixed with the regular
+@c output.  If you set the variable
+@c @code{shell-command-default-error-buffer} to a string, which is a buffer
+@c name, error output is inserted before point in the buffer of that name.
+コマンドからのエラー出力は、通常、普通の出力と混ざり合ってしまいます。
+変数@code{shell-command-default-error-buffer}に
+バッファ名の文字列を設定すると、
+その名前のバッファのポイント位置のまえにエラー出力が挿入されます。
+
+@node Interactive Shell
+@c @subsection Interactive Inferior Shell
+@subsection 対話的な下位のシェル @emph{(2005/05/08)}
+
+@findex shell
+@c   To run a subshell interactively, putting its typescript in an Emacs
+@c buffer, use @kbd{M-x shell}.  This creates (or reuses) a buffer named
+@c @samp{*shell*} and runs a subshell with input coming from and output going
+@c to that buffer.  That is to say, any ``terminal output'' from the subshell
+@c goes into the buffer, advancing point, and any ``terminal input'' for
+@c the subshell comes from text in the buffer.  To give input to the subshell,
+@c go to the end of the buffer and type the input, terminated by @key{RET}.
+サブシェルを対話的に実行し、その対話記録をEmacsバッファに残すには、
+@kbd{M-x shell}を使います。
+このコマンドは、@samp{*shell*}という名前のバッファを作成（または再使用）し、
+このバッファに入出力するサブシェルを実行します。
+つまり、サブシェルの『端末出力』はバッファに挿入されポイントを進め、
+サブシェルの『端末入力』はバッファから取られます。
+サブシェルに入力を与えるには、バッファの末尾へ移動して
+入力を打ち込み最後に@key{RET}を打ちます。
+
+@c   Emacs does not wait for the subshell to do anything.  You can switch
+@c windows or buffers and edit them while the shell is waiting, or while it is
+@c running a command.  Output from the subshell waits until Emacs has time to
+@c process it; this happens whenever Emacs is waiting for keyboard input or
+@c for time to elapse.
+Emacsはサブシェルが何かするのを待つことはしません。
+シェルが待っていようがシェルコマンドを実行していようが、
+ウィンドウやバッファを切り替えて編集できます。
+サブシェルからの出力は、
+Emacsがそれを取り込む処理を実行できるまで待たされます。
+取り込み処理は、Emacsがキーボード入力を待ったり、
+時間待ちに入ったときに行われます。
+
+@cindex @code{comint-highlight-input} face
+@cindex @code{comint-highlight-prompt} face
+@c   Input lines, once you submit them, are displayed using the face
+@c @code{comint-highlight-input}, and prompts are displayed using the
+@c face @code{comint-highlight-prompt}.  This makes it easier to see
+@c previous input lines in the buffer.  @xref{Faces}.
+行を入力し，それを一旦送ると，そのコマンドはフェイス
+@code{comint-highlight-input} を使って表示され，プロンプトはフェイス
+@code{comint-highlight-prompt} を使って表示されます．これにより，前に入力したコ
+マンドを簡単に見つけることができます．@xref{Faces}．
+
+@c   To make multiple subshells, you can invoke @kbd{M-x shell} with a
+@c prefix argument (e.g. @kbd{C-u M-x shell}), which will read a buffer
+@c name and create (or reuse) a subshell in that buffer.  You can also
+@c rename the @samp{*shell*} buffer using @kbd{M-x rename-uniquely}, then
+@c create a new @samp{*shell*} buffer using plain @kbd{M-x shell}.  All the
+@c subshells in different buffers run independently and in parallel.
+複数のサブシェルを使うには、@kbd{M-x shell} を数引数付きで実行します(例えば
+@kbd{C-u M-x shell} のように)．実行すると，バンファ名を求められ，そのバッファに
+サブシェルを作成(あるいは，再使用)します．@kbd{M-x rename-uniquely} を使って，
+@samp{*shell*} バッファを別のものに変更することもできます．この時，@kbd{M-x
+shell} を実行すると，新しく @samp{*shell*} バッファが作成されます．個々のバッファ
+で，すべてのサブシェルは独立かつ並行に実行されます。
+
+@vindex explicit-shell-file-name
+@c @cindex @env{ESHELL} environment variable
+@c @cindex @env{SHELL} environment variable
+@cindex 環境変数@env{ESHELL}
+@cindex @env{ESHELL}（環境変数）
+@cindex 環境変数 @env{SHELL}
+@cindex @env{SHELL}（環境変数）
+@c   The file name used to load the subshell is the value of the variable
+@c @code{explicit-shell-file-name}, if that is non-@code{nil}.  Otherwise,
+@c the environment variable @env{ESHELL} is used, or the environment
+@c variable @env{SHELL} if there is no @env{ESHELL}.  If the file name
+@c specified is relative, the directories in the list @code{exec-path} are
+@c searched; this list is initialized based on the environment variable
+@c @env{PATH} when Emacs is started.  Your @file{.emacs} file can override
+@c either or both of these default initializations.
+サブシェルとして実行するファイル名は、変数@env{explicit-shell-file-name}
+の値が@code{nil}以外ならば、この変数の値で指定します。
+@code{nil}のときは、環境変数@env{ESHELL}の値が使われますが、
+これが存在しない場合は環境変数@env{SHELL}の値が使われます。
+指定されたファイル名が相対名の場合は、
+@code{exec-path}に指定されているディレクトリ群を探索します。
+変数@env{exec-path}は、
+Emacs起動時の環境変数@env{PATH}をもとに初期設定されます。
+個人のファイル@file{.emacs}でこれらの変数を自由に変更してかまいません。
+
+@c   Emacs sends the new shell the contents of the file
+@c @file{~/.emacs_@var{shellname}} as input, if it exists, where
+@c @var{shellname} is the name of the file that the shell was loaded
+@c from.  For example, if you use bash, the file sent to it is
+@c @file{~/.emacs_bash}.
+Emacs は，ファイル @file{~/.emacs_@var{shellname}} が存
+在して，@var{shellname} が読み込まれたシェルの名前であれば，新しいシェルに入力と
+してその内容を送ります．例えば， bash を使っていれば @file{~/.emacs_bash} の内容
+を送ります．
+
+@c   To specify a coding system for the shell, you can use the command
+@c @kbd{C-x @key{RET} c} immediately before @kbd{M-x shell}.  You can also
+@c specify a coding system after starting the shell by using @kbd{C-x
+@c @key{RET} p} in the shell buffer.  @xref{Specify Coding}.
+シェルに対するコーディングシステムを指定するには、
+@kbd{M-x shell}の直前にコマンド@kbd{C-x @key{RET} c}を使います。
+または、シェルを開始したあとにシェルバッファで@kbd{C-x @key{RET} p}を
+使っても指定できます。
+@xref{Specify Coding}。
+
+@cindex @env{EMACS} environment variable
+@c   Unless the environment variable @env{EMACS} is already defined,
+@c Emacs defines it in the subshell, with value @code{t}.  A shell script
+@c can check this variable to determine whether it has been run from an
+@c Emacs subshell.
+もし環境変数 @env{EMACS} が設定されていなければ，Emacs はサブシェル内で @code{t}
+の値で定義します．シェルスクリプトはこの変数を確認して， Emacs のサブシェルから
+実行されているかどうかを確認します．
+
+@node Shell Mode
+@c @subsection Shell Mode
+@subsection シェルモード（Shellモード） @emph{(2005/05/05)}
+@c @cindex Shell mode
+@c @cindex mode, Shell
+@cindex シェルモード（Shell mode）
+@cindex モード、shell
+
+@c   Shell buffers use Shell mode, which defines several special keys
+@c attached to the @kbd{C-c} prefix.  They are chosen to resemble the usual
+@c editing and job control characters present in shells that are not under
+@c Emacs, except that you must type @kbd{C-c} first.  Here is a complete list
+@c of the special key bindings of Shell mode:
+シェルバッファではシェル（shell）モードが使われ、
+プレフィックスキー@kbd{C-c}を持つ特別なキーをいくつか定義しています。
+これらは、まず@kbd{C-c}を打つことを除けば、
+Emacsの外でシェルを使うときの通常のコマンド行編集や
+ジョブ制御のキーに似せて定義してあります。
+以下は、シェル（shell）モードでの特別なバインディングの一覧です。
+
+@table @kbd
+@item @key{RET}
+@c @kindex RET @r{(Shell mode)}
+@kindex RET @r{（シェルモード）}
+@findex comint-send-input
+@c At end of buffer send line as input; otherwise, copy current line to
+@c end of buffer and send it (@code{comint-send-input}).  When a line is
+@c copied, any prompt at the beginning of the line (text output by
+@c programs preceding your input) is omitted.  (See also the variable
+@c @code{comint-use-prompt-regexp-instead-of-fields}.)
+バッファの末尾で打つと、1行分を入力としてシェルに送る。
+バッファの末尾以外では、現在行をバッファの末尾にコピーしてから、
+それを入力としてシェルに送る（@code{comint-send-input}）。
+行をコピーするとき、行の先頭部分のプロンプト(入力の前にあるプログラムによって出
+力されるテキスト)は無視されます (変数
+@code{comint-use-prompt-regexp-instead-of-fields} も参照のこと)．
+
+@item @key{TAB}
+@c @kindex TAB @r{(Shell mode)}
+@kindex TAB @r{（シェルモード）}
+@findex comint-dynamic-complete
+@c Complete the command name or file name before point in the shell buffer
+@c (@code{comint-dynamic-complete}).  @key{TAB} also completes history
+@c references (@pxref{History References}) and environment variable names.
+シェルバッファでポイントの直前にあるコマンド名やファイル名を補完する
+（@code{comint-dynamic-complete}）。
+@key{TAB}は、履歴参照（@pxref{History References}）や
+環境変数名も補完できる。
+
+@vindex shell-completion-fignore
+@vindex comint-completion-fignore
+@c The variable @code{shell-completion-fignore} specifies a list of file
+@c name extensions to ignore in Shell mode completion.  The default
+@c setting is @code{nil}, but some users prefer @code{("~" "#" "%")} to
+@c ignore file names ending in @samp{~}, @samp{#} or @samp{%}.  Other
+@c related Comint modes use the variable @code{comint-completion-fignore}
+@c instead.
+変数@code{shell-completion-fignore}には、
+シェル（shell）モードでの補完において
+無視したいファイル名の拡張子のリストを指定する。
+デフォルトの設定では、@code{nil} ですが，ユーザによっては名前が、@samp{~}、@samp{#}、@samp{%}で
+終るファイルを無視するために @code{("~" "#" "%")} に設定することを好みます。
+関連する他のcomintモードではかわりに
+変数@code{comint-completion-fignore}を使う。
+
+@item M-?
+@c @kindex M-? @r{(Shell mode)}
+@kindex M-? @r{（シェルモード）}
+@findex comint-dynamic-list-filename@dots{}
+@c Display temporarily a list of the possible completions of the file name
+@c before point in the shell buffer
+@c (@code{comint-dynamic-list-filename-completions}).
+シェルバッファのポイントの直前にあるファイル名の可能な補完内容を
+一時的に表示する（@code{comint-dynamic-list-filename-completions}）。
+
+@item C-d
+@c @kindex C-d @r{(Shell mode)}
+@kindex C-d @r{（シェルモード）}
+@findex comint-delchar-or-maybe-eof
+@c Either delete a character or send @acronym{EOF}
+@c (@code{comint-delchar-or-maybe-eof}).  Typed at the end of the shell
+@c buffer, @kbd{C-d} sends @acronym{EOF} to the subshell.  Typed at any other
+@c position in the buffer, @kbd{C-d} deletes a character as usual.
+文字を削除するか、または、
+@acronym{EOF} を送る（@code{comint-delchar-or-maybe-eof}）。
+シェルバッファの末尾で@kbd{C-d}を打つとサブシェルに @acronym{EOF} を送る。
+バッファのそれ以外の位置では、@kbd{C-d}を打つと通常どおり1文字削除する。
+
+@item C-c C-a
+@c @kindex C-c C-a @r{(Shell mode)}
+@kindex C-c C-a @r{（シェルモード）}
+@findex comint-bol-or-process-mark
+@c Move to the beginning of the line, but after the prompt if any
+@c (@code{comint-bol-or-process-mark}).  If you repeat this command twice
+@c in a row, the second time it moves back to the process mark, which is
+@c the beginning of the input that you have not yet sent to the subshell.
+@c (Normally that is the same place---the end of the prompt on this
+@c line---but after @kbd{C-c @key{SPC}} the process mark may be in a
+@c previous line.)
+行の先頭に行く。
+ただし、プロンプトがある場合にはプロンプトの直後に行く
+（@code{comint-bol-or-process-mark}）。
+同じ行でこのコマンドを2回繰り返すと、2回目ではプロセスマークへ戻る。
+プロセスマークとは、サブシェルへまだ送っていない入力の開始位置のこと。
+（通常、これは同じ場所であり、
+プロセスマークはその行のプロンプトの終りにある。
+ただし、@kbd{C-c @key{SPC}}のあとでは、
+プロセスマークはまえの行にあるかもしれない。）
+
+@item C-c @key{SPC}
+@c Accumulate multiple lines of input, then send them together.  This
+@c command inserts a newline before point, but does not send the preceding
+@c text as input to the subshell---at least, not yet.  Both lines, the one
+@c before this newline and the one after, will be sent together (along with
+@c the newline that separates them), when you type @key{RET}.
+複数の入力行を溜めておき、まとめて送る。
+このコマンドは、ポイントのまえに改行を挿入するが、
+少なくともまだ、その行を入力としてサブシェルへ送らない。
+@key{RET}を打つと、
+改行のまえの1行とあとの1行を（区切りの改行を含めて）まとめて送る。
+
+@item C-c C-u
+@c @kindex C-c C-u @r{(Shell mode)}
+@kindex C-c C-u @r{（シェルモード）}
+@findex comint-kill-input
+@c Kill all text pending at end of buffer to be sent as input
+@c (@code{comint-kill-input}).
+バッファの末尾にある、まだシェルに送っていないテキストをすべてキルする
+（@code{comint-kill-input}）。
+
+@item C-c C-w
+@c @kindex C-c C-w @r{(Shell mode)}
+@kindex C-c C-w @r{（シェルモード）}
+@c Kill a word before point (@code{backward-kill-word}).
+ポイントの直前の1語をキルする（@code{backward-kill-word}）。
+
+@item C-c C-c
+@c @kindex C-c C-c @r{(Shell mode)}
+@kindex C-c C-c @r{（シェルモード）}
+@findex comint-interrupt-subjob
+@c Interrupt the shell or its current subjob if any
+@c (@code{comint-interrupt-subjob}).  This command also kills
+@c any shell input pending in the shell buffer and not yet sent.
+シェル、または、あればサブジョブに割り込む
+（@code{comint-interrupt-subjob}）。
+また、このコマンドは
+シェルバッファ内のまだシェルに送っていないテキストもキルする。
+
+@item C-c C-z
+@c @kindex C-c C-z @r{(Shell mode)}
+@kindex C-c C-z @r{（シェルモード）}
+@findex comint-stop-subjob
+@c Stop the shell or its current subjob if any (@code{comint-stop-subjob}).
+@c This command also kills any shell input pending in the shell buffer and
+@c not yet sent.
+シェル、または、あればサブジョブを中断する
+（@code{comint-stop-subjob}）。
+また、このコマンドは
+シェルバッファ内のまだシェルに送っていないテキストもキルする。
+
+@item C-c C-\
+@findex comint-quit-subjob
+@c @kindex C-c C-\ @r{(Shell mode)}
+@kindex C-c C-\ @r{（シェルモード）}
+@c Send quit signal to the shell or its current subjob if any
+@c (@code{comint-quit-subjob}).  This command also kills any shell input
+@c pending in the shell buffer and not yet sent.
+シェル、または、あればサブジョブにシグナルQUITを送る
+（@code{comint-quit-subjob}）。
+また、このコマンドは
+シェルバッファ内のまだシェルに送っていないテキストもキルする。
+
+@item C-c C-o
+@c @kindex C-c C-o @r{(Shell mode)}
+@kindex C-c C-o @r{（シェルモード）}
+@findex comint-delete-output
+@c Delete the last batch of output from a shell command
+@c (@code{comint-delete-output}).  This is useful if a shell command spews
+@c out lots of output that just gets in the way.  This command used to be
+@c called @code{comint-kill-output}.
+直前のシェルコマンドからのひとまとまりの出力を削除する
+（@code{comint-delete-output}）。
+シェルコマンドが大量の出力を出してしまったときなどに有効です。このコマンドは
+@code{comint-kill-output} が呼ばれるべき時に使われます．
+
+@item C-c C-s
+@c @kindex C-c C-s @r{(Shell mode)}
+@kindex C-c C-s @r{（シェルモード）}
+@findex comint-write-output
+@c Write the last batch of output from a shell command to a file
+@c (@code{comint-write-output}).  With a prefix argument, the file is
+@c appended to instead.  Any prompt at the end of the output is not
+@c written.
+シェルコマンドからのひとまとまりの出力をファイルに書き込みます
+(@code{comint-write-output})．数引数を付けると，かわりに追加されます．出力の最後
+にあるプロンプトは書き込まれません．
+
+@item C-c C-r
+@itemx C-M-l
+@c @kindex C-c C-r @r{(Shell mode)}
+@kindex C-c C-r @r{（シェルモード）}
+@c @kindex C-M-l @r{(Shell mode)}
+@kindex C-M-l @r{（シェルモード）}
+@findex comint-show-output
+@c Scroll to display the beginning of the last batch of output at the top
+@c of the window; also move the cursor there (@code{comint-show-output}).
+直前のひとまとまりの出力がウィンドウの先頭にくるようにスクロールする。
+また、ポイントもそこへ動かす（@code{comint-show-output}）。
+
+@item C-c C-e
+@c @kindex C-c C-e @r{(Shell mode)}
+@kindex C-c C-e @r{（シェルモード）}
+@findex comint-show-maximum-output
+@c Scroll to put the end of the buffer at the bottom of the window
+@c (@code{comint-show-maximum-output}).
+バッファの末尾がウィンドウの下端にくるようにスクロールする
+（@code{comint-show-maximum-output}）。
+
+@item C-c C-f
+@c @kindex C-c C-f @r{(Shell mode)}
+@kindex C-c C-f @r{（シェルモード）}
+@findex shell-forward-command
+@vindex shell-command-regexp
+@c Move forward across one shell command, but not beyond the current line
+@c (@code{shell-forward-command}).  The variable @code{shell-command-regexp}
+@c specifies how to recognize the end of a command.
+シェルコマンド1つ分だけ先へ進めるが、現在行の末尾より先へはいかない
+（@code{shell-forward-command}）。
+変数@code{shell-command-regexp}には、
+シェルコマンドの終りの探し方（正規表現）を指定する。
+
+@item C-c C-b
+@c @kindex C-c C-b @r{(Shell mode)}
+@kindex C-c C-b @r{（シェルモード）}
+@findex shell-backward-command
+@c Move backward across one shell command, but not beyond the current line
+@c (@code{shell-backward-command}).
+シェルコマンド1つ分だけ手前へ戻るが、現在行の先頭よりまえへはいかない
+（@code{shell-backward-command}）。
+
+@item C-c C-l
+@c @kindex C-c C-l @r{(Shell mode)}
+@kindex C-c C-l @r{（シェルモード）}
+@findex comint-dynamic-list-input-ring
+@c Display the buffer's history of shell commands in another window
+@c (@code{comint-dynamic-list-input-ring}).
+バッファのシェルコマンド履歴を別のウィンドウに表示する
+（@code{comint-dynamic-list-input-ring}）。
+
+@item M-x dirs
+@c Ask the shell what its current directory is, so that Emacs can agree
+@c with the shell.
+シェルにカレントディレクトリを問い合わせ、
+Emacs側のものをシェルに合わせる。
+
+@item M-x send-invisible @key{RET} @var{text} @key{RET}
+@findex send-invisible
+@c Send @var{text} as input to the shell, after reading it without
+@c echoing.  This is useful when a shell command runs a program that asks
+@c for a password.
+@var{text}をエコーバックせずに読み取り、
+入力としてシェルへ送る。
+パスワードを問い合わせるようなプログラムを起動する
+シェルコマンドで役立つ。
+
+@c Alternatively, you can arrange for Emacs to notice password prompts
+@c and turn off echoing for them, as follows:
+かわりに、つぎのようにして、
+Emacsにパスワードプロンプトを認識させてエコーバックを抑制する方法もある。
+
+@example
+(add-hook 'comint-output-filter-functions
+          'comint-watch-for-password-prompt)
+@end example
+
+@item M-x comint-continue-subjob
+@findex comint-continue-subjob
+@c Continue the shell process.  This is useful if you accidentally suspend
+@c the shell process.@footnote{You should not suspend the shell process.
+@c Suspending a subjob of the shell is a completely different matter---that
+@c is normal practice, but you must use the shell to continue the subjob;
+@c this command won't do it.}
+シェルプロセスを継続させる。
+これはまちがってシェルプロセスを休止させてしまった場合に役立つ。
+@footnote{シェルプロセスを休止すべきではない。
+シェルのサブジョブを休止するのとはまったく別のことであり、
+こちらは普通に行ってよい。
+ただし、休止したサブジョブはシェルで再開させる必要がある。
+このコマンドでは再開できない。}
+
+@item M-x comint-strip-ctrl-m
+@findex comint-strip-ctrl-m
+@c Discard all control-M characters from the current group of shell output.
+@c The most convenient way to use this command is to make it run
+@c automatically when you get output from the subshell.  To do that,
+@c evaluate this Lisp expression:
+現在の一群のシェルの出力から復帰（コントロールM）文字を削除する。
+このコマンドのもっとも便利な使い方の1つは、
+サブシェルの出力を受け取ると自動的にこのコマンドが実行されるように
+設定しておくことである。
+そのためには、つぎのLisp式を評価すればよい。
+
+@example
+(add-hook 'comint-output-filter-functions
+          'comint-strip-ctrl-m)
+@end example
+
+@item M-x comint-truncate-buffer
+@findex comint-truncate-buffer
+@c This command truncates the shell buffer to a certain maximum number of
+@c lines, specified by the variable @code{comint-buffer-maximum-size}.
+@c Here's how to do this automatically each time you get output from the
+@c subshell:
+このコマンドは、変数@code{comint-buffer-maximum-size}で指定した大きさに
+シェルバッファの行数を切り詰める。
+サブシェルから出力を受け取るたびに
+これを自動的に行うにはつぎのようにする。
+
+@example
+(add-hook 'comint-output-filter-functions
+          'comint-truncate-buffer)
+@end example
+@end table
+
+@c   Shell mode also customizes the paragraph commands so that only shell
+@c prompts start new paragraphs.  Thus, a paragraph consists of an input
+@c command plus the output that follows it in the buffer.
+シェル（shell）モードでは段落コマンドにも修正を加えてあり、
+シェルプロンプトでのみ新しい段落が始まるようになっています。
+つまり、シェルバッファでは、
+1つの段落はシェルコマンドとその出力から成るのです。
+
+@c @cindex Comint mode
+@c @cindex mode, Comint
+@cindex Comintモード（Comint mode）
+@cindex モード、comint
+@c   Shell mode is a derivative of Comint mode, a general-purpose mode for
+@c communicating with interactive subprocesses.  Most of the features of
+@c Shell mode actually come from Comint mode, as you can see from the
+@c command names listed above.  The special features of Shell mode include
+@c the directory tracking feature, and a few user commands.
+シェル（shell）モードは、対話的なサブプロセスと通信するための汎用モードである
+comintモードからの派生です。
+ここまでにあげてきたコマンドの名前からもわかるように、
+シェル（shell）モードの数多くの機能は、実は、comintモードからきています。
+シェル（shell）モードに固有な特別な機能は、
+カレントディレクトリの追跡、および、少数のユーザーコマンドに限られます。
+
+@c   Other Emacs features that use variants of Comint mode include GUD
+@c (@pxref{Debuggers}) and @kbd{M-x run-lisp} (@pxref{External Lisp}).
+comintモードから派生したEmacsのほかの機能としては、
+GUD（@pxref{Debuggers}）と
+@kbd{M-x run-lisp}（@pxref{External Lisp}）があります。
+
+@findex comint-run
+@c   You can use @kbd{M-x comint-run} to execute any program of your choice
+@c in a subprocess using unmodified Comint mode---without the
+@c specializations of Shell mode.
+@kbd{M-x comint-run}を使うと、
+シェル（shell）モード固有の機能を持たないcomintモードで、
+任意のプログラムをサブプロセスとして実行できます。
+
+@node Shell History
+@c @subsection Shell Command History
+@subsection シェルコマンド履歴 @emph{(2005/05/08)}
+
+@c   Shell buffers support three ways of repeating earlier commands.  You
+@c can use the same keys used in the minibuffer; these work much as they do
+@c in the minibuffer, inserting text from prior commands while point
+@c remains always at the end of the buffer.  You can move through the
+@c buffer to previous inputs in their original place, then resubmit them or
+@c copy them to the end.  Or you can use a @samp{!}-style history
+@c reference.
+シェルバッファでは、以前に使ったシェルコマンドを再実行する方法が3つあります。
+1つめは、ミニバッファと同じキーを使う方法です。
+すなわち、ミニバッファの場合と同様に、
+ポイントはつねにバッファの末尾にある状態で、
+以前に使ったシェルコマンドをバッファに挿入できます。
+2つめは、バッファ内で以前のシェルコマンドの箇所に移動して、
+それをそのまま再実行するかバッファの末尾にコピーします。
+3つめは、@samp{!}形式の履歴参照を使うことです。
+
+@menu
+* Ring: Shell Ring.             Fetching commands from the history list.
+* Copy: Shell History Copying.  Moving to a command and then copying it.
+* History References::          Expanding @samp{!}-style history references.
+@end menu
+
+@node Shell Ring
+@c @subsubsection Shell History Ring
+@subsubsection シェル履歴リング @emph{(2005/05/08)}
+
+@table @kbd
+@findex comint-previous-input
+@c @kindex M-p @r{(Shell mode)}
+@kindex M-p @r{（シェルモード）}
+@item M-p
+@c Fetch the next earlier old shell command.
+今のものより1つまえの古いシェルコマンドを持ってくる。
+
+@c @kindex M-n @r{(Shell mode)}
+@kindex M-n @r{（シェルモード）}
+@findex comint-next-input
+@item M-n
+@c Fetch the next later old shell command.
+今のものより1つあとの古いシェルコマンドを持ってくる。
+
+@c @kindex M-r @r{(Shell mode)}
+@kindex M-r @r{（シェルモード）}
+@c @kindex M-s @r{(Shell mode)}
+@kindex M-s @r{（シェルモード）}
+@findex comint-previous-matching-input
+@findex comint-next-matching-input
+@item M-r @var{regexp} @key{RET}
+@itemx M-s @var{regexp} @key{RET}
+@c Search backwards or forwards for old shell commands that match @var{regexp}.
+@var{regexp}に一致する古いシェルコマンドを後向きまたは前向きに探索する。
+
+@item C-c C-x @r{(Shell mode)}
+@findex comint-get-next-from-history
+@c Fetch the next subsequent command from the history.
+履歴からつぎのコマンドを持ってくる。
+
+@item C-c . @r{(Shell mode)}
+@findex comint-input-previous-argument
+@c Fetch one argument from an old shell command.
+以前に入力したシェルコマンドから1つ引数を持ってくる．
+@end table
+
+@c   Shell buffers provide a history of previously entered shell commands.  To
+@c reuse shell commands from the history, use the editing commands @kbd{M-p},
+@c @kbd{M-n}, @kbd{M-r} and @kbd{M-s}.  These work just like the minibuffer
+@c history commands except that they operate on the text at the end of the
+@c shell buffer, where you would normally insert text to send to the shell.
+シェルバッファには、それまでに入力したシェルコマンドの履歴があります。
+この履歴からシェルコマンドを再利用するには、編集コマンド、
+@kbd{M-p}、@kbd{M-n}、@kbd{M-r}、@kbd{M-s}を使います。
+これらはミニバッファの履歴コマンドと同様に働きますが、
+（普通はシェルに送るテキストを挿入する）
+シェルバッファの末尾にあるテキストに作用する点が異なります。
+
+@c   @kbd{M-p} fetches an earlier shell command to the end of the shell buffer.
+@c Successive use of @kbd{M-p} fetches successively earlier shell commands,
+@c each replacing any text that was already present as potential shell input.
+@c @kbd{M-n} does likewise except that it finds successively more recent shell
+@c commands from the buffer.
+@kbd{M-p}は、1つまえのシェルコマンドをシェルバッファの末尾に持ってきます。
+@kbd{M-p}を連続して使うと、次々にそれよりまえに実行したシェルコマンドを
+持ってきて、それまでのシェルへの入力用テキストを置き換えます。
+@kbd{M-n}も同様ですが、
+次々にそれよりあとのシェルコマンドを持ってくる点が異なります。 
+
+@c   The history search commands @kbd{M-r} and @kbd{M-s} read a regular
+@c expression and search through the history for a matching command.  Aside
+@c from the choice of which command to fetch, they work just like @kbd{M-p}
+@c and @kbd{M-n}.  If you enter an empty regexp, these commands reuse the
+@c same regexp used last time.
+@c same regexp used last time.
+履歴探索コマンド@kbd{M-r}と@kbd{M-s}は、
+正規表現を読み取り、それに一致するシェルコマンドを履歴の中から探します。
+どのシェルコマンドを持ってくるかという点を除けば、
+それらの働きは@kbd{M-p}や@kbd{M-n}と同じです。
+正規表現として空文字列を入力すると、直前に使用した正規表現を再使用します。
+
+@c   When you find the previous input you want, you can resubmit it by
+@c typing @key{RET}, or you can edit it first and then resubmit it if you
+@c wish.
+再使用したいシェルコマンドを探したならば、
+@key{RET}を打ってそのシェルコマンドを再実行するか、
+必要なら編集してから実行します。
+
+@c   Often it is useful to reexecute several successive shell commands that
+@c were previously executed in sequence.  To do this, first find and
+@c reexecute the first command of the sequence.  Then type @kbd{C-c C-x};
+@c that will fetch the following command---the one that follows the command
+@c you just repeated.  Then type @key{RET} to reexecute this command.  You
+@c can reexecute several successive commands by typing @kbd{C-c C-x
+@c @key{RET}} over and over.
+以前に連続して実行した一連のシェルコマンドをまとめて再実行できると便利な
+ことがあります。
+それには、まず、一連のシェルコマンドの最初のものを探して再実行します。
+そうしてから@kbd{C-c C-x}と打ちます。
+これは、直前に再実行したシェルコマンドの（履歴内で）
+つぎにあるシェルコマンドを持ってきます。
+@key{RET}と打って再実行します。
+このように、@kbd{C-c C-x @key{RET}}を繰り返し打てば一連のシェルコマンドを
+再実行できます。
+
+@c   The command @kbd{C-c .}@: (@code{comint-input-previous-argument})
+@c copies an individual argument from a previous command, like @kbd{ESC
+@c .} in Bash.  The simplest use copies the last argument from the
+@c previous shell command.  With a prefix argument @var{n}, it copies the
+@c @var{n}th argument instead.  Repeating @kbd{C-c .} copies from an
+@c earlier shell command instead, always using the same value of @var{n}
+@c (don't give a prefix argument when you repeat the @kbd{C-c .}
+@c command).
+コマンド @kbd{C-c .}@: (@code{comint-input-previous-argument}) は Bash での
+@kbd{ESC .} のように，前のコマンドからそれぞれの引数をコピーします．最も単純な使
+い方は前のシェルコマンドから最近の引数をコピーすることです．数引数 @var{n} を付
+けると，かわりに @var{n} 番目の引数をコピーします．@kbd{C-c .} を繰り返し実行す
+ると，さらに前のシェルコマンドの引数をコピーできます．この時，いつも @var{n} の
+値を使います (@kbd{C-c .} を繰り返す時には引数を与えないでください)．
+
+@c   These commands get the text of previous shell commands from a special
+@c history list, not from the shell buffer itself.  Thus, editing the shell
+@c buffer, or even killing large parts of it, does not affect the history
+@c that these commands access.
+これらのコマンドは過去に実行したシェルコマンドを専用の履歴リストから
+持ってくるのであって、シェルバッファからとってくるのではありません。
+したがって、シェルバッファを編集したり、その大部分をキルしたとしても、
+これらのコマンドが参照する履歴には影響しません。
+
+@vindex shell-input-ring-file-name
+@c   Some shells store their command histories in files so that you can
+@c refer to previous commands from previous shell sessions.  Emacs reads
+@c the command history file for your chosen shell, to initialize its own
+@c command history.  The file name is @file{~/.bash_history} for bash,
+@c @file{~/.sh_history} for ksh, and @file{~/.history} for other shells.
+いくつかのシェルは、コマンド履歴をファイルに保管して
+以前のセッションの履歴を引き継げるようになっています。
+Emacsは、自分の履歴リストを初期設定するために、
+ユーザーが使うシェルの履歴ファイルを読み込みます。
+ファイル名は、bashであれば@file{~/.bash_history}、
+kshであれば@file{~/.sh_history}、
+その他のシェルであれば@file{~/.history}です。
+
+@node Shell History Copying
+@c @subsubsection Shell History Copying
+@subsubsection シェル履歴のコピー
+
+@table @kbd
+@c @kindex C-c C-p @r{(Shell mode)}
+@kindex C-c C-p @r{（シェルモード）}
+@findex comint-previous-prompt
+@item C-c C-p
+@c Move point to the previous prompt (@code{comint-previous-prompt}).
+ポイントを1つまえのプロンプトへ移動する（@code{comint-previous-prompt}）。
+
+@c @kindex C-c C-n @r{(Shell mode)}
+@kindex C-c C-n @r{（シェルモード）}
+@findex comint-next-prompt
+@item C-c C-n
+@c Move point to the following prompt (@code{comint-next-prompt}).
+ポイントを1つあとのプロンプトへ移動する（@code{comint-next-prompt}）。
+
+@c @kindex C-c RET @r{(Shell mode)}
+@kindex C-c RET @r{（シェルモード）}
+@findex comint-copy-old-input
+@item C-c @key{RET}
+@c Copy the input command which point is in, inserting the copy at the end
+@c of the buffer (@code{comint-copy-old-input}).  This is useful if you
+@c move point back to a previous command.  After you copy the command, you
+@c can submit the copy as input with @key{RET}.  If you wish, you can
+@c edit the copy before resubmitting it.
+ポイントがあるところの入力コマンドをバッファの末尾にコピーする
+（@code{comint-copy-old-input}）。
+このコマンドはポイントを古いシェルコマンドへ移動したときに役立つ。
+シェルコマンドをコピーしたら、@key{RET}でそれを（シェルへ）送る。
+必要ならシェルコマンドを修正してから送ってもよい。
+@end table
+
+@c   Moving to a previous input and then copying it with @kbd{C-c
+@c @key{RET}} produces the same results---the same buffer contents---that
+@c you would get by using @kbd{M-p} enough times to fetch that previous
+@c input from the history list.  However, @kbd{C-c @key{RET}} copies the
+@c text from the buffer, which can be different from what is in the history
+@c list if you edit the input text in the buffer after it has been sent.
+ポイントをまえの入力箇所に移動してから@kbd{C-c @key{RET}}でコピーしても、
+@kbd{M-p}を必要な回数使って履歴リストからまえのコマンドを持ってきたのと
+（バッファの内容が同じという意味で）同じ結果になります。
+ただし、@kbd{C-c @key{RET}}はバッファからテキストをコピーするので、
+シェルへ送ったあとでそれをバッファ上で編集した場合には、
+履歴リストにあるものとは異なることもあります。
+
+@node History References
+@c @subsubsection Shell History References
+@subsubsection シェル履歴の参照 @emph{(2005/05/07)}
+@c @cindex history reference
+@cindex 履歴参照
+
+@c   Various shells including csh and bash support @dfn{history
+@c references} that begin with @samp{!} and @samp{^}.  Shell mode
+@c recognizes these constructs, and can perform the history substitution
+@c for you.
+cshやbashをはじめ多くのシェルは、
+@samp{!}や@samp{^}で始まる@dfn{履歴参照}の機能を提供しています。
+シェル（shell）モードでもこれらの指定を認識して、履歴置換を行えます。
+
+@c   If you insert a history reference and type @key{TAB}, this searches
+@c the input history for a matching command, performs substitution if
+@c necessary, and places the result in the buffer in place of the history
+@c reference.  For example, you can fetch the most recent command
+@c beginning with @samp{mv} with @kbd{! m v @key{TAB}}.  You can edit the
+@c command if you wish, and then resubmit the command to the shell by
+@c typing @key{RET}.
+履歴参照を入力して@key{TAB}を打つと、
+履歴リストから一致するシェルコマンドを探し、
+必要なら置換を行い、履歴参照をその結果で置き換えます。
+たとえば、@samp{mv}で始まるいちばん最近のシェルコマンドを持ってくるには
+@kbd{! m v @key{TAB}}と打ちます。
+必要ならシェルコマンドを編集し、@key{RET}と打ってシェルへ送ります。
+
+@vindex comint-input-autoexpand
+@findex comint-magic-space
+@c   Shell mode can optionally expand history references in the buffer
+@c when you send them to the shell.  To request this, set the variable
+@c @code{comint-input-autoexpand} to @code{input}.  You can make
+@c @key{SPC} perform history expansion by binding @key{SPC} to the
+@c command @code{comint-magic-space}.
+シェル（shell）モードでは、シェルに送る際にバッファ内で履歴参照を
+展開するようにも指定できます。
+それには、変数@code{compint-input-autoexpand}に@code{input}を設定します。
+@key{SPC}をコマンド@code{comint-magic-space}にバインドすれば、
+@key{SPC}で履歴展開が行えるようになります。
+
+@vindex shell-prompt-pattern
+@vindex comint-prompt-regexp
+@vindex comint-use-prompt-regexp-instead-of-fields
+@cindex prompt, shell
+@c   Shell mode recognizes history references when they follow a prompt.
+@c Normally, any text output by a program at the beginning of an input
+@c line is considered a prompt.  However, if the variable
+@c @code{comint-use-prompt-regexp-instead-of-fields} is non-@code{nil},
+@c then Comint mode uses a regular expression to recognize prompts.  In
+@c general, the variable @code{comint-prompt-regexp} specifies the
+@c regular expression; Shell mode uses the variable
+@c @code{shell-prompt-pattern} to set up @code{comint-prompt-regexp} in
+@c the shell buffer.
+テキストがプロンプトの後にあれば，シェルモードはそれを履歴として認識します．通常，
+入力の前にあるプログラムによって出力されたテキストはすべてプロンプトとして認識さ
+れます．しかし，変数 @code{comint-use-prompt-regexp-instead-of-fields} が
+非-@code{nil} であると，プロンプトを識別するために正規表現が使われます．普通，
+@code{comint-prompt-regexp} で正規表現を指定します．シェルモードでは，変数
+@code{shell-prompt-pattern} を @code{comint-prompt-regexp} に設定して使っていま
+す．
+
+@node Directory Tracking
+@c @subsection Directory Tracking
+@subsection ディレクトリ追跡機能 @emph{(2005/05/07)}
+@cindex directory tracking
+
+@vindex shell-pushd-regexp
+@vindex shell-popd-regexp
+@vindex shell-cd-regexp
+@c   Shell mode keeps track of @samp{cd}, @samp{pushd} and @samp{popd}
+@c commands given to the inferior shell, so it can keep the
+@c @samp{*shell*} buffer's default directory the same as the shell's
+@c working directory.  It recognizes these commands syntactically, by
+@c examining lines of input that are sent.
+シェルモードは @samp{cd} や @samp{pushd}，@samp{popd} コマンドで移動したことを記
+録します．これにより，@samp{*shell*} バッファのデフォルトディレクトリはシェルの
+作業ディレクトリと同じになります．これらのコマンドは入力された行を調べて認識して
+います．
+
+@c   If you use aliases for these commands, you can tell Emacs to
+@c recognize them also.  For example, if the value of the variable
+@c @code{shell-pushd-regexp} matches the beginning of a shell command
+@c line, that line is regarded as a @code{pushd} command.  Change this
+@c variable when you add aliases for @samp{pushd}.  Likewise,
+@c @code{shell-popd-regexp} and @code{shell-cd-regexp} are used to
+@c recognize commands with the meaning of @samp{popd} and @samp{cd}.
+@c These commands are recognized only at the beginning of a shell command
+@c line.
+こういったコマンドのエイリアスを用いているのであれば，Emacs にそのエイリアスも認
+識させることができます．例えば，シェルコマンドが変数 @code{shell-pushd-regexp}
+の値に一致すれば，その行は @code{pushd} コマンドとして認識されます．@code{pushd}
+のエイリアスを追加する時に，この変数も変更すればいいのです．同様に，
+@code{shell-popd-regexp} と @code{shell-cd-regexp} は @samp{popd} と @samp{cd}
+の意味を持つコマンドとして認識させるために使います．これらのコマンドはコマンド行の
+最初にある時だけ認識されます．
+
+@ignore  @c This seems to have been deleted long ago.
+@vindex shell-set-directory-error-hook
+  If Emacs gets an error while trying to handle what it believes is a
+@samp{cd}, @samp{pushd} or @samp{popd} command, it runs the hook
+@code{shell-set-directory-error-hook} (@pxref{Hooks}).
+@end ignore
+
+@findex dirs
+@c   If Emacs gets confused about changes in the current directory of the
+@c subshell, use the command @kbd{M-x dirs} to ask the shell what its
+@c current directory is.  This command works for shells that support the
+@c most common command syntax; it may not work for unusual shells.
+サブシェルのカレントディレクトリに変更したことで混乱したら，現在のカレントディレ
+クトリを確認するために，コマンド @kbd{M-x dirs} を使います．このコマンドは一般的
+なシェルであれば動作します．しかし，普通でないシェルでは動作しないかもしれません．
+
+@findex dirtrack-mode
+@c   You can also use @kbd{M-x dirtrack-mode} to enable (or disable) an
+@c alternative and more aggressive method of tracking changes in the
+@c current directory.
+@kbd{M-x dirtrack-mode} で有効 (あるいは，無効)にすることができます．
+無効にして，代わりの，より積極的なカレントディレクトリ追跡機能を使うこともできる
+でしょう．
+
+@node Shell Options
+@c @subsection Shell Mode Options
+@subsection シェルモードのオプション @emph{(2005/05/07)}
+
+@vindex comint-scroll-to-bottom-on-input
+@c   If the variable @code{comint-scroll-to-bottom-on-input} is
+@c non-@code{nil}, insertion and yank commands scroll the selected window
+@c to the bottom before inserting.
+変数@code{comint-scroll-to-bottom-on-input}が@code{nil}以外の場合には、
+挿入およびヤンクコマンドは、
+選択されているウィンドウを末尾までスクロールしてから挿入します。
+
+@vindex comint-scroll-show-maximum-output
+@c   If @code{comint-scroll-show-maximum-output} is non-@code{nil}, then
+@c arrival of output when point is at the end tries to place the last line of
+@c text at the bottom line of the window, so as to show as much useful
+@c text as possible.  (This mimics the scrolling behavior of many
+@c terminals.)  The default is @code{nil}.
+@code{comint-scroll-show-maximum-output} が @code{nil} 以外の場合、ポイントが最
+後にある時，
+出力で、
+最後の行ができるだけウィンドウのいちばん下にくるようにし、
+なるべく多くの有用なテキストが見えるようにします
+（これは多くの端末のスクロール動作の真似）。
+デフォルトは@code{nil}です。
+
+@vindex comint-move-point-for-output
+@c   By setting @code{comint-move-point-for-output}, you can opt for
+@c having point jump to the end of the buffer whenever output arrives---no
+@c matter where in the buffer point was before.  If the value is
+@c @code{this}, point jumps in the selected window.  If the value is
+@c @code{all}, point jumps in each window that shows the Comint buffer.  If
+@c the value is @code{other}, point jumps in all nonselected windows that
+@c show the current buffer.  The default value is @code{nil}, which means
+@c point does not jump to the end.
+@code{comint-move-point-for-output}を設定すると、
+ポイントがどこにあろうと、
+出力が到着するたびにバッファの末尾へポイントがジャンプするように設定できます。
+この変数の値が@code{this}であれば、
+ポイントは選択されたウィンドウでジャンプします。
+値が@code{all}であれば、Comintバッファを表示している各ウィンドウで
+ポイントはジャンプします。
+値が@code{other}であれば、カレントバッファを表示しているすべての
+選択されていないウィンドウでポイントはジャンプします。
+デフォルトは@code{nil}ですから、ポイントはジャンプしません。
+
+@vindex comint-input-ignoredups
+@c   The variable @code{comint-input-ignoredups} controls whether successive
+@c identical inputs are stored in the input history.  A non-@code{nil}
+@c value means to omit an input that is the same as the previous input.
+@c The default is @code{nil}, which means to store each input even if it is
+@c equal to the previous input.
+変数@code{comint-input-ignoredups}は、
+連続する同一の入力を履歴に格納するかどうかを制御します。
+値が@code{nil}以外のときは、直前の入力と同じ入力は履歴に格納しません。
+デフォルトは@code{nil}ですから、直前と同じ入力でもすべて履歴に格納します。
+
+@vindex comint-completion-addsuffix
+@vindex comint-completion-recexact
+@vindex comint-completion-autolist
+@c   Three variables customize file name completion.  The variable
+@c @code{comint-completion-addsuffix} controls whether completion inserts a
+@c space or a slash to indicate a fully completed file or directory name
+@c (non-@code{nil} means do insert a space or slash).
+@c @code{comint-completion-recexact}, if non-@code{nil}, directs @key{TAB}
+@c to choose the shortest possible completion if the usual Emacs completion
+@c algorithm cannot add even a single character.
+@c @code{comint-completion-autolist}, if non-@code{nil}, says to list all
+@c the possible completions whenever completion is not exact.
+3つの変数でファイル名の補完をカスタマイズします。
+変数@code{comint-completion-addsuffix}は、
+ファイル名やディレクトリ名を補完するとき、
+名前を完全に補完できたことを示すために
+末尾に空白やスラッシュを挿入するかどうかを指定します
+（@code{nil}以外のとき、空白やスラッシュを挿入）。
+@code{comint-completion-recexact}は、
+その値が@code{nil}以外の場合、Emacsの通常の補完アルゴリズムで1文字も
+追加できないときには@key{TAB}で可能なもっとも短い補完文字列を
+挿入するようにします。
+@code{comint-completion-autolist}は、その値が@code{nil}以外の場合、
+補完が完全でないときに可能な補完候補の一覧を表示することを指定します。
+
+@vindex shell-completion-execonly
+  Command completion normally considers only executable files.
+If you set @code{shell-completion-execonly} to @code{nil},
+it considers nonexecutable files as well.
+コマンド補完は、通常、実行可能なファイルだけを対象とします。
+@code{shell-completion-execonly} を @code{nil} にすると、
+実行可能でないファイルも対象となります。
+
+@c = 原文のタイポ？
+@c @findex shell-pushd-tohome
+@c @findex shell-pushd-dextract
+@c @findex shell-pushd-dunique
+@vindex shell-pushd-tohome
+@vindex shell-pushd-dextract
+@vindex shell-pushd-dunique
+@c   You can configure the behavior of @samp{pushd}.  Variables control
+@c whether @samp{pushd} behaves like @samp{cd} if no argument is given
+@c (@code{shell-pushd-tohome}), pop rather than rotate with a numeric
+@c argument (@code{shell-pushd-dextract}), and only add directories to the
+@c directory stack if they are not already on it
+@c (@code{shell-pushd-dunique}).  The values you choose should match the
+@c underlying shell, of course.
+@samp{pushd}の動作をカスタマイズできます。
+引数が与えられないと@samp{cd}と同様にふるまう
+（@code{shell-pushd-tohome}）、
+数引数を指定すると@code{pop}ではなく巡回する
+（@code{shell-pushd-dextract}）、
+ディレクトリスタックにないディレクトリだけを
+ディレクトリスタックに加える
+（@code{shell-pushd-dunique}）
+を制御できます。
+これらの値は当然、使っているシェルの動作と一致するように設定すべきです。
+
+@c   If you want Shell mode to handle color output from shell commands,
+@c you can enable ANSI Color mode.  Here is how to do this:
+もしシェルモードにスエルコマンドからのカラー出力を処理するようにさせたければ，
+ANSI カラーモードを利用できます．以下のように設定します．
+
+@example
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+@end example
+
+@node Terminal emulator
+@c @subsection Emacs Terminal Emulator
+@subsection Emacs ターミナルエミュレータ @emph{(2005/05/07)}
+@findex term
+
+@c   To run a subshell in a terminal emulator, putting its typescript in
+@c an Emacs buffer, use @kbd{M-x term}.  This creates (or reuses) a
+@c buffer named @samp{*terminal*}, and runs a subshell with input coming
+@c from your keyboard, and output going to that buffer.
+@kbd{M-x term} を実行することで，ターミナルエミュレータ上でサブシェルを起動し，
+Emacs バッファに文字を表示させることができます．このコマンドは @samp{*terminal*}
+のような名前のバッファを作成 (あるいは，再利用)します．そして，サブシェルを走ら
+せ，キーボードからの入力とバッファへの出力を表示させるのです．
+
+@c   The terminal emulator uses Term mode, which has two input modes.  In
+@c line mode, Term basically acts like Shell mode; see @ref{Shell Mode}.
+ターミナルエミュレータは 2つの入力モードを持つ Term モードを使います．line
+mode(行モード)では，端末は基本的にシェルモードのように動作します．@ref{Shell
+Mode} を参照ください．
+
+@c   In char mode, each character is sent directly to the inferior
+@c subshell, as ``terminal input.''  Any ``echoing'' of your input is the
+@c responsibility of the subshell.  The sole exception is the terminal
+@c escape character, which by default is @kbd{C-c} (@pxref{Term Mode}).
+@c Any ``terminal output'' from the subshell goes into the buffer,
+@c advancing point.
+char mode(文字モード)では，それぞれの文字が"端末の入力"として直接下位のシェルに
+送られます．入力に対する"エコーバック"もサブシェルの責務になります．唯一の例外は
+端末のエスケープ文字で，デフォルトでは @kbd{C-c} (@pxref{Term Mode}) です．サブ
+シェルからの端末出力はバッファのポイントの前に表示されます．
+
+@c   Some programs (such as Emacs itself) need to control the appearance
+@c on the terminal screen in detail.  They do this by sending special
+@c control codes.  The exact control codes needed vary from terminal to
+@c terminal, but nowadays most terminals and terminal emulators
+@c (including @code{xterm}) understand the ANSI-standard (VT100-style)
+@c escape sequences.  Term mode recognizes these escape sequences, and
+@c handles each one appropriately, changing the buffer so that the
+@c appearance of the window matches what it would be on a real terminal.
+@c You can actually run Emacs inside an Emacs Term window.
+いくつかのプログラム(例えば Emacs 自身) は端末上での外観を細かく制御する必要があ
+ります．このために，特別なコードを送っています．この時必要となるコードは端末によっ
+て異なりますが，最近では大抵の端末やターミナルエミュレータ (@code{xterm} を含む)
+は ANSI 標準 (VT100-スタイル) のエスケープシーケンスを理解します．Term モードは
+これらのエスケープシーケンスを認識し，それぞれを適切に処理し，ウィンドウの外観が
+本当の端末であるべき姿になるようにバッファを変更するのです．これにより，Emacs
+Term ウィンドウの中で Emacs を起動することができるのです．
+
+@c    The file name used to load the subshell is determined the same way
+@c as for Shell mode.  To make multiple terminal emulators, rename the
+@c buffer @samp{*terminal*} to something different using @kbd{M-x
+@c rename-uniquely}, just as with Shell mode.
+サブシェルを読み込むために使われるファイル名はシェルモードと同じように決定され
+ます．複数のターミナルエミュレータを使うためには，バッファ @samp{*terminal*} を
+シェルモードの時と同じように @kbd{M-x rename-uniquely} を実行して何か別の物に変
+更します．
+
+@c   Unlike Shell mode, Term mode does not track the current directory by
+@c examining your input.  But some shells can tell Term what the current
+@c directory is.  This is done automatically by @code{bash} version 1.15
+@c and later.
+シェルモードとは違い，Term モードは入力を調べることでカレントディレクトリを追跡
+することはしません．しかし，いくつかのシェルは Term にカレンドディレクトリがどこ
+か教えることができます．これは，@code{bash} バージョン 1.15 以降であれば自動的に
+行われます．
+
+@node Term Mode
+@c @subsection Term Mode
+@subsection Term モード @emph{(2005/05/07)}
+@cindex Term mode
+@cindex mode, Term
+
+@c   The terminal emulator uses Term mode, which has two input modes.  In
+@c line mode, Term basically acts like Shell mode; see @ref{Shell Mode}.
+@c In char mode, each character is sent directly to the inferior
+@c subshell, except for the Term escape character, normally @kbd{C-c}.
+ターミナルエミュレータは2つの入力モードを持つ Term モードを使います．行モードで
+は，基本的にシェルモードのように動作します．@ref{Shell Mode}を参照ください．文字
+モードでは，それぞれの文字が下位のシェルに直接送られますが，端末のエスケープキャ
+ラクタ (通常は @kbd{C-c}) は例外です．
+
+@c   To switch between line and char mode, use these commands:
+行モードと文字モードを切り替えるためには，以下のコマンドを使います．
+
+@table @kbd
+@kindex C-c C-j @r{(Term mode)}
+@findex term-char-mode
+@item C-c C-j
+@c Switch to line mode.  Do nothing if already in line mode.
+行モードに切り替える．すでに行モードであれば何もしない．
+
+@kindex C-c C-k @r{(Term mode)}
+@findex term-line-mode
+@item C-c C-k
+@c Switch to char mode.  Do nothing if already in char mode.
+文字モードに切り替える．すでに文字モードであれば何もしない．
+@end table
+
+@c   The following commands are only available in char mode:
+以下のコマンドは文字モードの時だけ利用できます．
+
+@table @kbd
+@item C-c C-c
+@c Send a literal @key{C-c} to the sub-shell.
+シェルに文字 @key{C-c} を送る．
+
+@item C-c C-x
+@c A prefix command to access the global @key{C-x} commands conveniently.
+@c For example, @kbd{C-c C-x o} invokes the global binding of
+@c @kbd{C-x o}, which is normally @samp{other-window}.
+プレフィックスを付けることで，@key{C-x} コマンドに便利にアクセスできる．例えば，
+@kbd{C-c C-x o} で @kbd{C-x o} にバインドされた機能，通常は @samp{other-window}
+を利用できる．
+@end table
+
+@node Paging in Term
+@c @subsection Page-At-A-Time Output
+@subsection ページ出力 @emph{(2005/05/07)}
+@cindex page-at-a-time
+
+@c   Term mode has a page-at-a-time feature.  When enabled it makes
+@c output pause at the end of each screenful.
+Term モードはページ出力機能を持っています．この機能を有効にすると，画面の終わり
+までくると，出力を停止します．
+
+@table @kbd
+@kindex C-c C-q @r{(Term mode)}
+@findex term-pager-toggle
+@item C-c C-q
+@c Toggle the page-at-a-time feature.  This command works in both line
+@c and char modes.  When page-at-a-time is enabled, the mode-line
+@c displays the word @samp{page}.
+ページ出力機能をトグルします．このコマンドは行モード，文字モードのどちらでも動作
+します．ページ出力機能が有効であれば，モードラインに @samp{page} という単語が表
+示されます．
+@end table
+
+@c   With page-at-a-time enabled, whenever Term receives more than a
+@c screenful of output since your last input, it pauses, displaying
+@c @samp{**MORE**} in the mode-line.  Type @key{SPC} to display the next
+@c screenful of output.  Type @kbd{?} to see your other options.  The
+@c interface is similar to the @code{more} program.
+ページ出力機能が有効であれば，端末が画面よりも多くのテキストを受け取ると，出力を
+停止し，モードラインに @samp{**MORE**} と表示します．次のテキストを表示するため
+には @key{SPC} を入力します．@kbd{?} を入力すると，他のオプションを見ることがで
+きます．このインターフェイスはプログラム @code{more} と似たものです．
+
+@node Remote Host
+@c @subsection Remote Host Shell
+@subsection リモートホストのシェル @emph{(2005/05/07)}
+@c @cindex remote host
+@c @cindex connecting to remote host
+@cindex リモートホスト
+@cindex リモートホストへの接続
+@cindex Telnet
+@cindex Rlogin
+
+@c   You can login to a remote computer, using whatever commands you
+@c would from a regular terminal (e.g.@: using the @code{telnet} or
+@c @code{rlogin} commands), from a Term window.
+通常の端末から入力するどんなコマンドでも(例えば，@code{telnet} や @code{rlogin}
+コマンド) 端末ウィンドウからリモートコンピュータにログインできます．
+
+@c   A program that asks you for a password will normally suppress
+@c echoing of the password, so the password will not show up in the
+@c buffer.  This will happen just as if you were using a real terminal,
+@c if the buffer is in char mode.  If it is in line mode, the password is
+@c temporarily visible, but will be erased when you hit return.  (This
+@c happens automatically; there is no special password processing.)
+通常パスワードを求めるプログラムではパスワードは隠される．そのため，バッファにも
+パスワードは表示されません．この機能はバッファが文字モードであれば，本当の端末を
+使っているのと同じようになります．行モードであれば，パスワードは一時的に表示され
+ますが，リターンを入力した時に消されます(この機能は自動的に機能します．特別なパ
+スワードの処理機能はありません)．
+
+@c   When you log in to a different machine, you need to specify the type
+@c of terminal you're using.  Terminal types @samp{ansi} or @samp{vt100}
+@c will work on most systems.
+別のマシンにログインする時には，使っている端末を指定する必要があります．端末のタ
+イプ @samp{ansi} か @samp{vt100} は大抵のマシンで機能するでしょう．
+
+@c   If you are talking to a Bourne-compatible
+@c shell, and your system understands the @env{TERMCAP} variable,
+@c you can use the command @kbd{M-x shell-send-termcap}, which
+@c sends a string specifying the terminal type and size.
+@c (This command is also useful after the window has changed size.)
+
+@c You can of course run @samp{gdb} on that remote computer.  One useful
+@c trick:  If you invoke gdb with the @code{--fullname} option,
+@c it will send special commands to Emacs that will cause Emacs to
+@c pop up the source files you're debugging.  This will work
+@c whether or not gdb is running on a different computer than Emacs,
+@c as long as Emacs can access the source files specified by gdb.
+
+@ignore
+  You cannot log in to a remote computer using the Shell mode.
+@c (This will change when Shell is re-written to use Term.)
+Instead, Emacs provides two commands for logging in to another computer
+and communicating with it through an Emacs buffer using Comint mode:
+
+@table @kbd
+@item M-x telnet @key{RET} @var{hostname} @key{RET}
+@c Set up a Telnet connection to the computer named @var{hostname}.
+ホスト@var{hostname}にtelnet経由で接続する。
+@item M-x rlogin @key{RET} @var{hostname} @key{RET}
+@c Set up an Rlogin connection to the computer named @var{hostname}.
+ホスト@var{hostname}にrlogin経由で接続する。
+@end table
+
+@findex telnet
+@c   Use @kbd{M-x telnet} to set up a Telnet connection to another
+@c computer.  (Telnet is the standard Internet protocol for remote login.)
+@c It reads the host name of the other computer as an argument with the
+@c minibuffer.  Once the connection is established, talking to the other
+@c computer works like talking to a subshell: you can edit input with the
+@c usual Emacs commands, and send it a line at a time by typing @key{RET}.
+@c The output is inserted in the Telnet buffer interspersed with the input.
+他のホストにtelnet経由で接続するには、@kbd{M-x telnet}を使います
+（telnetはリモートログイン用のInternetの標準プロトコル）。
+このコマンドは、接続先のホスト名を引数としてミニバッファで読みます。
+いったん接続が確立すると、他のホストとのやりとりはサブシェルとのやりとり
+と同様にして行えます。
+通常のEmacsコマンドで入力を編集でき、@key{RET}で相手側に送信します。
+相手側からの出力は（同じ）Telnetバッファに挿入されます。
+
+@findex rlogin
+@vindex rlogin-explicit-args
+@c   Use @kbd{M-x rlogin} to set up an Rlogin connection.  Rlogin is
+@c another remote login communication protocol, essentially much like the
+@c Telnet protocol but incompatible with it, and supported only by certain
+@c systems.  Rlogin's advantages are that you can arrange not to have to
+@c give your user name and password when communicating between two machines
+@c you frequently use, and that you can make an 8-bit-clean connection.
+@c (To do that in Emacs, set @code{rlogin-explicit-args} to @code{("-8")}
+@c before you run Rlogin.)
+rlogin接続を行うには、@kbd{M-x rlogin}を使います。
+rloginは本質的にはtelnetプロトコルとよく似た
+リモートログイン用の通信プロトコルですが、
+telnetとの互換性はなく、ある種のシステムでだけ使えます。
+rloginの利点は、2つのマシン間で頻繁に通信する場合に
+ユーザー名やパスワードを毎回打ち込まないですむように設定できることと、
+8ビットを透過的に使う接続が可能なことです。
+（Emacsでこれを行うには、
+rloginを開始するまえに@code{rlogin-explicit-args}に@code{("-8")}を
+設定する。）
+
+@c   @kbd{M-x rlogin} sets up the default file directory of the Emacs
+@c buffer to access the remote host via FTP (@pxref{File Names}), and it
+@c tracks the shell commands that change the current directory, just like
+@c Shell mode.
+@kbd{M-x rlogin}は、相手側とFTP経由でファイルをやりとりするために
+Emacsバッファのデフォルトディレクトリを設定し（@pxref{File Names}）、
+シェル（shell）モードと同様にカレントディレクトリを変更する
+シェルコマンドを監視します。
+
+@findex rlogin-directory-tracking-mode
+@c   There are two ways of doing directory tracking in an Rlogin
+@c buffer---either with remote directory names
+@c @file{/@var{host}:@var{dir}/} or with local names (that works if the
+@c ``remote'' machine shares file systems with your machine of origin).
+@c You can use the command @code{rlogin-directory-tracking-mode} to switch
+@c modes.  No argument means use remote directory names, a positive
+@c argument means use local names, and a negative argument means turn
+@c off directory tracking.
+rloginバッファでディレクトリを追跡する方法は2つあります。
+リモートディレクトリ名@file{/@var{host}:@var{dir}/}を使うか、
+ローカルファイル名を使います。
+（後者は『相手側のホスト』がローカルホストと
+ファイルシステムを共有している場合にのみ使える）。
+コマンド@code{rlogin-directory-tracking-mode}を使って、
+これらの2つのモードを相互に切り替えられます。
+引数なしではリモートディレクトリ名を使う状態にし、
+正の数を引数にするとローカル名を使う状態にします。
+負の数を引数にするとディレクトリの追跡機能を止めます。
+@end ignore
+
+@node Emacs Server, Hardcopy, Shell, Top
+@c @section Using Emacs as a Server
+@section Emacsをサーバーとして使う @emph{(2005/05/07)}
+@pindex emacsclient
+@c @cindex Emacs as a server
+@c @cindex server, using Emacs as
+@c @cindex @env{EDITOR} environment variable
+@cindex サーバーとしてのEmacs
+@cindex Emacsをサーバーとして使う
+@cindex 環境変数@code{EDITOR}
+@cindex @env{EDITOR}（環境変数）
+
+@c   Various programs such as @code{mail} can invoke your choice of editor
+@c to edit a particular piece of text, such as a message that you are
+@c sending.  By convention, most of these programs use the environment
+@c variable @env{EDITOR} to specify which editor to run.  If you set
+@c @env{EDITOR} to @samp{emacs}, they invoke Emacs---but in an
+@c inconvenient fashion, by starting a new, separate Emacs process.  This
+@c is inconvenient because it takes time and because the new Emacs process
+@c doesn't share the buffers in any existing Emacs process.
+@code{mail}を始めとする多くのプログラムは、
+送信メッセージなどのテキストを編集するために
+ユーザーが指定したエディタを起動します。
+これらのプログラムは、
+習慣として、環境変数@env{EDITOR}で指定されたエディタを起動します。
+@env{EDITOR}に@samp{emacs}を設定しておけばEmacsが起動しますが、
+新たに別のEmacsプロセスが開始されるので不便です。
+というのは、新しいEmacsプロセスは既存のどんな Emacsプロセスもバッファを
+共有しないからです。
+
+@c   You can arrange to use your existing Emacs process as the editor for
+@c programs like @code{mail} by using the Emacs client and Emacs server
+@c programs.  Here is how.
+EmacsクライアントとEmacsサーバーを用いて、
+@code{mail}などのプログラムが既存のEmacsプロセスを
+エディタとして使うようにできます。
+以下のようにします。
+
+@c @cindex @env{TEXEDIT} environment variable
+@cindex 環境変数 @env{TEXEDIT}
+@cindex @env{TEXEDIT}（環境変数）
+@c   First, the preparation.  Within Emacs, call the function
+@c @code{server-start}.  (Your @file{.emacs} file can do this automatically
+@c if you add the expression @code{(server-start)} to it.)  Then, outside
+@c Emacs, set the @env{EDITOR} environment variable to @samp{emacsclient}.
+@c (Note that some programs use a different environment variable; for
+@c example, to make @TeX{} use @samp{emacsclient}, you should set the
+@c @env{TEXEDIT} environment variable to @samp{emacsclient +%d %s}.)
+まずは準備です。
+Emacsの中で関数@code{server-start}を呼び出します。
+（個人のファイル@file{.emacs}に式@code{(server-start)}を書いておけば、
+これを自動的に行える。）
+つぎに、Emacsの外で環境変数 @env{EDITOR} に @samp{emacsclient} を設定します。
+（プログラムによっては別の環境変数を使う。
+たとえば、@TeX{} に @samp{emacsclient} を使わせるには、
+環境変数 @env{TEXEDIT} に @samp{emacsclient +%d %s} と設定する。）
+
+@kindex C-x #
+@findex server-edit
+@c   Then, whenever any program invokes your specified @env{EDITOR}
+@c program, the effect is to send a message to your principal Emacs telling
+@c it to visit a file.  (That's what the program @code{emacsclient} does.)
+@c Emacs displays the buffer immediately and you can immediately begin
+@c editing it.
+こうすると、どのプログラムが @env{EDITOR}に指定されたプログラムをエディタ
+として起動しても、結果としては、訪れるべきファイルを伝える
+メッセージが現在動いているEmacsに送られます。
+（これが@code{emacsclient}の役割。）
+Emacsはただちにバッファを表示し、ユーザーはすぐに編集を開始できます。
+
+@c   When you've finished editing that buffer, type @kbd{C-x #}
+@c (@code{server-edit}).  This saves the file and sends a message back to
+@c the @code{emacsclient} program telling it to exit.  The programs that
+@c use @env{EDITOR} wait for the ``editor'' (actually, @code{emacsclient})
+@c to exit.  @kbd{C-x #} also checks for other pending external requests
+@c to edit various files, and selects the next such file.
+そのバッファの編集が終ったら、@kbd{C-x #}と打ちます（@code{server-edit}）。
+これにより、ファイルが保存され、
+終了せよとのメッセージを@code{emacslient}に送り返します。
+@env{EDITOR} を参照したプログラムは
+『エディタ』（実際には@code{emacsclient}）が終了するのを待ちます。
+@kbd{C-x #}は複数のファイルに対する外部からの編集要求で
+他に残っているものがないかどうかも検査し、
+もしあればつぎのファイルを訪問します。
+
+@c   You can switch to a server buffer manually if you wish; you don't
+@c have to arrive at it with @kbd{C-x #}.  But @kbd{C-x #} is the way to
+@c say that you are finished with one.
+望むなら手でサーバーバッファに切り替えてもかまいません。
+必ず@kbd{C-x #}を使わなければならないということはありません。
+ただし、@kbd{C-x #}はサーバーバッファの編集が終ったということを
+告げる方法です。
+
+@vindex server-kill-new-buffers
+@vindex server-temp-file-regexp
+@c   Finishing with a server buffer also kills the buffer, unless it
+@c already existed in the Emacs session before the server asked to create
+@c it.  However, if you set @code{server-kill-new-buffers} to @code{nil},
+@c then a different criterion is used: finishing with a server buffer
+@c kills it if the file name matches the regular expression
+@c @code{server-temp-file-regexp}.  This is set up to distinguish certain
+@c ``temporary'' files.
+サーババッファを終えると，サーバに接続前に Emacs に既に存在したのでなければ，バッ
+ファもキルされます．しかし，@code{server-kill-new-buffers} を @code{nil} に設定
+していると，別の動作が行われます．サーババッファを終えると，ファイル名の正規表現
+が @code{server-temp-file-regexp} に一致していれば，そのバッファがキルされます．
+これはある種の一時ファイルを識別するための仕組みです．
+
+@vindex server-window
+@c   If you set the variable @code{server-window} to a window or a frame,
+@c @kbd{C-x #} displays the server buffer in that window or in that frame.
+変数@code{server-window}にウィンドウやフレームを設定してあれば、
+@kbd{C-x #}はサーバーバッファをそのウィンドウやフレームに表示します。
+
+@c   While @code{mail} or another application is waiting for
+@c @code{emacsclient} to finish, @code{emacsclient} does not read terminal
+@c input.  So the terminal that @code{mail} was using is effectively
+@c blocked for the duration.  In order to edit with your principal Emacs,
+@c you need to be able to use it without using that terminal.  There are
+@c three ways to do this:
+@code{mail}やその他のアプリケーションが@code{emacsclient}の終了を
+待っているあいだ、@code{emacsclient}は端末入力を読みません。
+したがって、@code{mail}が使っている端末は、そのあいだ実質的に
+ブロックされた状態にあります。
+サーバーとして使うEmacsで編集をするためには、
+その（ブロックしている）端末を使わずに行う必要があります。
+それには3つの方法があります。
+
+@itemize @bullet
+@item
+@c Using a window system, run @code{mail} and the principal Emacs in two
+@c separate windows.  While @code{mail} is waiting for @code{emacsclient},
+@c the window where it was running is blocked, but you can use Emacs by
+@c switching windows.
+ウィンドウシステムを使い、@code{mail}とEmacsとを別のウィンドウで動かす。
+@code{mail}が@code{emacsclient}を待っているあいだ、
+@code{mail}が動いてるウィンドウはブロックされるが、
+他のウィンドウに切り替えればEmacsを使える。
+
+@item
+@c Using virtual terminals, run @code{mail} in one virtual terminal
+@c and run Emacs in another.
+仮想端末を使い，仮想端末で @code{mail} を起動したり，他の端末で Emacs を動かす．
+
+@item
+@c Use Shell mode or Term mode in Emacs to run the other program such as
+@c @code{mail}; then, @code{emacsclient} blocks only the subshell under
+@c Emacs, and you can still use Emacs to edit the file.
+Emacsのシェル（shell）モードや Term モードを使って@code{mail}などのプログラムを動かす。
+こうすれば、@code{emacsclient}はEmacsの下で動いている
+サブシェルのみをブロックするので、
+Emacsを使ってファイルを編集するのは通常どおり行える。
+@end itemize
+
+@c   If you run @code{emacsclient} with the option @samp{--no-wait}, it
+@c returns immediately without waiting for you to ``finish'' the buffer
+@c in Emacs.  Note that server buffers created in this way are not killed
+@c automatically when you finish with them.
+オプション @samp{--no-wait} を指定して @code{emacsclient} を起動すると、
+Emacs上でバッファを編集し終るのを待たずにただちに終了します。サーババッファをこ
+の方法で作ると，それを終えた時に自動的にキルされます．
+
+@menu
+* Invoking emacsclient::
+@end menu
+
+@node Invoking emacsclient,, Emacs Server, Emacs Server
+@c @section Invoking @code{emacsclient}
+@section @code{emacsclient} の起動 @emph{(2005/05/07)}
+                                        
+@c   To run the @code{emacsclient} program, specify file names as arguments,
+@c and optionally line numbers as well.  Do it like this:
+プログラム @code{emacsclient} を起動する時には，引数としてファイル名や行数などが
+利用されます．例えば，以下のようになります．
+
+@example
+emacsclient @r{@{}@r{[}+@var{line}@r{[}@var{column}@r{]}@r{]} @var{filename}@r{@}}@dots{}
+@end example
+
+@noindent
+@c This tells Emacs to visit each of the specified files; if you specify a
+@c line number for a certain file, Emacs moves to that line in the file.
+@c If you specify a column number as well, Emacs puts point on that column
+@c in the line.
+この行は Emacs に指定されたファイルを開き，個々のファイルで行数の指定があれば，
+その行へ移動することを意味しています．もし，桁数も指定されていれば，Emacs は指定
+された行の指定された桁へポイントを移動します．
+
+@c   Ordinarily, @code{emacsclient} does not return until you use the
+@c @kbd{C-x #} command on each of these buffers.  When that happens,
+@c Emacs sends a message to the @code{emacsclient} program telling it to
+@c return.
+普通，@code{emacsclient} は個々のバッファでコマンド @kbd{C-x #} を実行するまで，
+返ることはありません．このため，Emacs は @code{emacsclient} にそのことを伝えます．
+
+@c   But if you use the option @samp{-n} or @samp{--no-wait} when running
+@c @code{emacsclient}, then it returns immediately.  (You can take as
+@c long as you like to edit the files in Emacs.)
+しかし，もし @code{emacsclient} を起動する時に，オプション @samp{-n} や
+@samp{--no-wait} を使っていれば，すぐに返ります (Emacs でファイルを編集したいだ
+けの時間を取ることができる)．
+
+@c   The option @samp{--alternate-editor=@var{command}} is useful when
+@c running @code{emacsclient} in a script.  It specifies a command to run
+@c if @code{emacsclient} fails to contact Emacs.  For example, the
+@c following setting for the @var{EDITOR} environment variable will
+@c always give an editor, even if Emacs is not running:
+オプション @samp{--alternate-editor=@var{command}} は @code{emacsclient} をスク
+リプトで起動する時に便利です．@code{emacsclient} が Emacs に接続するのを失敗した
+時に起動すべきコマンドを特定します．例えば，以下のように環境変数 @var{EDITOR} を
+設定しておけば，例え Emacs が起動しなくても，いつも何らかのエディタを利用できる
+でしょう．
+
+@example
+EDITOR="emacsclient --alternate-editor vi +%d %s"
+@end example
+
+@noindent
+@c The environment variable @var{ALTERNATE_EDITOR} has the same effect, but
+@c the value of the @samp{--alternate-editor} takes precedence.
+環境変数 @var{ALTERNATE_EDITOR} も同じ効果を持ちますが，
+@samp{--alternate-editor} で指定した値が優先されます．
+
+@pindex emacs.bash
+@c   Alternatively, the file @file{etc/emacs.bash} defines a bash
+@c function which will communicate with a running Emacs server, or start
+@c one if none exists.
+代わりに，ファイル @file{etc/emacs.bash} は Emacs サーバを起動する方法や失敗した
+時に起動すべきものを定義します．
+
+@c If you use several displays, you can tell Emacs on which display to
+@c open the given files with the option @samp{--display=@var{DISPLAY}}.
+@c This can be used typically when connecting from home to an Emacs
+@c server running on your machine at your workplace.
+もし複数のディスプレイがあれば，オプション @samp{--display=@var{DISPLAY}} を使う
+ことで，個々のディスプレイで指定したファイルを開くことができます．この機能はよく
+作業場にあるマシンで動作している Emacs サーバに家から接続する時に使われます．
+
+@c You can also use @code{emacsclient} to execute any piece of Emacs Lisp
+@c code, using the option @samp{--eval}.  When this option is given, the
+@c rest of the arguments is not taken as a list of files to visit but as
+@c a list of expressions to evaluate.
+オプション @samp{--eval} を使うことで，@code{emacsclient} に Emacs Lisp コードの
+一片を実行させることもできます．このオプションが与えられると，残りの引数が開くべ
+きファイルとしては処理されず，評価すべき式のリストとして処理されます．
+
+@node Hardcopy, PostScript, Emacs Server, Top
+@c @section Hardcopy Output
+@c @cindex hardcopy
+@cindex 印刷
+
+@c   The Emacs commands for making hardcopy let you print either an entire
+@c buffer or just part of one, either with or without page headers.
+@c See also the hardcopy commands of Dired (@pxref{Misc File Ops})
+@c and the diary (@pxref{Diary Commands}).
+印刷用のEmacsコマンドには、バッファ全体ないしその一部を、
+ページヘッダ付き／なしのどちらででも出力する機能があります。
+dired（@pxref{Misc File Ops}）とdiary（@pxref{Diary Commands}）の
+印刷機能についても参照してください。
+
+@table @kbd
+@item M-x print-buffer
+@c Print hardcopy of current buffer with page headings containing the file
+@c name and page number.
+カレントバッファの内容を、ファイル名とページ番号を
+記したページヘッダ付きで印刷する。
+@item M-x lpr-buffer
+@c Print hardcopy of current buffer without page headings.
+カレントバッファの内容を、ページヘッダなしで印刷する。
+@item M-x print-region
+@c Like @code{print-buffer} but print only the current region.
+@code{print-buffer}と同様だが、現在のリージョンのみを印刷する。
+@item M-x lpr-region
+@c Like @code{lpr-buffer} but print only the current region.
+@code{lpr-buffer}と同様だが、現在のリージョンのみを印刷。
+@end table
+
+@findex print-buffer
+@findex print-region
+@findex lpr-buffer
+@findex lpr-region
+@vindex lpr-switches
+@c   The hardcopy commands (aside from the Postscript commands) pass extra
+@c switches to the @code{lpr} program based on the value of the variable
+@c @code{lpr-switches}.  Its value should be a list of strings, each string
+@c an option starting with @samp{-}.  For example, to specify a line width
+@c of 80 columns for all the printing you do in Emacs, set
+@c @code{lpr-switches} like this:
+（Postscriptコマンドを除く）印刷コマンドは、
+@code{lpr-switches}の値をもとに追加オプションを@code{lpr}に渡します。
+この変数の値は文字列のリストであり、
+各文字列は@samp{-}で始まるオプションである必要があります。
+たとえば、Emacsから行う印刷で1行を80文字に設定するには、
+@code{lpr-switches}をつぎのように設定します。
+
+@example
+(setq lpr-switches '("-w80"))
+@end example
+
+@vindex printer-name
+@c   You can specify the printer to use by setting the variable
+@c @code{printer-name}.
+変数@code{printer-name}を設定すれば、使うプリンタを指定できます。
+
+@vindex lpr-headers-switches
+@vindex lpr-commands
+@vindex lpr-add-switches
+@c   The variable @code{lpr-command} specifies the name of the printer
+@c program to run; the default value depends on your operating system type.
+@c On most systems, the default is @code{"lpr"}.  The variable
+@c @code{lpr-headers-switches} similarly specifies the extra switches to
+@c use to make page headers.  The variable @code{lpr-add-switches} controls
+@c whether to supply @samp{-T} and @samp{-J} options (suitable for
+@c @code{lpr}) to the printer program: @code{nil} means don't add them.
+@c @code{lpr-add-switches} should be @code{nil} if your printer program is
+@c not compatible with @code{lpr}.
+変数@code{lpr-command}は、実行すべきプリンタプログラムを指定します。
+デフォルトの値はオペレーティングシステムに依存します。
+多くのシステムでは、デフォルトは@code{"lpr"}です。
+変数@code{lpr-headers-switches}も同様に、
+ページヘッダを作るための追加オプションを指定します。
+変数@code{lpr-add-switches}は、
+プリンタプログラムに（@code{lpr}には適した）
+オプション@samp{-T}とオプション@samp{-J}を指定するかどうか制御します。
+この変数の値が@code{nil}ならこれらのオプションを指定しません。
+プリンタプログラムが@code{lpr}と互換性がないなら、
+変数@code{lpr-add-switches}は@code{nil}にすべきです。
+
+@node PostScript, PostScript Variables, Hardcopy, Top
+@c @section PostScript Hardcopy
+@section PostScriptの印刷 @emph{(2005/05/07)}
+
+@c   These commands convert buffer contents to PostScript,
+@c either printing it or leaving it in another Emacs buffer.
+これらのコマンドは、バッファの内容をPostScriptに変換し、
+プリンタへ送るか他のEmacsバッファに入れます。
+
+@table @kbd
+@item M-x ps-print-buffer
+@c Print hardcopy of the current buffer in PostScript form.
+カレントバッファをPostScript形式で印刷する。
+@item M-x ps-print-region
+@c Print hardcopy of the current region in PostScript form.
+現在のリージョンをPostScript形式で印刷する。
+@item M-x ps-print-buffer-with-faces
+@c Print hardcopy of the current buffer in PostScript form, showing the
+@c faces used in the text by means of PostScript features.
+カレントバッファをPostScript形式で印刷するが、
+テキストで用いているフェイスをPostScriptの機能で表示する。
+@item M-x ps-print-region-with-faces
+@c Print hardcopy of the current region in PostScript form, showing the
+@c faces used in the text.
+現在のリージョンをPostScript形式で印刷するが、
+テキストで用いているフェイスも表示する。
+@item M-x ps-spool-buffer
+@c Generate PostScript for the current buffer text.
+カレントバッファのテキストをPostScriptに変換する。
+@item M-x ps-spool-region
+@c Generate PostScript for the current region.
+現在のリージョンをPostScriptに変換する。
+@c @item M-x ps-spool-buffer-with-faces
+@c Generate PostScript for the current buffer, showing the faces used.
+カレントバッファをPostScriptに変換するが、使われているフェイスも表示する。
+@item M-x ps-spool-region-with-faces
+@c Generate PostScript for the current region, showing the faces used.
+現在のリージョンをPostScriptに変換するが、使われているフェイスも表示する。
+@item M-x handwrite
+@c Generates/prints PostScript for the current buffer as if handwritten.
+カレントバッファを手書きのようなPostScriptに変換/印刷する
+@end table
+
+@findex ps-print-region
+@findex ps-print-buffer
+@findex ps-print-region-with-faces
+@findex ps-print-buffer-with-faces
+@c   The PostScript commands, @code{ps-print-buffer} and
+@c @code{ps-print-region}, print buffer contents in PostScript form.  One
+@c command prints the entire buffer; the other, just the region.  The
+@c corresponding @samp{-with-faces} commands,
+@c @code{ps-print-buffer-with-faces} and @code{ps-print-region-with-faces},
+@c use PostScript features to show the faces (fonts and colors) in the text
+@c properties of the text being printed.
+PostScriptコマンド@code{ps-print-buffer}および@code{ps-print-region}は
+バッファの内容をPostScript形式で出力します。
+前者はバッファ全体を出力しますが、後者はリージョンのみです。
+これらに対応した@samp{-with-faces}コマンドである
+@code{ps-print-buffer-with-faces}および@code{ps-print-region-with-faces}は、
+出力するテキストのテキスト属性のフェイス（フォントと表示色）を
+PostScriptの機能を用いて再現します。
+
+@c   If you are using a color display, you can print a buffer of program
+@c code with color highlighting by turning on Font-Lock mode in that
+@c buffer, and using @code{ps-print-buffer-with-faces}.
+カラーディスプレイを使っている場合、
+バッファでフォントロック（font-lock）モードを使って色付けしたプログラムコードを
+@code{ps-print-buffer-with-faces}で（そのまま）印刷できます。
+
+@findex ps-spool-region
+@findex ps-spool-buffer
+@findex ps-spool-region-with-faces
+@findex ps-spool-buffer-with-faces
+@c   The commands whose names have @samp{spool} instead of @samp{print}
+@c generate the PostScript output in an Emacs buffer instead of sending
+@c it to the printer.
+コマンド名が@samp{print}のかわりに@samp{spool}であるものは、
+変換したPostscript出力をプリンタに送るかわりにEmacsバッファに置きます。
+
+@findex handwrite
+@cindex handwriting
+@c @kbd{M-x handwrite} is more frivolous.  It generates a PostScript
+@c rendition of the current buffer as a cursive handwritten document.  It
+@c can be customized in group @code{handwrite}.  This function only
+@c supports ISO 8859-1 characters.
+@kbd{M-x handwrite} はもっとお遊び的な機能です．このコマンドはカレントバッファを
+手書きのドキュメントのように演出した PostScript を生成します．グループ
+@code{handwrite} でカスタマイズできます．この関数は ISO 8859-1 の文字だけをサポー
+トしています．
+
+@ifinfo
+@c   The following section describes variables for customizing these commands.
+つぎの節では、これらのコマンドをカスタマイズする変数について説明します。
+@end ifinfo
+
+@node PostScript Variables, Sorting, PostScript, Top
+@c @section Variables for PostScript Hardcopy
+@section Postscriptの印刷を制御する変数 @emph{(2005/05/08)}
+
+@vindex ps-lpr-command
+@vindex ps-lpr-switches
+@vindex ps-printer-name
+@c   All the PostScript hardcopy commands use the variables
+@c @code{ps-lpr-command} and @code{ps-lpr-switches} to specify how to print
+@c the output.  @code{ps-lpr-command} specifies the command name to run,
+@c @code{ps-lpr-switches} specifies command line options to use, and
+@c @code{ps-printer-name} specifies the printer.  If you don't set the
+@c first two variables yourself, they take their initial values from
+@c @code{lpr-command} and @code{lpr-switches}.  If @code{ps-printer-name}
+@c is @code{nil}, @code{printer-name} is used.
+すべてのPostScriptの印刷コマンドは、出力をどのように印刷するかを
+変数@code{ps-lpr-command}と@code{ps-lpr-switches}で指定できます。
+@code{ps-lpr-command}には印刷のため実行するシェルコマンド、
+@code{ps-lpr-switches}にはそのシェルコマンドに指定するオプション、
+@code{ps-printer-name}にはプリンタを指定します。
+始めの2つの変数を設定しなかった場合は、
+@code{lpr-command}と@code{lpr-switches}に基づいて初期値が設定されます。
+@code{ps-printer-name}が@code{nil}だと@code{printer-name}を使います。
+
+@vindex ps-print-header
+@c   The variable @code{ps-print-header} controls whether these commands
+@c add header lines to each page---set it to @code{nil} to turn headers
+@c off.
+変数 @code{ps-print-header} はこれらのコマンドが各ページにヘッダを追加するかどう
+かを制御します．ヘッダをオフにしたい時には @code{nil} にします．
+
+@cindex color emulation on black-and-white printers
+@vindex ps-print-color-p
+@c   If your printer doesn't support colors, you should turn off color
+@c processing by setting @code{ps-print-color-p} to @code{nil}.  By
+@c default, if the display supports colors, Emacs produces hardcopy output
+@c with color information; on black-and-white printers, colors are emulated
+@c with shades of gray.  This might produce illegible output, even if your
+@c screen colors only use shades of gray.
+もしプリンタがカラー印刷をサポートしていなければ，@code{ps-print-color-p} を
+@code{nil} に設定することでカラー処理を無効にすべきです．デフォルトでは，ディス
+プレイがカラーをサポートしていれば，Emacs はカラーでの印刷をサポートします．白黒
+プリンタでは，カラーはグレースケールで印刷されます．これにより，画面でグレイの陰
+を使っていても，読みにくい出力になるかもしれません．
+
+@vindex ps-use-face-background
+@c   By default, PostScript printing ignores the background colors of the
+@c faces, unless the variable @code{ps-use-face-background} is
+@c non-@code{nil}.  This is to avoid unwanted interference with the zebra
+@c stripes and background image/text.
+デフォルトでは，@code{ps-use-face-background} が 非 @code{nil} でなければ，
+PostScript は背景を無視します．これは，背景の画像やテキストが縞々になって望まな
+い干渉が出ることを避けるためです．
+
+@vindex ps-paper-type
+@vindex ps-page-dimensions-database
+@c   The variable @code{ps-paper-type} specifies which size of paper to
+@c format for; legitimate values include @code{a4}, @code{a3},
+@c @code{a4small}, @code{b4}, @code{b5}, @code{executive}, @code{ledger},
+@c @code{legal}, @code{letter}, @code{letter-small}, @code{statement},
+@c @code{tabloid}.  The default is @code{letter}.  You can define
+@c additional paper sizes by changing the variable
+@c @code{ps-page-dimensions-database}.
+変数@code{ps-paper-type}は、印刷用紙サイズを指定します。
+指定できる値は、@code{a4}、@code{a3}、@code{a4small}、
+@code{b4}、@code{b5}、@code{executive}、@code{ledger}、@code{legal}、
+@code{letter}、@code{letter-small}、@code{statement}、@code{tabloid}です。
+デフォルトは@code{letter}です。
+変数@code{ps-page-dimensions-database}を変更すれば
+別の用紙サイズを定義できます。
+
+@vindex ps-landscape-mode
+@c   The variable @code{ps-landscape-mode} specifies the orientation of
+@c printing on the page.  The default is @code{nil}, which stands for
+@c ``portrait'' mode.  Any non-@code{nil} value specifies ``landscape''
+@c mode.
+変数@code{ps-landscape-mode}は用紙の向きを指定します。
+デフォルトは@code{nil}で、『縦づかい』（ポートレート）です。
+@code{nil}以外の値を指定すると『横づかい』（ランドスケープ）です。
+
+@vindex ps-number-of-columns
+@c   The variable @code{ps-number-of-columns} specifies the number of
+@c columns; it takes effect in both landscape and portrait mode.  The
+@c default is 1.
+変数@code{ps-number-of-columns}は段数を指定します。
+縦づかいでも横づかいでも有効で、デフォルトは1です。
+
+@vindex ps-font-family
+@vindex ps-font-size
+@vindex ps-font-info-database
+@c   The variable @code{ps-font-family} specifies which font family to use
+@c for printing ordinary text.  Legitimate values include @code{Courier},
+@c @code{Helvetica}, @code{NewCenturySchlbk}, @code{Palatino} and
+@c @code{Times}.  The variable @code{ps-font-size} specifies the size of
+@c the font for ordinary text.  It defaults to 8.5 points.
+変数@code{ps-font-family}は、
+通常のテキストの印刷に使うフォントファミリを指定します。
+指定できる値は、@code{Courier}、@code{Helvetica}、
+@code{NewCenturySchlbk}、@code{Palatino}、@code{Times}です。
+変数@code{ps-font-size}は、
+通常のテキスト印刷に使うフォントのサイズを指定します。
+デフォルトは8.5ポイント@footnote{【訳注】
+印刷機の長さの単位。
+1ポイントは約1/72インチ（0.35mm）}です。
+
+@vindex ps-multibyte-buffer
+@cindex Intlfonts for PostScript printing
+@cindex fonts for PostScript printing
+@c   Emacs supports more scripts and characters than a typical PostScript
+@c printer.  Thus, some of the characters in your buffer might not be
+@c printable using the fonts built into your printer.  You can augment
+@c the fonts supplied with the printer with those from the GNU Intlfonts
+@c package, or you can instruct Emacs to use Intlfonts exclusively.  The
+@c variable @code{ps-multibyte-buffer} controls this: the default value,
+@c @code{nil}, is appropriate for printing @acronym{ASCII} and Latin-1
+@c characters; a value of @code{non-latin-printer} is for printers which
+@c have the fonts for @acronym{ASCII}, Latin-1, Japanese, and Korean
+@c characters built into them.  A value of @code{bdf-font} arranges for
+@c the BDF fonts from the Intlfonts package to be used for @emph{all}
+@c characters.  Finally, a value of @code{bdf-font-except-latin}
+@c instructs the printer to use built-in fonts for @acronym{ASCII} and Latin-1
+@c characters, and Intlfonts BDF fonts for the rest.
+Emacs は典型的な PostScript プリンタよりも多くのスクリプトや文字をサポートします．
+バッファにあるいくつかの文字はプリンタに組込まれたフォントでは印刷できないかもし
+れません．プリンタに組込まれたフォントに GNU Intlfonts パッケージからのフォント
+を組み込むことで増強したり，Intlfonts を使うように指示することができます．変数
+@code{ps-multibyte-buffer} はこの機能を制御しています．デフォルトは @code{nil}
+で，@acronym{ASCII} や Latin-1 の文字を印刷するのに最適です．
+@code{non-latin-printer} の値は @acronym{ASCII} や Latin-1，日本語，韓国語のフォ
+ントを持つプリンタです．@code{bdf-font} の値は Intlfonts パッケージから @emph{す
+べての}文字を使えるようにするために必要となります．最後に
+@code{bdf-font-except-latin} の値は組込まれた @acronym{ASCII} と Latin-1 を使い，
+残りには Intlfonts BDF フォントを使うように指示します．
+
+
+@vindex bdf-directory-list
+@c   To be able to use the BDF fonts, Emacs needs to know where to find
+@c them.  The variable @code{bdf-directory-list} holds the list of
+@c directories where Emacs should look for the fonts; the default value
+@c includes a single directory @file{/usr/local/share/emacs/fonts/bdf}.
+BDF フォントを使うことができるようにするために，Emacs はどこにフォントがあるか知
+る必要があります．変数 @code{bdf-directory-list} は Emacs がフォントを探すべきディ
+レクトリのリストになります．デフォルト値は1つのディレクトリ
+@file{/usr/local/share/emacs/fonts/bdf} を持ちます．
+
+@c   Many other customization variables for these commands are defined and
+@c described in the Lisp files @file{ps-print.el} and @file{ps-mule.el}.
+これらのコマンドには他にも多くのカスタマイズ可能な変数があり、
+それらはLispファイル@file{ps-print.el} や @file{ps-mule.el} で定義されています。
+
+@node Sorting, Narrowing, PostScript Variables, Top
+@c @section Sorting Text
+@section テキストのソート @emph{(2005/05/07)}
+@c @cindex sorting
+@cindex ソート
+
+@c   Emacs provides several commands for sorting text in the buffer.  All
+@c operate on the contents of the region (the text between point and the
+@c mark).  They divide the text of the region into many @dfn{sort records},
+@c identify a @dfn{sort key} for each record, and then reorder the records
+@c into the order determined by the sort keys.  The records are ordered so
+@c that their keys are in alphabetical order, or, for numeric sorting, in
+@c numeric order.  In alphabetic sorting, all upper-case letters `A' through
+@c `Z' come before lower-case `a', in accord with the @acronym{ASCII} character
+@c sequence.
+Emacsには、バッファ中のテキストをソートするコマンドがいくつかあります。
+すべてはリージョン（ポイントとマークのあいだのテキスト）に働きます。
+これらのコマンドは、リージョン中のテキストを
+多数の@dfn{ソートレコード}にわけ、
+各レコードについて@dfn{ソートキー}を識別し、
+一連のレコードをソートキーによって定まる順序に並べ替えます。
+レコードはキーのアルファベット（辞書）順にも、
+また数値に基づく数値順にも並べられます。
+アルファベット順の場合は、@acronym{ASCII} 文字の順序に基づいて
+すべての大文字「A」〜「Z」は小文字「a」よりまえにきます。
+
+@c   The various sort commands differ in how they divide the text into sort
+@c records and in which part of each record is used as the sort key.  Most of
+@c the commands make each line a separate sort record, but some commands use
+@c paragraphs or pages as sort records.  Most of the sort commands use each
+@c entire sort record as its own sort key, but some use only a portion of the
+@c record as the sort key.
+各種のソートコマンドの違いは、テキストをソートレコードに分ける方法と、
+各レコードのどの部分をソートキーに使うかです。
+ほとんどのコマンドは各行をソートレコードとして扱いますが、
+段落やページをソートレコードとして扱うコマンドもあります。
+ほとんどのソートコマンドは各ソートレコード全体を
+それ自身のソートキーとして扱いますが、
+ソートレコードの一部分だけをソートキーとして扱うコマンドもあります。
+
+@findex sort-lines
+@findex sort-paragraphs
+@findex sort-pages
+@findex sort-fields
+@findex sort-numeric-fields
+@vindex sort-numeric-base
+@table @kbd
+@item M-x sort-lines
+@c Divide the region into lines, and sort by comparing the entire
+@c text of a line.  A numeric argument means sort into descending order.
+リージョンを行の並びとみなし、行全体のテキストを比較して（昇順に）ソートする。
+数引数を指定すると降順にソートする。
+
+@item M-x sort-paragraphs
+@c Divide the region into paragraphs, and sort by comparing the entire
+@c text of a paragraph (except for leading blank lines).  A numeric
+@c argument means sort into descending order.
+リージョンを段落の並びとみなし、（先頭の空行を除く）
+段落全体のテキストを比較して（昇順に）ソートする。
+数引数を指定すると降順にソートする。
+
+@item M-x sort-pages
+@c Divide the region into pages, and sort by comparing the entire
+@c text of a page (except for leading blank lines).  A numeric
+@c argument means sort into descending order.
+リージョンをページの並びとみなし、（先頭の空行を除く）
+ページ全体のテキストを比較して（昇順に）ソートする。
+数引数を指定すると降順にソートする。
+
+@item M-x sort-fields
+@c Divide the region into lines, and sort by comparing the contents of
+@c one field in each line.  Fields are defined as separated by
+@c whitespace, so the first run of consecutive non-whitespace characters
+@c in a line constitutes field 1, the second such run constitutes field
+@c 2, etc.
+リージョンを行の並びとみなし、
+行の1つの欄を比較して（昇順に）ソートする。
+欄は白文字で区切られる。
+つまり、行の始めにある白文字でない文字の並びが第1欄、
+そのつぎの空白でない文字の並びが第2欄、というようになる。
+
+@c Specify which field to sort by with a numeric argument: 1 to sort by
+@c field 1, etc.  A negative argument means count fields from the right
+@c instead of from the left; thus, minus 1 means sort by the last field.
+@c If several lines have identical contents in the field being sorted, they
+@c keep the same relative order that they had in the original buffer.
+どの欄をキーとしてソートするかは、
+1を指定すれば第1欄、というように数引数で指定する。
+負の値を指定したときは左からでなく右から欄を数える。
+つまり、-1は最後の欄でソートする。
+複数の行において欄の値が同一の場合、
+バッファ上のもとの順序が保存される。
+
+@item M-x sort-numeric-fields
+@c Like @kbd{M-x sort-fields} except the specified field is converted
+@c to an integer for each line, and the numbers are compared.  @samp{10}
+@c comes before @samp{2} when considered as text, but after it when
+@c considered as a number.  By default, numbers are interpreted according
+@c to @code{sort-numeric-base}, but numbers beginning with @samp{0x} or
+@c @samp{0} are interpreted as hexadecimal and octal, respectively.
+@kbd{M-x sort-fields} と同様だが、
+指定した欄を行ごとに数値に変換し、その数値同士を比較する。
+@samp{10}はアルファベット順では@samp{2}よりまえにくるが、
+数値として見れば@samp{2}よりあとにくる。デフォルトでは，数は
+@code{sort-numeric-base} によって解釈されますが，@samp{0x} か @samp{0} で始まる
+数であればそれぞれ16進数や8進数として解釈されます．
+
+@item M-x sort-columns
+@c Like @kbd{M-x sort-fields} except that the text within each line
+@c used for comparison comes from a fixed range of columns.  See below
+@c for an explanation.
+@kbd{M-x sort-fields}と同様だが、行の比較に使うテキストは
+固定文字位置からとる。
+以下の説明を参照のこと。
+
+@item M-x reverse-region
+@c Reverse the order of the lines in the region.  This is useful for
+@c sorting into descending order by fields or columns, since those sort
+@c commands do not have a feature for doing that.
+リージョン内の行の順番を逆にする。
+欄や文字位置でソートするコマンドは降順にはソートできないので、
+昇順にソートしたあと降順に並べ替えるのに役立つ。
+@end table
+
+@c   For example, if the buffer contains this:
+たとえば、バッファにつぎのような内容が入っていたとします。
+
+@smallexample
+On systems where clash detection (locking of files being edited) is
+implemented, Emacs also checks the first time you modify a buffer
+whether the file has changed on disk since it was last visited or
+saved.  If it has, you are asked to confirm that you want to change
+the buffer.
+@end smallexample
+
+@noindent
+@c applying @kbd{M-x sort-lines} to the entire buffer produces this:
+バッファ全体に@kbd{M-x sort-lines}を適用すると、
+つぎのようになります。
+
+@smallexample
+On systems where clash detection (locking of files being edited) is
+implemented, Emacs also checks the first time you modify a buffer
+saved.  If it has, you are asked to confirm that you want to change
+the buffer.
+whether the file has changed on disk since it was last visited or
+@end smallexample
+
+@noindent
+@c where the upper-case @samp{O} sorts before all lower-case letters.  If
+@c you use @kbd{C-u 2 M-x sort-fields} instead, you get this:
+ここで、@samp{O}は大文字なのですべての小文字よりまえにきます。
+上記のかわりに@kbd{C-u 2 M-x sort-filelds}を使ったとすると、
+結果はつぎのようになります。
+
+@smallexample
+implemented, Emacs also checks the first time you modify a buffer
+saved.  If it has, you are asked to confirm that you want to change
+the buffer.
+On systems where clash detection (locking of files being edited) is
+whether the file has changed on disk since it was last visited or
+@end smallexample
+
+@noindent
+@c where the sort keys were @samp{Emacs}, @samp{If}, @samp{buffer},
+@c @samp{systems} and @samp{the}.
+この例ではソートキーは、@samp{Emacs}、@samp{If}、@samp{buffer}、
+@samp{systems}、@samp{the}だったわけです。
+
+@findex sort-columns
+@c   @kbd{M-x sort-columns} requires more explanation.  You specify the
+@c columns by putting point at one of the columns and the mark at the other
+@c column.  Because this means you cannot put point or the mark at the
+@c beginning of the first line of the text you want to sort, this command
+@c uses an unusual definition of ``region'': all of the line point is in is
+@c considered part of the region, and so is all of the line the mark is in,
+@c as well as all the lines in between.
+@kbd{M-x sort-columns}には少々説明が必要です。
+文字位置の範囲を指定するには、ポイントを文字位置の一方に、
+マークを他方の文字位置に置きます。
+このため、ポイントやマークをソートしたい最初の行の先頭に
+置くことができませんから、このコマンドでは変わった
+「リージョン」の定義を用います。
+ポイントがある行全体はリージョンに含まれ、
+同様に、マークがある行全体もリージョンに含まれ、
+この2つの行のあいだにある行はすべてリージョンに含まれるとみなすのです。
+
+@c   For example, to sort a table by information found in columns 10 to 15,
+@c you could put the mark on column 10 in the first line of the table, and
+@c point on column 15 in the last line of the table, and then run
+@c @code{sort-columns}.  Equivalently, you could run it with the mark on
+@c column 15 in the first line and point on column 10 in the last line.
+たとえば、ある表を10文字目から15文字目までの情報をもとにソートする場合、
+表の最初の行の10文字目にマークを置き、
+表の最後の行の15文字目にポイントを置き、
+そして@code{sort-column}を実行します。
+あるいは、マークを最初の行の15文字目、
+ポイントを最後の行の10文字目に置いても同じことです。
+
+@c   This can be thought of as sorting the rectangle specified by point and
+@c the mark, except that the text on each line to the left or right of the
+@c rectangle moves along with the text inside the rectangle.
+@c @xref{Rectangles}.
+これは、ポイントとマークで指定された矩形領域をソートするものと考えられます。
+ただし、矩形領域の右側や左側にある各行のテキストも一緒に移動します。
+
+@vindex sort-fold-case
+@c   Many of the sort commands ignore case differences when comparing, if
+@c @code{sort-fold-case} is non-@code{nil}.
+@code{sort-fold-case}が@code{nil}以外の場合、
+ソートコマンドのほとんどは比較に際して大文字小文字を区別しません。
+
+@node Narrowing, Two-Column, Sorting, Top
+@c @section Narrowing
+@section ナロイング @emph{(2005/05/07)}
+@c @cindex widening
+@c @cindex restriction
+@c @cindex narrowing
+@c @cindex accessible portion
+@cindex ワイドニング
+@cindex 範囲制限
+@cindex ナロイング
+@cindex 参照可能範囲
+
+@c   @dfn{Narrowing} means focusing in on some portion of the buffer,
+@c making the rest temporarily inaccessible.  The portion which you can
+@c still get to is called the @dfn{accessible portion}.  Canceling the
+@c narrowing, which makes the entire buffer once again accessible, is
+@c called @dfn{widening}.  The amount of narrowing in effect in a buffer at
+@c any time is called the buffer's @dfn{restriction}.
+@dfn{ナロイング}（narrowing）とは、バッファのある部分だけに焦点を当て、
+残りの部分を一時的に参照できなくすることです。
+扱える部分のことを@dfn{参照可能範囲}と呼びます。
+ナロイングを取り消して、バッファ全体を参照できるように戻すことを
+@dfn{ワイドニング}（widening）と呼びます。
+
+@c   Narrowing can make it easier to concentrate on a single subroutine or
+@c paragraph by eliminating clutter.  It can also be used to restrict the
+@c range of operation of a replace command or repeating keyboard macro.
+ナロイングすると、他の部分に煩わされることなく、
+1つのサブルーチンや段落などに集中できます。
+また、置換コマンドやキーボードマクロの適用範囲を制限するのにも利用できます。
+
+@table @kbd
+@item C-x n n
+@c Narrow down to between point and mark (@code{narrow-to-region}).
+ポイントとマークのあいだにナロイングする（@code{narrow-to-region}）。
+@item C-x n w
+@c Widen to make the entire buffer accessible again (@code{widen}).
+再度バッファ全体を参照可能にする（@code{widen}）。
+@item C-x n p
+@c Narrow down to the current page (@code{narrow-to-page}).
+現在のページにナロイングする（@code{narrow-to-page}）。
+@item C-x n d
+@c Narrow down to the current defun (@code{narrow-to-defun}).
+現在の関数定義にナロイングする（@code{narrow-to-defun}）。
+@end table
+
+@c   When you have narrowed down to a part of the buffer, that part appears
+@c to be all there is.  You can't see the rest, you can't move into it
+@c (motion commands won't go outside the accessible part), you can't change
+@c it in any way.  However, it is not gone, and if you save the file all
+@c the inaccessible text will be saved.  The word @samp{Narrow} appears in
+@c the mode line whenever narrowing is in effect.
+バッファの一部分へナロイングすると、その部分だけしかないように見えます。
+残りの部分は見えませんし、そこへポイントを移動することもできません
+（移動コマンドは参照可能範囲から外へ出られない）し、
+見えない部分はどのようにしても変更できません。
+しかし、その部分がなくなったわけではないので、
+ファイルに保存すれば参照できないテキストも保存されます。
+ナロイングしているあいだは、モード行に@samp{Narrow}と表示されます。
+
+@kindex C-x n n
+@findex narrow-to-region
+@c   The primary narrowing command is @kbd{C-x n n} (@code{narrow-to-region}).
+@c It sets the current buffer's restrictions so that the text in the current
+@c region remains accessible, but all text before the region or after the
+@c region is inaccessible.  Point and mark do not change.
+主要なナロイングコマンドは@kbd{C-x n n}（@code{narrow-to-region}）です。
+現在のリージョンだけが参照可能で、その前後のテキストは参照できないように
+カレントバッファに制限を課します。
+ポイントとマークは変化しません。
+
+@kindex C-x n p
+@findex narrow-to-page
+@kindex C-x n d
+@findex narrow-to-defun
+@c   Alternatively, use @kbd{C-x n p} (@code{narrow-to-page}) to narrow
+@c down to the current page.  @xref{Pages}, for the definition of a page.
+@c @kbd{C-x n d} (@code{narrow-to-defun}) narrows down to the defun
+@c containing point (@pxref{Defuns}).
+別のやり方として、@kbd{C-x n p}（@code{narrow-to-page}）は現在のページ
+だけが見えるようにナロイングします。
+ページの定義については、@xref{Pages}。
+@kbd{C-x n d}（@code{narrow-to-defun}）はポイントを含む関数定義の範囲に
+ナロイングします（@pxref{Defuns}）。
+
+@kindex C-x n w
+@findex widen
+@c   The way to cancel narrowing is to widen with @kbd{C-x n w}
+@c (@code{widen}).  This makes all text in the buffer accessible again.
+ナロイングを取り消すには、@kbd{C-x n w}でワイドニングします。
+これによってバッファ中の全テキストが再度参照可能になります。
+
+@c   You can get information on what part of the buffer you are narrowed down
+@c to using the @kbd{C-x =} command.  @xref{Position Info}.
+バッファ中のどの部分にナロイングしているかは、
+コマンド@kbd{C-x =}で調べることができます。
+@xref{Position Info}。
+
+@c   Because narrowing can easily confuse users who do not understand it,
+@c @code{narrow-to-region} is normally a disabled command.  Attempting to use
+@c this command asks for confirmation and gives you the option of enabling it;
+@c if you enable the command, confirmation will no longer be required for
+@c it.  @xref{Disabling}.
+ナロイングは、それについて知らないユーザーを簡単に混乱させますので、
+@code{narrow-to-region}は、通常、使用禁止コマンドになっています。
+このコマンドを使おうとすると、Emacsは確認を求めてきて、
+コマンドを使えるようにするかどうか問い合わせてきます。
+コマンドを利用可能にすると、それ以後は確認は必要なくなります。
+@xref{Disabling}。
+
+@node Two-Column, Editing Binary Files, Narrowing, Top
+@c @section Two-Column Editing
+@section 2段組み編集 @emph{(2005/05/07)}
+@c @cindex two-column editing
+@c @cindex splitting columns
+@c @cindex columns, splitting
+@cindex 2段組み編集
+@cindex 段の分割
+
+@c   Two-column mode lets you conveniently edit two side-by-side columns of
+@c text.  It uses two side-by-side windows, each showing its own
+@c buffer.
+2段組み（two-column）モードは、左右の段に分けたテキストを編集するのに便利です。
+このモードでは、左右に並んだ2つのウィンドウを使用し、
+それぞれに別のバッファを表示します。
+
+@c   There are three ways to enter two-column mode:
+2段組み（two-column）モードに入るには、3つの方法があります。
+
+@table @asis
+@c @item @kbd{@key{F2} 2} or @kbd{C-x 6 2}
+@item @kbd{@key{F2} 2} または @kbd{C-x 6 2}
+@kindex F2 2
+@kindex C-x 6 2
+@findex 2C-two-columns
+@c Enter two-column mode with the current buffer on the left, and on the
+@c right, a buffer whose name is based on the current buffer's name
+@c (@code{2C-two-columns}).  If the right-hand buffer doesn't already
+@c exist, it starts out empty; the current buffer's contents are not
+@c changed.
+カレントバッファを左側に、カレントバッファの名前に基づいた名前の
+バッファを右側にして2段組み（two-column）モードに入る
+（@code{2C-two-columns}）。
+右側のバッファがまだ存在しなければ空のバッファで始まり、
+カレントバッファの内容は変化しない。
+
+@c This command is appropriate when the current buffer is empty or contains
+@c just one column and you want to add another column.
+このコマンドはカレントバッファが空か、または1段目の内容だけを持っていて、
+これから2段目を作成しようとするときに使う。
+
+@c @item @kbd{@key{F2} s} or @kbd{C-x 6 s}
+@item @kbd{@key{F2} s} または @kbd{C-x 6 s}
+@kindex F2 s
+@kindex C-x 6 s
+@findex 2C-split
+@c Split the current buffer, which contains two-column text, into two
+@c buffers, and display them side by side (@code{2C-split}).  The current
+@c buffer becomes the left-hand buffer, but the text in the right-hand
+@c column is moved into the right-hand buffer.  The current column
+@c specifies the split point.  Splitting starts with the current line and
+@c continues to the end of the buffer.
+2段組みテキストを含んでいるカレントバッファの内容を2つのバッファに分割し、
+それらを左右に並べて表示する（@code{2C-split}）。
+カレントバッファは左側のバッファになるが、
+右側の段の内容は右側のバッファに移される。
+分割位置はポイントのある文字位置で指定する。
+現在行からバッファの末尾を分割する。
+
+@c This command is appropriate when you have a buffer that already contains
+@c two-column text, and you wish to separate the columns temporarily.
+このコマンドはバッファにすでに2段組みのテキストが入っていて、
+一時的に左右の段を分けて編集したいときに用いる。
+
+@item @kbd{@key{F2} b @var{buffer} @key{RET}}
+@itemx @kbd{C-x 6 b @var{buffer} @key{RET}}
+@kindex F2 b
+@kindex C-x 6 b
+@findex 2C-associate-buffer
+@c Enter two-column mode using the current buffer as the left-hand buffer,
+@c and using buffer @var{buffer} as the right-hand buffer
+@c (@code{2C-associate-buffer}).
+カレントバッファを左側のバッファ、@var{buffer}を右側のバッファとして
+2段組み（two-column）モードに入る（@code{2C-associate-buffer}）。
+@end table
+
+@c   @kbd{@key{F2} s} or @kbd{C-x 6 s} looks for a column separator, which
+@c is a string that appears on each line between the two columns.  You can
+@c specify the width of the separator with a numeric argument to
+@c @kbd{@key{F2} s}; that many characters, before point, constitute the
+@c separator string.  By default, the width is 1, so the column separator
+@c is the character before point.
+@kbd{@key{F2} s}と@kbd{C-x 6 s}は、
+各行を2つの段に分ける文字列である「段区切り文字列」を探します。
+段区切り文字列の文字数は、@kbd{@key{F2} s}への数引数で指定できます。
+ポイントの直前のその文字数分の文字列が段区切り文字列になります。
+デフォルトでは幅は1ですから、ポイントの直前の文字が段区切り文字列になります。
+
+@c   When a line has the separator at the proper place, @kbd{@key{F2} s}
+@c puts the text after the separator into the right-hand buffer, and
+@c deletes the separator.  Lines that don't have the column separator at
+@c the proper place remain unsplit; they stay in the left-hand buffer, and
+@c the right-hand buffer gets an empty line to correspond.  (This is the
+@c way to write a line that ``spans both columns while in two-column
+@c mode'': write it in the left-hand buffer, and put an empty line in the
+@c right-hand buffer.)
+各行の正しい位置に段区切り文字列があれば、
+@kbd{@key{F2} s}は各行の段区切り文字列のうしろの文字列を右側のバッファに移し、
+段区切り文字列を削除します。
+段区切り文字列が正しい位置にない行は分割されずに左側のバッファに残り、
+対応する右側のバッファの内容は空行になります。
+（これは、『2段組み（two-column）モードで両側の段にまたがった行』の書き方。
+つまり、左側のバッファにそのような行を書き、
+右側のバッファは空行にしておく）。
+
+@kindex F2 RET
+@kindex C-x 6 RET
+@findex 2C-newline
+@c   The command @kbd{C-x 6 @key{RET}} or @kbd{@key{F2} @key{RET}}
+@c (@code{2C-newline}) inserts a newline in each of the two buffers at
+@c corresponding positions.  This is the easiest way to add a new line to
+@c the two-column text while editing it in split buffers.
+コマンド@kbd{C-x 6 @key{RET}}や@kbd{@key{F2} @key{RET}}
+（@code{2C-newline}）は、
+左右の2つのバッファの対応する位置に改行を挿入します。
+バッファを分割して編集しているときに2段組みテキストに
+新しい行を追加するにはこれがもっとも簡単な方法です。
+
+@kindex F2 1
+@kindex C-x 6 1
+@findex 2C-merge
+@c   When you have edited both buffers as you wish, merge them with
+@c @kbd{@key{F2} 1} or @kbd{C-x 6 1} (@code{2C-merge}).  This copies the
+@c text from the right-hand buffer as a second column in the other buffer.
+@c To go back to two-column editing, use @kbd{@key{F2} s}.
+左右のバッファを望むように編集し終えたら、
+それらを@kbd{@key{F2} 1}または@kbd{C-x 6 1}（@code{2C-merge}）で
+再度併合します。
+右側バッファの内容を左側バッファに第2段目としてコピーします。
+再度2段組み編集に戻るには、@kbd{@key{F2} s}を使います。
+
+@kindex F2 d
+@kindex C-x 6 d
+@findex 2C-dissociate
+@c   Use @kbd{@key{F2} d} or @kbd{C-x 6 d} to dissociate the two buffers,
+@c leaving each as it stands (@code{2C-dissociate}).  If the other buffer,
+@c the one not current when you type @kbd{@key{F2} d}, is empty,
+@c @kbd{@key{F2} d} kills it.
+2つのバッファ間の関連を解消するには、
+@kbd{@key{F2} d}または@kbd{C-x 6 d}（@code{2C-dissociate}）を使います。
+コマンドを入力したときにカレントバッファでない側のバッファが空であれば、
+そのバッファは削除します。
+
+@node Editing Binary Files, Saving Emacs Sessions, Two-Column, Top
+@c @section Editing Binary Files
+@section バイナリファイルの編集 @emph{(2005/05/07)}
+
+@c @cindex Hexl mode
+@c @cindex mode, Hexl
+@c @cindex editing binary files
+@cindex hex editing
+@cindex hexlモード
+@cindex モード、hexl
+@cindex バイナリファイルの編集
+@c   There is a special major mode for editing binary files: Hexl mode.  To
+@c use it, use @kbd{M-x hexl-find-file} instead of @kbd{C-x C-f} to visit
+@c the file.  This command converts the file's contents to hexadecimal and
+@c lets you edit the translation.  When you save the file, it is converted
+@c automatically back to binary.
+バイナリファイルを編集するための特別なメジャーモード、
+hexlモードがあります。
+このモードを使うには、ファイルを訪問する@kbd{C-x C-f}のかわりに
+@kbd{M-x hexl-find-file}を使います。
+このコマンドはファイルの内容を16進数表現に変換し、
+変換したものを編集するようにします。
+ファイルを保存すると自動的にバイナリに戻されます。
+
+@c   You can also use @kbd{M-x hexl-mode} to translate an existing buffer
+@c into hex.  This is useful if you visit a file normally and then discover
+@c it is a binary file.
+@kbd{M-x hexl-mode}を使えば、既存のバッファを16進数表現に変換できます。
+普通にファイルを訪問してみたら、実はバイナリファイルだとわかった場合に便利です。
+
+@c   Ordinary text characters overwrite in Hexl mode.  This is to reduce
+@c the risk of accidentally spoiling the alignment of data in the file.
+@c There are special commands for insertion.  Here is a list of the
+@c commands of Hexl mode:
+hexlモードでは通常のテキスト文字は上書きします。
+これはファイル中のデータの配置をまちがって壊してしまう危険を減らすためです。
+特別な挿入コマンドがあります。
+以下は、hexlモードで使えるコマンドの一覧です。
+
+@c I don't think individual index entries for these commands are useful--RMS.
+@table @kbd
+@item C-M-d
+@c Insert a byte with a code typed in decimal.
+10数進で入力したコードのバイトを挿入する。
+
+@item C-M-o
+@c Insert a byte with a code typed in octal.
+8数進で入力したコードのバイトを挿入する。
+
+@item C-M-x
+@c Insert a byte with a code typed in hex.
+16数進で入力したコードのバイトを挿入する。
+
+@item C-x [
+@c Move to the beginning of a 1k-byte ``page.''
+1kバイト単位の『ページ』の先頭へ移動する。
+
+@item C-x ]
+@c Move to the end of a 1k-byte ``page.''
+1kバイト単位の『ページ』の末尾へ移動する。
+
+@item M-g
+@c Move to an address specified in hex.
+16進数で指定したアドレス位置へ移動する。
+
+@item M-j
+@c Move to an address specified in decimal.
+10進数で指定したアドレス位置へ移動する。
+
+@item C-c C-c
+@c Leave Hexl mode, going back to the major mode this buffer had before you
+@c invoked @code{hexl-mode}.
+hexlモードを抜け、
+@code{hexl-mode}実行前のこのバッファのメジャーモードに戻る。
+@end table
+
+@noindent
+@c Other Hexl commands let you insert strings (sequences) of binary
+@c bytes, move by @code{short}s or @code{int}s, etc.; type @kbd{C-h a
+@c hexl-@key{RET}} for details.
+他の Hexl コマンドはバイナリバイトの文字 (文字列) を挿入し，@code{short} や
+@code{int} での移動を可能にします．@kbd{C-h a hexl-@key{RET}} を参照ください．
+
+@node Saving Emacs Sessions, Recursive Edit, Editing Binary Files, Top
+@c @section Saving Emacs Sessions
+@section セッションの保存 @emph{(2005/05/07)}
+@c @cindex saving sessions
+@c @cindex restore session
+@c @cindex remember editing session
+@c @cindex reload files
+@c @cindex desktop
+@cindex セッションの保存
+@cindex セッションの回復
+@cindex 編集セッションの記憶
+@cindex ファイルの再読み込み
+@cindex デスクトップ
+
+@c    Use the desktop library to save the state of Emacs from one session
+@c to another.  Once you save the Emacs @dfn{desktop}---the buffers,
+@c their file names, major modes, buffer positions, and so on---then
+@c subsequent Emacs sessions reload the saved desktop.
+あるセッションから他のセッションへ Emacs の状態を保存するためにはデスクトップライ
+ブラリを使います．一旦 Emacs の@dfn{デスクトップ(desktop)}—バッファ，個々のファ
+イル名，メジャーモード，バッファ位置など—を保存しておけば，別の Emacs セッショ
+ンで保存されたデスクトップを読み込むことができるのです．
+
+@findex desktop-save
+@vindex desktop-save-mode
+@c   You can save the desktop manually with the command @kbd{M-x
+@c desktop-save}.  You can also enable automatical desktop saving when
+@c you exit Emacs: use the Customization buffer (@pxref{Easy
+@c Customization}) to set @code{desktop-save-mode} to @code{t} for future
+@c sessions, or add this line in your @file{~/.emacs} file:
+コマンド @kbd{M-x desktop-save} で手動でデスクロップを保存できます．Emacs を終了
+する時に自動的にデスクトップを保存することもできます．そのためには，カスタマイズ
+ (@pxref{Easy Customization}を参照) を使って @code{desktop-save-mode} を
+ @code{t} に設定するか，@file{~/.emacs} に以下を追加します．
+
+@example
+(desktop-save-mode 1)
+@end example
+
+@findex desktop-change-dir
+@findex desktop-revert
+@c   When Emacs starts, it looks for a saved desktop in the current
+@c directory.  Thus, you can have separate saved desktops in different
+@c directories, and the starting directory determines which one Emacs
+@c reloads.  You can save the current desktop and reload one saved in
+@c another directory by typing @kbd{M-x desktop-change-dir}.  Typing
+@c @kbd{M-x desktop-revert} reverts to the desktop previously reloaded.
+Emacs が起動された時，現在のディレクトリに保存されたデスクトップが無いか探します．
+こうして，別々のディレクトリに別々のデスクトップを保存することができます．そして，
+開始ディレクトリを変えることで，どのデスクトップを読み込むべきか指定できます．
+@kbd{M-x desktop-change-dir} を実行することで，現在のディスクトップを保存し，別
+のディレクトリに保存されたデスクトップを読み込ませることができます．@kbd{M-x
+desktop-revert} を入力することで，前に読み込まれたデスクトップに戻ることができま
+す．
+
+@c   Specify the option @samp{--no-desktop} on the command line when you
+@c don't want it to reload any saved desktop.
+コマンドでオプション @samp{--no-desktop} を指定することで，保存されたデスクトッ
+プを読み込ませないようにできます．
+
+@findex desktop-clear
+@vindex desktop-globals-to-clear
+@vindex desktop-clear-preserve-buffers-regexp
+@c   Type @kbd{M-x desktop-clear} to empty the Emacs desktop.  This kills
+@c all buffers except for internal ones, and clears the global variables
+@c listed in @code{desktop-globals-to-clear}.  If you want this to
+@c preserve certain buffers, customize the variable
+@c @code{desktop-clear-preserve-buffers-regexp}, whose value is a regular
+@c expression matching the names of buffers not to kill.
+@kbd{M-x desktop-clear} を入力することで Emacs のデスクストップを空にすることが
+できます．このコマンドは内部で用いられているもの以外のバッファをすべてキルし，
+@code{desktop-globals-to-clear} にリストされているグローバル変数をすべて初期化し
+ます．もしあるバッファを残したければ，変数
+@code{desktop-clear-preserve-buffers-regexp} をカスタマイズします．この変数の値
+はキルしないバッファ名に一致する正規表現になります．
+
+@node Recursive Edit, Emulation, Saving Emacs Sessions, Top
+@c @section Recursive Editing Levels
+@section 再帰編集レベル @emph{(2005/05/07)}
+@c @cindex recursive editing level
+@c @cindex editing level, recursive
+@cindex 再帰編集レベル
+
+@c   A @dfn{recursive edit} is a situation in which you are using Emacs
+@c commands to perform arbitrary editing while in the middle of another
+@c Emacs command.  For example, when you type @kbd{C-r} inside of a
+@c @code{query-replace}, you enter a recursive edit in which you can change
+@c the current buffer.  On exiting from the recursive edit, you go back to
+@c the @code{query-replace}.
+@dfn{再帰編集}とは、あるEmacsコマンドの実行途中で
+任意のEmacsコマンドを使って編集を行う状況をいいます。
+たとえば、@code{query-replace}の途中で@kbd{C-r}を打つと、
+再帰編集に入りカレントバッファを自由に変更できます。
+再帰編集から抜けると、@code{query-replace}の続きに戻ります。
+
+@kindex C-M-c
+@findex exit-recursive-edit
+@c @cindex exiting recursive edit
+@cindex 再帰編集からの脱出
+@c   @dfn{Exiting} the recursive edit means returning to the unfinished
+@c command, which continues execution.  The command to exit is @kbd{C-M-c}
+@c (@code{exit-recursive-edit}).
+再帰編集から@dfn{脱出}するとは、
+実行途中のコマンドに戻ってその続きを行うことを意味します。
+脱出のためのコマンドは@kbd{C-M-c}（@code{exit-recursive-edit}）です。
+
+@c   You can also @dfn{abort} the recursive edit.  This is like exiting,
+@c but also quits the unfinished command immediately.  Use the command
+@c @kbd{C-]} (@code{abort-recursive-edit}) to do this.  @xref{Quitting}.
+再帰編集を@dfn{アボート}することもできます。
+これは脱出と似ていますが、実行途中だったコマンドも一緒に中断します。
+アボートするには、
+@kbd{C-]}（@code{abort-recursive-edit}）を使います。
+@xref{Quitting}。
+
+@c   The mode line shows you when you are in a recursive edit by displaying
+@c square brackets around the parentheses that always surround the major and
+@c minor mode names.  Every window's mode line shows this in the same way,
+@c since being in a recursive edit is true of Emacs as a whole rather than
+@c any particular window or buffer.
+再帰編集中は、モード行のメジャー／マイナモード名を
+囲む丸括弧の外側に中括弧@samp{[@dots{}]}が表示されます。
+各ウィンドウのモード行すべてにこのように表示されます。
+というのは、特定のウィンドウやバッファではなくEmacs全体が再帰編集に
+入っているからです。
+
+@c   It is possible to be in recursive edits within recursive edits.  For
+@c example, after typing @kbd{C-r} in a @code{query-replace}, you may type a
+@c command that enters the debugger.  This begins a recursive editing level
+@c for the debugger, within the recursive editing level for @kbd{C-r}.
+@c Mode lines display a pair of square brackets for each recursive editing
+@c level currently in progress.
+再帰編集中にさらに再帰編集に入ることもできます。
+たとえば、@code{query-replace}の途中で@kbd{C-r}を打ってから
+デバッガを起動するコマンドを打ったとします。
+すると、@kbd{C-r}による再帰編集の中でさらにデバッガのための再帰編集に
+入ることになります。
+モード行には、現在の再帰編集レベルの数だけ中括弧の対が表示されます。
+
+@c   Exiting the inner recursive edit (such as, with the debugger @kbd{c}
+@c command) resumes the command running in the next level up.  When that
+@c command finishes, you can then use @kbd{C-M-c} to exit another recursive
+@c editing level, and so on.  Exiting applies to the innermost level only.
+@c Aborting also gets out of only one level of recursive edit; it returns
+@c immediately to the command level of the previous recursive edit.  If you
+@c wish, you can then abort the next recursive editing level.
+内側の再帰編集を（たとえばデバッガのコマンド@kbd{c}で）脱出すると、
+1つ上のレベルでのコマンドが再開されます。
+そのコマンドが終わったところで@kbd{C-M-c}を使うと
+そのレベルの再帰編集を脱出する、
+というようにして再帰編集を終わらせていくことができます。
+脱出はつねにもっとも内側のレベルに対して起こります。
+また、アボートも1つのレベルの再帰編集から脱出し、
+1つまえの再帰編集のコマンドレベルに戻ります。
+必要ならそこでつぎの再帰編集レベルをアボートする、
+というように続けることができます。
+
+@c   Alternatively, the command @kbd{M-x top-level} aborts all levels of
+@c recursive edits, returning immediately to the top-level command reader.
+あるいは、
+コマンド@kbd{M-x top-level}ですべてのレベルの再帰編集をアボートし、
+ただちにトップレベルのコマンド入力に戻ることができます。
+
+@c   The text being edited inside the recursive edit need not be the same text
+@c that you were editing at top level.  It depends on what the recursive edit
+@c is for.  If the command that invokes the recursive edit selects a different
+@c buffer first, that is the buffer you will edit recursively.  In any case,
+@c you can switch buffers within the recursive edit in the normal manner (as
+@c long as the buffer-switching keys have not been rebound).  You could
+@c probably do all the rest of your editing inside the recursive edit,
+@c visiting files and all.  But this could have surprising effects (such as
+@c stack overflow) from time to time.  So remember to exit or abort the
+@c recursive edit when you no longer need it.
+再帰編集の中で編集しているテキストは
+トップレベルで編集しているテキストと同じであるとは限りません。
+再帰編集の目的によって変わってきます。
+再帰編集を起動するコマンドがまず別のバッファに切り替えるものなら、
+そのバッファを再帰的に編集することになるでしょう。
+いずれにせよ、再帰編集の内側でも
+（バッファを切り替えるキーが再定義されていない限り）
+通常どおりバッファを切り替えることができます。
+残りの編集作業をすべて再帰編集の内側でやってしまい、
+別のファイルを訪問したりもできます。
+しかしそのようなことをすると、
+ときどき（スタックオーバーフローなどの）痛い目に合う可能性があります。
+ですから、再帰編集が不要になったら忘れずに脱出かアボートしてください。
+
+@c   In general, we try to minimize the use of recursive editing levels in
+@c GNU Emacs.  This is because they constrain you to ``go back'' in a
+@c particular order---from the innermost level toward the top level.  When
+@c possible, we present different activities in separate buffers so that
+@c you can switch between them as you please.  Some commands switch to a
+@c new major mode which provides a command to switch back.  These
+@c approaches give you more flexibility to go back to unfinished tasks in
+@c the order you choose.
+一般に、GNU Emacsでは再帰編集レベルを最小限に抑えるように努めています。
+というのは、再帰編集では特定の順、つまり、
+最内側レベルからトップレベルに向かう順で戻るように強いられるからです。
+このため、別の作業は別のバッファでするようにして、
+ユーザーがそれらの間を自由に行き来できるようにしています。
+たとえば、あるコマンドは新しいメジャーモードに切り替えますが、
+もとのモードに戻るコマンドを用意しておきます。
+このようにしたほうが、やりかけの作業に戻る順番を自由に選べ、
+柔軟性を提供できます。
+
+@node Emulation, Hyperlinking, Recursive Edit, Top
+@c @section Emulation
+@section エミュレーション @emph{(2005/05/07)}
+@c @cindex emulating other editors
+@c @cindex other editors
+@cindex 他のエディタのエミュレーション
+@cindex 他のエディタ
+@cindex EDT
+@cindex vi
+@cindex PC key bindings
+@cindex scrolling all windows
+@cindex PC selection
+@cindex Motif key bindings
+@cindex Macintosh key bindings
+@cindex WordStar
+
+@c   GNU Emacs can be programmed to emulate (more or less) most other
+@c editors.  Standard facilities can emulate these:
+GNU Emacsは、他のほとんどのエディタの（程度の差はありますが）
+エミュレート（真似を）するようにプログラムできます。
+標準の機能では、以下のものをエミュレートできます。
+
+@table @asis
+@item CRiSP/Brief (PC editor)
+@findex crisp-mode
+@vindex crisp-override-meta-x
+@findex scroll-all-mode
+@cindex CRiSP mode
+@cindex Brief emulation
+@cindex emulation of Brief
+@cindex mode, CRiSP
+@c You can turn on key bindings to emulate the CRiSP/Brief editor with
+@c @kbd{M-x crisp-mode}.  Note that this rebinds @kbd{M-x} to exit Emacs
+@c unless you change the user option @code{crisp-override-meta-x}.  You can
+@c also use the command @kbd{M-x scroll-all-mode} or set the user option
+@c @code{crisp-load-scroll-all} to emulate CRiSP's scroll-all feature
+@c (scrolling all windows together).
+@kbd{M-x crisp-mode} を入力することで CRiSP/Brief エディタをエミュレートしたキー
+バインドを有効にできます．この機能は @kbd{M-x} を Emacs を終了させるキーにバイン
+ドします．このバインドを無効にするためには @code{crisp-override-meta-x} を変更し
+ます．CRiSP のscroll-all 機能(すべてのウィンドウを一緒にスクロールさせる機能)を
+実現するためには，コマンド @kbd{M-x scroll-all-mode} を実行したり，ユーザオプション
+@code{crisp-load-scroll-all} を設定します．
+
+@c @item EDT (DEC VMS editor)
+@item EDT（DECのVMSエディタ）
+@findex edt-emulation-on
+@findex edt-emulation-off
+@c Turn on EDT emulation with @kbd{M-x edt-emulation-on}.  @kbd{M-x
+@c edt-emulation-off} restores normal Emacs command bindings.
+@kbd{M-x edt-emulation-on}でEDTエミュレーションに入る。
+@kbd{M-x edt-emulation-off}で通常のEmacsのバインディングに戻る。
+
+@c Most of the EDT emulation commands are keypad keys, and most standard
+@c Emacs key bindings are still available.  The EDT emulation rebindings
+@c are done in the global keymap, so there is no problem switching
+@c buffers or major modes while in EDT emulation.
+EDTエミュレーションコマンドの大部分はキーパッドのキーであり、
+大部分のEmacsのキーバインディングはそのまま使える。
+EDTエミュレーションのバインディング変更はグローバルキーマップに対して行われ、
+EDTエミュレーションの状態でバッファやメジャーモードを切り替えても問題ない。
+
+@item ``PC'' bindings
+@findex pc-bindings-mode
+@cindex ``PC'' key bindings
+@c The command @kbd{M-x pc-bindings-mode} sets up certain key bindings
+@c for ``PC compatibility''---what people are often used to on PCs---as
+@c follows: @kbd{Delete} and its variants delete forward instead of
+@c backward, @kbd{C-Backspace} kills backward a word (as @kbd{C-Delete}
+@c normally would), @kbd{M-Backspace} does undo, @kbd{Home} and @kbd{End}
+@c move to beginning and end of line, @kbd{C-Home} and @kbd{C-End} move
+@c to beginning and end of buffer and @kbd{C-Escape} does
+@c @code{list-buffers}.
+コマンド @kbd{M-x pc-bindings-mode} は "PC で一般的な"キーバインドに設定します．
+"PC で一般的な"とは，@kbd{Delete} とその変種で後ろではなく前にあるテキストを削除
+し，@kbd{C-Backspace} で前の単語をキルし (通常は @kbd{C-Delete} のように)，
+@kbd{M-Backspace} でアンドゥし， @kbd{Home} と @kbd{End} で行の先頭や末尾に移動
+し，@kbd{C-Home} と @kbd{C-End} でバッファの先頭や末尾へ移動し，@kbd{C-Escape}
+で @code{list-buffers} を実行することです．
+
+@item PC Selection mode
+@findex pc-selection-mode
+@cindex PC Selection minor mode
+@cindex mode, PC selection
+@cindex selection, PC
+@c The command @kbd{M-x pc-selection-mode} toggles a global minor mode
+@c that emulates the mark, copy, cut and paste commands of various other
+@c systems---an interface known as CUA.  It establishes the key bindings
+@c of PC mode, and also modifies the bindings of the cursor keys and the
+@c @kbd{next}, @kbd{prior}, @kbd{home} and @kbd{end} keys.  It does not
+@c provide the full set of CUA key bindings---the fundamental Emacs keys
+@c @kbd{C-c}, @kbd{C-v} and @kbd{C-x} are not changed.
+コマンド @kbd{M-x pc-selection-mode} は —CUA として知られるインターフェイスのよ
+うに—他の様々なシステムにあるマーク，コピー，カットアンドペーストコマンドをエミュ
+レートするグローバルマイナーモードをトグルします．この機能はPCモードのキーバイン
+ドを有効にし，カーソルキーと @kbd{next} や @kbd{prior}， @kbd{home}，@kbd{end}
+キーも変更します．このコマンドは CUA キーバインドのすべてを実現するわけではあり
+ません．基本的な Emacs のキーである @kbd{C-c} や @kbd{C-v}，@kbd{C-x} は変更しま
+せん．
+
+@c The standard keys for moving around (@kbd{right}, @kbd{left},
+@c @kbd{up}, @kbd{down}, @kbd{home}, @kbd{end}, @kbd{prior}, @kbd{next},
+@c called ``move-keys'') deactivate the mark in PC selection mode.
+@c However, using @kbd{Shift} together with the ``move keys'' activates
+@c the region over which they move.  The copy, cut and paste functions
+@c are available on @kbd{C-insert}, @kbd{S-delete} and @kbd{S-insert}
+@c respectively.
+PC 選択モード (PC selection
+モード)では移動するための標準的なキー (移動キーである @kbd{right}，@kbd{left}，@kbd{up}，@kbd{down}，
+@kbd{home}，@kbd{end}，@kbd{prior}，@kbd{next}) はマークを無効にします．しかし，
+移動キーと一緒に @kbd{Shift} を使うと，移動した領域をリージョンにできます．コピー
+やカット，ペーストはそれぞれ @kbd{C-insert}，@kbd{S-delete}，@kbd{S-insert} で利
+用できます．
+
+@c Turning @code{pc-selection-mode} off restores the old key bindings of
+@c these keys.
+@code{pc-selection-mode} をオフにすると，古いキーバインドを再現します．
+
+@cindex s-region package
+@c The @code{s-region} package provides similar, but less complete,
+@c facilities.
+@code{s-region} パッケージは似た機能ですが，より機能の少ないものです．
+
+@item TPU (DEC VMS editor)
+@findex tpu-edt-on
+@cindex TPU
+@c @kbd{M-x tpu-edt-on} turns on emulation of the TPU editor emulating EDT.
+@kbd{M-x tpu-edt-on} は EDT をエミュレートした TPU エディターをエミュレーション
+を有効にします．
+
+@c @item vi (Berkeley editor)
+@item vi （バークレー エディタ）
+@findex viper-mode
+@c Viper is the newest emulator for vi.  It implements several levels of
+@c emulation; level 1 is closest to vi itself, while level 5 departs
+@c somewhat from strict emulation to take advantage of the capabilities of
+@c Emacs.  To invoke Viper, type @kbd{M-x viper-mode}; it will guide you
+@c the rest of the way and ask for the emulation level.  @inforef{Top,
+@c Viper, viper}.
+viperは最新のviエミュレータである。
+viperでは複数レベルのエミュレーションを実装している。
+レベル1がもっともviに近く、レベル5はviといくらか違うところもあるが、
+そのかわりEmacsの機能も活かせるようになっている。
+viperを起動するには、@kbd{M-x viper-mode}と打つ。
+すると、使い方のガイドを表示し、
+どのレベルのエミュレーションにするかを尋ねてくる。
+@inforef{Top, Viper, viper}。
+
+@c @item vi (another emulator)
+@item vi （もう1つのエミュレータ）
+@findex vi-mode
+@c @kbd{M-x vi-mode} enters a major mode that replaces the previously
+@c established major mode.  All of the vi commands that, in real vi, enter
+@c ``input'' mode are programmed instead to return to the previous major
+@c mode.  Thus, ordinary Emacs serves as vi's ``input'' mode.
+@kbd{M-x vi-mode}はそれまでのメジャーモードにかわって
+viメジャーモードに入る。
+viの『入力』モードに入るコマンドはすべて、
+それまでのメジャーモードに戻る動作になっている。
+つまり、viの『入力』モードとして普通のEmacsが使えるのである。
+
+@c Because vi emulation works through major modes, it does not work
+@c to switch buffers during emulation.  Return to normal Emacs first.
+viエミュレーションはメジャーモードとして動くので、
+エミュレーション中にバッファを切り替えることはできない。
+バッファを切り替えたければ、まず通常のEmacsに戻る。
+
+@c If you plan to use vi emulation much, you probably want to bind a key
+@c to the @code{vi-mode} command.
+viエミュレーションを多用するつもりなら、
+@code{vi-mode}コマンドにキーをバインドしたほうがよいだろう。
+
+@c @item vi (alternate emulator)
+@item vi （また別のエミュレータ）
+@findex vip-mode
+@c @kbd{M-x vip-mode} invokes another vi emulator, said to resemble real vi
+@c more thoroughly than @kbd{M-x vi-mode}.  ``Input'' mode in this emulator
+@c is changed from ordinary Emacs so you can use @key{ESC} to go back to
+@c emulated vi command mode.  To get from emulated vi command mode back to
+@c ordinary Emacs, type @kbd{C-z}.
+@kbd{M-x vip-mode}は、@kbd{M-x vi-mode}よりもっと
+viに酷似しているといわれる別のviエミュレータを起動する。
+このエミュレータでは『入力』モードも通常のEmacsとは変わっていて、
+@key{ESC}でviコマンドモードに戻る。
+viコマンドモードのエミュレーションから通常のEmacsに戻るには@kbd{C-z}と打つ。
+
+@c This emulation does not work through major modes, and it is possible
+@c to switch buffers in various ways within the emulator.  It is not
+@c so necessary to assign a key to the command @code{vip-mode} as
+@c it is with @code{vi-mode} because terminating insert mode does
+@c not use it.
+このエミュレータはメジャーモードとして動くのではないので、
+エミュレータを動かしたままさまざまな方法でバッファを切り替えることができる。
+@code{vi-mode}のようにコマンド@code{vi-mode}で
+入力モードを終了するのではないので、
+@code{vip-mode}にキーを割り当てる必要はない。
+
+@c @inforef{Top, VIP, vip}, for full information.
+より詳しくは@inforef{Top, VIP, vip}。
+
+@item WordStar (old wordprocessor)
+@findex wordstar-mode
+@c @kbd{M-x wordstar-mode} provides a major mode with WordStar-like
+@c key bindings.
+@kbd{M-x wordstar-mode} は WordStar のようなキーバインドを持つメジャーモードです．
+@end table
+
+@node Hyperlinking, Dissociated Press, Emulation, Top
+@c @section Hyperlinking and Navigation Features
+@section ハイパーリンクとナビゲーション機能 @emph{(2005/05/08)}
+
+@cindex hyperlinking
+@cindex navigation
+@cindex ハイパーリンク
+@cindex ナビゲーション
+@c   Various modes documented elsewhere have hypertext features so that
+@c you can follow links, usually by clicking @kbd{Mouse-2} on the link or
+@c typing @key{RET} while point is on the link.  Info mode, Help mode and
+@c the Dired-like modes are examples.  The Tags facility links between
+@c uses and definitions in source files, see @ref{Tags}.  Imenu provides
+@c navigation amongst items indexed in the current buffer, see
+@c @ref{Imenu}.  Info-lookup provides mode-specific lookup of definitions
+@c in Info indexes, see @ref{Documentation}.  Speedbar maintains a frame
+@c in which links to files, and locations in files are displayed, see
+@c @ref{Speedbar}.
+ドキュメントのモードによってはハイパーテキスト機能を持ちます．大抵リンクの上で
+@kbd{Mouse-2} をクリックしたり，リンク上にポイントがある時に @key{RET} を入力す
+ることで，リンクを辿ることができます．Info モードや Help モード，Dired のような
+モードがこの例になります．タグ機能はソースファイルで利用方法とその定義をリンクし
+ます．@ref{Tags} を参照ください．Imenu は現在のバッファで収集されたアイテムの間
+を移動する機能です．@ref{Imenu}を参照ください．Info-lookup は モードに特有な検索
+機能です．@ref{Documentation} を参照ください．Speedbar はファイルやファイルのあ
+る位置にリンクしたフレームが表示されます．@ref{Speedbar} を参照ください．
+
+@c   Other non-mode-specific facilities described in this section enable
+@c following links from the current buffer in a context-sensitive
+@c fashion.
+この章で紹介する他のモードに特有でない機能は現在のバッファからある種のテキストを
+用いたリンクを実現します．
+
+@menu
+* Browse-URL::                  Following URLs.
+* Goto-address::                Activating URLs.
+* FFAP::                        Finding files etc. at point.
+* Find-func::                   Finding function and variable definitions.
+@end menu
+
+@node Browse-URL
+@c @subsection  Following URLs
+@subsection  URL を辿る @emph{(2005/05/08)}
+@cindex World Wide Web
+@cindex Web
+@findex browse-url
+@findex browse-url-at-point
+@findex browse-url-at-mouse
+@cindex Browse-URL
+@cindex URLs
+
+@table @kbd
+@item M-x browse-url @key{RET} @var{url} @key{RET}
+@c Load a URL into a Web browser.
+URL をブラウザで開く
+@end table
+
+@c The Browse-URL package provides facilities for following URLs specifying
+@c links on the World Wide Web.  Usually this works by invoking a web
+@c browser, but you can, for instance, arrange to invoke @code{compose-mail}
+@c from @samp{mailto:} URLs.
+Browse-URL パッケージを使うと，WWW の URL を開く機能を実現できます．この機能は大
+抵ブラウザを起動しますが，例えば，@samp{mailto:} に対して @code{compose-mail} を
+起動することもできます．
+
+@c   The general way to use this feature is to type @kbd{M-x browse-url},
+@c which displays a specified URL.  If point is located near a plausible
+@c URL, that URL is used as the default.  Other commands are available
+@c which you might like to bind to keys, such as
+@c @code{browse-url-at-point} and @code{browse-url-at-mouse}.
+この機能を使う一般的な方法は @kbd{M-x browse-url} を入力し，URLを入力することで
+す．もし，ポイントが URL らしき文字列上にあれば，その URL がデフォルトとして使わ
+れます．@code{browse-url-at-point} や @code{browse-url-at-mouse} のようなコマン
+ドはキーに割り当てるのに利用できるでしょう．
+
+@vindex browse-url-browser-function
+@c   You can customize Browse-URL's behavior via various options in the
+@c @code{browse-url} Customize group, particularly
+@c @code{browse-url-browser-function}.  You can invoke actions dependent
+@c on the type of URL by defining @code{browse-url-browser-function} as
+@c an association list.  The package's commentary available via @kbd{C-h
+@c p} provides more information.  Packages with facilities for following
+@c URLs should always go through Browse-URL, so that the customization
+@c options for Browse-URL will affect all browsing in Emacs.
+@code{browse-url} のカスタマイズグループを使って，さまざまなオプション，特に
+@code{browse-url-browser-function} を設定することで Browse-URL の動作を変えるこ
+とができます．@code{browse-url-browser-function} で連想リストとして定義しておく
+と，URL に依存した関数を起動できます．@kbd{C-h p} で見ることのできるパッケージの
+コメントにはもっと多くの情報があります．URL を辿る機能を持つパッケージは
+Browse-URL を使うべきです．そうすれば，Browse-URL のオプションをカスタマイズする
+ことで，Emacs でURL を辿るすべての動作を変更できるのです．
+
+@node Goto-address
+@c @subsection Activating URLs
+@subsection URL を活性化 @emph{(2005/05/08)}
+@findex goto-address
+@cindex Goto-address
+@cindex URLs, activating
+
+@table @kbd
+@item M-x goto-address
+@c Activate URLs and e-mail addresses in the current buffer.
+現在バッファのURLとメールアドレスを活性化する．
+@end table
+
+@c   You can make URLs in the current buffer active with @kbd{M-x
+@c goto-address}.  This finds all the URLs in the buffer, and establishes
+@c bindings for @kbd{Mouse-2} and @kbd{C-c @key{RET}} on them.  After
+@c activation, if you click on a URL with @kbd{Mouse-2}, or move to a URL
+@c and type @kbd{C-c @key{RET}}, that will display the web page that the URL
+@c specifies.  For a @samp{mailto} URL, it sends mail instead, using your
+@c selected mail-composition method (@pxref{Mail Methods}).
+@kbd{M-x goto-address} で現在バッファのURLを活性化できます．このコマンドはバッ
+ファですべてのURLを探し，それらのリンクに @kbd{Mouse-2} と @kbd{C-c @key{RET}}
+のキーバインドを付けます．活性化後，URL 上で @kbd{Mouse-2} をクリックしたり，URL
+へポイントを動かして @kbd{C-c @key{RET}} を入力すると，URL を開きそのページが表
+示されます．@samp{mailto} URL の場合には，指定されたメール作成方法 (@pxref{Mail
+Methods}) を使って，メールを送ります．
+
+@c   It can be useful to add @code{goto-address} to mode hooks and the
+@c hooks used to display an incoming message.
+@c @code{rmail-show-message-hook} is the appropriate hook for Rmail, and
+@c @code{mh-show-mode-hook} for MH-E.  This is not needed for Gnus,
+@c which has a similar feature of its own.
+@code{goto-address} をモードのフックや受け取ったメッセージを表示するフックに追加
+しておくと便利でしょう．Rmail のフックであれば @code{rmail-show-message-hook}，
+MH-E であれば @code{mh-show-mode-hook}が適切でしょう．Gnus では似た機能を独自に
+持っていますので，必要ありません．
+
+@node FFAP
+@c @subsection Finding Files and URLs at Point
+@subsection ポイントのファイルや URL を開く @emph{(2005/05/08)}
+@findex find-file-at-point
+@findex ffap
+@findex ffap-dired-at-point
+@findex ffap-next
+@findex ffap-menu
+@cindex finding file at point
+
+@c   FFAP mode replaces certain key bindings for finding files, including
+@c @kbd{C-x C-f}, with commands that provide more sensitive defaults.
+@c These commands behave like the ordinary ones when given a prefix
+@c argument.  Otherwise, they get the default file name or URL from the
+@c text around point.  If what is found in the buffer has the form of a
+@c URL rather than a file name, the commands use @code{browse-url} to
+@c view it.
+FFAP mode は @kbd{C-x C-f} を含めたファイルを開くキーバインドをより敏感なものに
+置き換えます．このコマンドは数引数を与えると普通のものと同じように振舞います．さ
+もなければ，ポイント周辺からデフォルトのファイル名や URL を得ます．もしバッファ
+で見付かったものがファイル名ではなく URL であったら，@code{browse-url} を使って
+表示します．
+
+@c   This feature is useful for following references in mail or news
+@c buffers, @file{README} files, @file{MANIFEST} files, and so on.  The
+@c @samp{ffap} package's commentary available via @kbd{C-h p} and the
+@c @code{ffap} Custom group provide details.
+この機能はメールやニュースバッファ，@file{README} ファイル，@file{MANIFEST} ファ
+イルなどで出典を辿るのに役立ちます．@kbd{C-h p} を使うことで，@samp{ffap} パッケー
+ジのコメントを見ることができます．また，カスタマイズグループ @code{ffap} もあり
+ます．
+
+@cindex FFAP minor mode
+@findex ffap-mode
+@c   You can turn on FFAP minor mode to make the following key bindings
+@c and to install hooks for using @code{ffap} in Rmail, Gnus and VM
+@c article buffers.
+FFAP マイナーモードを有効にすると，以下のキーバインドを割り当て，@code{ffap} を
+Rmail，Gnus，VM の記事バッファで有効にするフックを設定します．
+
+@table @kbd
+@item C-x C-f @var{filename} @key{RET}
+@kindex C-x C-f @r{(FFAP)}
+@c Find @var{filename}, guessing a default from text around point
+@c (@code{find-file-at-point}).
+@var{filename} を探す．ポイント周辺のテキストがデフォルトになる
+@c (@code{find-file-at-point})．
+@item C-x 4 f
+@kindex C-x 4 f @r{(FFAP)}
+@c @code{ffap-other-window}, analogous to @code{find-file-other-window}.
+@code{ffap-other-window}．@code{find-file-other-window} と同じ．
+@item C-x 5 f
+@kindex C-x 5 f @r{(FFAP)}
+@c @code{ffap-other-frame}, analogous to @code{find-file-other-frame}.
+@code{ffap-other-frame}． @code{find-file-other-frame} と同じ．
+@item M-x ffap-next
+@c Search buffer for next file name or URL, then find that file or URL.
+次のファイル名や URL を探し，そのファイルや URL を開く．
+@item C-x d @var{directory} @key{RET}
+@kindex C-x d @r{(FFAP)}
+@c Start Dired on @var{directory}, defaulting to the directory name at
+@c point (@code{ffap-dired-at-point}).
+@var{directory} で Dired を起動する．ポイント付近のディレクトリ名がデフォルトに
+なる (@code{ffap-dired-at-point})．
+@item S-Mouse-3
+@kindex S-Mouse-3 @r{(FFAP)}
+@c @code{ffap-at-mouse} finds the file guessed from text around the position
+@c of a mouse click.
+@code{ffap-at-mouse} はマウスをクリックした位置付近のテキストからファイル名を探
+し開きます．
+@item C-S-Mouse-3
+@kindex C-S-Mouse-3 @r{(FFAP)}
+@c Display a menu of files and URLs mentioned in current buffer, then
+@c find the one you select (@code{ffap-menu}).
+現在バッファにあるファイル名や URL のメニューを表示します．そして，選択したもの
+を開きます (@code{ffap-menu})．
+@end table
+
+@node Find-func
+@c @subsection Finding Function and Variable Definitions
+@subsection 関数や変数の定義を探す @emph{(2005/05/08)}
+@cindex definitions, finding in Lisp sources
+@cindex Lisp definitions, finding in sources
+
+@table @kbd
+@item M-x find-function @key{RET} @var{function} @key{RET}
+@c Find the definition of @var{function} in its source file.
+ソースファイルで @var{function} の定義を探す
+@item M-x find-variable @key{RET} @var{variable} @key{RET}
+@c Find the definition of @var{variable} in its source file.
+ソースファイルで @var{variable} の定義を探す
+@item M-x find-function-on-key @key{RET} @var{key}
+@c Find the definition of the function that @var{key} invokes.
+@var{key} を入力した時に起動される関数の定義を探す．
+@end table
+
+@c   These commands provide an easy way to find the definitions of Emacs
+@c Lisp functions and variables.  They are similar in purpose to the Tags
+@c facility (@pxref{Tags}), but don't require a tags table; on the other
+@c hand, they only work for function and variable definitions that are
+@c already loaded in the Emacs session.
+これらのコマンドを使うと簡単に Emacs Lisp の関数や変数の定義を探すことができます．
+目的としては， Tags 機能 (@pxref{Tags}を参照) と似ていますが，これはタグテーブル
+を必要としません．また，Emacs にすでに読み込まれた関数や変数の定義だけに有効です．
+
+@findex find-function
+@findex find-function-on-key
+@findex find-variable
+@c   To find the definition of a function, use @kbd{M-x find-function}.
+@c @kbd{M-x find-variable} finds the definition of a specified variable.
+@c @kbd{M-x find-function-on-key} finds the definition of the function
+@c bound to a specified key.
+関数の定義を探すためには @kbd{M-x find-function} を使います．@kbd{M-x
+find-variable} は指定された変数の定義を探します．@kbd{M-x find-function-on-key}
+は指定されたキーに割り当てられた関数の定義を探します．
+
+@c   To use these commands, you must have the Lisp source (@samp{.el})
+@c files available along with the compiled (@samp{.elc}) files, in
+@c directories in @code{load-path}.  You can use compressed source files
+@c if you enable Auto Compression mode.  These commands only handle
+@c definitions written in Lisp, not primitive functions or variables
+@c defined in the C code of Emacs.
+これらのコマンドを使うためには，コンパイルされたファイル (@samp{.elc}) と一緒に
+Lisp のソースファイル (@samp{.el}) が @code{load-path} に無ければいけません．
+Auto Compression モードが有効であれば，圧縮されたソースファイルを使うことができ
+ます．Lisp で書かれたコマンドだけを扱い，C で書かれた初歩的な関数や変数は扱いま
+せん．
+
+@node Dissociated Press, Amusements, Hyperlinking, Top
+@c @section Dissociated Press
+@section まぜこぜ新聞（Dissociated Press）
+
+@findex dissociated-press
+@c   @kbd{M-x dissociated-press} is a command for scrambling a file of text
+@c either word by word or character by character.  Starting from a buffer of
+@c straight English, it produces extremely amusing output.  The input comes
+@c from the current Emacs buffer.  Dissociated Press writes its output in a
+@c buffer named @samp{*Dissociation*}, and redisplays that buffer after every
+@c couple of lines (approximately) so you can read the output as it comes out.
+@kbd{M-x dissociated-press}はテキストを、単語単位、または、文字単位で
+混ぜ合わせるコマンドです。
+普通の英語をバッファに入れた状態でこれを実行すると、
+きわめておもしろい結果が生成されます。
+入力はカレントバッファから取り、
+出力は@samp{*Dissociation*}というバッファに書き込みます
+（およそ2、3行生成するごとにバッファが再表示されるので、
+生成内容を順次読めます）。
+
+@c   Dissociated Press asks every so often whether to continue generating
+@c output.  Answer @kbd{n} to stop it.  You can also stop at any time by
+@c typing @kbd{C-g}.  The dissociation output remains in the
+@c @samp{*Dissociation*} buffer for you to copy elsewhere if you wish.
+@kbd{M-x dissociated-press}は定期的にもっと出力を続けるかどうか聞いてきます。
+@kbd{n}と答えると生成をやめます。
+また、@kbd{C-g}を打てばいつでも止められます。
+出力はバッファ@samp{*Dissociation*}に残っていますから、
+必要ならどこへでもコピーできます。
+
+@c @cindex presidentagon
+@c   Dissociated Press operates by jumping at random from one point in the
+@c buffer to another.  In order to produce plausible output rather than
+@c gibberish, it insists on a certain amount of overlap between the end of
+@c one run of consecutive words or characters and the start of the next.
+@c That is, if it has just output `president' and then decides to jump
+@c to a different point in the file, it might spot the `ent' in `pentagon'
+@c and continue from there, producing `presidentagon'.@footnote{This
+@c dissociword actually appeared during the Vietnam War, when it was very
+@c appropriate.}  Long sample texts produce the best results.
+@kbd{M-x dissociated-press}はバッファ中のある箇所からランダムに
+別の箇所にジャンプすることを繰り返していきます。
+ただのゴミではなくおもしろい出力が得られるように、
+ある一連の単語列からつぎの一連の単語列に移る際に、
+それらのあいだに一定の重複があるようにします。
+つまり、たとえばpresidentと出力したところで別の場所にジャンプすることに
+決めたら、最後にあったentと同じ文字列のある単語、
+たとえばpentagonのところに飛んでそこから続けるので、
+結果としてpregidentagon
+@footnote{この合成語は、
+ベトナム戦争中にまさにそれにぴったりの意味で実際に使われたことがある。}
+というのが生成されるわけです。
+元テキストが長いとたいへんおもしろい結果を得られます。
+
+@c @cindex againformation
+@c   A positive argument to @kbd{M-x dissociated-press} tells it to operate
+@c character by character, and specifies the number of overlap characters.  A
+@c negative argument tells it to operate word by word and specifies the number
+@c of overlap words.  In this mode, whole words are treated as the elements to
+@c be permuted, rather than characters.  No argument is equivalent to an
+@c argument of two.  For your againformation, the output goes only into the
+@c buffer @samp{*Dissociation*}.  The buffer you start with is not changed.
+@kbd{M-x dissociated-press}に正の数引数を渡すと
+文字単位で動作し、その数値は重複する文字数を指定します。
+また、負の数引数を渡すと単語単位で動作し、その数値（の絶対値）で重複する
+単語数を指定します。
+引数を指定しないと「2」を指定したのと同じになります。
+繰り返しますが、出力はつねにバッファ@samp{*Dissociation*}に現れます。
+もとのバッファは変更されません。
+
+@c @cindex Markov chain
+@cindex マルコフ連鎖
+@c @cindex ignoriginal
+@c @cindex techniquitous
+@c   Dissociated Press produces nearly the same results as a Markov chain
+@c based on a frequency table constructed from the sample text.  It is,
+@c however, an independent, ignoriginal invention.  Dissociated Press
+@c techniquitously copies several consecutive characters from the sample
+@c between random choices, whereas a Markov chain would choose randomly for
+@c each word or character.  This makes for more plausible sounding results,
+@c and runs faster.
+@kbd{M-x dissociated-press}は、入力テキストから頻度表を作って
+マルコフ連鎖を適用したのに近い結果をもたらしますが、
+それ自体はきわめてオリジナルな発明です。
+というのは、マルコフ連鎖では単に乱数に基づいて文字や語を選ぶだけなのに対し、
+このコマンドでは乱数に基づいて連続した文字や語をコピーしてくるからです。
+このため、より高速な実行が可能ですし、読んでおもしろい結果が得られます。
+
+@c @cindex outragedy
+@c @cindex buggestion
+@c @cindex properbose
+@c @cindex mustatement
+@c @cindex developediment
+@c @cindex userenced
+@c   It is a mustatement that too much use of Dissociated Press can be a
+@c developediment to your real work.  Sometimes to the point of outragedy.
+@c And keep dissociwords out of your documentation, if you want it to be well
+@c userenced and properbose.  Have fun.  Your buggestions are welcome.
+@kbd{M-x dissociated-press}の使いすぎは仕事に差し支え、
+場合によっては重大な障碍となりますから注意しましょう。
+また、ユーザーに受け入れてもらうためにも、
+マニュアルにこのコマンドの出力を利用するのはやめたほうがよいです。
+でも、せいぜい楽しんで、よかったらバグの提案もよろしく。
+@footnote{【訳注】 この段落自体、@kbd{M-x dissociated-press}で生成したような
+ものなので、原文を掲載しておく。 @*
+It is a mustatement that too much use of Dissociated Press can be a
+developediment to your real work.  Sometimes to the point of outragedy.
+And keep dissociwords out of your documentation, if you want it to be well
+userenced and properbose.  Have fun.  Your buggestions are welcome.}
+
+@node Amusements, Customization, Dissociated Press, Top
+@c @section Other Amusements
+@section その他の娯楽 @emph{(2005/05/08)}
+@c @cindex boredom
+@cindex 退屈したら
+@findex hanoi
+@findex yow
+@findex gomoku
+@c @cindex tower of Hanoi
+@cindex ハノイの塔
+
+@c   If you are a little bit bored, you can try @kbd{M-x hanoi}.  If you are
+@c considerably bored, give it a numeric argument.  If you are very, very
+@c bored, try an argument of 9.  Sit back and watch.
+退屈なときは、@kbd{M-x hanoi}を試してください。
+ひどく退屈なら、数引数を指定してください。
+ものすごく、ひどく退屈なら、「9」を指定するとよいでしょう。
+まあやってみてください。
+
+@c @cindex Go Moku
+@cindex 五目
+@c   If you want a little more personal involvement, try @kbd{M-x gomoku},
+@c which plays the game Go Moku with you.
+もう少し積極的に何かしたいなら、@kbd{M-x gomoku}を試してください。
+これは五目並べのプログラムです。
+
+@findex blackbox
+@findex mpuz
+@findex 5x5
+@c @cindex puzzles
+@cindex パズル
+  @kbd{M-x blackbox}, @kbd{M-x mpuz} and @kbd{M-x 5x5} are kinds of puzzles.
+@code{blackbox} challenges you to determine the location of objects
+inside a box by tomography.  @code{mpuz} displays a multiplication
+puzzle with letters standing for digits in a code that you must
+guess---to guess a value, type a letter and then the digit you think it
+stands for.  The aim of @code{5x5} is to fill in all the squares.
+@kbd{M-x blackbox}と@kbd{M-x mpuz}，@kbd{M-x 5x5} はパズルゲームです。
+@code{blackbox}は箱の中の物の位置を当てるゲームです。
+@code{mpuz}は掛け算の覆面算で、英字に対応している数字を当てるゲームです。
+英字を打ってからその英字に対応していると思う数字を打ち込みます。 @code{5x5} は四
+角のすべてを埋めることです．
+
+@findex decipher
+@cindex ciphers
+@c @cindex cryptanalysis
+@cindex 暗号解読
+@c @kbd{M-x decipher} helps you to cryptanalyze a buffer which is encrypted
+@c in a simple monoalphabetic substitution cipher.
+@kbd{M-x decipher} は単純なアルファベット置換で暗号化されたバッファを解読するの
+に役立ちます．
+
+@findex dunnet
+@c   @kbd{M-x dunnet} runs an adventure-style exploration game, which is
+@c a bigger sort of puzzle.
+@kbd{M-x dunnet}はアドベンチャー風の探検ゲームで、
+大きなパズルだと思えばよいでしょう。
+
+@findex lm
+@cindex landmark game
+@c @kbd{M-x lm} runs a relatively non-participatory game in which a robot
+@c attempts to maneuver towards a tree at the center of the window based on
+@c unique olfactory cues from each of the four directions.
+@kbd{M-x lm} は見るだけのゲームです．ロボットがウィンドウの中心にある木に向かっ
+て4つの方向からの嗅覚の指示だけで動こうとするものです．
+
+@findex life
+@cindex Life
+@c @kbd{M-x life} runs Conway's ``Life'' cellular automaton.
+@kbd{M-x life} は Conway の人工生命シミュレーションを実行します．
+
+@findex morse-region
+@findex unmorse-region
+@cindex Morse code
+@cindex --/---/.-./.../.
+@c @kbd{M-x morse-region} converts text in a region to Morse code and
+@c @kbd{M-x unmorse-region} converts it back.  No cause for remorse.
+@kbd{M-x morse-region} はリージョンのテキストをモールス信号にコンバートします．
+@kbd{M-x unmorse-region} で解読します．No cause for remorse.
+
+@findex pong
+@cindex Pong game
+@c @kbd{M-x pong} plays a Pong-like game, bouncing the ball off opposing
+@c bats.
+@kbd{M-x pong} はボールを対向したバットでバウンドさせるゲームです．
+
+@findex solitaire
+@cindex solitaire
+@c @kbd{M-x solitaire} plays a game of solitaire in which you jump pegs
+@c across other pegs.
+@kbd{M-x solitaire} は solitaire で遊べます．これは他のコマを飛び越して，コマを
+ジャンプさせ，間のコマを消していくものです．
+
+@findex studlify-region
+@cindex StudlyCaps
+@c @kbd{M-x studlify-region} studlify-cases the region, producing
+@c text like this:
+@kbd{M-x studlify-region} は以下のように一部を大文字にすることで，リージョンをかっ
+こよくします．
+
+@example
+M-x stUdlIfY-RegioN stUdlIfY-CaSeS thE region.
+@end example
+
+@findex tetris
+@cindex Tetris
+@findex snake
+@cindex Snake
+@c @kbd{M-x tetris} runs an implementation of the well-known Tetris game.
+@c Likewise, @kbd{M-x snake} provides an implementation of Snake.
+@kbd{M-x tetris} はテトリスとしてよく知られたゲームを実現します．同様に @kbd{M-x
+snake} は Snake を実現します．
+
+@c   When you are frustrated, try the famous Eliza program.  Just do
+@c @kbd{M-x doctor}.  End each input by typing @key{RET} twice.
+いらいらするときは、有名なElizaプログラムを試してみてください。
+@kbd{M-x doctor}と打つだけです。
+1つの入力の終りには@key{RET}を2回打ちます。
+
+@cindex Zippy
+@c   When you are feeling strange, type @kbd{M-x yow}.
+奇妙な感じがするときは、@kbd{M-x yow}と打ってみてください。
+
+@findex zone
+@c The command @kbd{M-x zone} plays games with the display when Emacs is
+@c idle.
+@kbd{M-x zone} は Emacs が待機状態の時に表示させるゲームです．
+
+@ignore
+   arch-tag: 8f094220-c0d5-4e9e-af7d-3e0da8187474
+@end ignore

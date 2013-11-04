@@ -1,0 +1,1845 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1997, 1999, 2000, 2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node International, Major Modes, Frames, Top
+@c @chapter International Character Set Support
+@chapter 国際化文字集合の使い方 @emph{(2005/09/19)}
+@cindex MULE
+@c @cindex international scripts
+@c @cindex multibyte characters
+@c @cindex encoding of characters
+@cindex 国際化文字
+@cindex マルチバイト文字
+@cindex 文字の符号化
+
+@cindex Celtic
+@cindex Chinese
+@cindex Cyrillic
+@cindex Czech
+@cindex Devanagari
+@cindex Hindi
+@cindex Marathi
+@cindex Ethiopic
+@cindex German
+@cindex Greek
+@cindex Hebrew
+@cindex ケルト語
+@cindex 中国語
+@cindex キリル文字
+@cindex チェコ語
+@cindex デバナーガリー
+@cindex ヒンディー語
+@cindex マラッタ語
+@cindex エチオピア語
+@cindex ドイツ語
+@cindex ギリシア語
+@cindex ヘブライ語
+@cindex IPA
+@cindex Japanese
+@cindex Korean
+@cindex Lao
+@cindex Latin
+@cindex Polish
+@cindex Romanian
+@cindex Slovak
+@cindex Slovenian
+@cindex Thai
+@cindex Tibetan
+@cindex Turkish
+@cindex Vietnamese
+@cindex Dutch
+@cindex Spanish
+@cindex 日本語
+@cindex 韓国語
+@cindex ラオ語
+@cindex ラテン語
+@cindex ポーランド語
+@cindex ルーマニア語
+@cindex スロバキア語
+@cindex ロシア語
+@cindex タイ語
+@cindex チベット語
+@cindex ベトナム語
+@cindex オランダ語
+@cindex スペイン語
+@c   Emacs supports a wide variety of international character sets,
+@c including European variants of the Latin alphabet, as well as Chinese,
+@c Cyrillic, Devanagari (Hindi and Marathi), Ethiopic, Greek, Hebrew, IPA,
+@c Japanese, Korean, Lao, Thai, Tibetan, and Vietnamese scripts.  These features
+@c have been merged from the modified version of Emacs known as MULE (for
+@c ``MULti-lingual Enhancement to GNU Emacs'')
+Emacsでは広範囲の国際化文字集合を使えます。
+ラテンアルファベットの変種であるヨーロッパの言語はもちろん、中国語、キリル文字，
+デバナーガリー（ヒンディー語とマラッタ語）、エチオピア語、ヘブライ語，ギリシア語、
+IPA（International Phonetic Alphabet、万国表音文字）、日本語、韓国語、
+ラオ語、ロシア語、タイ語、チベット語、ベトナム語の文字を含んでいます。
+これらの機能は、MULE（『MULti-lingual Enhancement to GNU Emacs』）と
+して知られるEmacsの修正版から併合しました。
+
+@c   Emacs also supports various encodings of these characters used by
+@c other internationalized software, such as word processors and mailers.
+ワープロやメイラーのような他の国際化されたソフトにおいて使われる文字で利用される
+様々なエンコードもサポートしています．
+
+@c   Emacs allows editing text with international characters by supporting
+@c all the related activities:
+Emacsでは様々な文字の編集を行うことができます．
+
+@itemize @bullet
+@item
+@c You can visit files with non-@acronym{ASCII} characters, save non-@acronym{ASCII} text, and
+@c pass non-@acronym{ASCII} text between Emacs and programs it invokes (such as
+@c compilers, spell-checkers, and mailers).  Setting your language
+@c environment (@pxref{Language Environments}) takes care of setting up the
+@c coding systems and other options for a specific language or culture.
+@c Alternatively, you can specify how Emacs should encode or decode text
+@c for each command; see @ref{Specify Coding}.
+非@acronym{ASCII}文字のテキストファイルを開き，保存し(コンパイラやスペルチャッカ
+やメイラーのような)プログラムを起動することで非@acronym{ASCII}のテキストを渡すこ
+とができます．言語環境の設定(@pxref{Language Environments})は特有の言語や環境に
+関する文字コードや他のオプションを設定します．
+
+@item
+@c You can display non-@acronym{ASCII} characters encoded by the various scripts.
+@c This works by using appropriate fonts on X and similar graphics
+@c displays (@pxref{Defining Fontsets}), and by sending special codes to
+@c text-only displays (@pxref{Specify Coding}).  If some characters are
+@c displayed incorrectly, refer to @ref{Undisplayable Characters}, which
+@c describes possible problems and explains how to solve them.
+さまざまなスクリプトでエンコードされた非@acronym{ASCII}文字を表示できます．X上で
+は適切なフォントやよく似たグラフィックスを用い(@pxref{Defining
+Fontsets})，テキスト端末には特別なコードを送信して表示します．もしいくつかの文字
+が適切に表示されない時には @ref{Undisplayable Characters}を参照ください．そこに
+は，可能性のある問題点や解決方法が書いてあります．
+
+@item
+@c You can insert non-@acronym{ASCII} characters or search for them.  To do that,
+@c you can specify an input method (@pxref{Select Input Method}) suitable
+@c for your language, or use the default input method set up when you set
+@c your language environment.  (Emacs input methods are part of the Leim
+@c package, which must be installed for you to be able to use them.)  If
+@c your keyboard can produce non-@acronym{ASCII} characters, you can select an
+@c appropriate keyboard coding system (@pxref{Specify Coding}), and Emacs
+@c will accept those characters.  Latin-1 characters can also be input by
+@c using the @kbd{C-x 8} prefix, see @ref{Single-Byte Character Support,
+@c C-x 8}.  On X Window systems, your locale should be set to an
+@c appropriate value to make sure Emacs interprets keyboard input
+@c correctly; see @ref{Language Environments, locales}.
+非@acronym{ASCII}文字を入力したり，検索したりできます．そのためには，その言語に
+適した入力方法(@pxref{Select Input Method})にするか，自分の言語環境に合わせたデ
+フォルトの入力方法を使う必要があります(Emacsの入力メソッドはLeimパッケージの機
+能であり，適切にインストールしてある必要があります)．キーボードが非
+@acronym{ASCII}文字を入力できるのであれば，キーボードのコードを適切に選択してお
+かなければなりません (@pxref{Specify Coding})．そうすれば，Emacsはこの文字を受け
+付けることができます．プレフィックス@kbd{C-x 8}を使うことで，Latin-1の文字を入力
+することができます．詳しくは@ref{Single-Byte Character Support, C-x 8}を参照くだ
+さい．X Window システムではEmacsがキーボード入力を適切に解釈できるように言語環境
+を設定する必要があります．詳細は@ref{Language Environments, locales}を参照くださ
+い．
+@end itemize
+
+@c   The rest of this chapter describes these issues in detail.
+この章の残りでは，これらの詳細を説明します．
+
+@menu
+* International Chars::     Basic concepts of multibyte characters.
+* Enabling Multibyte::      Controlling whether to use multibyte characters.
+* Language Environments::   Setting things up for the language you use.
+* Input Methods::           Entering text characters not on your keyboard.
+* Select Input Method::     Specifying your choice of input methods.
+* Multibyte Conversion::    How single-byte characters convert to multibyte.
+* Coding Systems::          Character set conversion when you read and
+                              write files, and so on.
+* Recognize Coding::        How Emacs figures out which conversion to use.
+* Specify Coding::          Various ways to choose which conversion to use.
+* Fontsets::                Fontsets are collections of fonts
+                              that cover the whole spectrum of characters.
+* Defining Fontsets::       Defining a new fontset.
+* Undisplayable Characters:: When characters don't display.
+* Single-Byte Character Support::
+                            You can pick one European character set
+                            to use without multibyte characters.
+* Charsets::                How Emacs groups its internal character codes.
+@end menu
+
+@node International Chars
+@c @section Introduction to International Character Sets
+@section 国際化文字集合の紹介
+
+@c   The users of these scripts have established many more-or-less standard
+@c coding systems for storing files.  Emacs internally uses a single
+@c multibyte character encoding, so that it can intermix characters from
+@c all these scripts in a single buffer or string.  This encoding
+@c represents each non-ASCII character as a sequence of bytes in the range
+@c 0200 through 0377.  Emacs translates between the multibyte character
+@c encoding and various other coding systems when reading and writing
+@c files, when exchanging data with subprocesses, and (in some cases) in
+@c the @kbd{C-q} command (@pxref{Multibyte Conversion}).
+これらの文字のユーザーは、ファイルに格納するために、
+たくさんの標準的なコーディングシステムを確立してきました。
+Emacsは内部的には単一のマルチバイト文字符号化を使用しているので、
+1つのバッファや1つの文字列の中に、
+これらのすべての文字を混ぜ合わせることができます。
+この符号化では、非ASCII文字を0200から0377の範囲のバイトの
+並びとして表現します。
+Emacsは、ファイルを読み書きするとき、サブプロセスとデータを交換するとき、
+（場合によっては）@kbd{C-q}コマンドを使うときに、
+マルチバイト文字符号化と
+他のさまざまなコーディングシステムのあいだで変換します
+（@pxref{Multibyte Conversion}）。
+
+@kindex C-h h
+@findex view-hello-file
+@c   The command @kbd{C-h h} (@code{view-hello-file}) displays the file
+@c @file{etc/HELLO}, which shows how to say ``hello'' in many languages.
+@c This illustrates various scripts.
+コマンド@kbd{C-h h}（@code{view-hello-file}）は、
+多くの言語で『hello』と書いたファイル@file{etc/HELLO}を表示します。
+これは、さまざまな字体を例示します。
+
+@c   Keyboards, even in the countries where these character sets are used,
+@c generally don't have keys for all the characters in them.  So Emacs
+@c supports various @dfn{input methods}, typically one for each script or
+@c language, to make it convenient to type them.
+これらの文字集合を使っている国々であっても、
+一般にキーボードには、
+それらすべての文字に対するキーはありません。
+ですから、Emacsではさまざまな@dfn{入力方式}（input methods）
+@footnote{【訳注】GNU Emacsをインストールする時点で、
+対応する版のLEIM（Library of Emacs Input Method）のソースを
+GNU Emacsのソースディレクトリに展開しておくと、
+自動的にインストールされる。}を使って、
+便利に文字を打ち込めるようにします。
+典型的には、1つの字体や1つの言語について1つの入力方式があります。
+
+@kindex C-x RET
+@c   The prefix key @kbd{C-x @key{RET}} is used for commands that pertain
+@c to multibyte characters, coding systems, and input methods.
+プレフィックスキー@kbd{C-x @key{RET}}は、
+マルチバイト文字、コーディングシステム、入力方式に関係するコマンドに使います。
+
+@node Enabling Multibyte
+@c @section Enabling Multibyte Characters
+@section マルチバイト文字を使用可能にする
+
+@c   You can enable or disable multibyte character support, either for
+@c Emacs as a whole, or for a single buffer.  When multibyte characters are
+@c disabled in a buffer, then each byte in that buffer represents a
+@c character, even codes 0200 through 0377.  The old features for
+@c supporting the European character sets, ISO Latin-1 and ISO Latin-2,
+@c work as they did in Emacs 19 and also work for the other ISO 8859
+@c character sets.
+Emacs全体やバッファごとにマルチバイト文字の使用可／使用不可を設定できます。
+バッファでマルチバイト文字を使用不可にすると、
+そのバッファ内の各バイトは1つの文字を表します。
+たとえコードが0200から0377のあいだであってもそうです。
+ヨーロッパの文字集合であるISO Latin-1とISO Latin-2を扱う古い機能は、
+Emacs 19で動作していたように動き、
+他のISO 8859文字集合に対しても動作します。
+
+@c   However, there is no need to turn off multibyte character support to
+@c use ISO Latin; the Emacs multibyte character set includes all the
+@c characters in these character sets, and Emacs can translate
+@c automatically to and from the ISO codes.
+しかし、ISO Latinを使うために、
+マルチバイト文字を使用不可にする必要はありません。
+Emacsのマルチバイト文字集合にはこれらの文字集合のすべての文字が含まれ、
+EmacsはこれらのISOコードと相互に自動的に変換できます。
+
+@c   To edit a particular file in unibyte representation, visit it using
+@c @code{find-file-literally}.  @xref{Visiting}.  To convert a buffer in
+@c multibyte representation into a single-byte representation of the same
+@c characters, the easiest way is to save the contents in a file, kill the
+@c buffer, and find the file again with @code{find-file-literally}.  You
+@c can also use @kbd{C-x @key{RET} c}
+@c (@code{universal-coding-system-argument}) and specify @samp{raw-text} as
+@c the coding system with which to find or save a file.  @xref{Specify
+@c Coding}.  Finding a file as @samp{raw-text} doesn't disable format
+@c conversion, uncompression and auto mode selection as
+@c @code{find-file-literally} does.
+特定のファイルをユニバイト表現で編集するには、
+@code{find-file-literally}を使ってファイルを訪問します。
+@xref{Visiting}。
+マルチバイト表現のバッファを同じ文字の1バイト表現に変換するには、
+もっとも簡単な方法は、内容をファイルに保存してから、バッファを削除し、
+@code{find-file-literally}でそのファイルを訪問し直します。
+@kbd{C-x @key{RET} c}（@code{universal-coding-system-argument}）を使って、
+ファイルを探したり保存するときのコーディングシステムとして
+@samp{raw-text}を指定することもできます。
+@xref{Specify Coding}。
+@samp{raw-text}としてファイルを探しても、
+@code{find-file-literally}のようには、
+書式変換、圧縮の展開、モードの自動選択を禁止しません。
+
+@vindex enable-multibyte-characters
+@vindex default-enable-multibyte-characters
+@c   To turn off multibyte character support by default, start Emacs with
+@c the @samp{--unibyte} option (@pxref{Initial Options}), or set the
+@c environment variable @samp{EMACS_UNIBYTE}.  You can also customize
+@c @code{enable-multibyte-characters} or, equivalently, directly set the
+@c variable @code{default-enable-multibyte-characters} in your init file to
+@c have basically the same effect as @samp{--unibyte}.
+デフォルトでマルチバイト文字を使用不可にするには、
+@samp{--unibyte}オプション（@pxref{Initial Options}）を
+指定してEmacsを始めるか、あるいは、
+環境変数@samp{EMACS_UNIBYTE}を設定します。
+@samp{--unibyte}と同等な効果を得るには、
+@code{enable-multibyte-characters}をカスタマイズするか、
+これと等価に、初期化ファイル内で、
+変数@code{default-enable-multibyte-characters}を直接設定します。
+
+@c   Multibyte strings are not created during initialization from the
+@c values of environment variables, @file{/etc/passwd} entries etc.@: that
+@c contain non-ASCII 8-bit characters.  However, the initialization file is
+@c normally read as multibyte---like Lisp files in general---even with
+@c @samp{--unibyte}.  To avoid multibyte strings being generated by
+@c non-ASCII characters in it, put @samp{-*-unibyte: t;-*-} in a comment on
+@c the first line.  Do the same for initialization files for packages like
+@c Gnus.
+環境変数の値、@file{/etc/passwd}の内容などの非ASCII 8ビット文字からの
+初期化中にはマルチバイト文字列は作られません。
+しかし、@samp{--unibyte}を指定したとしても、
+一般のLispファイルのように、初期化ファイルは、通常、
+マルチバイトとして読み込みます。
+それらに含まれる非ASCII文字からマルチバイト文字列が生成されるのを防ぐには、
+1行目の注釈に@samp{-*-unibyte: t;-*-}を入れておきます。
+gnusなどのパッケージの初期化ファイルでも同じことをします。
+
+@c   The mode line indicates whether multibyte character support is enabled
+@c in the current buffer.  If it is, there are two or more characters (most
+@c often two dashes) before the colon near the beginning of the mode line.
+@c When multibyte characters are not enabled, just one dash precedes the
+@c colon.
+モード行には、カレントバッファでマルチバイト文字が使用可かどうか表示されます。
+使用可ならば、モード行の先頭付近のコロンのまえに
+2文字か数文字（ほとんどの場合ダッシュ2個）があります。
+マルチバイト文字が使用不可ならば、コロンのまえにはダッシュが1個だけです。
+
+@node Language Environments
+@c @section Language Environments
+@c @cindex language environments
+@section 言語環境
+@cindex 言語環境
+
+@c   All supported character sets are supported in Emacs buffers whenever
+@c multibyte characters are enabled; there is no need to select a
+@c particular language in order to display its characters in an Emacs
+@c buffer.  However, it is important to select a @dfn{language environment}
+@c in order to set various defaults.  The language environment really
+@c represents a choice of preferred script (more or less) rather than a
+@c choice of language.
+マルチバイト文字が使用可のときはいつでも、
+すべての扱える文字集合をEmacsバッファの中で使えます。
+ある言語の文字を表示するために、
+Emacsバッファでその言語を選択する必要はありません。
+しかし、さまざまなデフォルトを設定するために@dfn{言語環境}を
+選択しておくことは重要です。
+言語環境は、言語の選択というより、
+（多かれ少なかれ）実際には好みの文字を表します。
+
+@c   The language environment controls which coding systems to recognize
+@c when reading text (@pxref{Recognize Coding}).  This applies to files,
+@c incoming mail, netnews, and any other text you read into Emacs.  It may
+@c also specify the default coding system to use when you create a file.
+@c Each language environment also specifies a default input method.
+言語環境は、テキストを読み込むときにどのコーディングシステムを認識するかを
+制御します（@pxref{Recognize Coding}）。
+言語環境は、ファイル、到着メイル、ニュース、
+Emacsへ読み込むその他のテキストに適用されます。
+言語環境は、ファイルを作成したときに使うデフォルトの
+コーディングシステムを指定することもあります。
+各言語環境は、デフォルトの入力方式も指定します。
+
+@findex set-language-environment
+@c   The way to select a language environment is with the command @kbd{M-x
+@c set-language-environment}.  It makes no difference which buffer is
+@c current when you use this command, because the effects apply globally to
+@c the Emacs session.  The supported language environments include:
+言語環境を選択するには、
+コマンド@kbd{M-x set-language-environment}を使います。
+このコマンドを使ったときにどのバッファが
+カレントバッファであるかは関係ありません。
+というのは、その効力は、そのEmacsセッションに全体に適用されるからです。
+以下の言語環境を使えます。
+
+@quotation
+@c Chinese-BIG5, Chinese-CNS, Chinese-GB, Cyrillic-Alternativnyj,
+@c Cyrillic-ISO, Cyrillic-KOI8, Devanagari, English, Ethiopic, Greek,
+@c Hebrew, Japanese, Korean, Lao, Latin-1, Latin-2, Latin-3, Latin-4,
+@c Latin-5, Thai, Tibetan, and Vietnamese.
+Chinese-BIG5、Chinese-CNS、Chinese-GB、Cyrillic-Alternativnyj、
+Cyrillic-ISO、Cyrillic-KOI8、Devanagari、English、Ethiopic、Greek、
+Hebrew、Japanese、Korean、Lao、Latin-1、Latin-2、Latin-3、Latin-4、
+Latin-5、Thai、Tibetan、Vietnamese。
+@end quotation
+
+@c   Some operating systems let you specify the language you are using by
+@c setting locale environment variables.  Emacs handles one common special
+@c case of this: if your locale name for character types contains the
+@c string @samp{8859-@var{n}}, Emacs automatically selects the
+@c corresponding language environment.
+いくつかのオペレーティングシステムでは、
+ローケル（locale）環境変数を設定することで言語を指定できます。
+Emacsは、このよくある特別な場面を扱います。
+文字種を表すローケル名が文字列@samp{8859-@var{n}}を含むなら、
+Emacsは自動的に対応する言語環境を選択します。
+
+@kindex C-h L
+@findex describe-language-environment
+@c   To display information about the effects of a certain language
+@c environment @var{lang-env}, use the command @kbd{C-h L @var{lang-env}
+@c @key{RET}} (@code{describe-language-environment}).  This tells you which
+@c languages this language environment is useful for, and lists the
+@c character sets, coding systems, and input methods that go with it.  It
+@c also shows some sample text to illustrate scripts used in this language
+@c environment.  By default, this command describes the chosen language
+@c environment.
+ある言語環境@var{lang-env}の効果についての情報を表示するには、
+コマンド@kbd{C-h L @var{lang-env} @key{RET}}
+（@code{describe-language-environment}）を使います。
+このコマンドは、その言語環境がどの言語に役立つのか、
+その言語で使われる文字集合、コーディングシステム、
+入力方式の一覧を表示します。
+また、その言語環境で使われる文字を例示する例文も表示します。
+デフォルトでは、このコマンドは選択されている言語環境を記述します。
+
+@vindex set-language-environment-hook
+@c   You can customize any language environment with the normal hook
+@c @code{set-language-environment-hook}.  The command
+@c @code{set-language-environment} runs that hook after setting up the new
+@c language environment.  The hook functions can test for a specific
+@c language environment by checking the variable
+@c @code{current-language-environment}.
+どの言語環境もノーマルフック@code{set-language-environment-hook}で
+カスタマイズできます。
+コマンド@code{set-language-environment}は、
+新しい言語環境を設定したあとでこのフックを実行します。
+フック関数では、変数@code{current-language-environment}を検査すれば、
+言語環境を知ることができます。
+
+@vindex exit-language-environment-hook
+@c   Before it starts to set up the new language environment,
+@c @code{set-language-environment} first runs the hook
+@c @code{exit-language-environment-hook}.  This hook is useful for undoing
+@c customizations that were made with @code{set-language-environment-hook}.
+@c For instance, if you set up a special key binding in a specific language
+@c environment using @code{set-language-environment-hook}, you should set
+@c up @code{exit-language-environment-hook} to restore the normal binding
+@c for that key.
+@code{set-language-environment}は、新しい言語環境を設定し始めるまえに、
+まずフック@code{exit-language-environment-hook}を実行します。
+このフックは、（直前の言語環境を設定した）
+@code{set-language-environment}で施したカスタマイズをもとに戻すのに便利です。
+たとえば、@code{set-language-environment-hook}を使って設定した
+特定の言語環境で特別なキーバインディングを定義したときには、
+それをそのキーのもとのバインディングに戻すために
+@code{exit-language-environment-hook}を設定するべきです。
+
+@node Input Methods
+@c @section Input Methods
+@section 入力方式
+
+@c @cindex input methods
+@c   An @dfn{input method} is a kind of character conversion designed
+@c specifically for interactive input.  In Emacs, typically each language
+@c has its own input method; sometimes several languages which use the same
+@c characters can share one input method.  A few languages support several
+@c input methods.
+@dfn{入力方式}（input method）は、
+対話的に入力するために特別に設計された文字変換の一種です。
+Emacsでは、典型的には、各言語向けに専用の入力方式があります。
+ときには、同じ文字を使ういくつかの言語で入力方式を共有します。
+複数の入力方式を使う言語も少しはあります。
+
+@c   The simplest kind of input method works by mapping ASCII letters into
+@c another alphabet.  This is how the Greek and Russian input methods work.
+入力方式のもっとも単純なものは、ASCII文字を別のアルファベットに
+対応させることで動作します。
+ギリシア語とロシア語の入力方式はこのように動作します。
+
+@c   A more powerful technique is composition: converting sequences of
+@c characters into one letter.  Many European input methods use composition
+@c to produce a single non-ASCII letter from a sequence that consists of a
+@c letter followed by accent characters (or vice versa).  For example, some
+@c methods convert the sequence @kbd{a'} into a single accented letter.
+@c These input methods have no special commands of their own; all they do
+@c is compose sequences of printing characters.
+より強力な方法は合成で、文字の列を1つの文字に変換します。
+多くのヨーロッパの入力方式は、文字のうしろにアクセント文字が続く列
+（あるいはその逆順）から、1つの非ASCII文字を生成する合成を使います。
+たとえば、いくつかの入力方式では、
+文字の列@kbd{a'}を1つのアクセント付き文字に変換します。
+これらの入力方式には、その方式に固有の特別なコマンドはありません。
+印字文字の列を合成するだけです。
+
+@c   The input methods for syllabic scripts typically use mapping followed
+@c by composition.  The input methods for Thai and Korean work this way.
+@c First, letters are mapped into symbols for particular sounds or tone
+@c marks; then, sequences of these which make up a whole syllable are
+@c mapped into one syllable sign.
+音節文字用の入力方式では、典型的には、対応付けたあとで合成します。
+タイ語と韓国語の入力方式は、この方法で動作します。
+まず、文字を音声記号に対応付けます。
+そして、1つの音節全体を構成するそれらの列を1つの音節記号に対応付けます。
+
+@c   Chinese and Japanese require more complex methods.  In Chinese input
+@c methods, first you enter the phonetic spelling of a Chinese word (in
+@c input method @code{chinese-py}, among others), or a sequence of portions
+@c of the character (input methods @code{chinese-4corner} and
+@c @code{chinese-sw}, and others).  Since one phonetic spelling typically
+@c corresponds to many different Chinese characters, you must select one of
+@c the alternatives using special Emacs commands.  Keys such as @kbd{C-f},
+@c @kbd{C-b}, @kbd{C-n}, @kbd{C-p}, and digits have special definitions in
+@c this situation, used for selecting among the alternatives.  @key{TAB}
+@c displays a buffer showing all the possibilities.
+中国語や日本語では、より複雑な方法が必要です。
+中国語の入力方式では、まず、中国語の単語の発音表記を入力する
+（とりわけ入力方式@code{chinese-py}）か、
+1文字の各部分部分の列（とりわけ入力方式@code{chinese-4corner}や
+@code{chinese-sw}）を入力します。
+1つの発音表記は、普通、多くの異なる中国語の文字に対応しているので、
+特別なEmacsコマンドを使って候補群から1つを選ぶ必要があります。
+@kbd{C-f}、@kbd{C-b}、@kbd{C-n}、@kbd{C-p}と数字キーは、
+この状況で候補を選ぶために使われる特別な定義になっています。
+@key{TAB}は、すべての候補をバッファに表示します。
+
+@c    In Japanese input methods, first you input a whole word using
+@c phonetic spelling; then, after the word is in the buffer, Emacs converts
+@c it into one or more characters using a large dictionary.  One phonetic
+@c spelling corresponds to many differently written Japanese words, so you
+@c must select one of them; use @kbd{C-n} and @kbd{C-p} to cycle through
+@c the alternatives.
+日本語の入力方式@footnote{【訳注】言語環境が@code{Japanese}のときに
+デフォルトで使用されるLEIMに含まれているもの。
+「ローマ字→ひらがな→漢字」と変換するが、あまい使いやすくはない。
+WNN、かんな、SKKなどを使うには、Emacsの配布とは別の非公式パッチを
+自前で当てる必要がある。
+ただし、これらを用いた場合、日本語を入力できない場面もあることを
+承知しておく必要がある。}
+では、まず、発音表記を使って1つの単語全体を入力します。
+そして、単語がバッファに入ったあとで、
+Emacsは大きな辞書を使って1つ以上の文字へ変換します。
+1つの発音表記は、たくさんの異なる日本語の単語に対応しているので、
+その中から選ぶ必要があります。
+候補を巡回するには、@kbd{C-n}や@kbd{C-p}を使います。
+
+@c   Sometimes it is useful to cut off input method processing so that the
+@c characters you have just entered will not combine with subsequent
+@c characters.  For example, in input method @code{latin-1-postfix}, the
+@c sequence @kbd{e '} combines to form an @samp{e} with an accent.  What if
+@c you want to enter them as separate characters?
+ときには、入力方式での処理を切り離したほうが便利なことがあります。
+そうすれば、入力した文字は後続の入力文字と結合されません。
+たとえば、入力方式@code{latin-1-postfix}では、
+キー列@kbd{e '}は結合されてアクセント付き@samp{e}になります。
+これらを別々の文字として入力したいときはどうするのでしょう？
+
+@c   One way is to type the accent twice; that is a special feature for
+@c entering the separate letter and accent.  For example, @kbd{e ' '} gives
+@c you the two characters @samp{e'}.  Another way is to type another letter
+@c after the @kbd{e}---something that won't combine with that---and
+@c immediately delete it.  For example, you could type @kbd{e e @key{DEL}
+@c '} to get separate @samp{e} and @samp{'}.
+1つの方法は、アクセントを2回打つことです。
+これは、アルファベットとアクセントを別々に入力する特別な機能です。
+たとえば、@kbd{e ' '}は、2つの文字@samp{e'}になります。
+別の方法は、@kbd{e}のあとに結合されない別の文字を打ってから、
+すぐにそれを消すことです。
+たとえば、 @samp{e}と@samp{'}を入力するには、@kbd{e e @key{DEL}'}と打ちます。
+
+@c   Another method, more general but not quite as easy to type, is to use
+@c @kbd{C-\ C-\} between two characters to stop them from combining.  This
+@c is the command @kbd{C-\} (@code{toggle-input-method}) used twice.
+別の方法はより一般的ですが、打つのは簡単ではありません。
+2つの文字のあいだで@kbd{C-\ C-\}を打って、結合を止めます。
+これは、コマンド@kbd{C-\}（@code{toggle-input-method}）を2回使っています。
+@ifinfo
+@c @xref{Select Input Method}.
+@xref{Select Input Method}。
+@end ifinfo
+
+@c   @kbd{C-\ C-\} is especially useful inside an incremental search,
+@c because it stops waiting for more characters to combine, and starts
+@c searching for what you have already entered.
+@kbd{C-\ C-\}は、インクリメンタルサーチの中では特に便利です。
+というのは、結合する文字を待つことを止めて、
+すでに入力したものを探索し始めるからです。
+
+@vindex input-method-verbose-flag
+@vindex input-method-highlight-flag
+@c   The variables @code{input-method-highlight-flag} and
+@c @code{input-method-verbose-flag} control how input methods explain what
+@c is happening.  If @code{input-method-highlight-flag} is non-@code{nil},
+@c the partial sequence is highlighted in the buffer.  If
+@c @code{input-method-verbose-flag} is non-@code{nil}, the list of possible
+@c characters to type next is displayed in the echo area (but not when you
+@c are in the minibuffer).
+ 変数@code{input-method-highlight-flag}と
+@code{input-method-verbose-flag}は、
+入力方式に何が進行中かをどのように表示させるかを制御します。
+@code{input-method-highlight-flag}が@code{nil}以外ならば、
+バッファでは（入力途中の）部分列を強調表示します。
+@code{input-method-verbose-flag}が@code{nil}以外ならば、
+（ミニバッファの中でなければ）
+つぎに打鍵できる文字の一覧をエコー領域に表示します。
+
+@node Select Input Method
+@c @section Selecting an Input Method
+@section 入力方式の選択
+
+@table @kbd
+@item C-\
+@c Enable or disable use of the selected input method.
+選択されている入力方式をオン／オフする。
+
+@item C-x @key{RET} C-\ @var{method} @key{RET}
+@c Select a new input method for the current buffer.
+カレントバッファに対して新しい入力方式を選択する。
+
+@item C-h I @var{method} @key{RET}
+@itemx C-h C-\ @var{method} @key{RET}
+@findex describe-input-method
+@kindex C-h I
+@kindex C-h C-\
+@c Describe the input method @var{method} (@code{describe-input-method}).
+@c By default, it describes the current input method (if any).
+@c This description should give you the full details of how to
+@c use any particular input method.
+入力方式@var{method}について説明する（@code{describe-input-method}）。
+デフォルトでは、（あれば）現在の入力方式を説明する。
+この説明で、ある入力方式の使い方の詳細がわかるはず。
+
+@item M-x list-input-methods
+@c Display a list of all the supported input methods.
+使用可能なすべての入力方式の一覧を表示する。
+@end table
+
+@findex set-input-method
+@vindex current-input-method
+@kindex C-x RET C-\
+@c   To choose an input method for the current buffer, use @kbd{C-x
+@c @key{RET} C-\} (@code{set-input-method}).  This command reads the
+@c input method name with the minibuffer; the name normally starts with the
+@c language environment that it is meant to be used with.  The variable
+@c @code{current-input-method} records which input method is selected.
+カレントバッファに対する入力方式を選ぶには、
+@kbd{C-x @key{RET} C-\}（@code{set-input-method}）を使います。
+このコマンドは、ミニバッファで入力方式名を読みます。
+その名前は、通常、一緒に使うことを意図された言語環境で始まります。
+変数@code{current-input-method}は、どの入力方式を選択したかを記録します。
+  
+@findex toggle-input-method
+@kindex C-\
+@c   Input methods use various sequences of ASCII characters to stand for
+@c non-ASCII characters.  Sometimes it is useful to turn off the input
+@c method temporarily.  To do this, type @kbd{C-\}
+@c (@code{toggle-input-method}).  To reenable the input method, type
+@c @kbd{C-\} again.
+入力方式は、非ASCII文字を入力するために、さまざまなASCII文字の列を使います。
+ときには、一時的に入力方式をオフにできると便利なこともあります。
+そうするには、@kbd{C-\}（@code{toggle-input-method}）と打ちます。
+入力方式をふたたびオンにするには、@kbd{C-\}をもう一度打ちます。
+
+@c   If you type @kbd{C-\} and you have not yet selected an input method,
+@c it prompts for you to specify one.  This has the same effect as using
+@c @kbd{C-x @key{RET} C-\} to specify an input method.
+@kbd{C-\}を打ったときに、入力方式をまだ選択していないと、
+入力方式を指定するように聞いてきます。
+これは、入力方式を指定するために
+@kbd{C-x @key{RET} C-\}を使うのと同じ効果があります。
+
+@vindex default-input-method
+@c   Selecting a language environment specifies a default input method for
+@c use in various buffers.  When you have a default input method, you can
+@c select it in the current buffer by typing @kbd{C-\}.  The variable
+@c @code{default-input-method} specifies the default input method
+@c (@code{nil} means there is none).
+言語環境を選択すると、さまざまなバッファで使う
+デフォルトの入力方式を指定します。
+デフォルトの入力方式を指定してあれば、
+@kbd{C-\}と打てばカレントバッファでそれを選択できます。
+変数@code{default-input-method}は、デフォルトの入力方式を指定します
+（@code{nil}は入力方式なしの意味）。
+
+@findex quail-set-keyboard-layout
+@c   Some input methods for alphabetic scripts work by (in effect)
+@c remapping the keyboard to emulate various keyboard layouts commonly used
+@c for those scripts.  How to do this remapping properly depends on your
+@c actual keyboard layout.  To specify which layout your keyboard has, use
+@c the command @kbd{M-x quail-set-keyboard-layout}.
+アルファベット文字に対するいくつかの入力方式は、
+その文字向けに一般的に使用されるさまざまなキーボード配列を
+エミュレートするようにキーボードを
+（実質的に）マッピングし直すことで動作します。
+マッピングし直す方法は、あなたの実際のキーボード配列に依存します。
+使っているキーボード配列を指定するには、
+コマンド@kbd{M-x quail-set-keyboard-layout}を使います。
+
+@findex list-input-methods
+@c   To display a list of all the supported input methods, type @kbd{M-x
+@c list-input-methods}.  The list gives information about each input
+@c method, including the string that stands for it in the mode line.
+使用可能なすべての入力方式の一覧を表示するには、
+@kbd{M-x list-input-methods}と打ちます。
+この一覧には、モード行に表示される入力方式を表す文字列を含めて、
+各入力方式についての情報が示されます。
+
+@node Multibyte Conversion
+@c @section Unibyte and Multibyte Non-ASCII characters
+@section ユニバイトとマルチバイトの非ASCII文字
+
+@c   When multibyte characters are enabled, character codes 0240 (octal)
+@c through 0377 (octal) are not really legitimate in the buffer.  The valid
+@c non-ASCII printing characters have codes that start from 0400.
+マルチバイト文字が使用可のときには、
+文字コード0240（8進数）から0377（8進数）の文字は、
+実際にそのままではバッファ内に存在しません。
+正しい非ASCII印字文字は、0400から始まるコードになります。
+
+@c   If you type a self-inserting character in the invalid range 0240
+@c through 0377, Emacs assumes you intended to use one of the ISO
+@c Latin-@var{n} character sets, and converts it to the Emacs code
+@c representing that Latin-@var{n} character.  You select @emph{which} ISO
+@c Latin character set to use through your choice of language environment
+0240から0377の不正な範囲の自己挿入文字を打った場合、
+Emacsは、ISO Latin-@var{n}文字集合の1つを使おうとしていると仮定して、
+Latin-@var{n}の文字を表すEmacsのコードに変換します。
+言語環境の選択を介して、@emph{どの}ISO Latin文字集合を使うのか指定できます
+@iftex
+@c (see above).
+（上記参照）。
+@end iftex
+@ifinfo
+@c (@pxref{Language Environments}).
+（@pxref{Language Environments}）。
+@end ifinfo
+@c If you do not specify a choice, the default is Latin-1.
+何も選んでないと、デフォルトはLatin-1です。
+
+@c   The same thing happens when you use @kbd{C-q} to enter an octal code
+@c in this range.
+@kbd{C-q}でこの範囲の8進コードを入力すると、同じことが起こります。
+
+@node Coding Systems
+@c @section Coding Systems
+@c @cindex coding systems
+@section コーディングシステム
+@cindex コーディングシステム
+
+@c   Users of various languages have established many more-or-less standard
+@c coding systems for representing them.  Emacs does not use these coding
+@c systems internally; instead, it converts from various coding systems to
+@c its own system when reading data, and converts the internal coding
+@c system to other coding systems when writing data.  Conversion is
+@c possible in reading or writing files, in sending or receiving from the
+@c terminal, and in exchanging data with subprocesses.
+さまざまな言語を使うユーザーは、
+それらを表現するための標準的な
+コーディングシステムを数多く確立してきました。
+Emacsはこれらのコーディングシステムを内部的には使用しません。
+そのかわり、データを読むときには、
+さまざまなコーディングシステムからEmacs独自のコーディングシステムに変換し、
+データを書くときには、
+内部コーディングシステムから他のコーディングシステムに変換します。
+ファイルの読み書き、端末とのやりとり、サブプロセスとのデータ交換において、
+変換できます。
+
+@c   Emacs assigns a name to each coding system.  Most coding systems are
+@c used for one language, and the name of the coding system starts with the
+@c language name.  Some coding systems are used for several languages;
+@c their names usually start with @samp{iso}.  There are also special
+@c coding systems @code{no-conversion}, @code{raw-text} and
+@c @code{emacs-mule} which do not convert printing characters at all.
+Emacsは各コーディングシステムに名前を付けています。
+多くのコーディングシステムは、1つの言語で使用されるので、
+コーディングシステムの名前は、言語の名前で始まります。
+いくつかのコーディングシステムは、いくつもの言語で使用されます。
+その場合、コーディングシステムの名前は、通常、@samp{iso}で始まります。
+印字文字をまったく変換しない特別なコーディングシステム、
+@code{no-conversion}、@code{raw-text}、@code{emacs-mule}もあります。
+
+@c @cindex end-of-line conversion
+@cindex 行末変換
+@c   In addition to converting various representations of non-ASCII
+@c characters, a coding system can perform end-of-line conversion.  Emacs
+@c handles three different conventions for how to separate lines in a file:
+@c newline, carriage-return linefeed, and just carriage-return.
+非ASCII文字のさまざまな表現形の変換に加えて、
+コーディングシステムは行末変換も行います。
+Emacsは、ファイル内の行の区切り方として、
+3つの異なる変換を扱えます。
+つまり、改行、復帰改行、復帰です。
+
+@table @kbd
+@item C-h C @var{coding} @key{RET}
+@c Describe coding system @var{coding}.
+コーディングシステム@var{coding}を説明する。
+
+@item C-h C @key{RET}
+@c Describe the coding systems currently in use.
+現在使用しているコーディングシステムを説明する。
+
+@item M-x list-coding-systems
+@c Display a list of all the supported coding systems.
+使用可能なすべてのコーディングシステムの一覧を表示する。
+@end table
+
+@kindex C-h C
+@findex describe-coding-system
+@c   The command @kbd{C-h C} (@code{describe-coding-system}) displays
+@c information about particular coding systems.  You can specify a coding
+@c system name as argument; alternatively, with an empty argument, it
+@c describes the coding systems currently selected for various purposes,
+@c both in the current buffer and as the defaults, and the priority list
+@c for recognizing coding systems (@pxref{Recognize Coding}).
+コマンド@kbd{C-h C}（@code{describe-coding-system}）は、
+特定のコーディングシステムについての情報を表示します。
+引数にコーディングシステム名を指定できます。
+あるいは、引数が空のときには、
+カレントバッファに対するものとデフォルトの両方について、
+さまざまな目的のために選択されている現在のコーディングシステムと、
+コーディングシステムを認識するための優先順位表を説明します。
+（@pxref{Recognize Coding}）。
+
+@findex list-coding-systems
+@c   To display a list of all the supported coding systems, type @kbd{M-x
+@c list-coding-systems}.  The list gives information about each coding
+@c system, including the letter that stands for it in the mode line
+@c (@pxref{Mode Line}).
+利用可能なすべてのコーディングシステムの一覧を表示するには、
+@kbd{M-x list-coding-systems}と打ちます。
+モード行に表示される文字を含めて、
+各コーディングシステムについての情報の一覧を表示します（@pxref{Mode Line}）。
+
+@c @cindex end-of-line conversion
+@c @cindex MS-DOS end-of-line conversion
+@c @cindex Macintosh end-of-line conversion
+@cindex 行末変換
+@cindex MS-DOS行末変換
+@cindex Macintosh行末変換
+@c   Each of the coding systems that appear in this list---except for
+@c @code{no-conversion}, which means no conversion of any kind---specifies
+@c how and whether to convert printing characters, but leaves the choice of
+@c end-of-line conversion to be decided based on the contents of each file.
+@c For example, if the file appears to use the sequence carriage-return
+@c linefeed to separate lines, DOS end-of-line conversion will be used.
+いかなる種類の変換も行わない@code{no-conversion}を除いて、
+この一覧に現れる各コーディングシステムは
+印字文字をどのように変換する／しないを指定します。
+しかし、行末変換は、各ファイルの内容に基づいて決定されます。
+たとえば、ファイルが行区切りに復帰改行を使用しているように思われるときには、
+その行末変換を使います。
+
+@c   Each of the listed coding systems has three variants which specify
+@c exactly what to do for end-of-line conversion:
+一覧の各コーディングシステムには、
+どのように行末変換するかを正確に指定する3つの変種があります。
+
+@table @code
+@item @dots{}-unix
+@c Don't do any end-of-line conversion; assume the file uses
+@c newline to separate lines.  (This is the convention normally used
+@c on Unix and GNU systems.)
+行末変換を行わない。
+ファイルでは、行区切りに改行を使用していると仮定する。
+（これは、UNIXとGNUシステムで普通に使用される変換。）
+
+@item @dots{}-dos
+@c Assume the file uses carriage-return linefeed to separate lines, and do
+@c the appropriate conversion.  (This is the convention normally used on
+@c Microsoft systems.@footnote{It is also specified for MIME `text/*'
+@c bodies and in other network transport contexts.  It is different
+@c from the SGML reference syntax record-start/record-end format which
+@c Emacs doesn't support directly.})
+ファイルでは、行区切りに復帰改行を使用していると仮定し、適当な変換を行う。
+（これは、Microsoftシステムで普通に使用される変換。
+@footnote{MIMEの「text/*」の本体や、
+他のネットワーク転送の場面でも指定される。
+Emacsが直接には扱えない
+SGMLの参照構文であるrecord-start/record-end書式とは異なる。}）
+
+@item @dots{}-mac
+@c Assume the file uses carriage-return to separate lines, and do the
+@c appropriate conversion.  (This is the convention normally used on the
+@c Macintosh system.)
+ファイルでは、行区切りに復帰を使用していると仮定し、適当な変換を行う。
+（これは、Machintoshシステムで普通に使用される変換。）
+@end table
+
+@c   These variant coding systems are omitted from the
+@c @code{list-coding-systems} display for brevity, since they are entirely
+@c predictable.  For example, the coding system @code{iso-latin-1} has
+@c variants @code{iso-latin-1-unix}, @code{iso-latin-1-dos} and
+@c @code{iso-latin-1-mac}.
+これらのコーディングシステムの変種は、
+完全に予想できるので@code{list-coding-systems}の表示からは
+簡潔にするために除かれています。
+たとえば、コーディングシステム@code{iso-latin-1}には、
+@code{iso-latin-1-unix}、@code{iso-latin-1-dos}、@code{iso-latin-1-mac}
+の変種があります。
+
+@c   The coding system @code{raw-text} is good for a file which is mainly
+@c ASCII text, but may contain byte values above 127 which are not meant to
+@c encode non-ASCII characters.  With @code{raw-text}, Emacs copies those
+@c byte values unchanged, and sets @code{enable-multibyte-characters} to
+@c @code{nil} in the current buffer so that they will be interpreted
+@c properly.  @code{raw-text} handles end-of-line conversion in the usual
+@c way, based on the data encountered, and has the usual three variants to
+@c specify the kind of end-of-line conversion to use.
+コーディングシステム@code{raw-text}は、
+主にASCIIテキストのファイルに適していますが、
+ファイルには、非ASCII文字の符号を意味しない127を越えるバイト値が
+含まれるかもしれません。
+@code{raw-text}では、
+Emacsは、それらのバイトが適切に解釈されるように値を変更しないでコピーし、
+カレントバッファの
+@code{enable-multibyte-characters}に@code{nil}を設定します。
+@code{raw-text}は、出会ったデータに基づく普通の方法で行末変換を処理し、
+使用する行末変換を指定する3つの変種を持ちます。
+
+@c   In contrast, the coding system @code{no-conversion} specifies no
+@c character code conversion at all---none for non-ASCII byte values and
+@c none for end of line.  This is useful for reading or writing binary
+@c files, tar files, and other files that must be examined verbatim.  It,
+@c too, sets @code{enable-multibyte-characters} to @code{nil}.
+対照的に、コーディングシステム@code{no-conversion}は、
+非ASCIIバイト値と行末に対して、いかなる文字コード変換も指定しません。
+これは、バイナリファイル、tarファイル、
+そのまま処理する必要があるその他のファイルを読み書きするのに便利です。
+これも、@code{enable-multibyte-characters}に@code{nil}を設定します。
+
+@c   The easiest way to edit a file with no conversion of any kind is with
+@c the @kbd{M-x find-file-literally} command.  This uses
+@c @code{no-conversion}, and also suppresses other Emacs features that
+@c might convert the file contents before you see them.  @xref{Visiting}.
+いかなる種類の変換もしないでファイルを編集するもっとも簡単な方法は、
+@kbd{M-x find-file-literally}コマンドを使うことです。
+このコマンドは、@code{no-conversion}を使い、
+あなたがファイルを見るまえにファイルの内容を
+変換するかもしれないEmacsのその他の機能を抑制します。
+@xref{Visiting}。
+
+@c   The coding system @code{emacs-mule} means that the file contains
+@c non-ASCII characters stored with the internal Emacs encoding.  It
+@c handles end-of-line conversion based on the data encountered, and has
+@c the usual three variants to specify the kind of end-of-line conversion.
+コーディングシステム@code{emacs-mule}は、
+Emacs内部の符号化のままで格納された非ASCII文字を
+含むファイルであることを意味します。
+これは、出会ったデータに基づいて行末変換を扱い、
+行末変換の種類を指定する通常の3つの変種を持ちます。
+
+@node Recognize Coding
+@c @section Recognizing Coding Systems
+@section コーディングシステムの認識
+
+@c   Most of the time, Emacs can recognize which coding system to use for
+@c any given file---once you have specified your preferences.
+一度自分の好みを指定しておけば、ほとんどの場合、Emacsは、
+与えられたファイルに対してどのコーディングシステムを使うか認識できます。 
+
+@c   Some coding systems can be recognized or distinguished by which byte
+@c sequences appear in the data.  However, there are coding systems that
+@c cannot be distinguished, not even potentially.  For example, there is no
+@c way to distinguish between Latin-1 and Latin-2; they use the same byte
+@c values with different meanings.
+いくつかのコーディングシステムは、
+データ内にどのようなバイト列が現れたかで、認識したり区別できます。
+しかし、区別できないコーディングシステムや
+その可能性もないコーディングシステムもあります。
+たとえば、Latin-1とLatin-2を区別する方法はありません。
+これらは同じバイト値を異なる意味で使用しています。
+
+@c   Emacs handles this situation by means of a priority list of coding
+@c systems.  Whenever Emacs reads a file, if you do not specify the coding
+@c system to use, Emacs checks the data against each coding system,
+@c starting with the first in priority and working down the list, until it
+@c finds a coding system that fits the data.  Then it converts the file
+@c contents assuming that they are represented in this coding system.
+Emacsは、コーディングシステムの優先順位表を用いてこの事態を処理します。
+使用するコーディングシステムを指定しなければ、
+Emacsはファイルを読むときはいつでも、
+優先順位のもっとも高いものから始めて順に下りながら、
+データに合うコーディングシステムをみつけるまで
+各コーディングシステムに対してデータを検査します。
+そして、ファイルはそのコーディングシステムで表現されていると仮定して、
+ファイルの内容を変換します。
+
+@c   The priority list of coding systems depends on the selected language
+@c environment (@pxref{Language Environments}).  For example, if you use
+@c French, you probably want Emacs to prefer Latin-1 to Latin-2; if you use
+@c Czech, you probably want Latin-2 to be preferred.  This is one of the
+@c reasons to specify a language environment.
+コーディングシステムの優先順位表は、選択されている言語環境に依存します
+（@pxref{Language Environments}）。
+たとえば、フランス語を使うのなら、たぶん、
+EmacsにはLatin-2よりLatin-1を選んでほしいでしょう。
+チェコ語を使うなら、たぶん、Latin-2のほうがよいでしょう。
+これが、言語環境を指定する理由の1つです。 
+
+@findex prefer-coding-system
+@c   However, you can alter the priority list in detail with the command
+@c @kbd{M-x prefer-coding-system}.  This command reads the name of a coding
+@c system from the minibuffer, and adds it to the front of the priority
+@c list, so that it is preferred to all others.  If you use this command
+@c several times, each use adds one element to the front of the priority
+@c list.
+しかし、コマンド@kbd{M-x prefer-coding-system}を使って、
+優先順位表の詳細を変更できます。
+このコマンドはミニバッファからコーディングシステムの名前を読み、
+それを優先順位表の先頭に追加して、他のすべてのものより優先するようにします。
+このコマンドを数回使うと、
+使用するごとに優先順位表の先頭に1つの要素が追加されます。
+
+@c   If you use a coding system that specifies the end-of-line conversion
+@c type, such as @code{iso-8859-1-dos}, what that means is that Emacs
+@c should attempt to recognize @code{iso-8859-1} with priority, and should
+@c use DOS end-of-line conversion in case it recognizes @code{iso-8859-1}.
+@code{iso-8859-1-dos}のような行末変換を指定したコーディングシステムを使うと、
+@code{iso-8859-1}を優先して認識し、その場合にはDOSの行末変換を使うことを
+Emacsに指示することになります。
+
+@vindex file-coding-system-alist
+@c   Sometimes a file name indicates which coding system to use for the
+@c file.  The variable @code{file-coding-system-alist} specifies this
+@c correspondence.  There is a special function
+@c @code{modify-coding-system-alist} for adding elements to this list.  For
+@c example, to read and write all @samp{.txt} files using the coding system
+@c @code{china-iso-8bit}, you can execute this Lisp expression:
+ときには、ファイルに対して使用するコーディングシステムを
+ファイル名が示していることがあります。
+変数@code{file-coding-system-alist}は、この対応関係を指定します。
+このリストに要素を追加する特別な関数
+@code{modify-coding-system-alist}があります。
+たとえば、すべての@samp{.txt}の読み書きに、
+コーディングシステム@code{china-iso-8bit}を使用したいなら、
+つぎのLisp式を実行します。
+
+@smallexample
+(modify-coding-system-alist 'file "\\.txt\\'" 'china-iso-8bit)
+@end smallexample
+
+@noindent
+@c The first argument should be @code{file}, the second argument should be
+@c a regular expression that determines which files this applies to, and
+@c the third argument says which coding system to use for these files.
+始めの引数は@code{file}、
+第2引数はこれを適用するファイルを決定する正規表現、
+第3引数はこれらのファイルに対して使用するコーディングシステムです。
+
+@vindex inhibit-eol-conversion
+@c   Emacs recognizes which kind of end-of-line conversion to use based on
+@c the contents of the file: if it sees only carriage-returns, or only
+@c carriage-return linefeed sequences, then it chooses the end-of-line
+@c conversion accordingly.  You can inhibit the automatic use of
+@c end-of-line conversion by setting the variable @code{inhibit-eol-conversion}
+@c to non-@code{nil}.
+Emacsは、ファイルの内容に基づいて、使用する行末変換の種類を認識します。
+復帰のみ、あるいは、復帰改行の列のみであれば、
+対応する行末変換を選択します。
+変数@code{inhibit-eol-conversion}に@code{nil}以外を設定すると、
+行末変換の自動的な使用を禁止できます。
+
+@vindex coding
+@c   You can specify the coding system for a particular file using the
+@c @samp{-*-@dots{}-*-} construct at the beginning of a file, or a local
+@c variables list at the end (@pxref{File Variables}).  You do this by
+@c defining a value for the ``variable'' named @code{coding}.  Emacs does
+@c not really have a variable @code{coding}; instead of setting a variable,
+@c it uses the specified coding system for the file.  For example,
+@c @samp{-*-mode: C; coding: latin-1;-*-} specifies use of the Latin-1
+@c coding system, as well as C mode.  If you specify the coding explicitly
+@c in the file, that overrides @code{file-coding-system-alist}.
+ファイルの先頭の@samp{-*-@dots{}-*-}や、
+ファイルの最後のローカル変数リストを使って、
+個々のファイルに対してコーディングシステムを指定できます
+（@pxref{File Variables}）。
+これを行うには、@code{coding}という名前の『変数』に値を定義します。
+Emacsには、変数@code{coding}は実際にはありません。
+変数を設定するかわりに、
+ファイルに対して指定されたコーディングシステムを使います。
+たとえば、@samp{-*-mode: C; coding: latin-1;-*-}は、
+Cモードを指定するとともに、Latin-1のコーディングシステムの使用を指定します。
+ファイルでコーディングシステムを明示的に指定した場合、
+それは@code{file-coding-system-alist}に優先します。
+
+@vindex auto-coding-alist
+@c   The variable @code{auto-coding-alist} is the strongest way to specify
+@c the coding system for certain patterns of file names; this variable even
+@c overrides @samp{-*-coding:-*-} tags in the file itself.  Emacs uses this
+@c feature for tar and archive files, to prevent Emacs from being confused
+@c by a @samp{-*-coding:-*-} tag in a member of the archive and thinking it
+@c applies to the archive file as a whole.
+変数@code{auto-coding-alist}は、特定のパターンのファイル名に対して
+コーディングシステムを指定するもっとも強い方法です。
+この変数は、ファイル自身の@samp{-*-coding:-*-}にさえも優先します。
+Emacsはtarファイルやアーカイブファイルに対してこの機能を使います。
+アーカイブ内のファイルの中にある@samp{-*-coding:-*-}で混乱して、
+ファイル全体にコーディングシステムを適用してしまうことを防ぐのです。
+
+@vindex buffer-file-coding-system
+@c   Once Emacs has chosen a coding system for a buffer, it stores that
+@c coding system in @code{buffer-file-coding-system} and uses that coding
+@c system, by default, for operations that write from this buffer into a
+@c file.  This includes the commands @code{save-buffer} and
+@c @code{write-region}.  If you want to write files from this buffer using
+@c a different coding system, you can specify a different coding system for
+@c the buffer using @code{set-buffer-file-coding-system} (@pxref{Specify
+@c Coding}).
+Emacsがバッファに対するコーディングシステムを一度選択すると、
+そのコーディングシステムを@code{buffer-file-coding-system}に入れておき、
+このバッファからファイルに書く操作では、
+デフォルトでこのコーディングシステムを使います。
+これには、コマンド@code{save-buffer}や@code{write-region}も含まれます。
+異なるコーディングシステムを用いてこのバッファからファイルに書きたいときには、
+@code{set-buffer-file-coding-system}を使って、
+そのバッファに対して異なるコーディングシステムを指定します
+（@pxref{Specify Coding}）。
+
+@vindex sendmail-coding-system
+@c   When you send a message with Mail mode (@pxref{Sending Mail}), Emacs has
+@c four different ways to determine the coding system to use for encoding
+@c the message text.  It tries the buffer's own value of
+@c @code{buffer-file-coding-system}, if that is non-@code{nil}.  Otherwise,
+@c it uses the value of @code{sendmail-coding-system}, if that is
+@c non-@code{nil}.  The third way is to use the default coding system for
+@c new files, which is controlled by your choice of language environment,
+@c if that is non-@code{nil}.  If all of these three values are @code{nil},
+@c Emacs encodes outgoing mail using the Latin-1 coding system.
+メイル（mail）モード（@pxref{Sending Mail}）でメッセージを送るとき、
+Emacsには、メッセージテキストの符号化に使うコーディングシステムを決定する
+異なる方法が4つあります。
+バッファの@code{buffer-file-coding-system}が@code{nil}以外ならば、
+その値を試します。
+さもなければ、@code{sendmail-coding-system}の値が@code{nil}以外ならば、
+その値を使います。
+3つめの方法は、新しいファイルに対するデフォルトの
+コーディングシステムが@code{nil}以外ならば、それを使います。
+この値は、言語環境の選択で制御されます。
+これらの3つの値がすべて@code{nil}ならば、
+Emacsは、Latin-1のコーディングシステムを使用して送出メイルを符号化します。
+
+@vindex rmail-decode-mime-charset
+@c   When you get new mail in Rmail, each message is translated
+@c automatically from the coding system it is written in---as if it were a
+@c separate file.  This uses the priority list of coding systems that you
+@c have specified.  If a MIME message specifies a character set, Rmail
+@c obeys that specification, unless @code{rmail-decode-mime-charset} is
+@c @code{nil}.
+rmailで新しいメイルを受けとったとき、
+各メッセージが別々のファイルであるかのように、
+各メッセージは自動的にそのメイルが書かれたコーディングシステムで変換されます。
+これには、指定したコーディングシステムの優先順位表を使います。
+MIMEメッセージが文字集合を指定するときには、
+@code{rmail-decode-mime-charset}が@code{nil}でない限り、
+rmailはその指定に従います。
+
+@vindex rmail-file-coding-system
+@c   For reading and saving Rmail files themselves, Emacs uses the coding
+@c system specified by the variable @code{rmail-file-coding-system}.  The
+@c default value is @code{nil}, which means that Rmail files are not
+@c translated (they are read and written in the Emacs internal character
+@c code).
+rmailファイル自身を読んだり保存したりするときには、
+Emacsは、変数@code{rmail-file-coding-system}で指定された
+コーディングシステムを使います。
+そのデフォルト値は、@code{nil}です。
+rmailファイルは変換しないという意味です
+（rmailファイルは、Emacsの内部文字コードで読み書きされる。）
+
+@node Specify Coding
+@c @section Specifying a Coding System
+@section コーディングシステムの指定
+
+@c   In cases where Emacs does not automatically choose the right coding
+@c system, you can use these commands to specify one:
+Emacsが自動的に正しいコーディングシステムを選択しない場合には、
+コーディングシステムを指定するつぎのコマンドを使用できます。
+
+@table @kbd
+@item C-x @key{RET} f @var{coding} @key{RET}
+@c Use coding system @var{coding} for the visited file
+@c in the current buffer.
+カレントバッファに訪問したファイルに
+コーディングシステム@var{coding}を使う。
+
+@item C-x @key{RET} c @var{coding} @key{RET}
+@c Specify coding system @var{coding} for the immediately following
+@c command.
+このコマンドの直後に続くコマンドに対して
+コーディングシステム@var{coding}を指定する。
+
+@item C-x @key{RET} k @var{coding} @key{RET}
+@c Use coding system @var{coding} for keyboard input.
+キーボード入力に対してコーディングシステム@var{coding}を使用する。
+
+@item C-x @key{RET} t @var{coding} @key{RET}
+@c Use coding system @var{coding} for terminal output.
+端末出力に対してコーディングシステム@var{coding}を使用する。
+
+@item C-x @key{RET} p @var{input-coding} @key{RET} @var{output-coding} @key{RET}
+@c Use coding systems @var{input-coding} and @var{output-coding} for
+@c subprocess input and output in the current buffer.
+カレントバッファでのサブプロセスの入力と出力に
+コーディングシステム@var{input-coding}と@var{output-coding}を使用する。
+
+@item C-x @key{RET} x @var{coding} @key{RET}
+@c Use coding system @var{coding} for transferring selections to and from
+@c other programs through the window system.
+ウィンドウシステムを介した他のプログラムとのセレクションの交換には、
+コーディングシステム@var{coding}を使用する。
+
+@item C-x @key{RET} X @var{coding} @key{RET}
+@c Use coding system @var{coding} for transferring @emph{one}
+@c selection---the next one---to or from the window system.
+ウィンドウシステムで@emph{1つ}のセレクションの交換には、
+コーディングシステム@var{coding}を使用する。
+@end table
+
+@kindex C-x RET f
+@findex set-buffer-file-coding-system
+@c   The command @kbd{C-x @key{RET} f} (@code{set-buffer-file-coding-system})
+@c specifies the file coding system for the current buffer---in other
+@c words, which coding system to use when saving or rereading the visited
+@c file.  You specify which coding system using the minibuffer.  Since this
+@c command applies to a file you have already visited, it affects only the
+@c way the file is saved.
+コマンド@kbd{C-x @key{RET} f}（@code{set-buffer-file-coding-system}）は
+カレントバッファに対してファイルコーディングシステムを指定します。
+いいかえれば、訪問したファイルを保存したりふたたび読む込むときに
+使うコーディングシステムです。
+コーディングシステムはミニバッファを使って指定します。
+このコマンドは、すでに訪問したファイルに作用するので、
+ファイルを保存するときにしか影響しません。
+
+@kindex C-x RET c
+@findex universal-coding-system-argument
+@c   Another way to specify the coding system for a file is when you visit
+@c the file.  First use the command @kbd{C-x @key{RET} c}
+@c (@code{universal-coding-system-argument}); this command uses the
+@c minibuffer to read a coding system name.  After you exit the minibuffer,
+@c the specified coding system is used for @emph{the immediately following
+@c command}.
+ファイルに対するコーディングシステムを指定する別の方法は、
+ファイルを訪問するときです。
+まずコマンド@kbd{C-x @key{RET} c}
+（@code{universal-coding-system-argument}）を使います。
+このコマンドは、ミニバッファを使ってコーディングシステム名を読みます。
+ミニバッファを出たあと、
+@emph{直後のコマンド}に対して指定したコーディングシステムが使用されます。
+
+@c   So if the immediately following command is @kbd{C-x C-f}, for example,
+@c it reads the file using that coding system (and records the coding
+@c system for when the file is saved).  Or if the immediately following
+@c command is @kbd{C-x C-w}, it writes the file using that coding system.
+@c Other file commands affected by a specified coding system include
+@c @kbd{C-x C-i} and @kbd{C-x C-v}, as well as the other-window variants of
+@c @kbd{C-x C-f}.
+ですから、たとえば、その直後のコマンドが@kbd{C-x C-f}ならば、
+そのコーディングシステムを使ってファイルを読みます
+（そして、ファイルを保存するときのために
+そのコーディングシステムを記録します）。 
+あるいは、その直後のコマンドが@kbd{C-x C-w}ならば、
+そのコーディングシステムを使ってファイルに書きます。
+コーディングシステムを指定することで、影響される他のファイルコマンドは、
+@kbd{C-x C-i}と@kbd{C-x C-v}、および、
+別のウィンドウを使う@kbd{C-x C-f}の変形です。
+
+@c   @kbd{C-x @key{RET} c} also affects commands that start subprocesses,
+@c including @kbd{M-x shell} (@pxref{Shell}).
+@kbd{C-x @key{RET} c}は、@kbd{M-x shell}（@pxref{Shell}）を含む
+サブプロセスを開始するコマンドにも影響します。
+
+@c   However, if the immediately following command does not use the coding
+@c system, then @kbd{C-x @key{RET} c} ultimately has no effect.
+しかしながら、その直後のコマンドがコーディングシステムを使用しないなら、
+@kbd{C-x @key{RET} c}は最終的には何の効果もありません。
+
+@c   An easy way to visit a file with no conversion is with the @kbd{M-x
+@c find-file-literally} command.  @xref{Visiting}.
+ファイルを変換しないで訪問するもっとも簡単な方法は、
+@kbd{M-x find-file-literally}コマンドです。
+@xref{Visiting}。
+
+@vindex default-buffer-file-coding-system
+@c   The variable @code{default-buffer-file-coding-system} specifies the
+@c choice of coding system to use when you create a new file.  It applies
+@c when you find a new file, and when you create a buffer and then save it
+@c in a file.  Selecting a language environment typically sets this
+@c variable to a good choice of default coding system for that language
+@c environment.
+ 変数@code{default-buffer-file-coding-system}は、
+新しいファイルを作成するときのコーディングシステムの選択を指定します。
+この変数は、新規作成のファイルを訪問するとき、あるいは、
+バッファを作成してそれをファイルに保存するときに適用されます。
+言語環境を選択すると、典型的には、
+言語環境に対して最適のデフォルトのコーディングシステムを
+この変数に設定します。
+
+@kindex C-x RET t
+@findex set-terminal-coding-system
+@c   The command @kbd{C-x @key{RET} t} (@code{set-terminal-coding-system})
+@c specifies the coding system for terminal output.  If you specify a
+@c character code for terminal output, all characters output to the
+@c terminal are translated into that coding system.
+コマンド@kbd{C-x @key{RET} t}（@code{set-terminal-coding-system}）は
+端末出力に対するコーディングシステムを指定します。
+端末出力のコーディングシステムを指定すると、
+端末へのすべての文字出力はそのコーディングシステムに翻訳されます。
+
+@c   This feature is useful for certain character-only terminals built to
+@c support specific languages or character sets---for example, European
+@c terminals that support one of the ISO Latin character sets.  You need to
+@c specify the terminal coding system when using multibyte text, so that
+@c Emacs knows which characters the terminal can actually handle.
+この機能は、特定の言語や文字集合向けに作られたある種の文字端末には便利です。
+たとえば、ISO Latin 文字集合の1つを扱えるヨーロッパの端末です。 
+マルチバイトテキストを使っているときには、
+Emacsが端末で実際に扱える文字を知るために、
+端末コーディングシステムを指定する必要があります。
+
+@c   By default, output to the terminal is not translated at all, unless
+@c Emacs can deduce the proper coding system from your terminal type.
+Emacsがあなたの端末の正しいコーディングシステムを推測できない限り、
+デフォルトでは、端末出力はまったく変換しません。
+
+@kindex C-x RET k
+@findex set-keyboard-coding-system
+@c   The command @kbd{C-x @key{RET} k} (@code{set-keyboard-coding-system})
+@c specifies the coding system for keyboard input.  Character-code
+@c translation of keyboard input is useful for terminals with keys that
+@c send non-ASCII graphic characters---for example, some terminals designed
+@c for ISO Latin-1 or subsets of it.
+コマンド@kbd{C-x @key{RET} k}（@code{set-keyboard-coding-system}）は
+キーボード入力に対するコーディングシステムを指定します。
+キーボードから入力した文字コードの変換は、
+非ASCII図形文字を送出するキーを有する端末には便利です。
+たとえば、いくつかの端末は、ISO Latin-1やその部分集合向けに設計されています。
+
+@c   By default, keyboard input is not translated at all.
+デフォルトでは、キーボード入力はまったく変換しません。
+
+@c   There is a similarity between using a coding system translation for
+@c keyboard input, and using an input method: both define sequences of
+@c keyboard input that translate into single characters.  However, input
+@c methods are designed to be convenient for interactive use by humans, and
+@c the sequences that are translated are typically sequences of ASCII
+@c printing characters.  Coding systems typically translate sequences of
+@c non-graphic characters.
+コーディングシステムを使用してキーボード入力を変換することと、
+入力方式の使用には似たところがあります。
+どちらも、1つの文字に変換するキーボード入力列を定義しています。
+しかしながら、入力方式は人が対話的に使用するのに便利なように設計されていて、
+変換される列は典型的にはASCII印字文字の列です。
+コーディングシステムは、典型的には非図形文字の列を変換します。
+
+@kindex C-x RET x
+@kindex C-x RET X
+@findex set-selection-coding-system
+@findex set-next-selection-coding-system
+@c   The command @kbd{C-x @key{RET} x} (@code{set-selection-coding-system})
+@c specifies the coding system for sending selected text to the window
+@c system, and for receiving the text of selections made in other
+@c applications.  This command applies to all subsequent selections, until
+@c you override it by using the command again.  The command @kbd{C-x
+@c @key{RET} X} (@code{set-next-selection-coding-system}) specifies the
+@c coding system for the next selection made in Emacs or read by Emacs.
+コマンド@kbd{C-x @key{RET} x}（@code{set-selection-coding-system}）は、
+選択されたテキストをウィンドウシステムへ送るとき、および、
+他のアプリケーションで作られたセレクションのテキストを受け取るときの
+コーディングシステムを指定します。
+このコマンドは、再設定しない限り、以降のすべてのセレクションに作用します。
+コマンド@kbd{C-x @key{RET} X}（@code{set-next-selection-coding-system}）は、
+Emacsが作る／読むつぎのセレクションのコーディングシステムを指定します。
+
+@kindex C-x RET p
+@findex set-buffer-process-coding-system
+@c   The command @kbd{C-x @key{RET} p} (@code{set-buffer-process-coding-system})
+@c specifies the coding system for input and output to a subprocess.  This
+@c command applies to the current buffer; normally, each subprocess has its
+@c own buffer, and thus you can use this command to specify translation to
+@c and from a particular subprocess by giving the command in the
+@c corresponding buffer.
+コマンド@kbd{C-x @key{RET} p}（@code{set-buffer-process-coding-system}）は、
+サブプロセスの入出力に対するコーディングシステムを指定します。
+このコマンドはカレントバッファに作用します。
+通常、各サブプロセスはそれ自身のバッファを持ちます。
+ですから、各サブプロセスの入出力の変換を指定するには、
+対応するバッファでこのコマンドを使用します。
+
+@c   By default, process input and output are not translated at all.
+デフォルトでは、プロセスの入出力はまったく変換しません。
+
+@vindex file-name-coding-system
+@c   The variable @code{file-name-coding-system} specifies a coding system
+@c to use for encoding file names.  If you set the variable to a coding
+@c system name (as a Lisp symbol or a string), Emacs encodes file names
+@c using that coding system for all file operations.  This makes it
+@c possible to use non-ASCII characters in file names---or, at least, those
+@c non-ASCII characters which the specified coding system can encode.
+変数@code{file-name-coding-system}は、
+ファイル名を符号化するためのコーディングシステムを指定します。
+この変数に（Lispシンボルや文字列で）コーディングシステム名を設定すると、
+Emacsは、すべてのファイル操作に対してそのコーディングシステムを
+使ってファイル名を符号化します。
+これは、ファイル名に非ASCII文字を使うことを可能にしています。
+あるいは、少なくとも、指定したコーディングシステムで符号化できる
+非ASCII文字を使えるはずです。
+
+@c   If @code{file-name-coding-system} is @code{nil}, Emacs uses a default
+@c coding system determined by the selected language environment.  In the
+@c default language environment, any non-ASCII characters in file names are
+@c not encoded specially; they appear in the file system using the internal
+@c Emacs representation.
+@code{file-name-coding-system}が@code{nil}ならば、
+Emacsは、選択されている言語環境で決まるデフォルトのコーディングシステムを
+使います。
+デフォルトの言語環境では、
+ファイル名の中の非ASCII文字は特別に符号化しません。
+Emacsの内部表現でファイルシステム上に現れます。
+
+@c   @strong{Warning:} if you change @code{file-name-coding-system} (or the
+@c language environment) in the middle of an Emacs session, problems can
+@c result if you have already visited files whose names were encoded using
+@c the earlier coding system and cannot be encoded (or are encoded
+@c differently) under the new coding system.  If you try to save one of
+@c these buffers under the visited file name, saving may use the wrong file
+@c name, or it may get an error.  If such a problem happens, use @kbd{C-x
+@c C-w} to specify a new file name for that buffer.
+@strong{警告：}@code{ }Emacsセッションの途中で@code{file-name-coding-system}
+（や言語環境）を変更すると、問題となる場合があります。
+つまり、それまでのコーディングシステムで符号化された名前のファイルを
+すでに訪問していて、新しいコーディングシステムではその名前を
+符号化できない（あるいは異なって符号化される）ときです。
+そのようなバッファを訪問先ファイル名で保存しようとすると、
+まちがった名前のファイルに保存されるか、エラーになります。
+そのような問題が発生した場合には、 @kbd{C-x C-w}を使って、
+そのバッファに新しいファイル名を指定します。
+
+@node Fontsets
+@c @section Fontsets
+@c @cindex fontsets
+@section フォントセット
+@cindex フォントセット
+
+@c   A font for X Windows typically defines shapes for one alphabet or
+@c script.  Therefore, displaying the entire range of scripts that Emacs
+@c supports requires a collection of many fonts.  In Emacs, such a
+@c collection is called a @dfn{fontset}.  A fontset is defined by a list of
+@c fonts, each assigned to handle a range of character codes. 
+Xウィンドウシステムのフォントは、典型的には、
+1つのアルファベットや文字集合の形を定義しています。
+したがって、Emacsが扱える文字の範囲全体を表示するには、
+たくさんのフォントを集めたものが必要です。
+Emacsでは、そういったフォントを集めたものを
+@dfn{フォントセット}（fontset）と呼びます。
+フォントセットは、ある文字コード範囲を扱うフォントのリストで定義されます。
+
+@c   Each fontset has a name, like a font.  The available X fonts are
+@c defined by the X server; fontsets, however, are defined within Emacs
+@c itself.  Once you have defined a fontset, you can use it within Emacs by
+@c specifying its name, anywhere that you could use a single font.  Of
+@c course, Emacs fontsets can use only the fonts that the X server
+@c supports; if certain characters appear on the screen as hollow boxes,
+@c this means that the fontset in use for them has no font for those
+@c characters.
+各フォントセットには、フォントと同様に名前があります。
+使用可能なXのフォントは、Xサーバーが定義します。
+しかし、フォントセットはEmacsの中で定義されます。
+いったんフォントセットを定義すれば、フォントを使える場面ではどこでも、
+その名前を指定してEmacs内のフォントセットを使用できます。
+もちろん、Emacsのフォントセットでは、Xサーバーで使えるフォントだけを使えます。
+ある文字が画面で中抜きの箱で表示されたなら、
+その文字に使用したフォントセットには、
+その文字に対するフォントがないことを意味します。
+
+@c   Emacs creates two fontsets automatically: the @dfn{standard fontset}
+@c and the @dfn{startup fontset}.  The standard fontset is most likely to
+@c have fonts for a wide variety of non-ASCII characters; however, this is
+@c not the default for Emacs to use.  (By default, Emacs tries to find a
+@c font which has bold and italic variants.)  You can specify use of the
+@c standard fontset with the @samp{-fn} option, or with the @samp{Font} X
+@c resource (@pxref{Font X}).  For example,
+Emacsは、@dfn{標準フォントセット}と@dfn{スタートアップフォントセット}の
+2つのフォントセットを自動的に作ります。
+標準フォントセットは、非ASCII文字向けの広い範囲のフォントを
+もっとも持ちそうなものです。
+しかし、これは、Emacsが使うデフォルトではありません。
+（デフォルトでは、
+Emacsはボールドとイタリックの変種のフォントをみつけようとする。）
+オプション@samp{-fn}やXのリソース@samp{Font}（@pxref{Font X}）で
+使用する標準フォントセットを指定できます。
+たとえば、つぎのようにします。
+
+@example
+emacs -fn fontset-standard
+@end example
+
+@c   A fontset does not necessarily specify a font for every character
+@c code.  If a fontset specifies no font for a certain character, or if it
+@c specifies a font that does not exist on your system, then it cannot
+@c display that character properly.  It will display that character as an
+@c empty box instead.
+フォントセットが、すべての文字コードに対するフォントを
+指定する必要はありません。
+フォントセットが、ある文字に対してフォントを指定していない、あるいは、
+システムに存在しないフォントを指定している場合には、
+その文字を正しく表示できません。
+そのかわりに、中抜きの箱を表示します。 
+
+@vindex highlight-wrong-size-font
+@c   The fontset height and width are determined by the ASCII characters
+@c (that is, by the font used for ASCII characters in that fontset).  If
+@c another font in the fontset has a different height, or a different
+@c width, then characters assigned to that font are clipped to the
+@c fontset's size.  If @code{highlight-wrong-size-font} is non-@code{nil},
+@c a box is displayed around these wrong-size characters as well.
+フォントセットの高さと幅は、ASCII文字で決定されます
+（つまり、そのフォントセット内でASCII文字用に使われるフォント）。
+フォントセットのあるフォントが異なる高さや幅を持つ場合には、
+そのフォントを割り当てられた文字は、
+フォントセットの大きさに切り詰められます。
+@code{highlight-wrong-size-font}が@code{nil}以外ならば、
+これらのまちがった大きさの文字は箱で囲まれて表示されます。
+
+@node Defining Fontsets
+@c @section Defining fontsets
+@section フォントセットの定義方法
+
+@vindex standard-fontset-spec
+@cindex 標準フォントセット
+@c @cindex standard fontset
+@c   Emacs creates a standard fontset automatically according to the value
+@c of @code{standard-fontset-spec}.  This fontset's name is
+Emacsは@code{standard-fontset-spec}の値に従って、
+自動的に標準フォントセットを作ります。
+フォントセットの名前はつぎのとおりです。
+
+@example
+-*-fixed-medium-r-normal-*-16-*-*-*-*-*-fontset-standard
+@end example
+
+@noindent
+@c or just @samp{fontset-standard} for short.
+または、省略して@samp{fontset-standard}です。
+
+@c   Bold, italic, and bold-italic variants of the standard fontset are
+@c created automatically.  Their names have @samp{bold} instead of
+@c @samp{medium}, or @samp{i} instead of @samp{r}, or both.
+標準フォントセットのボールド、イタリック、ボールドイタリックの変種も
+自動的に作られます。
+それらの名前は、@samp{medium}のかわりに@samp{bold}、
+@samp{r}のかわりに@samp{i}、あるいは、両方ともそのようになります。
+
+@c @cindex startup fontset
+@cindex スタートアップフォントセット
+@c   If you specify a default ASCII font with the @samp{Font} resource or
+@c the @samp{-fn} argument, Emacs generates a fontset from it
+@c automatically.  This is the @dfn{startup fontset} and its name is
+@c @code{fontset-startup}.  It does this by replacing the @var{foundry},
+@c @var{family}, @var{add_style}, and @var{average_width} fields of the
+@c font name with @samp{*}, replacing @var{charset_registry} field with
+@c @samp{fontset}, and replacing @var{charset_encoding} field with
+@c @samp{startup}, then using the resulting string to specify a fontset.
+リソース@samp{Font}やオプション@samp{-fn}で、
+デフォルトのASCIIフォントを指定すると、
+Emacsはそれから自動的にフォントセットを生成します。
+これが、@dfn{スタートアップフォントセット}で、
+その名前は@code{fontset-startup}です。
+これは、フォント名のフィールド、@var{foundry}、@var{family}、
+@var{add_style}、@var{average_width}を@samp{*}で、
+@var{charset_registry}を@samp{fontset}で、
+@var{charset_encoding}を@samp{startup}で置き換えて得られた文字列を
+フォントセットの指定に使用します。
+
+@c   For instance, if you start Emacs this way,
+たとえば、Emacsをつぎのように起動します。
+
+@example
+emacs -fn "*courier-medium-r-normal--14-140-*-iso8859-1"
+@end example
+
+@noindent
+@c Emacs generates the following fontset and uses it for the initial X
+@c window frame:
+Emacsがつぎのフォントセットを生成して、
+Xウィンドウの初期フレームに使います。
+
+@example
+-*-*-medium-r-normal-*-14-140-*-*-*-*-fontset-startup
+@end example
+
+@c   With the X resource @samp{Emacs.Font}, you can specify a fontset name
+@c just like an actual font name.  But be careful not to specify a fontset
+@c name in a wildcard resource like @samp{Emacs*Font}---that wildcard
+@c specification applies to various other purposes, such as menus, and
+@c menus cannot handle fontsets.
+Xのリソース@samp{Emacs.Font}で、
+フォントセット名を実際のフォント名のように指定できます。
+しかし、@samp{Emacs*Font}のようなワイルドカードを使ったリソースに
+フォントセット名を指定しないように注意してください。
+ワイルドカードを使った指定は、フォントセットを扱えないメニューのような、
+他のさまざまな目的にも適用されます。
+
+@c   You can specify additional fontsets using X resources named
+@c @samp{Fontset-@var{n}}, where @var{n} is an integer starting from 0.
+@c The resource value should have this form:
+@samp{Fontset-@var{n}}という名前のXのリソースを
+使って追加フォントセットを指定できます。
+ただし、@var{n}は0から始まる整数です。
+リソースの値はつぎのような形式でなければなりません。
+
+@smallexample
+@var{fontpattern}, @r{[}@var{charsetname}:@var{fontname}@r{]@dots{}}
+@end smallexample
+
+@noindent
+@c @var{fontpattern} should have the form of a standard X font name, except
+@c for the last two fields.  They should have the form
+@c @samp{fontset-@var{alias}}.
+@var{fontpattern}は、最後の2つのフィールドを除いて、
+標準のXフォント名の形式でなければなりません。
+最後の2つのフィールドは、@samp{fontset-@var{alias}}の形式を持つべきです。
+
+@c   The fontset has two names, one long and one short.  The long name is
+@c @var{fontpattern}.  The short name is @samp{fontset-@var{alias}}.  You
+@c can refer to the fontset by either name.
+フォントセットには2つの名前、長い名前と短い名前があります。
+長い名前は@var{fontpattern}です。
+短い名前は@samp{fontset-@var{alias}}です。
+どちらの名前でもフォントセットを参照できます。
+
+@c   The construct @samp{@var{charset}:@var{font}} specifies which font to
+@c use (in this fontset) for one particular character set.  Here,
+@c @var{charset} is the name of a character set, and @var{font} is the
+@c font to use for that character set.  You can use this construct any
+@c number of times in defining one fontset.
+@samp{@var{charset}:@var{font}}という構成は、
+ある文字集合に対して（このフォントセットでは）
+どのフォントを使用するかを指定します。
+ここで@var{charset}は、文字集合の名前で、
+@var{font}はその文字集合に使用するフォントです。
+1つのフォントセットの定義の中では、この構成を何度でも使用できます。
+
+@c   For the other character sets, Emacs chooses a font based on
+@c @var{fontpattern}.  It replaces @samp{fontset-@var{alias}} with values
+@c that describe the character set.  For the ASCII character font,
+@c @samp{fontset-@var{alias}} is replaced with @samp{ISO8859-1}.
+他の文字集合に対しては、Emacsは@var{fontpattern}に基づいて選択します。
+これには、文字集合を記述する値で@samp{fontset-@var{alias}}を置き換えます。
+ASCII文字フォントに対しては、@samp{fontset-@var{alias}}を
+@samp{ISO8859-1}で置き換えます
+
+@c   In addition, when several consecutive fields are wildcards, Emacs
+@c collapses them into a single wildcard.  This is to prevent use of
+@c auto-scaled fonts.  Fonts made by scaling larger fonts are not usable
+@c for editing, and scaling a smaller font is not useful because it is
+@c better to use the smaller font in its own size, which Emacs does.
+これに加えて、いくつか連続したフィールドがワイルドカードであるなら、
+Emacsはそれらを1つのワイルドカードにまとめます。
+これは、自動的に拡大縮小したフォントの使用を避けるためです。
+大きめのフォントを縮小したフォントは編集には使えません。
+また、小さめのフォントを拡大したフォントも便利ではありません。
+というのは、Emacsがそうするように、
+もともと小さなフォントを使うほうがよいからです。
+
+@c   Thus if @var{fontpattern} is this,
+したがって、@var{fontpattern}がつぎのようであると、
+
+@example
+-*-fixed-medium-r-normal-*-24-*-*-*-*-*-fontset-24
+@end example
+
+@noindent
+@c the font specification for ASCII characters would be this:
+ASCII文字に対するフォント指定はつぎのようになります。
+
+@example
+-*-fixed-medium-r-normal-*-24-*-ISO8859-1
+@end example
+
+@noindent
+@c and the font specification for Chinese GB2312 characters would be this:
+また、Chinese GB2312文字に対するフォント指定はつぎのようになります。
+
+@example
+-*-fixed-medium-r-normal-*-24-*-gb2312*-*
+@end example
+
+@c   You may not have any Chinese font matching the above font
+@c specification.  Most X distributions include only Chinese fonts that
+@c have @samp{song ti} or @samp{fangsong ti} in @var{family} field.  In
+@c such a case, @samp{Fontset-@var{n}} can be specified as below:
+上のフォント指定に一致する中国語フォントがないかもしれません。
+多くのXの配布には、@var{family}フィールドが
+@samp{song ti}か@samp{fangsong ti}の中国語フォントだけが含まれています。
+そういった場合、@samp{Fontset-@var{n}}をつぎのように指定します。
+
+@smallexample
+Emacs.Fontset-0: -*-fixed-medium-r-normal-*-24-*-*-*-*-*-fontset-24,\
+        chinese-gb2312:-*-*-medium-r-normal-*-24-*-gb2312*-*
+@end smallexample
+
+@noindent
+@c Then, the font specifications for all but Chinese GB2312 characters have
+@c @samp{fixed} in the @var{family} field, and the font specification for
+@c Chinese GB2312 characters has a wild card @samp{*} in the @var{family}
+@c field.
+そうすると、Chinese GB2312の文字を除くフォント指定では
+@var{family}フィールドが@samp{fixed}となり、
+Chinese GB2312の文字に対するフォント指定では
+@var{family}フィールドが@samp{*}となります。
+
+@findex create-fontset-from-fontset-spec
+@c   The function that processes the fontset resource value to create the
+@c fontset is called @code{create-fontset-from-fontset-spec}.  You can also
+@c call this function explicitly to create a fontset.
+フォントセットのリソース値を処理してフォントセットを作る関数は、
+@code{create-fontset-from-fontset-spec}です。
+フォントセットを作るために、この関数を明示的に呼ぶこともできます。
+
+@c   @xref{Font X}, for more information about font naming in X.
+Xにおけるフォントの命名法について詳しくは、@xref{Font X}。
+
+@node Single-Byte European Support
+@c @section Single-byte European Character Support
+@section 1バイトヨーロッパ文字の使い方
+
+@c @cindex European character sets
+@c @cindex accented characters
+@c @cindex ISO Latin character sets
+@c @cindex Unibyte operation
+@cindex ヨーロッパ文字集合
+@cindex アクセント文字
+@cindex ISO Latin 文字集合
+@cindex ユニバイト操作
+@vindex enable-multibyte-characters
+@c   The ISO 8859 Latin-@var{n} character sets define character codes in
+@c the range 160 to 255 to handle the accented letters and punctuation
+@c needed by various European languages.  If you disable multibyte
+@c characters, Emacs can still handle @emph{one} of these character codes
+@c at a time.  To specify @emph{which} of these codes to use, invoke
+@c @kbd{M-x set-language-environment} and specify a suitable language
+@c environment such as @samp{Latin-@var{n}}.
+ISO 8859 Latin-@var{n}文字集合は、
+さまざまなヨーロッパの言語で必要とされるアクセント文字と句読点記号を
+扱うために、160から250の範囲の文字コードを定義しています。
+マルチバイト文字を使用不可にしても、
+Emacsは、一度にはこれらの文字コードの@emph{1つ}を扱えます。
+これらのコードの@emph{どれ}を使うかを指定するには、
+@kbd{M-x set-language-environment}を起動して、
+@samp{Latin-@var{n}}のような適切な言語環境を指定します。
+
+@c   For more information about unibyte operation, see @ref{Enabling
+@c Multibyte}.  Note particularly that you probably want to ensure that
+@c your initialization files are read as unibyte if they contain non-ASCII
+@c characters.
+ユニバイト操作についてより詳しくは、
+@ref{Enabling Multibyte}を参照してください。
+非ASCII文字を含んだ初期化ファイルをユニバイトで読むことを保証したいときには
+特に注意してください。
+
+@vindex unibyte-display-via-language-environment
+@c   Emacs can also display those characters, provided the terminal or font
+@c in use supports them.  This works automatically.  Alternatively, if you
+@c are using a window system, Emacs can also display single-byte characters
+@c through fontsets, in effect by displaying the equivalent multibyte
+@c characters according to the current language environment.  To request
+@c this, set the variable @code{unibyte-display-via-language-environment}
+@c to a non-@code{nil} value.
+端末や使っているフォントでこれらの文字を扱えるならば、
+Emacsはこれらの文字を表示できます。
+これは自動的に行われます。
+あるいは、ウィンドウシステムを使っている場合には、
+現在の言語環境に従ってそれらに対応するマルチバイト文字を表示することで、
+Emacsはフォントセットを介して1バイト文字を表示できます。
+これを行うには、
+変数@code{unibyte-display-via-language-environment}に@code{nil}以外の
+値を設定します。
+
+@c @cindex @code{iso-ascii} library
+@cindex @code{iso-ascii}ライブラリ
+@c   If your terminal does not support display of the Latin-1 character
+@c set, Emacs can display these characters as ASCII sequences which at
+@c least give you a clear idea of what the characters are.  To do this,
+@c load the library @code{iso-ascii}.  Similar libraries for other
+@c Latin-@var{n} character sets could be implemented, but we don't have
+@c them yet.
+もし、端末でLatin-1文字集合を表示できなければ、
+Emacsは、これらの文字をその文字が少なくとも何であるかを明確に理解できるような
+ASCII列として表示できます。
+これを行うには、ライブラリ@code{iso-ascii}をロードします。
+他のLatin-@var{n}文字集合に対しても似たようなライブラリを実装できますが、
+まだ行っていません。
+
+@findex standard-display-8bit
+@c @cindex 8-bit display
+@cindex 8ビット表示
+@c   Normally non-ISO-8859 characters (between characters 128 and 159
+@c inclusive) are displayed as octal escapes.  You can change this for
+@c non-standard `extended' versions of ISO-8859 character sets by using the
+@c function @code{standard-display-8bit} in the @code{disp-table} library.
+（文字128から159の）非ISO 8859文字は、通常、8進表示されます。
+ライブラリ@code{disp-table}の関数@code{standard-display-8bit}を使えば、
+この表示を非標準の「拡張」版のISO 8859文字集合に変更できます。
+
+@c   There are three different ways you can input single-byte non-ASCII
+@c characters:
+1バイト非ASCII文字を入力する異なる方法が3つあります。
+
+@itemize @bullet
+@item
+@c If your keyboard can generate character codes 128 and up, representing
+@c non-ASCII characters, execute the following expression to enable Emacs to
+@c understand them:
+キーボードが、非ASCII文字を表現する128以上の文字コードを生成できるならば、
+Emacsがそれらを理解できるようにつぎの式を実行する。
+
+@example
+(set-input-mode (car (current-input-mode))
+                (nth 1 (current-input-mode))
+                0)
+@end example
+
+@item
+@c You can use an input method for the selected language environment.
+@c @xref{Input Methods}.  When you use an input method in a unibyte buffer,
+@c the non-ASCII character you specify with it is converted to unibyte.
+選択した言語環境の入力方式を使う。
+@pxref{Input Methods}。
+ユニバイトのバッファで入力方式を使うと、
+入力した非ASCII文字は、ユニバイトに変換される。
+
+@kindex C-x 8
+@c @cindex @code{iso-transl} library
+@cindex @code{iso-transl} ライブラリ
+@item
+@c For Latin-1 only, you can use the
+@c key @kbd{C-x 8} as a ``compose character'' prefix for entry of
+@c non-ASCII Latin-1 printing characters.  @kbd{C-x 8} is good for
+@c insertion (in the minibuffer as well as other buffers), for searching,
+@c and in any other context where a key sequence is allowed.
+Latin-1に対してだけだが、非ASCIIのLatin-1の印字文字の入力の
+『合成文字』プレフィックスとして@kbd{C-x 8}を使える。
+@kbd{C-x 8}は、（ミニバッファや他のバッファでの）挿入、探索、
+キー列が許される他の文脈などで使える。
+
+@c @kbd{C-x 8} works by loading the @code{iso-transl} library.  Once that
+@c library is loaded, the @key{ALT} modifier key, if you have one, serves
+@c the same purpose as @kbd{C-x 8}; use @key{ALT} together with an accent
+@c character to modify the following letter.  In addition, if you have keys
+@c for the Latin-1 ``dead accent characters'', they too are defined to
+@c compose with the following character, once @code{iso-transl} is loaded.
+ライブラリ@code{iso-transl}をロードすることで@kbd{C-x 8}は動作する。
+ライブラリをロードしておくと、
+@key{ALT}修飾キーがあるならば、@kbd{C-x 8}と同じ目的で使用できる。
+後続の文字を修飾するには、アクセント文字と一緒に@key{ALT}を使う。
+さらに、Latin-1の『専用アクセント文字』キーがあると、
+@code{iso-transl}をロード後は、
+それらのキーも後続の文字を合成するように定義される。
+@end itemize

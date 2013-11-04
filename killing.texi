@@ -1,0 +1,1136 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c = 20.6改訂: 大木敦雄＠大塚.筑波大学 = 2000/03/03
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,97,00,2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@iftex
+@c @chapter Killing and Moving Text
+@chapter テキストのキルと移動 @emph{(2005/03/20)}
+
+@c   @dfn{Killing} means erasing text and copying it into the @dfn{kill
+@c ring}, from which it can be retrieved by @dfn{yanking} it.  Some systems
+@c use the terms ``cutting'' and ``pasting'' for these operations.
+@dfn{キル}（kill）とは、テキストを消しさり、
+それを@dfn{キルリング}（kill ring）にコピーすることを意味します。
+キルリングからは、@dfn{ヤンク}（yank）することで、
+テキストを取り出すことができます。
+これらの操作を『カット』と『ペースト』と呼ぶシステムもあります。
+
+@c   The most common way of moving or copying text within Emacs is to kill it
+@c and later yank it elsewhere in one or more places.  This is very safe
+@c because Emacs remembers several recent kills, not just the last one.  It
+@c is versatile, because the many commands for killing syntactic units can
+@c also be used for moving those units.  But there are other ways of
+@c copying text for special purposes.
+Emacsにおいてテキストを移動したりコピーしたりするもっとも一般的な方法は、
+テキストをキルして、あとで数箇所にヤンクすることです。
+この方法はとても安全です。
+というのは、直前の1回のキルだけでなく、
+ここ最近の数回分のキルした内容を記録しているからです。
+構文単位でキルする多くのコマンドは、
+構文単位のテキスト移動にも使えるので、用途が広いともいえます。
+他にも、特別な目的のためにテキストをコピーする方法があります。
+
+@c   On terminals that support multiple windows for multiple applications,
+@c the kill commands also provide a way to select text for other applications
+@c to copy, and the Emacs yank commands can access selections made by
+@c other programs.
+複数のアプリケーションを用いるための複数のウィンドウを利用できる端末では，キルコ
+マンドを使うと，他のアプリケーションでコピーしたテキストを選択できます．Emacs の
+ヤンクコンマンドでは他のプログラムでコピーしたテキストを選択できるのです．
+
+@c   Emacs has only one kill ring for all buffers, so you can kill text in
+@c one buffer and yank it in another buffer.
+Emacsには、すべてのバッファに対してたった1つのキルリングしかありません。
+そのため、あるバッファでキルしたテキストを
+別のバッファにヤンクできます。
+
+@end iftex
+
+@node Killing, Yanking, Mark, Top
+@c @section Deletion and Killing
+@section 削除とキル @emph{(2005/03/20)}
+
+@c @cindex killing text
+@c @cindex cutting text
+@c @cindex deletion
+@cindex テキストのキル
+@cindex テキストのカット
+@cindex 削除
+@c   Most commands which erase text from the buffer save it in the kill
+@c ring so that you can move or copy it to other parts of the buffer.
+@c These commands are known as @dfn{kill} commands.  The rest of the
+@c commands that erase text do not save it in the kill ring; they are known
+@c as @dfn{delete} commands.  (This distinction is made only for erasure of
+@c text in the buffer.)  If you do a kill or delete command by mistake, you
+@c can use the @kbd{C-x u} (@code{undo}) command to undo it
+@c (@pxref{Undo}).
+バッファからテキストを消しさるコマンドのほとんどは、
+そのテキストをキルリングにコピーしておくので、
+バッファの他の部分にそのテキストを移動したりコピーしたりできます。
+これらのコマンドを、@dfn{キル}（kill）コマンドと呼びます。
+それ以外の『テキストを消すコマンド』は、
+テキストをキルリングに保存しません。
+これらを@dfn{削除}（delete）コマンドと呼びます。
+（両者を区別するのは、バッファ内のテキストを消す場合だけ。）
+キルコマンドや削除コマンドを誤って実行してしまった場合には、
+@kbd{C-x u}（@code{undo}）コマンドを使って、もとに戻すことができます。
+
+@vindex kill-read-only-ok
+@cindex read-only text, killing
+@cindex 読み込み専用のテキスト，キル，切り取り
+@c   You cannot kill read-only text, since such text does not allow any
+@c kind of modification.  But some users like to use the kill commands to
+@c copy read-only text into the kill ring, without actually changing it.
+@c If you set the variable @code{kill-read-only-ok} to a non-@code{nil}
+@c value, the kill commands work specially in a read-only buffer: they
+@c move over text, and copy it to the kill ring, without actually
+@c deleting it from the buffer.  When this happens, a message in the echo
+@c area tells you what is happening.
+読み込み専用のテキストは変更ができませんので，キルすることはできません．しかし，
+実際には変更しないで，読み込み専用のテキストをコピーするためにキルコマンドを使い
+たいこともあるでしょう．変数 @code{kill-read-only-ok} を非n-@code{nil} にしてお
+くと，キルコマンドは読み込み専用のバッファで特別な働きをします：つまり，テキスト
+を移動して，それをキルリングへコピーするのです．バッファから実際にテキストを削除
+することはしません．この処理が実行されると，エコー領域にそのことが表示されます．
+
+@c   The delete commands include @kbd{C-d} (@code{delete-char}) and
+@c @key{DEL} (@code{delete-backward-char}), which delete only one
+@c character at a time, and those commands that delete only spaces or
+@c newlines.  Commands that can destroy significant amounts of nontrivial
+@c data generally do a kill operation instead.  The commands' names and
+@c individual descriptions use the words @samp{kill} and @samp{delete} to
+@c say which kind of operation they perform.
+削除コマンドには、一度に1つの文字だけを削除する
+@kbd{C-d}（@code{delete-char}）や@key{DEL}（@code{delete-backward-char}）、
+空白や改行だけを削除するコマンドがあります。
+単純ではないデータをかなりの分量で破壊する可能性のあるコマンドは、
+一般にキルを変わりに行います。
+コマンド名や個々の説明では、そのコマンドがどちらの働きをするかによって、
+@samp{キル}（kill）と@samp{削除}（delete）を使い分けています。
+
+@c   On window systems, the most recent kill done in Emacs is also the
+@c primary selection, if it is more recent than any selection you made in
+@c another program.  This means that the paste commands of other window
+@c applications copy the text that you killed in Emacs.
+ウィンドウシステムでは，他のプログラムでコピーした時よりも新しければ，Emacs です
+直前にコピーしたテキストが1番に選択されます．つまり，他のソフトで貼り付けを行う
+と，Emacsでキルしたテキストが貼り付けられるのです．
+
+@cindex Delete Selection mode
+@cindex mode, Delete Selection
+@findex delete-selection-mode
+@c   Many window systems follow the convention that insertion while text
+@c is selected deletes the selected text.  You can make Emacs behave this
+@c way by enabling Delete Selection mode, with @kbd{M-x
+@c delete-selection-mode}, or using Custom.  Another effect of this mode
+@c is that @key{DEL}, @kbd{C-d} and some other keys, when a selection
+@c exists, will kill the whole selection.  It also enables Transient Mark
+@c mode (@pxref{Transient Mark}).
+多くのウィンドウシステムでは，テキストが選択されている時に文字を入力すると選択さ
+れたテクストが削除されるという習わしがあります．@kbd{M-x delete-selection-mode}
+かカスタムで Delete Selection mode を有効にすることで， Emacs でもこのようなこと
+を実現できます．このモードを有効にすると，テキストを選択した状態で @key{DEL} や
+@kbd{C-d}，他のキーを押すと選択範囲全体が消去されます．このモードは Transient Mark
+mode (@pxref{Transient Mark}) も有効にします．
+
+@menu
+* Deletion::            Commands for deleting small amounts of text and
+                          blank areas.
+* Killing by Lines::    How to kill entire lines of text at one time.
+* Other Kill Commands:: Commands to kill large regions of text and
+                          syntactic units such as words and sentences. 
+@end menu
+
+@need 1500
+@node Deletion
+@c @subsection Deletion
+@subsection 削除 @emph{(2005/03/20)}
+@findex delete-backward-char
+@findex delete-char
+
+@c   Deletion means erasing text and not saving it in the kill ring.  For
+@c the most part, the Emacs commands that delete text are those that
+@c erase just one character or only whitespace.
+削除とはキルリングに保存することなくテキストを消すことです．ほとんどの場合，
+Emacs のコマンドは1文字だけや空白のみを削除します．
+
+@table @kbd
+@item C-d
+@itemx @key{Delete}
+@c Delete next character (@code{delete-char}).  If your keyboard has a
+@c @key{Delete} function key (usually located in the edit keypad), Emacs
+@c binds it to @code{delete-char} as well.
+つぎの文字を削除する（@code{delete-char}）。もし，キーボードに @key{Delete} キー
+(大抵は編集用キーパッドにあります) があれば，Emacs はそのキーを
+@code{delete-char} に割り当てます．
+@item @key{DEL}
+@itemx @key{BS}
+@c Delete previous character (@code{delete-backward-char}).  Some keyboards
+@c refer to this key as a ``backspace key'' and label it with a left arrow.
+まえの文字を削除する（@code{delete-backward-char}）。いくつかのキーボードではこ
+のキーを``backspace key''と書かれ，左矢印が描かれています．
+@item M-\
+@c Delete spaces and tabs around point (@code{delete-horizontal-space}).
+ポイントの周りの空白とタブを削除する（@code{delete-horizontal-space}）。
+@item M-@key{SPC}
+@c Delete spaces and tabs around point, leaving one space
+@c (@code{just-one-space}).
+ポイントの周りの空白とタブを削除し、空白を1個だけ残す
+（@code{just-one-space}）。
+@item C-x C-o
+@c Delete blank lines around the current line (@code{delete-blank-lines}).
+現在行の周りの空行を削除する（@code{delete-blank-lines}）。
+@item M-^
+@c Join two lines by deleting the intervening newline, along with any
+@c indentation following it (@code{delete-indentation}).
+行間の改行とそれに続く字下げを削除して2行を繋げる
+（@code{delete-indentation}）。
+@end table
+
+@kindex DEL
+@kindex C-d
+@c   The most basic delete commands are @kbd{C-d} (@code{delete-char}) and
+@c @key{DEL} (@code{delete-backward-char}).  @kbd{C-d} deletes the
+@c character after point, the one the cursor is ``on top of.''  This
+@c doesn't move point.  @key{DEL} deletes the character before the cursor,
+@c and moves point back.  You can delete newlines like any other characters
+@c in the buffer; deleting a newline joins two lines.  Actually, @kbd{C-d}
+@c and @key{DEL} aren't always delete commands; when given arguments, they
+@c kill instead, since they can erase more than one character this way.
+もっとも基本的な削除コマンドは、@kbd{C-d}（@code{delete-char}）と
+@key{DEL}（@code{delete-backward-char}）です。
+@kbd{C-d}はポイントの直後の文字、
+つまり、カーソルが重なっている文字を削除します。
+このコマンドでは、ポイントは動きません。
+@key{DEL}はカーソルの直前の文字を削除して、
+ポイントを1つまえに移動します。
+バッファ内の他の文字と同様に、改行も削除できます。
+改行を削除すると、2つの行が繋がります。
+実際には、@kbd{C-d}と@key{DEL}がつねに削除コマンドであるわけではありません。
+引数を指定するとキルコマンドとなり、
+同じ方法で2文字以上を消すことができます。
+
+@kindex BACKSPACE
+@kindex BS
+@kindex DELETE
+@c   Every keyboard has a large key, labeled @key{DEL}, @key{BACKSPACE},
+@c @key{BS} or @key{DELETE}, which is a short distance above the
+@c @key{RET} or @key{ENTER} key and is normally used for erasing what you
+@c have typed.  Regardless of the actual name on the key, in Emacs it is
+@c equivalent to @key{DEL}---or it should be.
+すべてのキーボードは @key{DEL} や @key{BACKSPACE}，@key{BS}，@key{DELETE} などと
+印刷されたキーがあります．これらのキーは @key{RET} や @key{ENTER} キー上の近くに
+あり，大抵入力した文字を削除するのに使われます．実際の名前やキーによらず，Emacs
+ではどちらのキーも @key{DEL} と同じになるか，そうあるべきなのです．
+
+@c   Many keyboards (including standard PC keyboards) have a
+@c @key{BACKSPACE} key a short ways above @key{RET} or @key{ENTER}, and a
+@c @key{DELETE} key elsewhere.  In that case, the @key{BACKSPACE} key is
+@c @key{DEL}, and the @key{DELETE} key is equivalent to @kbd{C-d}---or it
+@c should be.
+多くのキーボード (標準的な PC のキーボードを含む) では @key{BACKSPACE} キー が
+@key{RET} や @key{ENTER} キーのすぐ上にあります．そして，@key{DELETE} キーがまた
+別のところにあります．その場合，@key{BACKSPACE} キーは @key{DEL} として働き，
+@key{DELETE} キーは @kbd{C-d} と同じであるか，，そうあるべきなのです．
+
+@c   Why do we say ``or it should be''?  When Emacs starts up using a
+@c window system, it determines automatically which key or keys should be
+@c equivalent to @key{DEL}.  As a result, @key{BACKSPACE} and/or @key{DELETE}
+@c keys normally do the right things.  But in some unusual cases Emacs
+@c gets the wrong information from the system.  If these keys don't do
+@c what they ought to do, you need to tell Emacs which key to use for
+@c @key{DEL}.  @xref{DEL Does Not Delete}, for how to do this.
+なぜ"そうあるべきなのです"と書いているのか？ ウィンドウシステムで Emacs を起動す
+ると，どのキーが @key{DEL} と等価であるかを自動的に決定します．普通，結果として
+@key{BACKSPACE}と(か) @key{DELETE} をそのように決定します．しかし，うまくいかな
+い場合には Emacs はシステムから誤った情報を受け取ります．もし，これらのキーがす
+べき機能を果たしていなければ，どのキーを @key{DEL} として使うべきか設定する必要
+があります．@xref{DEL Does Not Delete} を参照してください．
+
+@findex normal-erase-is-backspace-mode
+@c   On most text-only terminals, Emacs cannot tell which keys the
+@c keyboard really has, so it follows a uniform plan which may or may not
+@c fit your keyboard.  The uniform plan is that the @acronym{ASCII} @key{DEL}
+@c character deletes, and the @acronym{ASCII} @key{BS} (backspace) character asks
+@c for help (it is the same as @kbd{C-h}).  If this is not right for your
+@c keyboard, such as if you find that the key which ought to delete backwards
+@c enters Help instead, see @ref{DEL Does Not Delete}.
+
+大抵のテキスト端末では，Emacsは実際にどのキーがあるか判断できません．だから，あ
+なたのキーボードに合うかどうかに関わらず，標準的な設定が使われます．標準的な設定
+とは，@acronym{ASCII} @key{DEL} キーは文字を削除し，@acronym{ASCII} @key{BS}
+(backspace) キーはヘルプ (@kbd{C-h}と同じ) になります．もし，ヘルプを表示する代
+わりに前方へ削除すべきキーがあるといったように，あなたのキーボードで正しく動作し
+ていなければ，@ref{DEL Does Not Delete} を参照してください．
+
+@kindex M-\
+@findex delete-horizontal-space
+@kindex M-SPC
+@findex just-one-space
+@c   The other delete commands are those which delete only whitespace
+@c characters: spaces, tabs and newlines.  @kbd{M-\}
+@c (@code{delete-horizontal-space}) deletes all the spaces and tab
+@c characters before and after point.  @kbd{M-@key{SPC}}
+@c (@code{just-one-space}) does likewise but leaves a single space after
+@c point, regardless of the number of spaces that existed previously (even
+@c if there were none before).
+他の削除コマンドは、空白、タブ、改行といった白文字だけを削除します。
+@kbd{M-\}（@code{delete-horizontal-space}）は、
+ポイントの前後にあるすべての空白とタブ文字を削除します。
+@kbd{M-@key{SPC}}（@code{just-one-space}）も同様に削除しますが、
+今ある空白の個数に関係なく（たとえ無かったとしても）、
+ポイントの直後に空白を1個だけ残します。
+
+@c   @kbd{C-x C-o} (@code{delete-blank-lines}) deletes all blank lines
+@c after the current line.  If the current line is blank, it deletes all
+@c blank lines preceding the current line as well (leaving one blank line,
+@c the current line).
+@kbd{C-x C-o}（@code{delete-blank-lines}）は、
+現在行に続くすべての空行を削除します。
+現在行が空行である場合には、（空行である現在行だけを残して）
+先行する空行も同様にすべて削除します。
+
+@c   @kbd{M-^} (@code{delete-indentation}) joins the current line and the
+@c previous line, by deleting a newline and all surrounding spaces, usually
+@c leaving a single space.  @xref{Indentation,M-^}.
+@kbd{M-^}（@code{delete-indentation}）は、
+改行とその周りの空白を削除して、
+通常は空白を1個残して現在行と先行する行を繋げます。
+@xref{Indentation,M-^}。
+
+@node Killing by Lines
+@c @subsection Killing by Lines
+@subsection 行単位のキル @emph{(2005/03/20)}
+
+@table @kbd
+@item C-k
+@c Kill rest of line or one or more lines (@code{kill-line}).
+行の残りの部分、あるいは、行全体を1行以上キルする（@code{kill-line}）。
+@end table
+
+@kindex C-k
+@findex kill-line
+@c   The simplest kill command is @kbd{C-k}.  If given at the beginning of
+@c a line, it kills all the text on the line, leaving it blank.  When used
+@c on a blank line, it kills the whole line including its newline.  To kill
+@c an entire non-blank line, go to the beginning and type @kbd{C-k} twice.
+もっとも単純なキルコマンドは@kbd{C-k}です。
+行の先頭で使うと、その行のすべてのテキストをキルして、空行にします。
+空行で使うと、改行を含めてその行を完全にキルします。
+空行でない行を完全にキルするには、行頭で@kbd{C-k}を2回打ちます。
+
+@c   More generally, @kbd{C-k} kills from point up to the end of the line,
+@c unless it is at the end of a line.  In that case it kills the newline
+@c following point, thus merging the next line into the current one.
+@c Spaces and tabs that you can't see at the end of the line are ignored
+@c when deciding which case applies, so if point appears to be at the end
+@c of the line, you can be sure @kbd{C-k} will kill the newline.
+一般に、@kbd{C-k}は、行末でなければ、
+ポイントからその行の末尾までをキルします。
+行末では、ポイントのうしろの改行をキルするので、
+現在行と後続の行が繋がります。
+どちらの動作をするか決めるときには、
+行末にあって見にくい空白やタブを無視しますから、
+ポイントが行末にあるように見えていれば、
+@kbd{C-k}で改行がキルされると考えてください。
+
+@c   When @kbd{C-k} is given a positive argument, it kills that many lines
+@c and the newlines that follow them (however, text on the current line
+@c before point is not killed).  With a negative argument @minus{}@var{n}, it
+@c kills @var{n} lines preceding the current line (together with the text
+@c on the current line before point).  Thus, @kbd{C-u - 2 C-k} at the front
+@c of a line kills the two previous lines.
+@kbd{C-k}に正の引数を指定すると、
+その個数の行とそれらに続く改行をキルします
+（ただし、現在行のポイントよりまえのテキストはキルされない）。
+負の引数@minus{}@var{n}を指定すると、
+@kbd{C-k}は現在行に先行する@var{n}行
+（と現在行のポイント位置よりまえのテキストを含めて）を削除します。
+つまり、ポイントが行頭にある状態で@kbd{C-u - 2 C-k}とすれば、
+先行する2行をキルします。
+
+@c   @kbd{C-k} with an argument of zero kills the text before point on the
+@c current line.
+@kbd{C-k}に引数0を指定すると、
+現在行のポイントよりまえのテキストをキルします。
+
+@vindex kill-whole-line
+@c   If the variable @code{kill-whole-line} is non-@code{nil}, @kbd{C-k} at
+@c the very beginning of a line kills the entire line including the
+@c following newline.  This variable is normally @code{nil}.
+変数@code{kill-whole-line}が@code{nil}以外の場合、
+行頭で@kbd{C-k}を使うと、行末の改行も含めて行全体をキルします。
+この変数は、通常、@code{nil}です。
+
+@node Other Kill Commands
+@c @subsection Other Kill Commands
+@subsection 他のキルコマンド @emph{(2005/03/20)}
+@findex kill-region
+@kindex C-w
+
+@table @kbd
+@item C-w
+@c Kill region (from point to the mark) (@code{kill-region}).
+リージョン（ポイントからマークまで）をキルする（@code{kill-region}）。
+@item M-d
+@c Kill word (@code{kill-word}).  @xref{Words}.
+単語をキルする（@code{kill-word}）。
+@pxref{Words}。
+@item M-@key{DEL}
+@c Kill word backwards (@code{backward-kill-word}).
+単語を後向きにキルする（@code{backward-kill-word}）。
+@item C-x @key{DEL}
+@c Kill back to beginning of sentence (@code{backward-kill-sentence}).
+@c @xref{Sentences}.
+文の先頭までを後向きにキルする（@code{backward-kill-sentence}）。
+@pxref{Sentences}。
+@item M-k
+@c Kill to end of sentence (@code{kill-sentence}).
+文の末尾までをキルする（@code{kill-sentence}）。
+@item C-M-k
+@c Kill the following balanced expression (@code{kill-sexp}).  @xref{Expressions}.
+括弧でバランスした式をキルキルする(@code{kill-sexp})． @xref{Expressions}．
+@pxref{Lists}。
+@item M-z @var{char}
+@c Kill through the next occurrence of @var{char} (@code{zap-to-char}).
+つぎに@var{char}が現れる箇所までをキルする（@code{zap-to-char}）。
+@end table
+
+@c   A kill command which is very general is @kbd{C-w}
+@c (@code{kill-region}), which kills everything between point and the
+@c mark.  With this command, you can kill any contiguous sequence of
+@c characters, if you first set the region around them.
+汎用的なキルコマンドといえば@kbd{C-w}（@code{kill-region}）です。
+このコマンドは、あらかじめ連続領域をポイントとマークで囲んでおけば、
+どんな連続領域でもキルできます。
+
+@kindex M-z
+@findex zap-to-char
+@c   A convenient way of killing is combined with searching: @kbd{M-z}
+@c (@code{zap-to-char}) reads a character and kills from point up to (and
+@c including) the next occurrence of that character in the buffer.  A
+@c numeric argument acts as a repeat count.  A negative argument means to
+@c search backward and kill text before point.
+探索と組み合わせた便利なキルの仕方もあります。
+@kbd{M-z}（@code{zap-to-char}）は1文字を読み取り、
+ポイントからバッファ内でその文字がつぎに現れる箇所までを
+（その文字も含めて）キルします。
+数引数を指定した場合は、反復回数を意味します。
+負の引数の場合は、ポイント位置から逆方向に探索し、
+ポイントの直前までをキルします。
+
+@c   Other syntactic units can be killed: words, with @kbd{M-@key{DEL}} and
+@c @kbd{M-d} (@pxref{Words}); sexps, with @kbd{C-M-k} (@pxref{Lists}); and
+@c sentences, with @kbd{C-x @key{DEL}} and @kbd{M-k}
+@c (@pxref{Sentences}).@refill
+他の構文単位でもキルできます。
+@kbd{M-@key{DEL}}や@kbd{M-d}（@pxref{Words}）で単語を、
+@kbd{C-M-k}（@pxref{Expressions}）で括弧で囲まれた式を、
+@kbd{C-x @key{DEL}}や@kbd{M-k}（@pxref{Sentences}）で文をキルできます。
+
+@c   You can use kill commands in read-only buffers.  They don't actually
+@c change the buffer, and they beep to warn you of that, but they do copy
+@c the text you tried to kill into the kill ring, so you can yank it into
+@c other buffers.  Most of the kill commands move point across the text
+@c they copy in this way, so that successive kill commands build up a
+@c single kill ring entry as usual.
+読み出し専用のバッファでもキルできます。
+実際にはバッファに変更を加えることはありませんし、
+ベルを鳴らしてその旨警告を発しますが、
+キルしようとしたテキストはキルリングにコピーされます。
+ですから、別のバッファにそのテキストをヤンクできます。
+ほとんどのキルコマンドは、
+このようにコピーするテキストを越えてポイントを進めますから、
+連続してキルコマンドを実行しても
+キルリングに入る項目は通常どおり1個だけです。
+
+@node Yanking, Accumulating Text, Killing, Top
+@c @section Yanking
+@section ヤンク @emph{(2005/03/20)}
+@c @cindex moving text
+@c @cindex copying text
+@c @cindex kill ring
+@c @cindex yanking
+@c @cindex pasting
+@cindex テキストの移動
+@cindex テキストのコピー
+@cindex キルリング
+@cindex ヤンク
+@cindex ペースト
+
+@c   @dfn{Yanking} means reinserting text previously killed.  This is what
+@c some systems call ``pasting.''  The usual way to move or copy text is to
+@c kill it and then yank it elsewhere one or more times.
+@dfn{ヤンク}（yank）とは、
+以前にキルしたテキストをバッファにふたたび挿入することです。
+他のシステムでは『ペースト』と呼ぶこともあります。
+テキストを移動したりコピーしたりする普通の方法は、
+そのテキストをいったんキルしてから、別の場所に（1回以上）ヤンクすることです。
+
+@table @kbd
+@item C-y
+@c Yank last killed text (@code{yank}).
+最後にキルしたテキストをヤンクする（@code{yank}）。
+@item M-y
+@c Replace text just yanked with an earlier batch of killed text
+@c (@code{yank-pop}).
+たった今ヤンクしたテキストをそれより以前にキルした一塊のテキストで置き換える
+（@code{yank-pop}）。
+@item M-w
+@c Save region as last killed text without actually killing it
+@c (@code{kill-ring-save}).
+リージョンを実際にはキルせずに、最後にキルしたテキストとして保存する
+（@code{kill-ring-save}）。
+@item C-M-w
+@c Append next kill to last batch of killed text (@code{append-next-kill}).
+つぎのキルを、最後にキルした一塊のテキストに付け加える
+（@code{append-next-kill}）。
+@end table
+
+@c   On window systems, if there is a current selection in some other
+@c application, and you selected it more recently than you killed any
+@c text in Emacs, @kbd{C-y} copies the selection instead of text
+@c killed within Emacs.
+ウィンドウシステムでは，Emacs でテキストをキルした時よりも後に，他のソフトでコピー
+したテキストがあると，@kbd{C-y} はEmacs でキルされたテキストの代わりに，他のソフ
+トでコピーしたテキストを貼り付けます．
+
+@menu
+* Kill Ring::		Where killed text is stored.  Basic yanking.
+* Appending Kills::	Several kills in a row all yank together.
+* Earlier Kills::	Yanking something killed some time ago.
+@end menu
+
+@node Kill Ring
+@c @subsection The Kill Ring
+@subsection キルリング @emph{(2005/03/20)}
+
+@c   All killed text is recorded in the @dfn{kill ring}, a list of blocks of
+@c text that have been killed.  There is only one kill ring, shared by all
+@c buffers, so you can kill text in one buffer and yank it in another buffer.
+@c This is the usual way to move text from one file to another.
+@c (@xref{Accumulating Text}, for some other ways.)
+すべてのキルされたテキストは、キルされたテキストの塊をリストとする
+@dfn{キルリング}（kill ring）に記録されています。
+キルリングはたった1つしかなくて、すべてのバッファで共有しています。
+ですから、あるバッファでキルしたテキストは、
+別のバッファでヤンクできます。
+普通、このようにして、あるファイルから別のファイルへテキストを移動します。
+（別の方法については、@pxref{Accumulating Text}。）
+
+@kindex C-y
+@findex yank
+@c   The command @kbd{C-y} (@code{yank}) reinserts the text of the most recent
+@c kill.  It leaves the cursor at the end of the text.  It sets the mark at
+@c the beginning of the text.  @xref{Mark}.
+コマンド@kbd{C-y}（@code{yank}）は、
+最後にキルしたテキストをふたたび挿入します。
+カーソルは挿入したテキストの末尾に置かれます。
+マークは挿入したテキストの先頭に置かれます。
+@xref{Mark}。
+
+@c   @kbd{C-u C-y} leaves the cursor in front of the text, and sets the
+@c mark after it.  This happens only if the argument is specified with just
+@c a @kbd{C-u}, precisely.  Any other sort of argument, including @kbd{C-u}
+@c and digits, specifies an earlier kill to yank (@pxref{Earlier Kills}).
+@kbd{C-u C-y}は、テキストのまえにカーソルを置き、うしろにマークを置きます。
+引数として@kbd{C-u}だけを指定した場合に限り、こうなります。
+@kbd{C-u}と数字を含めた他の引数を指定すると、
+いくつまえのキル内容をヤンクするかを意味します（@pxref{Earlier Kills}）。
+
+@cindex yanking and text properties
+@vindex yank-excluded-properties
+@c   The yank commands discard certain text properties from the text that
+@c is yanked, those that might lead to annoying results.  For instance,
+@c they discard text properties that respond to the mouse or specify key
+@c bindings.  The variable @code{yank-excluded-properties} specifies the
+@c properties to discard.  Yanking of register contents and rectangles
+@c also discard these properties.
+ヤンクすると，ヤンクされたテキストからある種のテキストプロパティは削除されます．
+このことは，混乱を起こすかもしれません．例えば，マウスやある種のキーに反応するテ
+キストプロパティが無効になるなど．変数 @code{yank-excluded-properties} は削除す
+べきプロパティを決定します．レジスタや矩形領域のヤンクでもこれらの削除が起こりま
+す．
+
+@kindex M-w
+@findex kill-ring-save
+@c   To copy a block of text, you can use @kbd{M-w}
+@c (@code{kill-ring-save}), which copies the region into the kill ring
+@c without removing it from the buffer.  This is approximately equivalent
+@c to @kbd{C-w} followed by @kbd{C-x u}, except that @kbd{M-w} does not
+@c alter the undo history and does not temporarily change the screen.
+一塊のテキストをコピーする場合は、
+@kbd{M-w}（@code{kill-ring-save}）を使うとよいでしょう。
+このコマンドは、バッファからリージョンをキルせずに、
+リージョンをキルリングにコピーします。
+このコマンドは、@kbd{C-w}に続けて@kbd{C-x u}を実行するのとほぼ同等ですが、
+@kbd{M-w}はアンドゥ履歴を変更しませんし、一時的にせよ画面表示も変わりません。
+
+@node Appending Kills
+@c @subsection Appending Kills
+@subsection キルしたテキストの追加 @emph{(2005/03/20)}
+
+@c @cindex appending kills in the ring
+@c @cindex television
+@cindex キルテキストのリングへの追加
+@cindex テレビ
+@c   Normally, each kill command pushes a new entry onto the kill ring.
+@c However, two or more kill commands in a row combine their text into a
+@c single entry, so that a single @kbd{C-y} yanks all the text as a unit,
+@c just as it was before it was killed.
+通常、各キルコマンドは、キルリングに新たな項目を押し込みます。
+しかし、連続したキルコマンドでは、
+それぞれでキルしたテキストを1つの項目にまとめます。
+そのため、1回の@kbd{C-y}で、キルするまえの状態に、
+それらのテキストをひとまとめにヤンクできます。
+
+@c   Thus, if you want to yank text as a unit, you need not kill all of it
+@c with one command; you can keep killing line after line, or word after
+@c word, until you have killed it all, and you can still get it all back at
+@c once.
+したがって、テキストを一塊でヤンクしたい場合でも、
+1つのコマンドでそれらをキルする必要はありません。
+すべてをキルするまで、1行ずつ、あるいは、1単語ずつキルしていっても、
+一括してもとに戻すことができます。
+
+@c   Commands that kill forward from point add onto the end of the previous
+@c killed text.  Commands that kill backward from point add text onto the
+@c beginning.  This way, any sequence of mixed forward and backward kill
+@c commands puts all the killed text into one entry without rearrangement.
+@c Numeric arguments do not break the sequence of appending kills.  For
+@c example, suppose the buffer contains this text:
+ポイント位置から前向きにキルするコマンドでは、
+直前にキルしたテキストの末尾に付け加えます。
+ポイント位置から後向きにキルするコマンドでは、
+テキストの先頭に付け加えます。
+このように、前向き／後向きの両方のキルコマンドをどのように混ぜて実行しても、
+キルしたテキストの順番を崩すことなく
+1つの項目としてキルリングに記録されます。
+数引数を指定しても、このような追加系列が途切れることはありません。
+たとえば、バッファにつぎのテキストが入っていて、
+@point{}の位置にポイントがあるとしましょう。
+
+@example
+This is a line @point{}of sample text.
+@end example
+
+@noindent
+@c with point shown by @point{}.  If you type @kbd{M-d M-@key{DEL} M-d
+@c M-@key{DEL}}, killing alternately forward and backward, you end up with
+@c @samp{a line of sample} as one entry in the kill ring, and @samp{This
+@c is@ @ text.} in the buffer.  (Note the double space between @samp{is}
+@c and @samp{text}, which you can clean up with @kbd{M-@key{SPC}} or
+@c @kbd{M-q}.)
+@kbd{M-d M-@key{DEL} M-d M-@key{DEL}}と打って、
+前向き／後向きと交互にキルしても、
+キルリングには1つの項目として@samp{a line of sample}が入り、
+バッファには@samp{This is@ @ text.}が残ります。
+（空白が@samp{is} と@samp{text} の間に2個残っていることに注意。
+これらは@kbd{M-@key{SPC}}や@kbd{M-q}で一掃できる。）
+
+@c   Another way to kill the same text is to move back two words with
+@c @kbd{M-b M-b}, then kill all four words forward with @kbd{C-u M-d}.
+@c This produces exactly the same results in the buffer and in the kill
+@c ring.  @kbd{M-f M-f C-u M-@key{DEL}} kills the same text, all going
+@c backward; once again, the result is the same.  The text in the kill ring
+@c entry always has the same order that it had in the buffer before you
+@c killed it.
+同じようにテキストをキルするもう1つの方法は、
+@kbd{M-b M-b}で後向きに2語移動してから、
+@kbd{C-u M-d}で前向きに4語キルします。
+こうしても、バッファとキルリングの中身は、
+先の例とまったく同じ結果になります。
+@kbd{M-f M-f C-u M-@key{DEL}}としても、
+後向きに同じテキストをキルします。
+これでもやはり同じ結果が得られます。
+キルリングの項目内のテキストの順序は、
+キルするまえのバッファ内での順序と同じです。
+
+@kindex C-M-w
+@findex append-next-kill
+@c   If a kill command is separated from the last kill command by other
+@c commands (not just numeric arguments), it starts a new entry on the kill
+@c ring.  But you can force it to append by first typing the command
+@c @kbd{C-M-w} (@code{append-next-kill}) right before it.  The @kbd{C-M-w}
+@c tells the following command, if it is a kill command, to append the text
+@c it kills to the last killed text, instead of starting a new entry.  With
+@c @kbd{C-M-w}, you can kill several separated pieces of text and
+@c accumulate them to be yanked back in one place.@refill
+キルコマンドと最後のキルコマンドのあいだに
+（単なる数引数ではない）他のコマンドが入ると、
+キルリングには新たな項目が作られます。
+しかし、キルコマンドを打つ直前に
+コマンド@kbd{C-M-w}（@code{append-next-kill}）を打っておけば、
+既存の項目へ追加するように強制できます。
+@kbd{C-M-w}は、つぎがキルコマンドであれば、
+新たな項目を作成するかわりにキルしたテキストを
+以前にキルしたテキストに付け加えるよう指示します。
+@kbd{C-M-w}を使うことで、
+まとめて1か所にヤンクできるように、
+離れた場所にあるいくつかのテキスト断片をキルして集めておけます。
+
+@c   A kill command following @kbd{M-w} does not append to the text that
+@c @kbd{M-w} copied into the kill ring.
+@kbd{M-w}に続くキルコマンドでは、
+@kbd{M-w}がキルリングにコピーしたテキストには付け加えません。
+
+@node Earlier Kills
+@c @subsection Yanking Earlier Kills
+@subsection 以前にキルしたテキストのヤンク @emph{(2005/03/20)}
+
+@c @cindex yanking previous kills
+@cindex 先にキルしたテキストのヤンク
+@kindex M-y
+@findex yank-pop
+@c   To recover killed text that is no longer the most recent kill, use the
+@c @kbd{M-y} command (@code{yank-pop}).  It takes the text previously
+@c yanked and replaces it with the text from an earlier kill.  So, to
+@c recover the text of the next-to-the-last kill, first use @kbd{C-y} to
+@c yank the last kill, and then use @kbd{M-y} to replace it with the
+@c previous kill.  @kbd{M-y} is allowed only after a @kbd{C-y} or another
+@c @kbd{M-y}.
+直前にキルしたものではないテキストを取り出すには、
+@kbd{M-y}コマンド（@code{yank-pop}）を使います。
+@kbd{M-y}は、直前にヤンクしたテキストを
+それ以前にキルしたテキストで置き換えます。
+たとえば、最後から2つめのキルテキストを取り出すには、
+まず@kbd{C-y}で最後にキルしたテキストをヤンクしてから、
+@kbd{M-y}で1つまえのものに置き換えます。
+@kbd{M-y}は@kbd{C-y}や他の@kbd{M-y}の直後でしか使えません。
+
+@c   You can understand @kbd{M-y} in terms of a ``last yank'' pointer which
+@c points at an entry in the kill ring.  Each time you kill, the ``last
+@c yank'' pointer moves to the newly made entry at the front of the ring.
+@c @kbd{C-y} yanks the entry which the ``last yank'' pointer points to.
+@c @kbd{M-y} moves the ``last yank'' pointer to a different entry, and the
+@c text in the buffer changes to match.  Enough @kbd{M-y} commands can move
+@c the pointer to any entry in the ring, so you can get any entry into the
+@c buffer.  Eventually the pointer reaches the end of the ring; the next
+@c @kbd{M-y} loops back around to the first entry again.
+キルリング内の項目を指す『最終ヤンク』ポインタを考えると、
+@kbd{M-y}の動作を理解しやすいでしょう。
+キルするたびに、『最終ヤンク』ポインタは、
+リングの先頭に新たに作られた項目を指します。
+@kbd{C-y}は、『最終ヤンク』ポインタが指す項目をヤンクします。
+@kbd{M-y}は、『最終ヤンク』ポインタを別の項目へ移動し、
+それに合わせてバッファのテキストを変更します。
+@kbd{M-y}コマンドを繰り返せばリング内のどの項目へもポインタを移動できるので、
+どの項目でもバッファに取り込めます。
+ポインタがリングの最後に達すると、
+つぎの@kbd{M-y}はポインタをふたたびリングの先頭の項目に戻します。
+
+@c   @kbd{M-y} moves the ``last yank'' pointer around the ring, but it does
+@c not change the order of the entries in the ring, which always runs from
+@c the most recent kill at the front to the oldest one still remembered.
+@kbd{M-y}は、リング内で『最終ヤンク』ポインタを移動しますが、
+リング内の項目の順番を変えることはありません。
+つねに、最後にキルしたものが先頭にあり、
+記録に残っている最古のものが最後尾にあります。
+
+@c   @kbd{M-y} can take a numeric argument, which tells it how many entries
+@c to advance the ``last yank'' pointer by.  A negative argument moves the
+@c pointer toward the front of the ring; from the front of the ring, it
+@c moves ``around'' to the last entry and continues forward from there.
+@kbd{M-y}には数引数を指定できて、
+『最終ヤンク』ポインタをいくつ進めるかを指定します。
+負の引数では、ポインタをリングの先頭に向けて移動します。
+リングの先頭からは最後の項目へ移動し、そこから先頭に向けて移動します。
+
+@c   Once the text you are looking for is brought into the buffer, you can
+@c stop doing @kbd{M-y} commands and it will stay there.  It's just a copy
+@c of the kill ring entry, so editing it in the buffer does not change
+@c what's in the ring.  As long as no new killing is done, the ``last
+@c yank'' pointer remains at the same place in the kill ring, so repeating
+@c @kbd{C-y} will yank another copy of the same previous kill.
+目的のテキストがバッファに入ったならば、
+@kbd{M-y}コマンドの繰り返しを止めれば、みつけたテキストが残ります。
+そのテキストはキルリングの項目のコピーなので、
+バッファ内で編集してもリング内の項目は変わりません。
+新たにキルしない限り、『最終ヤンク』ポインタは
+キルリング内の同じ場所を指していますから、
+@kbd{C-y}を繰り返すと、
+直前に取り込んだものと同じキル内容のコピーをヤンクできます。
+
+@c   If you know how many @kbd{M-y} commands it would take to find the
+@c text you want, you can yank that text in one step using @kbd{C-y} with
+@c a numeric argument.  @kbd{C-y} with an argument restores the text from
+@c the specified kill ring entry, counting back from the most recent as
+@c 1.  Thus, @kbd{C-u 2 C-y} gets the next-to-the-last block of killed
+@c text---it is equivalent to @kbd{C-y M-y}.  @kbd{C-y} with a numeric
+@c argument starts counting from the ``last yank'' pointer, and sets the
+@c ``last yank'' pointer to the entry that it yanks.
+目的のテキストを引き出すのに
+@kbd{M-y}コマンドを何回使えばよいのかわかっている場合には、
+数引数を指定して@kbd{C-y}を使えば、
+一発で目的のテキストをヤンクできます。
+@kbd{C-y}に数引数を指定すると、
+最も最近のものを1として，そこからキルリング内で遡って数えた項目のテキストを取り込みます。
+たとえば、@kbd{C-u 2 C-y}は最後から2番目にキルしたテキストを取り込みます。
+つまり、@kbd{C-y M-y}とするのと等価です。
+数引数を指定した@kbd{C-y}は、『最終ヤンク』ポインタの場所から
+数え始め、ヤンクする項目にポイントを移動します。
+
+@vindex kill-ring-max
+@c   The length of the kill ring is controlled by the variable
+@c @code{kill-ring-max}; no more than that many blocks of killed text are
+@c saved.
+キルリングの長さは、変数@code{kill-ring-max}で制御します。
+この個数以上のキルテキストは保存しません。
+
+@vindex kill-ring
+@c   The actual contents of the kill ring are stored in a variable named
+@c @code{kill-ring}; you can view the entire contents of the kill ring with
+@c the command @kbd{C-h v kill-ring}.
+キルリングの実際の内容は、@code{kill-ring}という名前の変数に入っています。
+キルリングの全内容は、コマンド@kbd{C-h v kill-ring}で見ることができます。
+
+@node Accumulating Text, Rectangles, Yanking, Top
+@c @section Accumulating Text
+@section テキストの蓄積 @emph{(2005/03/20)}
+@findex append-to-buffer
+@findex prepend-to-buffer
+@findex copy-to-buffer
+@findex append-to-file
+
+@c @cindex accumulating scattered text
+@cindex 分散したテキストの蓄積
+@c   Usually we copy or move text by killing it and yanking it, but there
+@c are other methods convenient for copying one block of text in many
+@c places, or for copying many scattered blocks of text into one place.  To
+@c copy one block to many places, store it in a register
+@c (@pxref{Registers}).  Here we describe the commands to accumulate
+@c scattered pieces of text into a buffer or into a file.
+通常、テキストをコピーしたり移動したりするにはキルとヤンクで行います。
+しかし、一塊のテキストを何か所にもコピーしたり、
+多くの箇所に分散したテキストを1か所にコピーしたりするのに
+便利な方法が他にもあります。
+一塊のテキストを何か所にもコピーするには、
+そのテキストをレジスタに保存します（@pxref{Registers}）。
+ここでは、何か所かに分散したテキストをバッファやファイルに
+蓄積するためのコマンドを説明します。
+
+@table @kbd
+@item M-x append-to-buffer
+@c Append region to the contents of a specified buffer.
+リージョンを指定したバッファの内容の末尾に付加する。
+@item M-x prepend-to-buffer
+@c Prepend region to the contents of a specified buffer.
+リージョンを指定したバッファの内容の先頭に付加する。
+@item M-x copy-to-buffer
+@c Copy region into a specified buffer, deleting that buffer's old contents.
+リージョンを指定したバッファにコピーするが、
+そのバッファの古い内容は削除する。
+@item M-x insert-buffer
+@c Insert the contents of a specified buffer into current buffer at point.
+指定したバッファの内容をカレントバッファのポイント位置に挿入する。
+@item M-x append-to-file
+@c Append region to the contents of a specified file, at the end.
+リージョンを指定したファイルの内容の末尾に付加する。
+@end table
+
+@c   To accumulate text into a buffer, use @kbd{M-x append-to-buffer}.
+@c This reads a buffer name, then inserts a copy of the region into the
+@c buffer specified.  If you specify a nonexistent buffer,
+@c @code{append-to-buffer} creates the buffer.  The text is inserted
+@c wherever point is in that buffer.  If you have been using the buffer for
+@c editing, the copied text goes into the middle of the text of the buffer,
+@c starting from wherever point happens to be at that moment.
+テキストをバッファに蓄積するには、@kbd{M-x append-to-buffer}を使います。
+これは、バッファ名を読み取り、
+リージョンのコピーを指定したバッファに挿入します。
+存在しないバッファを指定した場合、
+@code{append-to-buffer}はバッファを作成します。
+テキストは、そのバッファ内のポイント位置に挿入されます。
+バッファを編集用に使っている場合には、
+そのバッファ内のテキストのあいだ、
+その瞬間にあったポイント位置にコピーしたテキストを挿入します。
+
+@c   Point in that buffer is left at the end of the copied text, so
+@c successive uses of @code{append-to-buffer} accumulate the text in the
+@c specified buffer in the same order as they were copied.  Strictly
+@c speaking, @code{append-to-buffer} does not always append to the text
+@c already in the buffer---it appends only if point in that buffer is at the end.
+@c However, if @code{append-to-buffer} is the only command you use to alter
+@c a buffer, then point is always at the end.
+コピー先のバッファ内では、ポイントはコピーされたテキストの末尾に置かれます。
+したがって、連続して@code{append-to-buffer}を使うと、
+コピーした順序でバッファにテキストが蓄積されます。
+厳密には、@code{append-to-buffer}は、
+バッファ内の既存のテキストに追加するとは限りません。
+そのバッファの末尾にポイントがある場合に限り、追加します。
+しかし、バッファを変更するコマンドが@code{append-to-buffer}だけならば、
+ポイントはつねに末尾に置かれています。
+
+@c   @kbd{M-x prepend-to-buffer} is just like @code{append-to-buffer}
+@c except that point in the other buffer is left before the copied text, so
+@c successive prependings add text in reverse order.  @kbd{M-x
+@c copy-to-buffer} is similar, except that any existing text in the other
+@c buffer is deleted, so the buffer is left containing just the text newly
+@c copied into it.
+@kbd{M-x prepend-to-buffer}は@code{append-to-buffer}にとてもよく似ていますが、
+コピー先のバッファ内のポイントは、
+コピーしたテキストの直前に置かれる点が異なります。
+つまり、続けてこのコマンドを使うと、
+テキストは逆順に追加されていきます。
+@kbd{M-x copy-to-buffer}も同様ですが、
+指定したバッファ内の既存のテキストを削除します。
+したがって、バッファには新たにコピーしたテキストだけが残ります。
+
+@c   To retrieve the accumulated text from another buffer, use the
+@c command @kbd{M-x insert-buffer}; this too takes @var{buffername} as an
+@c argument.  It inserts a copy of the whole text in buffer
+@c @var{buffername} into the current buffer at point, and sets the mark
+@c after the inserted text.  Alternatively, you can select the other
+@c buffer for editing, then copy text from it by killing.
+@c @xref{Buffers}, for background information on buffers.
+別のバッファに蓄積したテキストを取り出すには、
+コマンド@kbd{M-x insert-buffer}を使います。
+このコマンドも引数として@var{buffername}を必要とします。
+バッファ@var{buffername}内の全テキストのコピーを
+現在バッファのポイント位置に挿入し，挿入されたテキストの後にマークを置きます．
+あるいは、そのバッファを選択して編集し、
+場合によってはキルしてそのバッファからテキストを移動することもできます。
+バッファに関する背景情報は、@xref{Buffers}。
+
+@c   Instead of accumulating text within Emacs, in a buffer, you can append
+@c text directly into a file with @kbd{M-x append-to-file}, which takes
+@c @var{filename} as an argument.  It adds the text of the region to the end
+@c of the specified file.  The file is changed immediately on disk.
+テキストをEmacsのバッファに蓄積するかわりに、
+@kbd{M-x append-to-file}を使って、テキストを直接ファイルに追加できます。
+このコマンドは引数として@var{filename}を必要とします。
+リージョンのテキストを指定したファイルの末尾に追加します。
+ファイルはディスク上でただちに更新されます。
+
+@c   You should use @code{append-to-file} only with files that are
+@c @emph{not} being visited in Emacs.  Using it on a file that you are
+@c editing in Emacs would change the file behind Emacs's back, which
+@c can lead to losing some of your editing.
+このコマンドに指定するファイルは、
+Emacsで訪問して@emph{いない}ファイルだけに限るべきです。
+Emacsで編集中のファイルを指定すると、
+Emacsに隠れてファイルを変更することになり、
+編集内容の一部を失うことにもなりかねません。
+
+@node Rectangles, Registers, Accumulating Text, Top
+@c @section Rectangles
+@section 矩形領域 @emph{(2005/03/20)}
+@c @cindex rectangle
+@c @cindex columns (and rectangles)
+@c @cindex killing rectangular areas of text
+@cindex 矩形領域
+@cindex 桁（と矩形領域）
+@cindex テキストの矩形領域のキル
+
+@c   The rectangle commands operate on rectangular areas of the text: all
+@c the characters between a certain pair of columns, in a certain range of
+@c lines.  Commands are provided to kill rectangles, yank killed rectangles,
+@c clear them out, fill them with blanks or text, or delete them.  Rectangle
+@c commands are useful with text in multicolumn formats, and for changing
+@c text into or out of such formats.
+矩形領域コマンドはテキストの矩形領域を操作します。
+矩形領域のテキストとは、
+2つの行の範囲内にある2つの桁位置のあいだにある文字すべてを指します。
+矩形領域をキルする、キルした矩形領域をヤンクする、
+矩形領域をクリアする、矩形領域を空白やテキストで充填する、
+矩形領域を削除する、といったコマンドがあります。
+矩形領域コマンドは、複数段に組んだテキストを操作したり、
+テキストをそのように組んだり戻したりする場合に便利です。
+
+@c   When you must specify a rectangle for a command to work on, you do it
+@c by putting the mark at one corner and point at the opposite corner.  The
+@c rectangle thus specified is called the @dfn{region-rectangle} because
+@c you control it in much the same way as the region is controlled.  But
+@c remember that a given combination of point and mark values can be
+@c interpreted either as a region or as a rectangle, depending on the
+@c command that uses them.
+コマンドで操作する矩形領域を指定するには、
+一方の隅にマークを設定し、その対角にポイントを置きます。
+このように設定した矩形領域を@dfn{矩形リージョン}
+（region-rectangle）と呼びます。
+というのも、リージョンの制御と似た方法で矩形領域を制御できるからです。
+しかし、ポイントとマークの組は、それを使うコマンドに依存して、
+リージョンとして解釈される、あるいは、
+矩形領域として解釈されることに注意してください。
+
+@c   If point and the mark are in the same column, the rectangle they
+@c delimit is empty.  If they are in the same line, the rectangle is one
+@c line high.  This asymmetry between lines and columns comes about
+@c because point (and likewise the mark) is between two columns, but within
+@c a line.
+ポイントとマークが同じ桁位置にある場合、
+それらが切り分ける矩形領域は空です。
+同じ行上にある場合は、矩形領域の高さは1行です。
+桁と行の扱い方が非対称であるのは、
+ポイント（同様にマーク）は2つの桁のあいだにあるのに対し、
+行ではその中にあるからです。
+
+@table @kbd
+@item C-x r k
+@c Kill the text of the region-rectangle, saving its contents as the 
+@c ``last killed rectangle'' (@code{kill-rectangle}).
+矩形リージョンのテキストをキルし、
+その内容を『最後にキルした矩形領域』として保存する（@code{kill-rectangle}）。
+@item C-x r d
+@c Delete the text of the region-rectangle (@code{delete-rectangle}).
+矩形リージョンのテキストを削除する（@code{delete-rectangle}）。
+@item C-x r y
+@c Yank the last killed rectangle with its upper left corner at point
+@c (@code{yank-rectangle}).
+最後にキルした矩形領域をポイント位置を左上隅としてヤンクする
+（@code{yank-rectangle}）。
+@item C-x r o
+@c Insert blank space to fill the space of the region-rectangle
+@c (@code{open-rectangle}).  This pushes the previous contents of the
+@c region-rectangle rightward.
+空白で埋めた矩形リージョンを挿入する（@code{open-rectangle}）。
+矩形リージョンの直前の内容は右に押しやられる。
+@item C-x r c
+@c Clear the region-rectangle by replacing its contents with spaces
+@c (@code{clear-rectangle}).
+@item M-x clear-rectangle
+矩形リージョンのすべてのテキストを空白で置き換えて、
+内容をクリアする (@code{clear-rectangle})。
+@item M-x delete-whitespace-rectangle
+@c Delete whitespace in each of the lines on the specified rectangle,
+@c starting from the left edge column of the rectangle.
+指定した矩形領域の各行において、
+矩形領域の左端から白文字を削除する。
+@item C-x r t @var{string} @key{RET}
+@c Replace rectangle contents with @var{string} on each line.
+@c (@code{string-rectangle}).
+指定した矩形領域の各行の内容を @var{string} で置き換える
+（@code{string-rectangle}）。
+@item M-x string-insert-rectangle @key{RET} @var{string} @key{RET}
+@c Insert @var{string} on each line of the rectangle.
+矩形領域の各行に @var{string} を挿入する
+@end table
+
+@c   The rectangle operations fall into two classes: commands for
+@c deleting and inserting rectangles, and commands for blank rectangles.
+矩形操作は2種類に分類できます。
+矩形領域を削除したり挿入したりするコマンドと、
+空白の矩形領域を扱うコマンドです。
+
+@kindex C-x r k
+@kindex C-x r d
+@findex kill-rectangle
+@findex delete-rectangle
+@c   There are two ways to get rid of the text in a rectangle: you can
+@c discard the text (delete it) or save it as the ``last killed''
+@c rectangle.  The commands for these two ways are @kbd{C-x r d}
+@c (@code{delete-rectangle}) and @kbd{C-x r k} (@code{kill-rectangle}).  In
+@c either case, the portion of each line that falls inside the rectangle's
+@c boundaries is deleted, causing any following text on the line to
+@c move left into the gap.
+矩形領域内のテキストを消すには、2つの方法があります。
+テキストを捨てる（削除する）か、
+『最後にキルした』矩形領域として保存するかです。
+これらの機能を実現するコマンドは、@kbd{C-x r d}（@code{delete-rectangle}）と
+@kbd{C-x r k}（@code{kill-rectangle}）です。
+どちらも、矩形領域の内側にある各行の部分を削除し、
+それより(もしいくらかでも)右側にテキストがあれば、
+隙間を埋めるようにそれらを左へ移動します。
+
+@c   Note that ``killing'' a rectangle is not killing in the usual sense; the
+@c rectangle is not stored in the kill ring, but in a special place that
+@c can only record the most recent rectangle killed.  This is because yanking
+@c a rectangle is so different from yanking linear text that different yank
+@c commands have to be used and yank-popping is hard to make sense of.
+矩形領域の『キル』は普通の意味でのキルではない、
+ということに注意してください。
+矩形領域はキルリングには保存されませんが、
+最後にキルした矩形領域を1つだけ記録できる特別な場所に保存されます。
+というのは、矩形領域をヤンクすることは、
+線形のテキストのヤンクとは大きく異なり、
+特別なヤンクコマンドが必要だったり、
+ヤンクしたテキストの入れ換え操作が意味をなさなかったりするからです。
+
+@kindex C-x r y
+@findex yank-rectangle
+@c   To yank the last killed rectangle, type @kbd{C-x r y}
+@c (@code{yank-rectangle}).  Yanking a rectangle is the opposite of killing
+@c one.  Point specifies where to put the rectangle's upper left corner.
+@c The rectangle's first line is inserted there, the rectangle's second
+@c line is inserted at the same horizontal position, but one line
+@c vertically down, and so on.  The number of lines affected is determined
+@c by the height of the saved rectangle.
+最後にキルした矩形領域をヤンクするには、
+@kbd{C-x r y}（@code{yank-rectangle}）と打ちます。
+矩形領域のヤンクは矩形領域のキルの逆です。
+ポイントは矩形領域の左上隅の位置を指定します。
+その場所には矩形領域の1行目が挿入され、
+矩形領域の2行目はそのつぎの行で同じ列だが1行下がった場所に挿入されるといった具合
+です．
+影響される行数は、保存されている矩形領域の高さで決まります。
+
+@c   You can convert single-column lists into double-column lists using
+@c rectangle killing and yanking; kill the second half of the list as a
+@c rectangle and then yank it beside the first line of the list.
+@c @xref{Two-Column}, for another way to edit multi-column text.
+矩形領域のキルとヤンクを使うと、1段組みの一覧表を2段組の一覧表に変換できます。
+一覧表の後半を矩形領域としてキルして、
+一覧表の第1行の隣にヤンクすればよいのです。
+
+@c   You can also copy rectangles into and out of registers with @kbd{C-x r
+@c r @var{r}} and @kbd{C-x r i @var{r}}.  @xref{RegRect,,Rectangle
+@c Registers}.
+また、@kbd{C-x r r @var{r}}や@kbd{C-x r i @var{r}}を使えば、
+矩形領域をレジスタにコピーしたり、レジスタから矩形領域をコピーしたりできます。
+@xref{RegRect,,Rectangle Registers}。
+
+@kindex C-x r o
+@findex open-rectangle
+@kindex C-x r c
+@findex clear-rectangle
+@c   There are two commands you can use for making blank rectangles:
+@c @kbd{C-x r c} (@code{clear-rectangle}) which blanks out existing text,
+@c and @kbd{C-x r o} (@code{open-rectangle}) which inserts a blank
+@c rectangle.  Clearing a rectangle is equivalent to deleting it and then
+@c inserting a blank rectangle of the same size.
+空白の矩形領域を作るコマンドは2つあります。
+@kbd{C-x r c} (@code{M-x clear-rectangle}) は既存のテキストを空白で置き換え、
+@kbd{C-x r o}（@code{open-rectangle}）は空白の矩形領域を挿入します。
+矩形領域をクリアすることは、
+矩形領域を削除してから同じ大きさの空白の矩形領域を挿入するのと同じことです。
+
+@findex delete-whitespace-rectangle
+@c   The command @kbd{M-x delete-whitespace-rectangle} deletes horizontal
+@c whitespace starting from a particular column.  This applies to each of
+@c the lines in the rectangle, and the column is specified by the left
+@c edge of the rectangle.  The right edge of the rectangle does not make
+@c any difference to this command.
+コマンド@kbd{M-x delete-whitespace-rectangle}は、
+特定の桁位置から始まる横に並んだ白文字を削除します。
+矩形領域内の各行に作用し、桁位置は矩形領域の左端です。
+矩形領域の右端はこのコマンドには関係ありません。
+
+@kindex C-x r t
+@findex string-rectangle
+@c   The command @kbd{C-x r t} (@code{string-rectangle}) replaces the
+@c contents of a region-rectangle with a string on each line.  The
+@c string's width need not be the same as the width of the rectangle.  If
+@c the string's width is less, the text after the rectangle shifts left;
+@c if the string is wider than the rectangle, the text after the
+@c rectangle shifts right.
+コマンド@kbd{C-x r t}（@code{string-rectangle}）は、
+矩形領域を指定した文字列で置き換えます。
+文字列の幅は、矩形領域の幅と同じである必要はありません。
+文字列の幅が足りなければ、矩形領域の右側にあるテキストは左へ移動します。
+文字列の幅が広ければ、矩形領域の右側にあるテキストは右へ移動します。
+
+@findex string-insert-rectangle
+@c   The command @kbd{M-x string-insert-rectangle} is similar to
+@c @code{string-rectangle}, but inserts the string on each line,
+@c shifting the original text to the right.
+@kbd{M-x string-insert-rectangle} は @code{string-rectangle} と似ていますが，元
+のテキストを右にシフトしてから，各行に文字を挿入します．
+
+@ignore
+   arch-tag: d8da8f96-0928-449a-816e-ff2d3497866c
+@end ignore

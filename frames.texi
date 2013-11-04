@@ -1,0 +1,1848 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Frames, International, Windows, Top
+@c @chapter Frames and X Windows
+@c @cindex frames
+@chapter フレームとXウィンドウシステム
+@cindex フレーム
+
+@c   When using the X Window System, you can create multiple windows at the
+@c X level in a single Emacs session.  Each X window that belongs to Emacs
+@c displays a @dfn{frame} which can contain one or several Emacs windows.
+@c A frame initially contains a single general-purpose Emacs window which
+@c you can subdivide vertically or horizontally into smaller windows.  A
+@c frame normally contains its own echo area and minibuffer, but you can
+@c make frames that don't have these---they use the echo area and
+@c minibuffer of another frame.
+Xウィンドウシステムで使っているときには、
+1つのEmacsセッションでXのレベルで複数のウィンドウを作ることができます。
+Emacsに属するXの各ウィンドウは、
+Emacsのウィンドウを1つ以上含めことができる@dfn{フレーム}（frame）を表示します。
+フレームは、最初は汎用のEmacsのウィンドウを1つ含みますが、
+上下左右に小さなウィンドウに分割できます。
+フレームは通常、専用のエコー領域とミニバッファを含みますが、
+それらを含まないものを作ることもできます。
+その場合は、別のフレームのエコー領域やミニバッファを使います。
+
+@c   Editing you do in one frame also affects the other frames.  For
+@c instance, if you put text in the kill ring in one frame, you can yank it
+@c in another frame.  If you exit Emacs through @kbd{C-x C-c} in one frame,
+@c it terminates all the frames.  To delete just one frame, use @kbd{C-x 5
+@c 0}.
+あるフレームでの編集は、別のフレームにも影響します。
+たとえば、あるフレームでキルリングにテキストを入れると、
+別のフレームでヤンクできます。
+あるフレームで@kbd{C-x C-c}でEmacsを終ると、
+すべてのフレームを終了します。
+1つのフレームだけを削除するなら、@kbd{C-x 5 0}を使います。
+
+@c   To avoid confusion, we reserve the word ``window'' for the
+@c subdivisions that Emacs implements, and never use it to refer to a
+@c frame.
+混乱を避けるために、Emacsが実装している細分化できるものを
+『ウィンドウ』と呼び、フレームを意味するときにはこの単語を使いません。
+
+@c   Emacs compiled for MS-DOS emulates some aspects of the window system
+@c so that you can use many of the features described in this chapter.
+@c @xref{MS-DOS Input}, for more information.
+MS-DOS用にコンパイルしたEmacsは、
+ウィンドウシステムのある種の特徴をエミュレートするので、
+本章で説明する機能の多くを使うことができます。
+詳しくは、@xref{MS-DOS Input}。
+
+@menu
+* Mouse Commands::      Moving, cutting, and pasting, with the mouse.
+* Secondary Selection:: Cutting without altering point and mark.
+* Mouse References::    Using the mouse to select an item from a list.
+* Menu Mouse Clicks::   Mouse clicks that bring up menus.
+* Mode Line Mouse::     Mouse clicks on the mode line.
+* Speedbar::            How to make and use a speedbar frame.
+* Creating Frames::     Creating additional Emacs frames with various contents.
+* Multiple Displays::   How one Emacs job can talk to several displays.
+* Special Buffer Frames::  You can make certain buffers have their own frames.
+* Frame Parameters::    Changing the colors and other modes of frames.
+* Scroll Bars::	        How to enable and disable scroll bars; how to use them.
+* Menu Bars::	        Enabling and disabling the menu bar.
+* Faces::	        How to change the display style using faces.
+* Font Lock::           Minor mode for syntactic highlighting using faces.
+* Support Modes::       Font Lock support modes make Font Lock faster.
+* Highlight Changes::   Using colors to show where you changed the buffer.
+* Misc X::	        Iconifying and deleting frames. Region highlighting.
+* Non-Window Terminals::  Multiple frames on terminals that show only one.
+@end menu
+
+@node Mouse Commands
+@c @section Mouse Commands for Editing
+@c @cindex mouse buttons (what they do)
+@section 編集用マウスコマンド
+@cindex マウスボタン（何をするか）
+
+@c   The mouse commands for selecting and copying a region are mostly
+@c compatible with the @code{xterm} program.  You can use the same mouse
+@c commands for copying between Emacs and other X client programs.
+リージョンを選択したりコピーしたりするマウスコマンドは、
+@code{xterm}プログラムとほぼ互換です。
+Emacsと他のXクライアントプログラムとのあいだでコピーするには、
+Xのマウスコマンドと同じものを使えます。
+
+@kindex DELETE
+@c   If you select a region with any of these mouse commands, and then
+@c immediately afterward type the @key{DELETE} function key, it deletes the
+@c region that you selected.  The @key{BACKSPACE} function key and the
+@c ASCII character @key{DEL} do not do this; if you type any other key
+@c in between the mouse command and @key{DELETE}, it does not do this.
+これらのマウスコマンドでリージョンを選択して、
+そのあとすぐにファンクションキー@key{DELETE}を打つと、
+選択したリージョンを削除します。
+ファンクションキー@key{BACKSPACE}やASCII文字@key{DEL}は、
+これを行いません。
+マウスコマンドと@key{DELETE}のあいだに別のキーを打ったときも、
+これを行いません。
+
+@findex mouse-set-region
+@findex mouse-set-point
+@findex mouse-yank-at-click
+@findex mouse-save-then-click
+@kindex Mouse-1
+@kindex Mouse-2
+@kindex Mouse-3
+@table @kbd
+@item Mouse-1
+@c Move point to where you click (@code{mouse-set-point}).
+@c This is normally the left button.
+クリックした位置にポイントを移動する（@code{mouse-set-point}）。
+通常、左ボタン。
+
+@item Drag-Mouse-1
+@c Set the region to the text you select by dragging, and copy it to the
+@c kill ring (@code{mouse-set-region}).  You can specify both ends of the
+@c region with this single command.
+ドラッグにより選択したテキストにリージョンを設定し、
+キルリングにそれをコピーする（@code{mouse-set-region}）。
+リージョンの始めと終りの両方をこのコマンド1つで指定できる。
+
+@vindex mouse-scroll-min-lines
+@c If you move the mouse off the top or bottom of the window while
+@c dragging, the window scrolls at a steady rate until you move the mouse
+@c back into the window.  This way, you can select regions that don't fit
+@c entirely on the screen.  The number of lines scrolled per step depends
+@c on how far away from the window edge the mouse has gone; the variable
+@c @code{mouse-scroll-min-lines} specifies a minimum step size.
+ドラッグ中に、ウィンドウの上下からマウスが出ると、
+マウスがウィンドウ内に戻ってくるまで、
+ウィンドウを一定の割合でスクロールする。
+こうして、画面全体に入りきらないリージョンでも選択できる。
+一度にスクロールする行数は、
+マウスがウィンドウの縁からどの程度離れているかに依存する。
+変数@code{mouse-scroll-min-lines}には最小の行数を指定する。
+
+@item Mouse-2
+@c Yank the last killed text, where you click (@code{mouse-yank-at-click}).
+@c This is normally the middle button.
+クリックした場所に、もっとも最近にキルしたテキストをヤンクする
+（@code{mouse-yank-at-click}）。
+通常、中ボタン。
+
+@item Mouse-3
+@c This command, @code{mouse-save-then-kill}, has several functions
+@c depending on where you click and the status of the region.
+このコマンド@code{mouse-save-then-kill}は、
+クリックした場所とリージョンの状態に依存して、
+いくつかの機能がある。
+
+@c The most basic case is when you click @kbd{Mouse-1} in one place and
+@c then @kbd{Mouse-3} in another.  This selects the text between those two
+@c positions as the region.  It also copies the new region to the kill
+@c ring, so that you can copy it to someplace else.
+もっとも基本的な場合は、ある場所で@kbd{Mouse-1}をクリックしてから、
+別の場所で@kbd{Mouse-3}をクリックしたとき。
+こうすると、これらの2点のあいだにあるテキストをリージョンとして選択する。
+さらに、新しいリージョンをキルリングへもコピーするので、
+別の場所へそれをコピーできる。
+
+@c If you click @kbd{Mouse-1} in the text, scroll with the scroll bar, and
+@c then click @kbd{Mouse-3}, it remembers where point was before scrolling
+@c (where you put it with @kbd{Mouse-1}), and uses that position as the
+@c other end of the region.  This is so that you can select a region that
+@c doesn't fit entirely on the screen.
+テキスト上で@kbd{Mouse-1}をクリックしてから、
+スクロールバーでスクロールしたあとで@kbd{Mouse-3}をクリックすると、
+スクロールする以前の（@kbd{Mouse-1}でクリックした）場所を覚えていて、
+そこをリージョンの片方の端点として使う。
+こうすると、画面に入りきらないリージョンでも選択できる。
+
+@c More generally, if you do not have a highlighted region, @kbd{Mouse-3}
+@c selects the text between point and the click position as the region.  It
+@c does this by setting the mark where point was, and moving point to where
+@c you click.
+より一般的には、強調表示されたリージョンがないならば、
+@kbd{Mouse-3}は、ポイントとクリックした位置のあいだのテキストを
+リージョンとして選択する。
+これは、ポイントがあった位置にマークを設定し、
+クリックした位置にポイントを移動することで行う。
+
+@c If you have a highlighted region, or if the region was set just before
+@c by dragging button 1, @kbd{Mouse-3} adjusts the nearer end of the region
+@c by moving it to where you click.  The adjusted region's text also
+@c replaces the old region's text in the kill ring.
+強調表示されたリージョンがある場合、あるいは、
+ボタン1をドラッグしてリージョンを設定してある場合、
+@kbd{Mouse-3}はクリックした場所に近い側のリージョンの端を
+クリック位置に移動して調整する。
+また、調整したリージョンのテキストは、
+キルリング内の古いリージョンのテキストを置き換える。
+
+@c If you originally specified the region using a double or triple
+@c @kbd{Mouse-1}, so that the region is defined to consist of entire words
+@c or lines, then adjusting the region with @kbd{Mouse-3} also proceeds by
+@c entire words or lines.
+もともと@kbd{Mouse-1}をダブルクリックあるいはトリプルクリックして、
+リージョンを単語や行単位で設定した場合には、
+@kbd{Mouse-3}によるリージョンの調整も単語や行単位で行われる。
+
+@c If you use @kbd{Mouse-3} a second time consecutively, at the same place,
+@c that kills the region already selected.
+連続して2度同じ場所で@kbd{Mouse-3}を使うと、
+すでに選択してあるリージョンをキルする。
+
+@item Double-Mouse-1
+@c This key sets the region around the word which you click on.  If you
+@c click on a character with ``symbol'' syntax (such as underscore, in C
+@c mode), it sets the region around the symbol surrounding that character.
+このキーは、クリックした単語全体にリージョンを設定する。
+『シンボル』の構文（Cの下線のような）の文字をクリックすると、
+その文字を囲むシンボル全体にリージョンを設定する。
+
+@c If you click on a character with open-parenthesis or close-parenthesis
+@c syntax, it sets the region around the parenthetical grouping (sexp)
+@c which that character starts or ends.  If you click on a character with
+@c string-delimiter syntax (such as a singlequote or doublequote in C), it
+@c sets the region around the string constant (using heuristics to figure
+@c out whether that character is the beginning or the end of it).
+開き括弧や閉じ括弧の構文の文字をクリックすると、
+その文字で始まり／終る括弧で囲まれた塊（sexp）にリージョンを設定する。
+文字列区切りの構文（Cのシングルクォートやダブルクォート）の文字をクリック
+すると、（その文字が文字列の始まりか終りかを発見的方法を使って決めて）
+文字列定数を囲むリージョンを設定する。
+
+@item Double-Drag-Mouse-1
+@c This key selects a region made up of the words you drag across.
+このキーは、
+ドラッグした範囲内にある単語を囲むリージョンを設定する。
+
+@item Triple-Mouse-1
+@c This key sets the region around the line you click on.
+このキーは、クリックした行全体を囲むリージョンを設定する。
+
+@item Triple-Drag-Mouse-1
+@c This key selects a region made up of the lines you drag across.
+このキーは、ドラッグした範囲内にある行すべてを囲むリージョンを設定する。
+@end table
+
+@c   The simplest way to kill text with the mouse is to press @kbd{Mouse-1}
+@c at one end, then press @kbd{Mouse-3} twice at the other end.
+@c @xref{Killing}.  To copy the text into the kill ring without deleting it
+@c from the buffer, press @kbd{Mouse-3} just once---or just drag across the
+@c text with @kbd{Mouse-1}.  Then you can copy it elsewhere by yanking it.
+マウスを使ったもっとも単純なテキストのキル方法は、
+片方の端で@kbd{Mouse-1}を押し、もう一方の端で@kbd{Mouse-3}を2回押すことです。
+@xref{Killing}。
+バッファから削除しないでキルリングにテキストをコピーするには、
+@kbd{Mouse-3}を一度だけ押します。
+あるいは、@kbd{Mouse-1}でテキストを横断してドラッグするだけです。
+そうすると、どこででも、それをヤンクすることでコピーできます。
+
+@vindex mouse-yank-at-point
+@c   To yank the killed or copied text somewhere else, move the mouse there
+@c and press @kbd{Mouse-2}.  @xref{Yanking}.  However, if
+@c @code{mouse-yank-at-point} is non-@code{nil}, @kbd{Mouse-2} yanks at
+@c point.  Then it does not matter where you click, or even which of the
+@c frame's windows you click on.  The default value is @code{nil}.  This
+@c variable also affects yanking the secondary selection.
+キルしたりコピーしたりしたテキストをどこか別の場所にヤンクするには、
+マウスをその場所に移動して@kbd{Mouse-2}を押します。
+@xref{Yanking}。
+しかし、@code{mouse-yank-at-point}が@code{nil}以外ならば、
+@kbd{Mouse-2}はポイント位置にヤンクします。
+つまり、ウィンドウのどこをクリックしたのか、あるいは、
+フレームのどのウィンドウをクリックしたのかは問題ではありません。
+デフォルトの値は@code{nil}です。
+この変数は二次セレクションのヤンクにも影響します。
+
+@c @cindex cutting and X
+@c @cindex pasting and X
+@c @cindex X cutting and pasting
+@c   To copy text to another X window, kill it or save it in the kill ring.
+@c Under X, this also sets the @dfn{primary selection}.  Then use the
+@c ``paste'' or ``yank'' command of the program operating the other window
+@c to insert the text from the selection.
+@cindex カットとX
+@cindex ペーストとX
+@cindex Xでのカットとペースト
+別のXのウィンドウへテキストをコピーするには、
+その部分をキルするかキルリングに保存します。
+Xの管理下では、@dfn{一次セレクション}も設定します。
+そのあとで、別のXのウィンドウで動いているプログラムの『ペースト』や
+『ヤンク』コマンドを使って、セレクションからテキストを挿入します。
+
+@c   To copy text from another X window, use the ``cut'' or ``copy'' command
+@c of the program operating the other window, to select the text you want.
+@c Then yank it in Emacs with @kbd{C-y} or @kbd{Mouse-2}.
+別のXのウィンドウからテキストをコピーするには、
+そのウィンドウで動いているプログラムの『カット』や『コピー』コマンドを
+使って目的のテキストをセレクションにします。
+そのあとで、@kbd{C-y}や@kbd{Mouse-2}を使ってEmacsにヤンクします。
+
+@c   These cutting and pasting commands also work on MS-Windows.
+これらのカット／ペーストコマンドはMS-Windows上でも動作します。
+
+@c @cindex primary selection
+@c @cindex cut buffer
+@c @cindex selection, primary
+@cindex 一次セレクション
+@cindex カットバッファ
+@cindex セレクション、一次
+@vindex x-cut-buffer-max
+@c   When Emacs puts text into the kill ring, or rotates text to the front
+@c of the kill ring, it sets the @dfn{primary selection} in the X server.
+@c This is how other X clients can access the text.  Emacs also stores the
+@c text in the cut buffer, but only if the text is short enough
+@c (@code{x-cut-buffer-max} specifies the maximum number of characters);
+@c putting long strings in the cut buffer can be slow.
+Emacsがテキストをキルリングに入れたり、
+キルリングのテキストを先頭へ巡回するとき、
+EmacsはXサーバーの一次セレクションに設定します。
+このために、別のXクライアントがテキストを参照できるのです。
+テキストが十分に短い場合にのみ
+（@code{x-cut-buffer-max}は最大文字数を指定する）、
+Emacsはカットバッファにもテキストを収めます。
+長い文字列をカットバッファへ置くには時間がかかります。
+
+@c   The commands to yank the first entry in the kill ring actually check
+@c first for a primary selection in another program; after that, they check
+@c for text in the cut buffer.  If neither of those sources provides text
+@c to yank, the kill ring contents are used.
+キルリングの始めのテキストをヤンクするコマンドは、
+実際には、別のプログラムの一次セレクションをまず調べ、
+そのあとで、カットバッファのテキストを調べます。
+どちらにもヤンクするテキストがなれば、キルリングの内容を使います。
+
+@node Secondary Selection
+@c @section Secondary Selection
+@c @cindex secondary selection
+@section 二次セレクション
+@cindex 二次セレクション
+@cindex セレクション、二次
+
+@c   The @dfn{secondary selection} is another way of selecting text using
+@c X.  It does not use point or the mark, so you can use it to kill text
+@c without setting point or the mark.
+@dfn{二次セレクション}は、Xにおいてテキストを選択する別の方法です。
+これは、ポイントやマークを使わないので、
+ポイントやマークを設定せずにテキストを削除するのに使えます。
+
+@table @kbd
+@findex mouse-set-secondary
+@kindex M-Drag-Mouse-1
+@item M-Drag-Mouse-1
+@c Set the secondary selection, with one end at the place where you press
+@c down the button, and the other end at the place where you release it
+@c (@code{mouse-set-secondary}).  The highlighting appears and changes as
+@c you drag.
+ボタンを押した場所を片方の端、ボタンを離した場所をもう一方の端として、
+二次セレクションを設定する（@code{mouse-set-secondary}）。
+強調表示されドラッグするにつれて変化する。
+
+@c If you move the mouse off the top or bottom of the window while
+@c dragging, the window scrolls at a steady rate until you move the mouse
+@c back into the window.  This way, you can mark regions that don't fit
+@c entirely on the screen.
+ドラッグ中にウィンドウの上下からマウスが出ると、
+ウィンドウへマウスが戻ってくるまで、
+ウィンドウを一定の割合でスクロールする。
+こうして、画面全体に入りきらないリージョンも選択できる。
+
+@findex mouse-start-secondary
+@kindex M-Mouse-1
+@item M-Mouse-1
+@c Set one endpoint for the @dfn{secondary selection}
+@c (@code{mouse-start-secondary}).
+@dfn{二次セレクション}の一方の端を設定する
+（@code{mouse-start-secondary}）。
+
+@findex mouse-secondary-save-then-kill
+@kindex M-Mouse-3
+@item M-Mouse-3
+@c Make a secondary selection, using the place specified with @kbd{M-Mouse-1}
+@c as the other end (@code{mouse-secondary-save-then-kill}).  A second click
+@c at the same place kills the secondary selection just made.
+@kbd{M-Mouse-1}で指定した場所を一方の端として使い、
+二次セレクションを設定する。
+（@code{mouse-secondary-save-then-kill}）。
+同じ位置での2回目のクリックは、
+ちょうど作成した二次セレクションをキルする。
+
+@findex mouse-yank-secondary
+@kindex M-Mouse-2
+@item M-Mouse-2
+@c Insert the secondary selection where you click
+@c (@code{mouse-yank-secondary}).  This places point at the end of the
+@c yanked text.
+クリックした位置に二次セレクションを挿入する
+（@code{mouse-yank-secondary}）。
+ヤンクしたテキストの最後にポイントを置く。
+@end table
+
+@c Double or triple clicking of @kbd{M-Mouse-1} operates on words and
+@c lines, much like @kbd{Mouse-1}.
+@kbd{M-Mouse-1}のダブルクリックやトリプルクリックは、
+@kbd{Mouse-1}のように単語や行単位に作用します。
+
+@c If @code{mouse-yank-at-point} is non-@code{nil}, @kbd{M-Mouse-2}
+@c yanks at point.  Then it does not matter precisely where you click; all
+@c that matters is which window you click on.  @xref{Mouse Commands}.
+@code{mouse-yank-at-point}が@code{nil}以外ならば、
+@kbd{M-Mouse-2}はポイント位置にヤンクします。
+そのときには、どこをクリックしたかは関係なく、
+どのウィンドウをクリックしたかだけが関係します。
+@xref{Mouse Commands}。
+
+@node Mouse References
+@c @section Following References with the Mouse
+@c @kindex Mouse-2 @r{(selection)}
+@section マウスで参照を辿る
+@kindex Mouse-2 @r{（セレクション）}
+
+@c   Some Emacs buffers display lists of various sorts.  These include
+@c lists of files, of buffers, of possible completions, of matches for
+@c a pattern, and so on.
+いくつかのEmacsバッファでは、いろいろなものの一覧を表示します。
+ファイル一覧、バッファ一覧、補完候補一覧、パターンに一致したものの一覧
+などです。
+
+@c   Since yanking text into these buffers is not very useful, most of them
+@c define @kbd{Mouse-2} specially, as a command to use or view the item you
+@c click on.
+これらのバッファにテキストをヤンクできても便利ということはないので、
+これらの多くは@kbd{Mouse-2}を特別に定義して、
+クリックした項目を使ったり眺めたりするコマンドとしています。
+
+@c   For example, if you click @kbd{Mouse-2} on a file name in a Dired
+@c buffer, you visit that file.  If you click @kbd{Mouse-2} on an error
+@c message in the @samp{*Compilation*} buffer, you go to the source code
+@c for that error message.  If you click @kbd{Mouse-2} on a completion in
+@c the @samp{*Completions*} buffer, you choose that completion.
+たとえば、diredバッファのファイル名を@kbd{Mouse-2}でクリックすると、
+そのファイルを訪問します。
+@samp{*Compilation*}バッファのエラーメッセージを@kbd{Mouse-2}で
+クリックすると、そのエラーメッセージに対応するソースコードへ行きます。
+@samp{*Completions*}バッファの補完候補を@kbd{Mouse-2}でクリックすると、
+その補完候補を選択します。
+
+@c   You can usually tell when @kbd{Mouse-2} has this special sort of
+@c meaning because the sensitive text highlights when you move the mouse
+@c over it.
+反応するテキストの上にマウスが移動するとテキストが強調表示されるので、
+@kbd{Mouse-2}がいつ特別な意味を持つか普通はわかります。
+
+@node Menu Mouse Clicks
+@c @section Mouse Clicks for Menus
+@section メニューを出すマウスクリック
+
+@c   Mouse clicks modified with the @key{CTRL} and @key{SHIFT} keys
+@c bring up menus.
+@key{CTRL}や@key{SHIFT}キーで修飾されたマウスクリックは、
+メニューを立ち上げます。
+
+@kindex C-Mouse-3
+@table @kbd
+@item C-Mouse-1
+@c This menu is for selecting a buffer.
+バッファを選択するためのメニュー。
+
+@item C-Mouse-2
+@c This menu is for specifying faces and other text properties
+@c for editing formatted text.  @xref{Formatted Text}.
+整形済みのテキストに使うフェイスやテキスト属性を指定するためのメニュー。
+@pxref{Formatted Text}。
+
+@item C-Mouse-3
+@c This menu is mode-specific.  For most modes, this menu has the same
+@c items as all the mode-specific menu-bar menus put together.  Some modes
+@c may specify a different menu for this button.@footnote{Some systems use
+@c @kbd{Mouse-3} for a mode-specific menu.  We took a survey of users, and
+@c found they preferred to keep @kbd{Mouse-3} for selecting and killing
+@c regions.  Hence the decision to use @kbd{C-Mouse-3} for this menu.}
+モードに特有のメニュー。
+ほとんどのモードでは、このメニューは、
+すべてのモード特有のメニューバーメニューを一緒にしたのと同じ項目を持つ。
+いくつかのモードでは、このボタン
+@footnote{いくつかのシステムでは、@kbd{Mouse-3}をモード特有のメニューに使う。
+ユーザーを調査した結果、@kbd{Mouse-3}をリージョンの選択とキルに
+使い続けることが好まれていることが判明した。
+ゆえに、このメニューに対して@kbd{C-Mouse-3}を使うことにした。}
+に異なるメニューを指定しているかもしれない。
+
+@item S-mouse-1
+@c This menu is for specifying the frame's principal font.
+フレームの主要フォントの指定に関するメニュー。
+@end table
+
+@node Mode Line Mouse
+@c @section Mode Line Mouse Commands
+@section モード行のマウスコマンド
+
+@c   You can use mouse clicks on window mode lines to select and manipulate
+@c windows.
+ウィンドウを選択したり操作するために、
+ウィンドウのモード行でマウスクリックを使えます。
+
+@table @kbd
+@item Mouse-1
+@c @kbd{Mouse-1} on a mode line selects the window above.  By dragging
+@c @kbd{Mouse-1} on the mode line, you can move it, thus changing the
+@c height of the windows above and below.
+モード行で@kbd{Mouse-1}をクリックするとその上のウィンドウを選択する。
+モード行を@kbd{Mouse-1}でドラッグするとモード行を移動することができ、
+そのウィンドウの高さを変更できる。 
+
+@item Mouse-2
+@c @kbd{Mouse-2} on a mode line expands that window to fill its frame.
+モード行で@kbd{Mouse-2}をクリックすると、
+そのフレーム一杯にウィンドウを広げる。
+
+@item Mouse-3
+@c @kbd{Mouse-3} on a mode line deletes the window above.
+モード行で@kbd{Mouse-3}をクリックすると、
+その上のウィンドウを削除する。
+
+@item C-Mouse-2
+@c @kbd{C-Mouse-2} on a mode line splits the window above
+@c horizontally, above the place in the mode line where you click.
+モード行で@kbd{C-Mouse-2}をクリックすると、
+モード行をクリックした場所でその上のウィンドウを左右に分割する。
+@end table
+
+@c   @kbd{C-Mouse-2} on a scroll bar splits the corresponding window
+@c vertically.  @xref{Split Window}.
+スクロールバーで@kbd{C-Mouse-2}をクリックすると、
+対応するウィンドウを上下に分割します。
+@xref{Split Window}。
+
+@node Creating Frames
+@c @section Creating Frames
+@c @cindex creating frames
+@section フレームの作成
+@cindex フレームの作成
+
+@kindex C-x 5
+@c   The prefix key @kbd{C-x 5} is analogous to @kbd{C-x 4}, with parallel
+@c subcommands.  The difference is that @kbd{C-x 5} commands create a new
+@c frame rather than just a new window in the selected frame (@pxref{Pop
+@c Up Window}).  If an existing visible or iconified frame already displays
+@c the requested material, these commands use the existing frame, after
+@c raising or deiconifying as necessary. 
+プレフィックスキー@kbd{C-x 5}は、
+@kbd{C-x 4}と同じようなサブコマンドがあるという点で似ています。
+違いは、@kbd{C-x 5}コマンドは、
+選択されているフレームで新たにウィンドウを作るのではなく、
+新しいフレームを作ることです（@pxref{Pop Up Window}）。
+既存の見えているフレームやアイコン化されたフレームが、
+要求された内容を表示しているなら、これらのコマンドは、
+必要ならフレームをいちばん手前にもってきたりアイコンを開いてから、
+既存のフレームを使います。
+
+@c   The various @kbd{C-x 5} commands differ in how they find or create the
+@c buffer to select:
+さまざまな@kbd{C-x 5}コマンドは、
+選択するバッファの探し方や作成方法が異なります。
+
+@table @kbd
+@item C-x 5 2
+@kindex C-x 5 2
+@findex make-frame-command
+@c Create a new frame (@code{make-frame-command}).
+新しいフレームを作る（@code{make-frame-command}）。
+@item C-x 5 b @var{bufname} @key{RET}
+@c Select buffer @var{bufname} in another frame.  This runs
+@c @code{switch-to-buffer-other-frame}.
+別のフレームでバッファ@var{bufname}を選択する。
+これは、@code{switch-to-buffer-other-frame}を実行する。
+@item C-x 5 f @var{filename} @key{RET}
+@c Visit file @var{filename} and select its buffer in another frame.  This
+@c runs @code{find-file-other-frame}.  @xref{Visiting}.
+ファイル@var{filename}を訪問して、別のフレームでそのバッファを選択する。
+これは、@code{find-file-other-frame}を実行する。
+@pxref{Visiting}。
+@item C-x 5 d @var{directory} @key{RET}
+@c Select a Dired buffer for directory @var{directory} in another frame.
+@c This runs @code{dired-other-frame}.  @xref{Dired}.
+別のフレームでディレクトリ@var{directory}に対するdiredバッファを選択する。
+これは、@code{dired-other-frame}を実行する。
+@pxref{Dired}。
+@item C-x 5 m
+@c Start composing a mail message in another frame.  This runs
+@c @code{mail-other-frame}.  It is the other-frame variant of @kbd{C-x m}.
+@c @xref{Sending Mail}.
+別のフレームでメイルメッセージの作成を始める。
+これは、@code{mail-other-frame}を実行する。
+これは、@kbd{C-x m}の他のフレームを使う変形版。
+@pxref{Sending Mail}。
+@item C-x 5 .
+@c Find a tag in the current tag table in another frame.  This runs
+@c @code{find-tag-other-frame}, the multiple-frame variant of @kbd{M-.}.
+@c @xref{Tags}.
+別のフレームで現在のタグテーブルからタグを探す。
+これは、@code{find-tag-other-frame}を実行し、
+@kbd{M-.}の複数フレーム向けの変形版。
+@pxref{Tags}。
+@item C-x 5 r @var{filename} @key{RET}
+@kindex C-x 5 r
+@findex find-file-read-only-other-frame
+@c Visit file @var{filename} read-only, and select its buffer in another
+@c frame.  This runs @code{find-file-read-only-other-frame}.
+@c @xref{Visiting}.
+ファイル@var{filename}を読み出し専用で訪問し、
+別のフレームでそのバッファを選択する。
+これは、@code{find-file-read-only-other-frame}を実行する。
+@pxref{Visiting}。
+@end table
+
+@cindex default-frame-alist
+@cindex initial-frame-alist
+@c   You can control the appearance of new frames you create by setting the
+@c frame parameters in @code{default-frame-alist}.  You can use the
+@c variable @code{initial-frame-alist} to specify parameters that affect
+@c only the initial frame.  @xref{Initial Parameters,,, elisp, The Emacs
+@c Lisp Reference Manual}, for more information.
+@code{default-frame-alist}にフレームパラメータを設定することで、
+新たに作成するフレームの見た目を制御できます。
+初期フレームだけに影響するパラメータを指定するには、
+変数@code{initial-frame-alist}を使います。
+詳しくは、
+@xref{Initial Parameters,, 初期フレームのパラメータ, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@c @cindex font (default)
+@cindex フォント（デフォルト）
+@c   The easiest way to specify the principal font for all your Emacs
+@c frames is with an X resource (@pxref{Font X}), but you can also do it by
+@c modifying @code{default-frame-alist} to specify the @code{font}
+@c parameter, as shown here:
+すべてのEmacsフレームに主要フォントを指定するもっとも簡単な方法は、
+Xのリソース（@pxref{Font X}）を使うことですが、
+つぎに示すように、@code{font}パラメータを指定するように
+@code{default-frame-alist}を変更してもできます。
+
+@example
+(add-to-list 'default-frame-alist '(font . "10x20"))
+@end example
+
+@node Speedbar
+@c @section Making and Using a Speedbar Frame
+@section スピードバーフレームの作成と使い方
+@c @cindex speedbar
+@cindex スピードバー
+
+@c   An Emacs frame can have a @dfn{speedbar}, which is a vertical window
+@c that serves as a scrollable menu of files you could visit and tags
+@c within those files.  To create a speedbar, type @kbd{M-x speedbar}; this
+@c creates a speedbar window for the selected frame.  From then on, you can
+@c click on a file name in the speedbar to visit that file in the
+@c corresponding Emacs frame, or click on a tag name to jump to that tag in
+@c the Emacs frame.
+Emacsのフレームは、@dfn{スピードバー}を持つことができます。
+スピードバーは、縦長のウィンドウで、
+訪問したりタグを探したりするためのスクロール可能な
+ファイルメニューとして働きます。
+スピードバーを作るには、@kbd{M-x speedbar}と打ちます。
+これは、選択されたフレームに対するスピードバーウィンドウを作ります。
+そうすると、スピードバーのファイル名をクリックすると、
+対応するEmacsフレームでそのファイルを訪問できます。
+あるいは、タグの名前をクリックすると、
+Emacsフレームでそのタグの箇所へ飛んで行きます。
+
+@c   Initially the speedbar lists the immediate contents of the current
+@c directory, one file per line.  Each line also has a box, @samp{[+]} or
+@c @samp{<+>}, that you can click on with @kbd{Mouse-2} to ``open up'' the
+@c contents of that item.  If the line names a directory, opening it adds
+@c the contents of that directory to the speedbar display, underneath the
+@c directory's own line.  If the line lists an ordinary file, opening it up
+@c adds a list of the tags in that file to the speedbar display.  When a
+@c file is opened up, the @samp{[+]} changes to @samp{[-]}; you can click
+@c on that box to ``close up'' that file (hide its contents).
+最初、スピードバーには、カレントディレクトリの直下の内容を
+1行につき1つのファイルで表示します。
+各行には、@samp{[+]}か@samp{<+>}の箱があって、
+それを@kbd{Mouse-2}でクリックするとその項目の内容を『開け』ます。
+その行の名前がディレクトリならば、それを開くと、
+そのディレクトリの内容をその行の下に追加してスピードバーに表示します。
+その行が普通のファイルならば、それを開くと、
+そのファイル内のタグ一覧をスピードバーに追加して表示します。
+ファイルが開かれていると、@samp{[+]}は@samp{[-]}に変わります。
+ファイルを『閉じる』（内容を隠す）ためにその箱をクリックできます。
+
+@c   Some major modes, including Rmail mode, Info, and GUD, have
+@c specialized ways of putting useful items into the speedbar for you to
+@c select.  For example, in Rmail mode, the speedbar shows a list of Rmail
+@c files, and lets you move the current message to another Rmail file by
+@c clicking on its @samp{<M>} box.
+rmailモード、infoモード、GUDモードを含むいくつかのメジャーモードには、
+選択可能な有用な項目をスピードバーに追加する特別な方法があります。
+たとえば、rmailモードでは、スピードバーにはrmailファイル一覧を表示します。
+カレントメッセージを別のrmailファイルに移すには、
+目的のrmailファイルの@samp{<M>}の箱をクリックするだけです。
+
+@c   A speedbar belongs to one Emacs frame, and always operates on that
+@c frame.  If you use multiple frames, you can make a speedbar for some or
+@c all of the frames; type @kbd{M-x speedbar} in any given frame to make a
+@c speedbar for it.
+スピードバーは1つのEmacsフレームに属し、つねにそのフレームに作用します。
+複数のフレームを使うときには、
+一部のフレームやすべてのフレームにスピードバーを作れます。
+フレームのスピードバーを作るには、そのフレームで@kbd{M-x speedbar}と打ちます。
+
+@node Multiple Displays
+@c @section Multiple Displays
+@c @cindex multiple displays
+@section 複数ディスプレイ
+@cindex 複数ディスプレイ
+
+@c   A single Emacs can talk to more than one X Windows display.
+@c Initially, Emacs uses just one display---the one specified with the
+@c @code{DISPLAY} environment variable or with the @samp{--display} option
+@c (@pxref{Initial Options}).  To connect to another display, use the
+@c command @code{make-frame-on-display}:
+1つのEmacsは、複数のXディスプレイと通信できます。
+最初は、Emacsは1つのディスプレイだけを使います。
+環境変数@code{DISPLAY}や@samp{--display}オプションに指定されたものです
+（@pxref{Initial Options}）。
+他のディスプレイに接続するには、
+コマンド@code{make-frame-on-display}を使います。
+
+@findex make-frame-on-display
+@table @kbd
+@item M-x make-frame-on-display @key{RET} @var{display} @key{RET}
+@c Create a new frame on display @var{display}.
+ディスプレイ@var{display}上に新しいフレームを作成する。
+@end table
+
+@c   A single X server can handle more than one screen.  When you open
+@c frames on two screens belonging to one server, Emacs knows they share a
+@c single keyboard, and it treats all the commands arriving from these
+@c screens as a single stream of input.
+1つのXサーバーは複数のスクリーンを扱えます。
+1つのサーバーに属する2つのスクリーンにフレームを開くとき、
+Emacsは1つのキーボードを共有していることを知っていて、
+これらのスクリーンから到着するすべてのコマンドを1つの
+入力ストリームとして扱います。
+
+@c   When you open frames on different X servers, Emacs makes a separate
+@c input stream for each server.  This way, two users can type
+@c simultaneously on the two displays, and Emacs will not garble their
+@c input.  Each server also has its own selected frame.  The commands you
+@c enter with a particular X server apply to that server's selected frame.
+異なるXサーバー上にフレームを開くとき、
+Emacsはそれぞれのサーバーに対して別々の入力ストリームを作ります。
+こうすることで、2つのディスプレイ上で2人のユーザーが同時に打鍵でき、
+Emacsはそれらの入力をごっちゃにすることはありません。
+各サーバーにはそれ自身が選択しているフレームがあります。
+特定のXサーバーで入力したコマンドは、
+そのサーバーが選択しているフレームに適用されます。
+
+@c   Despite these features, people using the same Emacs job from different
+@c displays can still interfere with each other if they are not careful.
+@c For example, if any one types @kbd{C-x C-c}, that exits the Emacs job
+@c for all of them!
+これらの機能にも関わらず、異なるディスプレイで同じEmacsジョブを
+使っている人達は、注意を怠ると、互いに干渉し合ってしまいます。
+たとえば、誰かが@kbd{C-x C-c}と打つと、
+その人達が共有している（1つの）Emacsジョブは終了してしまいます！
+
+@node Special Buffer Frames
+@c @section Special Buffer Frames
+@section 特別なバッファフレーム
+
+@vindex special-display-buffer-names
+@c   You can make certain chosen buffers, for which Emacs normally creates
+@c a second window when you have just one window, appear in special frames
+@c of their own.  To do this, set the variable
+@c @code{special-display-buffer-names} to a list of buffer names; any
+@c buffer whose name is in that list automatically gets a special frame,
+@c when an Emacs command wants to display it ``in another window.''
+ウィンドウが1つのときにはEmacsが普通2つめのウィンドウを作るような
+特定のバッファでは、それ専用の特別なフレームに表示することができます。
+こうするには、変数@code{special-display-buffer-names}に
+バッファ名のリストを設定します。
+そのリストに名前があるどのバッファも、
+Emacsコマンドが『別のウィンドウに』表示したいときには、
+特別なフレームを自動的に取得します。
+
+@c   For example, if you set the variable this way,
+たとえば、つぎのように変数を設定したとすると、
+補完一覧、@code{grep}の出力、@TeX{}モードのシェルバッファは、
+それぞれ個別のフレームを取得します。
+
+@example
+(setq special-display-buffer-names
+      '("*Completions*" "*grep*" "*tex-shell*"))
+@end example
+
+@noindent
+@c then completion lists, @code{grep} output and the @TeX{} mode shell
+@c buffer get individual frames of their own.  These frames, and the
+@c windows in them, are never automatically split or reused for any other
+@c buffers.  They continue to show the buffers they were created for,
+@c unless you alter them by hand.  Killing the special buffer deletes its
+@c frame automatically.
+これらのフレームとその中のウィンドウは、
+別のバッファのために自動的に分割されたり再利用されることはありません。
+手動で変更するまで、そのために作成されたバッファを表示し続けます。
+特別なバッファを消去すると、そのフレームも自動的に削除されます。
+
+@vindex special-display-regexps
+@c   More generally, you can set @code{special-display-regexps} to a list
+@c of regular expressions; then a buffer gets its own frame if its name
+@c matches any of those regular expressions.  (Once again, this applies only
+@c to buffers that normally get displayed for you in a separate window.)
+より一般的には、正規表現のリストを@code{special-display-regexps}に
+設定できます。
+すると、バッファの名前がそれらの正規表現に一致すると、
+バッファは専用のフレームを取得します。
+（繰り返すが、これは通常、別のウィンドウに表示するバッファにのみ適用する。）
+
+@vindex special-display-frame-alist
+@c   The variable @code{special-display-frame-alist} specifies the frame
+@c parameters for these frames.  It has a default value, so you don't need
+@c to set it.
+変数@code{special-display-frame-alist}は、
+このようなフレームに対するフレームパラメータを指定します。
+これにはデフォルト値があるので、特に設定する必要はありません。
+
+@c   For those who know Lisp, an element of
+@c @code{special-display-buffer-names} or @code{special-display-regexps}
+@c can also be a list.  Then the first element is the buffer name or
+@c regular expression; the rest of the list specifies how to create the
+@c frame.  It can be an association list specifying frame parameter values;
+@c these values take precedence over parameter values specified in
+@c @code{special-display-frame-alist}.  Alternatively, it can have this
+@c form:
+Lispがわかる人のためにですが、
+@code{special-display-buffer-names}や@code{special-display-regexps}の要素は、
+リストでもかまいません。
+その場合、最初の要素はバッファ名か正規表現です。
+リストの残りは、フレームの作成方法を指定します。
+これは、フレームパラメータの値を指定する連想リストにすることもできます。
+これらの値は、@code{special-display-frame-alist}に
+指定されたパラメータの値より優先されます。
+あるいは、リストはつぎのような形式にすることもできます。
+
+@example
+(@var{function} @var{args}...)
+@end example
+
+@noindent
+@c where @var{function} is a symbol.  Then the frame is constructed by
+@c calling @var{function}; its first argument is the buffer, and its
+@c remaining arguments are @var{args}.
+ここで、@var{function}はシンボルです。
+こうすると、@var{function}を呼んでフレームを作ります。
+関数呼び出しの最初の引数はバッファで、残りの引数は@var{args}です。
+
+@c    An analogous feature lets you specify buffers which should be
+@c displayed in the selected window.  @xref{Force Same Window}.  The
+@c same-window feature takes precedence over the special-frame feature;
+@c therefore, if you add a buffer name to
+@c @code{special-display-buffer-names} and it has no effect, check to see
+@c whether that feature is also in use for the same buffer name.
+似たような機能で、バッファをどの選択されているウィンドウに表示するか
+指定できます。
+@xref{Force Same Window}。
+同じウィンドウに表示する機能は、特別なフレームに表示する機能に優ります。
+したがって、バッファ名を@code{special-display-buffer-names}に追加しても
+何の効果もなかったら、
+その機能が同じバッファ名に対しても使われていないか調べてください。
+
+@node Frame Parameters
+@c @section Setting Frame Parameters
+@c @cindex colors
+@c @cindex Auto-Raise mode
+@c @cindex Auto-Lower mode
+@section フレームパラメータの設定
+@cindex 表示色
+@cindex オートレイズモード（Auto-Raise mode）
+@cindex オートローワモード（Auto-Lower mode）
+
+@c   This section describes commands for altering the display style and
+@c window management behavior of the selected frame.
+本節では、選択しているフレームの表示スタイルやウィンドウ管理のふるまいを
+変更するコマンドを説明します。
+
+@findex set-foreground-color
+@findex set-background-color
+@findex set-cursor-color
+@findex set-mouse-color
+@findex set-border-color
+@findex auto-raise-mode
+@findex auto-lower-mode
+@table @kbd
+@item M-x set-foreground-color @key{RET} @var{color} @key{RET}
+@c Specify color @var{color} for the foreground of the selected frame.
+選択しているフレームの前景色を@var{color}と指定する。
+
+@item M-x set-background-color @key{RET} @var{color} @key{RET}
+@c Specify color @var{color} for the background of the selected frame.
+@c This changes the foreground color of the @code{modeline} face also, so
+@c that it remains in inverse video compared with the default.
+選択しているフレームの背景色を@var{color}と指定する。
+これは@code{modeline}フェイスの前景色も変更するので、
+デフォルトと比較しても反転表示のままになる。
+
+@item M-x set-cursor-color @key{RET} @var{color} @key{RET}
+@c Specify color @var{color} for the cursor of the selected frame.
+選択しているフレームのカーソルの表示色を@var{color}と指定する。
+
+@item M-x set-mouse-color @key{RET} @var{color} @key{RET}
+@c Specify color @var{color} for the mouse cursor when it is over the
+@c selected frame.
+マウスカーソルが選択しているフレーム内にあるときの
+マウスカーソルの表示色を@var{color}と指定する。
+
+@item M-x set-border-color @key{RET} @var{color} @key{RET}
+@c Specify color @var{color} for the border of the selected frame.
+選択しているフレームの境界色を@var{color}と指定する。
+
+@item M-x list-colors-display
+@c Display the defined color names and show what the colors look like.
+@c This command is somewhat slow.
+定義されている表示色の名称とそれがどう見えるか表示する。
+このコマンドは少し遅い。
+
+@item M-x auto-raise-mode
+@c Toggle whether or not the selected frame should auto-raise.  Auto-raise
+@c means that every time you move the mouse onto the frame, it raises the
+@c frame.
+選択されているフレームをオートレイズするべきかどうか切り替える。
+オートレイズとは、マウスカーソルがフレームに入るたびに、
+そのフレームを手前にもってくること。
+
+@c Note that this auto-raise feature is implemented by Emacs itself.  Some
+@c window managers also implement auto-raise.  If you enable auto-raise for
+@c Emacs frames in your X window manager, it should work, but it is beyond
+@c Emacs's control and therefore @code{auto-raise-mode} has no effect on
+@c it.
+このオートレイズ機能はEmacs自身が実装していることに注意。
+ウィンドウマネージャの中にも、オートレイズを実装しているものがある。
+XのウィンドウマネージャでEmacsフレームのオートレイズを指定しているときには、
+それが動作するはず。
+しかし、それはEmacsの制御を超えているので、それに関しては
+@code{auto-raise-mode}は何の影響もない。
+
+@item M-x auto-lower-mode
+@c Toggle whether or not the selected frame should auto-lower.
+@c Auto-lower means that every time you move the mouse off the frame,
+@c the frame moves to the bottom of the stack of X windows.
+選択されているフレームをオートローワするべきかどうか切り替える。
+オートローワとは、マウスカーソルがフレームから出るたびに、
+そのフレームをXのウィンドウスタックの底に移すこと。
+
+@c The command @code{auto-lower-mode} has no effect on auto-lower
+@c implemented by the X window manager.  To control that, you must use
+@c the appropriate window manager features.
+コマンド@code{auto-lower-mode}は、
+Xのウィンドウマネージャが実装するオートローワには何の影響もない。
+それを制御するには、適切なウィンドウマネージャの機能を使う必要がある。
+
+@findex set-frame-font
+@item M-x set-frame-font @key{RET} @var{font} @key{RET}
+@c @cindex font (principal)
+@cindex フォント（主要）
+@c Specify font @var{font} as the principal font for the selected frame.
+@c The principal font is used for all text displayed in the frame, except
+@c when a face (@pxref{Faces}) specifies a different font to use for
+@c certain text.  @xref{Font X}, for ways to list the available fonts on
+@c your system.
+選択されたフレームに対する主要フォントとして@var{font}を指定する。
+フェイス（@pxref{Faces}）が別のフォントを使うことを指定しているときを
+除いて、主要フォントは、フレームに表示するすべてのテキストに対して使われる。
+あなたのシステムで使えるフォント一覧を表示する方法については、
+@pxref{Font X}。
+
+@c @kindex S-Mouse-1
+@c You can also set a frame's principal font through a pop-up menu.
+@c Press @kbd{S-Mouse-1} to activate this menu.
+ポップアップメニューから、フレームの主要フォントを設定することもできる。
+このメニューを立ち上げるには@kbd{S-Mouse-1}を押す。
+@end table
+
+@c   In Emacs versions that use an X toolkit, the color-setting and
+@c font-setting functions don't affect menus and the menu bar, since they
+@c are displayed by their own widget classes.  To change the appearance of
+@c the menus and menu bar, you must use X resources (@pxref{Resources X}).
+@c @xref{Colors X}, regarding colors.  @xref{Font X}, regarding choice of
+@c font.
+Xツールキットを使うEmacsの版では、表示色とフォントを設定する関数は
+メニューやメニューバーには影響しません。
+というのは、メニューやメニューバーは、
+それら自身のウィジェットクラスを使って表示されているからです。
+メニューとメニューバーの見た目を変更するには、
+Xのリソースを使う必要があります（@pxref{Resources X}）。
+表示色に関しては、@xref{Colors X}。
+フォントの選択については、@xref{Font X}。
+
+@c   For information on frame parameters and customization, see @ref{Frame
+@c Parameters,,, elisp, The Emacs Lisp Reference Manual}.
+フレームパラメータとそのカスタマイズについては、
+@xref{Frame Parameters,, フレームパラメータ, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@node Scroll Bars
+@c @section Scroll Bars
+@section スクロールバー
+@c @cindex Scroll Bar mode
+@c @cindex mode, Scroll Bar
+@cindex スクロールバーモード（Scroll Bar mode）
+@cindex モード、Scroll Bar
+
+@c   When using X, Emacs normally makes a @dfn{scroll bar} at the left of
+@c each Emacs window.  The scroll bar runs the height of the window, and
+@c shows a moving rectangular inner box which represents the portion of the
+@c buffer currently displayed.  The entire height of the scroll bar
+@c represents the entire length of the buffer.
+Xを使っているときには、Emacsは通常、各Emacsウィンドウの左側に
+@dfn{スクロールバー}（scroll bar）を作ります。
+スクロールバーは、ウィンドウの高さに延びていて、
+内側に動く矩形の箱を表示します。
+この箱は、現在表示されているバッファ内の部分を表しています。
+スクロールバーの全体の高さは、バッファの全体の長さを表します。
+
+@c   You can use @kbd{Mouse-2} (normally, the middle button) in the scroll
+@c bar to move or drag the inner box up and down.  If you move it to the
+@c top of the scroll bar, you see the top of the buffer.  If you move it to
+@c the bottom of the scroll bar, you see the bottom of the buffer.
+@kbd{Mouse-2}（通常、中ボタン）を使って、
+スクロールバーの内側の箱を上下に移動したりドラッグできます。
+内側の箱をスクロールバーのいちばん上へ移動すると、
+バッファの先頭を見ることができます。
+スクロールバーのいちばん下に内側の箱を移動すると、バッファの末尾が見えます。
+
+@c   The left and right buttons in the scroll bar scroll by controlled
+@c increments.  @kbd{Mouse-1} (normally, the left button) moves the line at
+@c the level where you click up to the top of the window.  @kbd{Mouse-3}
+@c (normally, the right button) moves the line at the top of the window
+@c down to the level where you click.  By clicking repeatedly in the same
+@c place, you can scroll by the same distance over and over.
+スクロールバーで左や右ボタンを使うと、制御された増分でスクロールできます。
+@kbd{Mouse-1}（通常、左ボタン）は、
+クリックした場所の高さの行をウィンドウの最上端の行へ移動します。
+@kbd{Mouse-3}（通常、右ボタン）は、
+ウィンドウの最上端の行をクリックした場所の高さの行へ移動します。
+同じ位置で繰り返しクリックすると、
+同じ分量のスクロールを繰り返します。
+
+@c   Aside from scrolling, you can also click @kbd{C-Mouse-2} in the scroll
+@c bar to split a window vertically.  The split occurs on the line where
+@c you click.
+スクロール以外では、スクロールバーで@kbd{C-Mouse-2}をクリックすると、
+ウィンドウを上下に分割できます。
+クリックした場所の行で分割されます。
+
+@findex scroll-bar-mode
+@c   You can enable or disable Scroll Bar mode with the command @kbd{M-x
+@c scroll-bar-mode}.  With no argument, it toggles the use of scroll bars.
+@c With an argument, it turns use of scroll bars on if and only if the
+@c argument is positive.  This command applies to all frames, including
+@c frames yet to be created.  You can use the X resource
+@c @samp{verticalScrollBars} to control the initial setting of Scroll Bar
+@c mode.  @xref{Resources X}.
+コマンド@kbd{M-x scroll-bar-mode}で、
+スクロールバー（scroll-bar）モードをオン／オフできます。
+引数を指定しなければ、スクロールバーの使用をトグルします。
+引数を指定した場合、引数が正のときだけスクロールバーを使うようにします。
+このコマンドは、これから作成されるフレームを含めてすべての
+フレームに作用します。
+Xのリソース@samp{verticalScrollBars}を使って、
+スクロールバー（scroll-bar）モードの初期設定を制御できます。
+@xref{Resources X}。
+
+@c @findex toggle-scroll-bar
+@c   To enable or disable scroll bars for just the selected frame, use the
+@c @kbd{M-x toggle-scroll-bar} command.
+選択されているフレームに対してのみスクロールバーをオン／オフするには、
+@kbd{M-x toggle-scroll-bar}コマンドを使います。
+
+@node Menu Bars
+@c @section Menu Bars
+@c @cindex Menu Bar mode
+@c @cindex mode, Menu Bar
+@section メニューバー
+@cindex メニューバーモード（Menu Bar mode）
+@cindex モード、Menu Bar
+
+@c   You can turn display of menu bars on or off with @kbd{M-x
+@c menu-bar-mode}.  With no argument, this command toggles Menu Bar mode, a
+@c minor mode.  With an argument, the command turns Menu Bar mode on if the
+@c argument is positive, off if the argument is not positive.  You can use
+@c the X resource @samp{menuBarLines} to control the initial setting of
+@c Menu Bar mode.  @xref{Resources X}.  Expert users often turn off the
+@c menu bar, especially on text-only terminals, where this makes one
+@c additional line available for text.
+@kbd{M-x menu-bar-mode}でメニューバーの表示をオン／オフできます。
+引数を指定しないと、このコマンドはマイナモードである
+メニューバー（menu-bar）モードをトグルします。
+引数を指定した場合、引数が正ならメニューバー（menu-bar）モードをオンにし、
+引数が正でないならオフにします。
+Xのリソース@samp{menuBarLines}を使って、
+メニューバー（menu-bar）モードの初期設定を制御できます。
+@xref{Resources X}。
+熟練したユーザーは、メニューバーをしばしばオフにし、
+特に文字端末上ではそうします。
+というのは、テキスト表示に1行余分に使えるからです。
+
+@c   @xref{Menu Bar}, for information on how to invoke commands with the
+@c menu bar.
+メニューバーでコマンドを起動する方法については、@xref{Menu Bar}。
+
+@node Faces
+@c @section Using Multiple Typefaces
+@c @cindex faces
+@section 複数タイプフェイスの利用
+@cindex フェイス
+
+@c   When using Emacs with X, you can set up multiple styles of displaying
+@c characters.  The aspects of style that you can control are the type
+@c font, the foreground color, the background color, and whether to
+@c underline.  Emacs on MS-DOS supports faces partially by letting you
+@c control the foreground and background colors of each face
+@c (@pxref{MS-DOS}).
+XでEmacsを使っているとき、文字表示に複数のスタイルを設定できます。
+制御できるスタイルは、フォントの種類、前景色、背景色、下線を引くかどうかです。
+MS-DOS用Emacsは、各フェイスの前景色と背景色を制御して、
+フェイスの一部だけを扱えます（@pxref{MS-DOS}）。
+
+@c   The way you control display style is by defining named @dfn{faces}.
+@c Each face can specify a type font, a foreground color, a background
+@c color, and an underline flag; but it does not have to specify all of
+@c them.  Then by specifying the face or faces to use for a given part
+@c of the text in the buffer, you control how that text appears.
+表示スタイルを制御する方法は、名前付き@dfn{フェイス}を定義することです。
+各フェイスでは、フォントの種類、前景色、背景色、下線フラグを指定できます。
+しかし、これらすべてを指定する必要はありません。
+バッファ内のテキストの一部分に対して使用するフェイスを指定することで、
+そのテキストの見た目を制御できます。
+
+@c   The style of display used for a given character in the text is
+@c determined by combining several faces.  Any aspect of the display style
+@c that isn't specified by overlays or text properties comes from the frame
+@c itself.
+テキスト中のある文字に対して使う表示スタイルは、
+いくつかのフェイスを組み合わせて決定されます。
+重ね合わせやテキスト属性で指定されていない表示スタイルは、
+フレームそのものから得ます。
+
+@c   Enriched mode, the mode for editing formatted text, includes several
+@c commands and menus for specifying faces.  @xref{Format Faces}, for how
+@c to specify the font for text in the buffer.  @xref{Format Colors}, for
+@c how to specify the foreground and background color.
+整形済みテキストを編集するモードであるエンリッチ（enriched）モードには、
+フェイスを指定するためのコマンドやメニューがあります。
+バッファ内のテキストに対するフォントの指定方法については、@xref{Format Faces}。
+前景色と背景色の指定方法については、@xref{Format Colors}。
+
+@c   To alter the appearance of a face, use the customization buffer.
+@c @xref{Face Customization}.  You can also use X resources to specify
+@c attributes of particular faces (@pxref{Resources X}).
+フェイスの見た目を変更するには、カスタマイズバッファを使います
+@xref{Face Customization}。
+Xのリソースを使って、特定のフェイスの属性を指定できます
+（@pxref{Resources X}）。
+
+@findex list-faces-display
+@c   To see what faces are currently defined, and what they look like, type
+@c @kbd{M-x list-faces-display}.  It's possible for a given face to look
+@c different in different frames; this command shows the appearance in the
+@c frame in which you type it.  Here's a list of the standardly defined
+@c faces:
+現在定義されているフェイスとその見た目を調べるには、
+@kbd{M-x list-faces-display}と打ちます。
+あるフェイスを違うフレームでは違って見えるようにできます。
+このコマンドは、コマンドを打ったフレーム上での見た目を表示します。
+つぎは、標準的に定義されているフェイス一覧です。
+
+@table @code
+@item default
+@c This face is used for ordinary text that doesn't specify any other face.
+このフェイスは、他のフェイスを指定していない普通のテキストに使われる。
+@item modeline
+@c This face is used for mode lines.  By default, it's set up as the
+@c inverse of the default face.  @xref{Display Vars}.
+このフェイスはモード行に対して使われる。
+デフォルトでは、@code{default}フェイスの反転表示を設定。
+@pxref{Display Vars}。
+@item highlight
+@c This face is used for highlighting portions of text, in various modes.
+このフェイスは、さまざまモードでのテキストの強調表示部分に対して使われる。
+@item region
+@c This face is used for displaying a selected region (when Transient Mark
+@c mode is enabled---see below).
+このフェイスは、選択されているリージョン
+（暫定マーク（transient-mark）モードがオンのとき。下記参照）
+の表示に使われる。
+@item secondary-selection
+@c This face is used for displaying a secondary selection (@pxref{Secondary
+@c Selection}).
+このフェイスは、二次セレクションの表示に使われる
+（@pxref{Secondary Selection}）。
+@item bold
+@c This face uses a bold variant of the default font, if it has one.
+このフェイスは、ボールド体（太字体）があるならば、
+ボールド体を用いたデフォルトフォントの変種。
+@item italic
+@c This face uses an italic variant of the default font, if it has one.
+このフェイスは、イタリック体（斜体）があるならば、
+イタリック体を用いたデフォルトフォントの変種。
+@item bold-italic
+@c This face uses a bold italic variant of the default font, if it has one.
+このフェイスは、ボールドイタリック体（太字斜体）があるならば、
+ボールドイタリック体を用いたデフォルトフォントの変種。
+@item underline
+@c This face underlines text.
+このフェイスは、テキストに下線を引く。
+@end table
+
+@c @cindex @code{region} face
+@cindex @code{region}フェイス
+@cindex フェイス@code{region}
+@c   When Transient Mark mode is enabled, the text of the region is
+@c highlighted when the mark is active.  This uses the face named
+@c @code{region}; you can control the style of highlighting by changing the
+@c style of this face (@pxref{Face Customization}).  @xref{Transient Mark},
+@c for more information about Transient Mark mode and activation and
+@c deactivation of the mark.
+暫定マーク（transient-mark）モードがオンのときは、
+マークが活性ならば、リージョンのテキストは強調表示されます。
+これには@code{region}という名前のフェイスを使います。
+このフェイスのスタイルを変更することで、
+強調表示のスタイルを制御できます（@pxref{Face Customization}）。
+暫定マーク（transient-mark）とマークの活性／不活性について詳しくは、
+@xref{Transient Mark}。
+
+@c   One easy way to use faces is to turn on Font Lock mode.  This minor
+@c mode, which is always local to a particular buffer, arranges to
+@c choose faces according to the syntax of the text you are editing.  It
+@c can recognize comments and strings in most languages; in several
+@c languages, it can also recognize and properly highlight various other
+@c important constructs.  @xref{Font Lock}, for more information about
+@c Font Lock mode and syntactic highlighting.
+フェイスを使う簡単な方法の1つは、
+フォントロック（font-lock）モードを使うことです。
+特定のバッファにつねにローカルであるこのマイナモードは、
+編集するテキストの構文に従ってフェイスを選択します。
+このモードは、ほとんどの言語のコメントと文字列を認識できます。
+いくつかの言語では、それ以外のさまざまな重要な構造も認識して、
+適切に強調表示します。
+フォントロック（font-lock）モードと構文の強調表示について詳しくは、
+@xref{Font Lock}。
+
+@c   You can print out the buffer with the highlighting that appears
+@c on your screen using the command @code{ps-print-buffer-with-faces}.
+@c @xref{Postscript}.
+画面上で強調表示されたバッファは、
+コマンド@code{ps-print-buffer-with-faces}を使って印刷できます。
+@xref{Postscript}。
+
+@node Font Lock
+@c @section Font Lock mode
+@c @cindex Font Lock mode
+@c @cindex mode, Font Lock
+@c @cindex syntax highlighting
+@section フォントロックモード
+@cindex フォントロックモード（Font Lock mode）
+@cindex モード、Font Lock
+@cindex 構文の強調表示
+
+@c   Font Lock mode is a minor mode, always local to a particular
+@c buffer, which highlights (or ``fontifies'') using various faces
+@c according to the syntax of the text you are editing.  It can
+@c recognize comments and strings in most languages; in several
+@c languages, it can also recognize and properly highlight various other
+@c important constructs---for example, names of functions being defined
+@c or reserved keywords.
+フォントロック（font-lock）モードはマイナモードです。
+特定のバッファにつねにローカルであり、
+編集しているテキストの構文に従ってさまざまなフェイスを
+使って強調表示（または『フォント表示化』）します。
+このモードは、ほとんどの言語のコメントや文字列を認識できます。
+いくつかの言語では、他のさまざまな重要な構成要素も認識し、
+正しく強調表示します。 
+たとえば、定義されている関数名や予約語です。
+
+@findex font-lock-mode
+@findex turn-on-font-lock
+@c   The command @kbd{M-x font-lock-mode} turns Font Lock mode on or off
+@c according to the argument, and toggles the mode when it has no argument.
+@c The function @code{turn-on-font-lock} unconditionally enables Font Lock
+@c mode.  This is useful in mode-hook functions.  For example, to enable
+@c Font Lock mode whenever you edit a C file, you can do this:
+コマンド@kbd{M-x font-lock-mode}は、
+引数に従ってフォントロック（font-lock）モードをオン／オフし、
+引数がなければモードをトグルします。
+関数@code{turn-on-font-lock}は、
+フォントロック（font-lock）モードを無条件でオンにします。
+このコマンドは、モードフック関数で使うと便利です。
+たとえば、Cのファイルを編集しているときにはいつでも
+フォントロック（font-lock）モードをオンにするには、
+つぎのようにします。
+
+@example
+(add-hook 'c-mode-hook 'turn-on-font-lock)
+@end example
+
+@findex global-font-lock-mode
+@c   To turn on Font Lock mode automatically in all modes which support it,
+@c use the function @code{global-font-lock-mode}, like this:
+フォントロック（font-lock）モードを扱える
+すべての（メジャー）モードで自動的にフォントロック（font-lock）モードを
+オンにするには、
+関数@code{global-font-lock-mode}をつぎのように使います。
+
+@example
+(global-font-lock-mode 1)
+@end example
+
+@kindex M-g M-g
+@findex font-lock-fontify-block
+@c   In Font Lock mode, when you edit the text, the highlighting updates
+@c automatically in the line that you changed.  Most changes don't affect
+@c the highlighting of subsequent lines, but occasionally they do.  To
+@c rehighlight a range of lines, use the command @kbd{M-g M-g}
+@c (@code{font-lock-fontify-block}).
+フォントロック（font-lock）モードでは、
+テキストを編集していると、自動的に変更した行の強調表示を更新します。
+ほとんどの変更は、後続行の強調表示には影響しませんが、
+時折、影響することもあります。
+ある範囲の行を強調表示し直すには、コマンド@kbd{M-g M-g}を使います
+（@code{font-lock-fontify-block}）。
+
+@vindex font-lock-mark-block-function
+@c   In certain major modes, @kbd{M-g M-g} refontifies the entire current
+@c function.  (The variable @code{font-lock-mark-block-function} controls
+@c how to find the current function.)  In other major modes, @kbd{M-g M-g}
+@c refontifies 16 lines above and below point.
+ある種のメジャーモードでは、@kbd{M-g M-g}は、
+現在の関数定義全体をフォント表示化し直します。
+（変数@code{font-lock-mark-block-function}は、
+現在の関数定義の探し方を制御する。）
+別のメジャーモードでは、 @kbd{M-g M-g}は、
+ポイントのまえとあとの16行をフォント表示化し直します。
+
+@c   With a prefix argument @var{n}, @kbd{M-g M-g} refontifies @var{n}
+@c lines above and below point, regardless of the mode.
+数引数@var{n}を指定すると、@kbd{M-g M-g}は、
+モードに関係なく、 ポイントのまえとあとの@var{n}行をフォント表示化し直します。
+
+@c   To get the full benefit of Font Lock mode, you need to choose a
+@c default font which has bold, italic, and bold-italic variants; or else
+@c you need to have a color or gray-scale screen.
+フォントロック（font-lock）モードの利点を十分に活用するには、
+ボールド体、イタリック体、ボールドイタリック体のデフォルトフォントを
+選ぶ必要があります。
+あるいは、カラーやグレースケールの画面が必要です。
+
+@vindex font-lock-maximum-decoration
+@c   The variable @code{font-lock-maximum-decoration} specifies the
+@c preferred level of fontification, for modes that provide multiple
+@c levels.  Level 1 is the least amount of fontification; some modes
+@c support levels as high as 3.  The normal default is ``as high as
+@c possible.''  You can specify an integer, which applies to all modes, or
+@c you can specify different numbers for particular major modes; for
+@c example, to use level 1 for C/C++ modes, and the default level
+@c otherwise, use this:
+変数@code{font-lock-maximum-decoration}は、
+複数のレベルを提供するモードでのフォント表示化の好ましいレベルを指定します。
+レベル1は最低限のフォント表示化です。
+いくつかのモードでは、もっとも高い3のレベルまであります。
+通常デフォルトは『可能な限り大きい数』です。
+すべてのモードに適用する整数を指定できます。
+あるいは、特定のメジャーモードに対して異なる数を指定できます。
+たとえば、C/C++モードではレベル1を、
+それ以外ではデフォルトのレベルを指定するには、つぎのようにします。
+
+@example
+(setq font-lock-maximum-decoration
+      '((c-mode . 1) (c++-mode . 1)))
+@end example
+
+@vindex font-lock-maximum-size
+@c   Fontification can be too slow for large buffers, so you can suppress
+@c it.  The variable @code{font-lock-maximum-size} specifies a buffer size,
+@c beyond which buffer fontification is suppressed.
+フォント表示化は、大きなバッファに対してはとても遅くなりえますから、
+抑制することもできます。
+変数@code{font-lock-maximum-size}にバッファサイズを指定すると、
+その値を越えるバッファについてはフォント表示化を抑制します。
+
+@c @w is used below to prevent a bad page-break.
+@vindex font-lock-beginning-of-syntax-function
+@c   Comment and string fontification (or ``syntactic'' fontification)
+@c relies on analysis of the syntactic structure of the buffer text.  For
+@c the purposes of speed, some modes including C mode and Lisp mode rely on
+@c a special convention: an open-parenthesis in the leftmost column always
+@c defines the @w{beginning} of a defun, and is thus always outside any string
+@c or comment.  (@xref{Defuns}.)  If you don't follow this convention,
+@c then Font Lock mode can misfontify the text after an open-parenthesis in
+@c the leftmost column that is inside a string or comment.
+コメントと文字列のフォント表示化（あるいは、『構文の』フォント表示化）は、
+バッファのテキストの構文解析に頼っています。
+速度向上のために、CモードやLispモードを含むいくつかのモードでは、
+特別な習慣に頼っています。
+最左桁にある開き括弧は、つねに関数定義の@w{開始}を表し、
+そのため、つねに文字列やコメントの外側だということです。
+（@pxref{Defuns}。）
+この習慣に従わないと、フォントロック（font-lock）モードは、
+文字列やコメントの内側にある最左桁の開き括弧のうしろでは、
+違ったフォント表示化をすることもありえます。
+
+@c   The variable @code{font-lock-beginning-of-syntax-function} (always
+@c buffer-local) specifies how Font Lock mode can find a position
+@c guaranteed to be outside any comment or string.  In modes which use the
+@c leftmost column parenthesis convention, the default value of the variable
+@c is @code{beginning-of-defun}---that tells Font Lock mode to use the
+@c convention.  If you set this variable to @code{nil}, Font Lock no longer
+@c relies on the convention.  This avoids incorrect results, but the price
+@c is that, in some cases, fontification for a changed text must rescan
+@c buffer text from the beginning of the buffer.
+変数@code{font-lock-beginning-of-syntax-function}
+（つねにバッファにローカル）は、フォントロック（font-lock）モードが、
+コメントや文字列の外側であることが保証される位置を
+どのように探すかを指定します。
+最左桁の括弧の習慣を使うモードでは、
+変数のデフォルト値は、@code{beginning-of-defun}です。 
+つまり、フォントロック（font-lock）モードは
+習慣を使うようにということです。
+この変数に@code{nil}を設定すると、
+フォントロック（font-lock）モードは、もはや習慣に頼りません。
+これでまちがった結果を避けられますが、その代償は、
+変更したテキストをフォント表示化するには、
+バッファのテキストをバッファの先頭から再走査する必要がある場合もあります。
+
+@findex font-lock-add-keywords
+@c   Font Lock highlighting patterns already exist for many modes, but you
+@c may want to fontify additional patterns.  You can use the function
+@c @code{font-lock-add-keywords}, to add your own highlighting patterns for
+@c a particular mode.  For example, to highlight @samp{FIXME:} words in C
+@c comments, use this:
+多くのモードに対するフォントロックの強調表示パターンはすでにありますが、
+フォント表示化するパターンを追加したいこともあるでしょう。
+関数@code{font-lock-add-keywords}を使って、
+特定のモードに対する個人用の強調表示パターンを追加できます。
+たとえば、Cのコメントで単語@samp{FIXME:}を強調表示するには、
+つぎのように使います。
+
+@example
+(font-lock-add-keywords
+ 'c-mode
+ '(("\\<\\(FIXME\\):" 1 font-lock-warning-face t)))
+@end example
+
+@node Support Modes
+@c @section Font Lock Support Modes
+@section フォントロックのモード
+
+@c   Font Lock support modes make Font Lock mode faster for large buffers.
+@c There are two support modes: Fast Lock mode and Lazy Lock mode.  They
+@c use two different methods of speeding up Font Lock mode.
+フォントロックには、大きなバッファに対して
+フォントロック（font-lock）モードを高速に動作させるモードがあります。
+高速ロック（fast-lock）モードと遅延ロック（lazy-lock）モードです。
+これらは、フォントロック（font-lock）モードの速度を向上するために
+2つの異なる方法を使います。
+
+@menu
+* Fast Lock Mode::      Saving font information in files.
+* Lazy Lock Mode::      Fontifying only text that is actually displayed.
+* Fast or Lazy::        Which support mode is best for you?
+@end menu
+
+@node Fast Lock Mode
+@c @subsection Fast Lock Mode
+@subsection 高速ロックモード
+
+@c @cindex Fast Lock mode
+@c @cindex mode, Fast Lock
+@cindex 高速ロックモード（Fast Lock mode）
+@cindex モード、Fast Lock
+@c   To make Font Lock mode faster for buffers visiting large files, you
+@c can use Fast Lock mode.  Fast Lock mode saves the font information for
+@c each file in a separate cache file; each time you visit the file, it
+@c rereads the font information from the cache file instead of refontifying
+@c the text from scratch.
+大きなファイルを訪問したバッファに対して
+フォントロック（font-lock）モードを速くするには、
+高速ロック（fast-lock）モードを使えます。
+高速ロック（fast-lock）モードは、
+各ファイルに対するフォント情報を
+別のキャッシュファイル（cache file）に保存します。
+ファイルを訪問するたびに、最初からテキストをフォント表示化し直すかわりに、
+キャッシュファイルからフォント情報を読み直します。
+
+@findex fast-lock-mode
+@c   The command @kbd{M-x fast-lock-mode} turns Fast Lock mode on or off,
+@c according to the argument (with no argument, it toggles).  You can also
+@c arrange to enable Fast Lock mode whenever you use Font Lock mode, like
+@c this:
+コマンド@kbd{M-x fast-lock-mode}は、
+引数に従って高速ロック（fast-lock）モードをオン／オフします
+（引数がないければトグル）。
+フォントロック（font-lock）モードを使うときに、
+いつでも高速ロック（fast-lock）モードをオンにするには、
+つぎのようにします。
+
+@example
+(setq font-lock-support-mode 'fast-lock-mode)
+@end example
+
+@vindex fast-lock-minimum-size
+@c   It is not worth writing a cache file for small buffers.  Therefore,
+@c the variable @code{fast-lock-minimum-size} specifies a minimum file size
+@c for caching font information.
+小さなバッファに対しては、キャッシュファイルを書く価値がありません。
+それゆえ、変数@code{fast-lock-minimum-size}は、
+フォント情報をキャッシュする最小のファイルサイズを指定します。
+
+@vindex fast-lock-cache-directories
+@c   The variable @code{fast-lock-cache-directories} specifies where to put
+@c the cache files.  Its value is a list of directories to try; @code{"."}
+@c means the same directory as the file being edited.  The default value is
+@c @w{@code{("." "~/.emacs-flc")}}, which means to use the same directory if
+@c possible, and otherwise the directory @file{~/.emacs-flc}.
+変数@code{fast-lock-cache-directories}は、
+キャッシュファイルをどこに置くかを指定します。
+その値は、ディレクトリ群のリストです。
+@code{"."}は、編集しているファイルと同じディレクトリを表します。
+デフォルト値は、@w{@code{("." "~/.emacs-flc")}}で、
+可能ならば同じディレクトリを使い、
+さもなければディレクトリ@file{~/.emacs-flc}を使うという意味です。 
+
+@vindex fast-lock-save-others
+@c   The variable @code{fast-lock-save-others} specifies whether Fast Lock
+@c mode should save cache files for files that you do not own.  A
+@c non-@code{nil} value means yes (and that is the default).
+変数@code{fast-lock-save-others}は、
+あなたが所持していないファイルに対するキャッシュファイルを
+高速ロック（fast-lock）モードが保存すべきかどうかを指定します。
+値が@code{nil}以外ならば保存します（これがデフォルト）。
+
+@node Lazy Lock Mode
+@c @subsection Lazy Lock Mode
+@c @cindex Lazy Lock mode
+@c @cindex mode, Lazy Lock
+@subsection 遅延ロックモード
+@cindex 遅延ロックモード（Lazy Lock mode）
+@cindex モード、Lazy Lock
+
+@c   To make Font Lock mode faster for large buffers, you can use Lazy Lock
+@c mode to reduce the amount of text that is fontified.  In Lazy Lock mode,
+@c buffer fontification is demand-driven; it happens to portions of the
+@c buffer that are about to be displayed.  And fontification of your
+@c changes is deferred; it happens only when Emacs has been idle for a
+@c certain short period of time.
+大きなバッファに対してフォントロック（font-lock）モードを速くするには、
+フォント表示化するテキストの量を減らす
+遅延ロック（lazy-lock）モードを使えます。
+遅延ロック（lazy-lock）モードでは、バッファのフォント表示化は要求駆動型です。
+表示されようとしているバッファの部分だけをフォント表示化します。
+また、変更部分のフォント表示化は延期され、
+Emacsがある短い時間アイドルであったときにのみフォント表示化します。
+
+@findex lazy-lock-mode
+@c   The command @kbd{M-x lazy-lock-mode} turns Lazy Lock mode on or off,
+@c according to the argument (with no argument, it toggles).  You can also
+@c arrange to enable Lazy Lock mode whenever you use Font Lock mode, like
+@c this:
+コマンド@kbd{M-x lazy-lock-mode}は、
+遅延ロック（lazy-lock）モードを引数に従ってオン／オフします
+（引数がなければトグル）。
+フォントロック（font-lock）モードを使うときに、
+いつでも遅延ロック（lazy-lock）モードをオンにするには、
+つぎのようにします。
+
+@example
+(setq font-lock-support-mode 'lazy-lock-mode)
+@end example
+
+@vindex lazy-lock-minimum-size
+@c   It is not worth avoiding buffer fontification for small buffers.
+@c Therefore, the variable @code{lazy-lock-minimum-size} specifies a
+@c minimum buffer size for demand-driven buffer fontification.  Buffers
+@c smaller than that are fontified all at once, as in plain Font Lock mode.
+小さなバッファに対してバッファのフォント表示化を避ける価値はありません。
+ですから、変数@code{lazy-lock-minimum-size}は、
+要求駆動型でバッファのフォント表示化を行う最小のバッファサイズを指定します。
+これより小さなバッファは、普通のフォントロック（font-lock）モードのように
+一度にフォント表示化します。
+
+@vindex lazy-lock-defer-time
+@c   When you alter the buffer, Lazy Lock mode defers fontification of the
+@c text you changed.  The variable @code{lazy-lock-defer-time} specifies
+@c how many seconds Emacs must be idle before it starts fontifying your
+@c changes.  If the value is 0, then changes are fontified immediately, as
+@c in plain Font Lock mode.
+バッファを変更したとき、遅延ロック（lazy-lock）モードは
+変更したテキストのフォント表示化を延期します。
+変数@code{lazy-lock-defer-time}は、
+変更部分のフォント表示化を始めるまでに
+Emacsがアイドルであるべき秒数です。
+この値が0ならは、普通のフォントロック（font-lock）モードと同じように、
+変更はすぐにフォント表示化されます。
+
+@vindex lazy-lock-defer-on-scrolling
+@c   Lazy Lock mode normally fontifies newly visible portions of the buffer
+@c before they are first displayed.  However, if the value of
+@c @code{lazy-lock-defer-on-scrolling} is non-@code{nil}, newly visible
+@c text is fontified only when Emacs is idle for
+@c @code{lazy-lock-defer-time} seconds.
+遅延ロック（lazy-lock）モードは、通常、
+新たに見えてくるバッファ部分が初めて表示されるまえに
+その部分をフォント表示化します。
+しかし、@code{lazy-lock-defer-on-scrolling}の値が@code{nil}以外ならば、
+新たに見えてくるテキストは、Emacsが@code{lazy-lock-defer-time}秒だけ
+アイドルしたときにのみフォント表示化されます。
+
+@vindex lazy-lock-defer-contextually
+@c   In some modes, including C mode and Emacs Lisp mode, changes in one
+@c line's contents can alter the context for subsequent lines, and thus
+@c change how they ought to be fontified.  Ordinarily, you must type
+@c @kbd{M-g M-g} to refontify the subsequent lines.  However, if you set
+@c the variable @code{lazy-lock-defer-contextually} to non-@code{nil}, Lazy
+@c Lock mode does this automatically, after @code{lazy-lock-defer-time}
+@c seconds.
+CやEmacs Lispモードを含むいくつかのモードでは、
+ある1行の内容を変更すると後続行の文脈が変わり、
+そのため、後続行をどうフォント表示化するかも変わります。
+通常は、後続行を再フォント表示化するために@kbd{M-g M-g}を打つ必要があります。
+しかし、変数@code{lazy-lock-defer-contextually}に
+@code{nil}以外を設定していると、遅延ロック（lazy-lock）モードでは、
+@code{lazy-lock-defer-time}秒後にこれを自動的に行います。
+
+@cindex stealth fontification
+@c   When Emacs is idle for a long time, Lazy Lock fontifies additional
+@c portions of the buffer, not yet displayed, in case you will display them
+@c later.  This is called @dfn{stealth fontification}.
+Emacsが長時間アイドルだと、遅延ロックは、
+バッファのまだ表示されていない部分を、
+のちの表示に備えてフォント表示化します。
+これを@dfn{内密のフォント表示化}（stealth fontification）と呼びます。
+
+@vindex lazy-lock-stealth-time
+@vindex lazy-lock-stealth-lines
+@vindex lazy-lock-stealth-verbose
+@c   The variable @code{lazy-lock-stealth-time} specifies how many seconds
+@c Emacs has to be idle before stealth fontification starts.  A value of
+@c @code{nil} means no stealth fontification.  The variables
+@c @code{lazy-lock-stealth-lines} and @code{lazy-lock-stealth-verbose}
+@c specify the granularity and verbosity of stealth fontification.
+変数@code{lazy-lock-stealth-time}は、内密のフォント表示化を開始するまでに、
+Emacsが何秒間アイドルであるべきかを指定します。
+値が@code{nil}だと、内密のフォント表示化をしません。
+変数@code{lazy-lock-stealth-lines}と@code{lazy-lock-stealth-verbose}は、
+内密のフォント表示化の粒度と冗長性を指定します。
+
+@node Fast or Lazy
+@c @subsection Fast Lock or Lazy Lock?
+@subsection 高速ロックか遅延ロックか？
+
+@c   Here is a simple guide to help you choose one of the Font Lock support
+@c modes.
+フォントロックで使えるモードの1つを選択する目安となる簡単な指針をあげます。
+
+@itemize @bullet
+@item
+@c Fast Lock mode intervenes only during file visiting and buffer
+@c killing (and related events); therefore buffer editing and window
+@c scrolling are no faster or slower than in plain Font Lock mode.
+高速ロック（fast-lock）モードは、
+ファイルの訪問とバッファの削除（と関連する事象）の最中に作業する。
+それゆえ、バッファの編集やウィンドウのスクロールは、
+普通のフォントロック（font-lock）モードより速くも遅くもない。
+
+@item
+@c Fast Lock mode is slower at reading a cache file than Lazy Lock
+@c mode is at fontifying a window; therefore Fast Lock mode is slower at
+@c visiting a file than Lazy Lock mode.
+高速ロック（fast-lock）モードのキャッシュファイルの読み込みは、
+遅延ロック（lazy-lock）モードがウィンドウをフォント表示化するより遅い。
+よって、高速ロック（fast-lock）モードは、
+遅延ロック（lazy-lock）モードよりファイルの訪問が遅い。
+
+@item
+@c Lazy Lock mode intervenes during window scrolling to fontify text that
+@c scrolls onto the screen; therefore, scrolling is slower than in plain
+@c Font Lock mode.
+遅延ロック（lazy-lock）モードは、
+ウィンドウをスクロールする最中に、
+画面上に現れるテキストをフォント表示化する。
+よって、スクロールは、通常のフォントロック（font-lock）モードより遅い。
+
+@item
+@c Lazy Lock mode doesn't fontify during buffer editing (it defers
+@c fontification of changes); therefore, editing is faster than in plain
+@c Font Lock mode.
+遅延ロック（lazy-lock）モードは、
+バッファを編集中はフォント表示化しない（変更部分のフォント表示化を延期する）。
+よって、編集は、通常のフォントロック（font-lock）モードより速い。 
+
+@item
+@c Fast Lock mode can be fooled by a file that is kept under version
+@c control software; therefore buffer fontification may occur even when
+@c a cache file exists for the file.
+高速ロック（fast-lock）モードは、
+版管理の下に置かれたファイルではだまされることがある。
+よって、そのファイルに対するキャッシュファイルが存在していても、
+バッファのフォント表示化が起こりえる。
+
+@item
+@c Fast Lock mode only works with a buffer visiting a file; Lazy Lock
+@c mode works with any buffer.
+高速ロック（fast-lock）モードは、
+ファイルを訪問しているバッファでのみ動作する。
+遅延ロック（lazy-lock）モードは、どのバッファでも動作する。
+
+@item
+@c Fast Lock mode generates cache files; Lazy Lock mode does not.
+高速ロック（fast-lock）モードは、キャッシュファイルを生成する。
+遅延ロック（lazy-lock）モードは、生成しない。
+@end itemize
+
+@vindex font-lock-support-mode
+@c   The variable @code{font-lock-support-mode} specifies which of these
+@c support modes to use; for example, to specify that Fast Lock mode is
+@c used for C/C++ modes, and Lazy Lock mode otherwise, set the variable
+@c like this:
+変数@code{font-lock-support-mode}は、
+これらのどちらのモードを使うかを指定します。
+たとえば、C/C++モードでは高速ロック（fast-lock）モードを使い、
+それ以外のモードでは遅延ロック（lazy-lock）モードを使うように指定するには、
+変数をつぎのように設定します。
+
+@example
+(setq font-lock-support-mode
+      '((c-mode . fast-lock-mode) (c++-mode . fast-lock-mode)
+        (t . lazy-lock-mode)))
+@end example
+
+@node Highlight Changes
+@c @section Highlight Changes Mode
+@section 変更部分強調表示モード
+
+@findex highlight-changes-mode
+@c   Use @kbd{M-x highlight-changes-mode} to enable a minor mode
+@c that uses faces (colors, typically) to indicate which parts of
+@c the buffer were changed most recently.
+バッファ内の最近に変更された部分を示すためにフェイス（典型的には表示色）を
+用いるマイナモードをオンにするには、
+@kbd{M-x highlight-changes-mode}を使います。
+
+@node Misc X
+@c @section Miscellaneous X Window Features
+@section その他のXウィンドウシステムでの機能
+
+@c   The following commands let you create, delete and operate on frames:
+つぎのコマンドは、フレームを作成したり削除したり操作したりします。
+
+@table @kbd
+@item C-z
+@c @kindex C-z @r{(X windows)}
+@kindex C-z @r{（Xウィンドウシステム）}
+@findex iconify-or-deiconify-frame
+@c Iconify the selected Emacs frame (@code{iconify-or-deiconify-frame}).
+@c The normal meaning of @kbd{C-z}, to suspend Emacs, is not useful under a
+@c window system, so it has a different binding in that case.
+選択されているEmacsフレームをアイコン化する
+（@code{iconify-or-deiconify-frame}）。
+Emacsを休止するという@kbd{C-z}の通常の意味は、
+ウィンドウシステムでは有用ではない。
+そのため、別のバインドになっている。
+
+@c If you type this command on an Emacs frame's icon, it deiconifies the frame.
+Emacsフレームのアイコンでこのコマンドを打つと、
+アイコンをフレームに開く。
+
+@item C-x 5 0
+@kindex C-x 5 0
+@findex delete-frame
+@c Delete the selected frame (@code{delete-frame}).  This is not allowed if
+@c there is only one frame.
+選択されているフレームを削除する（@code{delete-frame}）。
+フレームがたった1つの場合には、このコマンドは許されない。
+
+@item C-x 5 o
+@kindex C-x 5 o
+@findex other-frame
+@c Select another frame, raise it, and warp the mouse to it so that it
+@c stays selected.  If you repeat this command, it cycles through all the
+@c frames on your terminal.
+別のフレームを選択し、それをいちばん手前にもってきて、
+そのフレームが選択されるようにマウスを飛び込ませる。
+このコマンドを繰り返すと、端末上のすべてのフレームを巡回する。
+@end table
+
+@node Non-Window Terminals
+@c @section Non-Window Terminals
+@c @cindex non-window terminals
+@c @cindex single-frame terminals
+@section 非ウィンドウ端末
+@cindex 非ウィンドウ端末
+@cindex 単一フレーム端末
+
+@c   If your terminal does not have a window system that Emacs supports,
+@c then it can display only one Emacs frame at a time.  However, you can
+@c still create multiple Emacs frames, and switch between them.  Switching
+@c frames on these terminals is much like switching between different
+@c window configurations.
+Emacsが扱えるウィンドウシステムを使えない端末では、
+一度に1つのフレームしか表示できません。
+しかし、複数のEmacsフレームを作って、それらのフレーム間を切り替えられます。
+このような端末でのフレームの切り替えは、
+異なるウィンドウ構成の端末での切り替えとたいへんよく似ています。
+
+@c   Use @kbd{C-x 5 2} to create a new frame and switch to it; use @kbd{C-x
+@c 5 o} to cycle through the existing frames; use @kbd{C-x 5 0} to delete
+@c the current frame.
+新しいフレームを作りそれに切り替えるには、@kbd{C-x 5 2}を使います。
+既存のフレーム間を巡回するには、@kbd{C-x 5 o}を使います。
+カレントフレームを削除するには、@kbd{C-x 5 0}を使います。
+
+@c   Each frame has a number to distinguish it.  If your terminal can
+@c display only one frame at a time, the selected frame's number @var{n}
+@c appears near the beginning of the mode line, in the form
+@c @samp{F@var{n}}.
+各フレームにはそれを区別する番号があります。
+一度には1つのフレームだけしか表示できない端末では、
+選択されているフレームの番号@var{n}が、
+モード行の先頭近くに@samp{F@var{n}}という形式で現れます。
+
+@findex set-frame-name
+@findex select-frame-by-name
+@c   @samp{F@var{n}} is actually the frame's name.  You can also specify a
+@c different name if you wish, and you can select a frame by its name.  Use
+@c the command @kbd{M-x set-frame-name @key{RET} @var{name} @key{RET}} to
+@c specify a new name for the selected frame, and use @kbd{M-x
+@c select-frame-by-name @key{RET} @var{name} @key{RET}} to select a frame
+@c according to its name.  The name you specify appears in the mode line
+@c when the frame is selected.
+@samp{F@var{n}}は、実際にはフレームの名前です。
+望むなら別の名前を指定でき、その名前でフレームを選択できます。
+選択されたフレームに新しい名前を指定するには、
+コマンド@kbd{M-x set-frame-name @key{RET} @var{name} @key{RET}}を使います。
+その名前でフレームを選択するには、
+@kbd{M-x select-frame-by-name @key{RET} @var{name} @key{RET}}を使います。
+指定した名前は、フレームを選択するとモード行に表示されます。
+

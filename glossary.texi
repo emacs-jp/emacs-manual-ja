@@ -1,0 +1,2129 @@
+@c =============================================================
+@c = 元 翻 訳: 田中聡＠東京女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =           ref 修正                = 2000/02/13
+@c = 原文では用語集内の相互参照は「(q.v.@:)」であるが、
+@c = 和訳では《参照》としてある。
+@c = （原文どおりの）「アルファベット順」なので、
+@c = 「あいうえお順」に直す必要がある。
+@c = 「==jtable」と「==jend」のあいだにある「==jitem」の読みで
+@c = ソート(gl-sort.c参照)
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Glossary, Key Index, Intro, Top
+@c @unnumbered Glossary
+@unnumbered 用語集
+
+@table @asis
+@c ==jtable
+@c ==jitem りゃくご
+@c @item Abbrev
+@item 略語（Abbrev）
+@c An abbrev is a text string which expands into a different text string
+@c when present in the buffer.  For example, you might define a few letters
+@c as an abbrev for a long phrase that you want to insert frequently.
+@c @xref{Abbrevs}.
+略語とは、バッファ内では別のテキスト文字列に展開されるテキスト文字列のこと。
+たとえば、頻繁に挿入する長い句に対して数個の文字から成る略語を定義する。
+@pxref{Abbrevs}。
+
+@c ==jitem あぼーと
+@c @item Aborting
+@item アボート（Aborting）
+@c Aborting means getting out of a recursive edit (q.v.@:).  The
+@c commands @kbd{C-]} and @kbd{M-x top-level} are used for this.
+@c @xref{Quitting}.
+アボートとは、再帰編集《参照》から脱出すること。
+コマンド@kbd{C-]}
+@footnote{【訳注】Muleでは、quailマイナモードを起動する
+@kbd{quail-mode}にバインドされていた。}
+や@kbd{M-x top-level}はこのために使う。
+@pxref{Quitting}。
+
+@c ==jitem あると
+@c @item Alt
+@item アルト（Alt）
+@c Alt is the name of a modifier bit which a keyboard input character may
+@c have.  To make a character Alt, type it while holding down the @key{ALT}
+@c key.  Such characters are given names that start with @kbd{Alt-}
+@c (usually written @kbd{A-} for short).  (Note that many terminals have a
+@c key labeled @key{ALT} which is really a @key{META} key.)  @xref{User
+@c Input, Alt}.
+アルトは、キーボードからの入力文字に付く修飾ビットの名前である。
+アルト文字にするには、@key{ALT}キーを押し下げたまま文字を打ち込む。
+このような文字は、@kbd{Alt-}（普通は縮めて@kbd{A-}）で始まる名前になる。
+（多くの端末には@key{ALT}と刻印したキーがあるが、
+実際には@key{META}キーとして働く。）
+@pxref{User Input, Alt}。
+
+@c ==jitem あすきーもじ
+@c @item ASCII character
+@item ASCII文字（ASCII character）
+@c An ASCII character is either an ASCII control character or an ASCII
+@c printing character.  @xref{User Input}.
+ASCII文字は、ASCIIコントロール文字かASCII印字文字のいずれかである。
+@pxref{User Input}。
+
+@c ==jitem あすきーこんとろーるもじ
+@c @item ASCII control character
+@item ASCIIコントロール文字（ASCII control character）
+@c An ASCII control character is the Control version of an upper-case
+@c letter, or the Control version of one of the characters @samp{@@[\]^_?}.
+ASCIIコントロール文字は、大文字のコントロール版か、
+文字@samp{@@[\]^_?}のコントロール版のいずれかである。
+
+@c ==jitem あすきーいんじもじ
+@c @item ASCII printing character
+@item ASCII印字文字（ASCII printing character）
+@c ASCII printing characters include letters, digits, space, and these
+@c punctuation characters: @samp{!@@#$%^& *()_-+=|\~` @{@}[]:;"' <>,.?/}.
+ASCII印字文字には、
+アルファベット、数字、空白、
+@samp{!@@#$%^& *()_-+=|\~` @{@}[]:;"' <>,.?/}などの区切り文字が含まれる。
+
+@c ==jitem じどうつめこみもーど
+@c @item Auto Fill Mode
+@item 自動詰め込みモード（Auto Fill Mode）
+@c Auto Fill mode is a minor mode in which text that you insert is
+@c automatically broken into lines of fixed width.  @xref{Filling}.
+自動詰め込み（auto-fill）モードはマイナモードであり、
+挿入したテキストは固定幅の行に収まるように自動的に分割される。
+@pxref{Filling}。
+
+@c ==jitem じどうほぞん
+@c @item Auto Saving
+@item 自動保存（Auto Saving）
+@c Auto saving is the practice of saving the contents of an Emacs buffer in
+@c a specially-named file, so that the information will not be lost if the
+@c buffer is lost due to a system error or user error.  @xref{Auto Save}.
+自動保存とは、Emacsバッファの内容を特別な名前のファイルに保存する
+行為のことであり、システムのエラーやユーザーのエラーでバッファが失われても、
+情報が消えないようにする。
+@pxref{Auto Save}。
+
+@c ==jitem ばっくあっぷふぁいる
+@c @item Backup File
+@item バックアップファイル（Backup File）
+@c A backup file records the contents that a file had before the current
+@c editing session.  Emacs makes backup files automatically to help you
+@c track down or cancel changes you later regret making.  @xref{Backup}.
+バックアップファイルは、
+現在の編集作業を始めるまえのファイルの内容を記録している。
+Emacsは、後悔した場合に備えて、変更を見直したり取り消すために
+自動的にバックアップファイルを作成する。
+@pxref{Backup}。
+
+@c ==jitem かっこのたいおうづけ
+@c @item Balance Parentheses
+@item 括弧の対応付け（Balance Parentheses）
+@c Emacs can balance parentheses manually or automatically.  Manual
+@c balancing is done by the commands to move over balanced expressions
+@c (@pxref{Lists}).  Automatic balancing is done by blinking or
+@c highlighting the parenthesis that matches one just inserted
+@c (@pxref{Matching,,Matching Parens}).
+Emacsは手動でも自動でも括弧を対応付けられる。
+手動対応付けは、対応した式のあいだを移動するコマンドで可能である（@pxref{Lists}）。
+自動対応付けは、挿入した括弧に対応するものを点滅したり、
+強調表示することで可能である（@pxref{Matching,,Matching Parens}）。
+
+@c ==jitem ばいんど
+@c @item Bind
+@item バインド（Bind）
+@c To bind a key sequence means to give it a binding (q.v.@:).
+@c @xref{Rebinding}.
+キー列をバインド（束縛）するとは、
+キー列にバインディング《参照》を与えることである。
+@pxref{Rebinding}。
+
+@c ==jitem ばいんでぃんぐ
+@c @item Binding
+@item バインディング（Binding）
+@c A key sequence gets its meaning in Emacs by having a binding, which is a
+@c command (q.v.@:), a Lisp function that is run when the user types that
+@c sequence.  @xref{Commands,Binding}.  Customization often involves
+@c rebinding a character to a different command function.  The bindings of
+@c all key sequences are recorded in the keymaps (q.v.@:).  @xref{Keymaps}.
+Emacsにおいてキー列が意味を持つには、バインディング、
+つまり、そのキー列を打ち込むと実行されるLisp関数であるコマンド《参照》が
+与えられる必要がある。
+@pxref{Commands,Binding}。
+カスタマイズでは、文字に別のコマンド関数をリバインド（再束縛）することが
+よく行われる。
+すべてのキー列のバインディングはキーマップ《参照》に記録される。
+@pxref{Keymaps}。
+
+@c ==jitem くうぎょう
+@c @item Blank Lines
+@item 空行（Blank Lines）
+@c Blank lines are lines that contain only whitespace.  Emacs has several
+@c commands for operating on the blank lines in the buffer.
+空行は白文字だけを含む行である。
+Emacsには、バッファ内の空行を操作するコマンドがある。
+
+@c ==jitem ばっふぁ
+@c @item Buffer
+@item バッファ（Buffer）
+@c The buffer is the basic editing unit; one buffer corresponds to one text
+@c being edited.  You can have several buffers, but at any time you are
+@c editing only one, the `selected' buffer, though several can be visible
+@c when you are using multiple windows (q.v.).  Most buffers are visiting
+@c (q.v.@:) some file.  @xref{Buffers}.
+バッファは基本的な編集単位である。
+1つのバッファは編集中の1つのテキストに対応する。
+複数のバッファを使えるが、
+ある時点で編集できるのはたった1つの『選択した』バッファのみである。
+しかし、複数のウィンドウ《参照》を使えば、
+同時に複数のバッファを眺めることもできる。
+ほとんどのバッファはファイルを訪問《参照》したものである。
+@pxref{Buffers}。
+
+@c ==jitem ばっふぁせんたくりれき
+@c @item Buffer Selection History
+@item バッファ選択履歴（Buffer Selection History）
+@c Emacs keeps a buffer selection history which records how recently each
+@c Emacs buffer has been selected.  This is used for choosing a buffer to
+@c select.  @xref{Buffers}.
+Emacsは、各バッファがどの程度最近に選択されたかを
+バッファ選択履歴に記録する。
+この記録は、選択するバッファを選ぶのに使われる。
+@pxref{Buffers}。
+
+@c ==jitem ぼたんおしさげいべんと
+@c @item Button Down Event
+@item ボタン押し下げイベント（Button Down Event）
+@c A button down event is the kind of input event generated right away when
+@c you press a mouse button.  @xref{Mouse Buttons}.
+ボタン押し下げイベントは、
+マウスボタンが押されるとただちに発生する入力イベントの一種である。
+@pxref{Mouse Buttons}。
+
+@c ==jitem あすきーもじC-
+@item @kbd{C-}
+@c @kbd{C-} in the name of a character is an abbreviation for Control.
+@c @xref{User Input,C-}.
+文字の名前の@kbd{C-}は、コントロール（Control）の略である。
+@pxref{User Input,C-}。
+
+@c ==jitem あすきーもじC-M-
+@item @kbd{C-M-}
+@c @kbd{C-M-} in the name of a character is an abbreviation for
+@c Control-Meta.  @xref{User Input,C-M-}.
+文字の名前の@kbd{C-M-}は、コントロール・メタ（Control-Meta）の略である。
+@pxref{User Input,C-M-}。
+
+@c ==jitem おおもじこもじへんかん
+@c @item Case Conversion
+@item 大文字小文字変換（Case Conversion）
+@c Case conversion means changing text from upper case to lower case or
+@c vice versa.  @xref{Case}, for the commands for case conversion.
+大文字小文字変換とは、
+テキストの大文字を小文字に変換すること、あるいは、その逆に変換することである。
+大文字小文字変換のコマンドについては、@pxref{Case}。
+
+@c ==jitem もじ
+@c @item Character
+@item 文字（Character）
+@c Characters form the contents of an Emacs buffer; see @ref{Text
+@c Characters}.  Also, key sequences (q.v.@:) are usually made up of
+@c characters (though they may include other input events as well).
+@c @xref{User Input}.
+文字はEmacsバッファの内容を構成する。
+@pxref{Text Characters}。
+また、キー列《参照》は、（他の入力イベントを含むこともあるが）
+通常、文字から成る。
+@pxref{User Input}。
+
+@c ==jitem もじしゅうごう
+@c @item Character Set
+@item 文字集合（Character Set）
+@c Emacs supports a number of character sets, each of which represents a
+@c particular alphabet or script.  @xref{International}.
+Emacsでは、特定のアルファベットや文書を表現する
+多くの文字集合を使える。
+@pxref{International}。
+
+@c ==jitem くりっくいべんと
+@c @item Click Event
+@item クリックイベント（Click Event）
+@c A click event is the kind of input event generated when you press a
+@c mouse button and release it without moving the mouse.  @xref{Mouse Buttons}.
+クリックイベントとは、マウスボタンを押し下げて移動せずに放したときに
+生成される入力イベントの一種である。
+@pxref{Mouse Buttons}。
+
+@c ==jitem こーでぃんぐしすてむ
+@c @item Coding System
+@item コーディングシステム（Coding System）
+@c A coding system is an encoding for representing text characters in a
+@c file or in a stream of information.  Emacs has the ability to convert
+@c text to or from a variety of coding systems when reading or writing it.
+@c @xref{Coding Systems}.
+コーディングシステムとは、
+ファイルや情報ストリームにおいてテキスト文字を表現するための符号化である。
+Emacsには、ファイルの読み書き時に、
+さまざまなコーディングシステム間でテキストを変換する機能がある。
+@pxref{Coding Systems}。
+
+@c ==jitem こまんど
+@c @item Command
+@item コマンド（Command）
+@c A command is a Lisp function specially defined to be able to serve as a
+@c key binding in Emacs.  When you type a key sequence (q.v.@:), its
+@c binding (q.v.@:) is looked up in the relevant keymaps (q.v.@:) to find
+@c the command to run.  @xref{Commands}.
+コマンドとは、Emacsにおいてキーバインディングとなりうるように
+特別に定義されたLisp関数である。
+キー列《参照》を打ち込むと、実行すべきコマンドを決定するために、
+適切なキーマップ《参照》からキー列のバインディング《参照》を探す。
+@pxref{Commands}。
+
+@c ==jitem こまんどめい
+@c @item Command Name
+@item コマンド名（Command Name）
+@c A command name is the name of a Lisp symbol which is a command
+@c (@pxref{Commands}).  You can invoke any command by its name using
+@c @kbd{M-x} (@pxref{M-x}).
+コマンド名とは、コマンド（@pxref{Commands}）であるLispシンボルの名前である。
+@kbd{M-x}を使えば任意のコマンドを名前で起動できる。
+（@pxref{M-x}）。
+
+@c ==jitem こめんと
+@c @item Comment
+@item コメント（Comment）
+@c A comment is text in a program which is intended only for humans reading
+@c the program, and which is marked specially so that it will be ignored
+@c when the program is loaded or compiled.  Emacs offers special commands
+@c for creating, aligning and killing comments.  @xref{Comments}.
+コメント（注釈）とは、
+プログラムを読む人間だけを対象としたプログラム内のテキストであり、
+プログラムをロードしたりコンパイルするときには
+無視するように特殊な印が付いている。
+Emacsには、コメントを作成、整列、キルするコマンドがある。
+@pxref{Comments}。
+
+@c ==jitem こんぱいる
+@c @item Compilation
+@item コンパイル（Compilation）
+@c Compilation is the process of creating an executable program from source
+@c code.  Emacs has commands for compiling files of Emacs Lisp code
+@c (@pxref{Byte Compilation,, Byte Compilation, elisp, the Emacs Lisp
+@c Reference Manual}) and programs in C and other languages
+@c (@pxref{Compilation}).
+コンパイルとは、ソースコードから実行プログラムを作成する処理である。
+Emacsには、Emacs Lispコード
+（@pxref{Byte Compilation,, バイトコンパイル, elisp,
+Emacs Lisp リファレンスマニュアル}）や
+Cなどの他の言語で書いたプログラムのファイルをコンパイルするコマンドがある。
+（@pxref{Compilation}）。
+
+@c ==jitem かんけつきー
+@c @item Complete Key
+@item 完結キー（Complete Key）
+@c A complete key is a key sequence which fully specifies one action to be
+@c performed by Emacs.  For example, @kbd{X} and @kbd{C-f} and @kbd{C-x m}
+@c are complete keys.  Complete keys derive their meanings from being bound
+@c (q.v.@:) to commands (q.v.@:).  Thus, @kbd{X} is conventionally bound to
+@c a command to insert @samp{X} in the buffer; @kbd{C-x m} is
+@c conventionally bound to a command to begin composing a mail message.
+@c @xref{Keys}.
+完結キーとは、Emacsが実行する1つの動作を完全に指定するキー列である。
+たとえば、 @kbd{X}、@kbd{C-f}、@kbd{C-x m}は完結キーである。
+完結キーは、コマンド《参照》にバインド《参照》されていることで
+その意味が与えられる。
+したがって、@kbd{X}は、通常、
+バッファに@samp{X}を挿入するコマンドにバインドされている。
+@kbd{C-x m}は、通常、メイルメッセージを作成するコマンドにバインドされている。
+@pxref{Keys}。
+
+@c ==jitem ほかん
+@c @item Completion
+@item 補完（Completion）
+@c Completion is what Emacs does when it automatically fills out an
+@c abbreviation for a name into the entire name.  Completion is done for
+@c minibuffer (q.v.@:) arguments when the set of possible valid inputs
+@c is known; for example, on command names, buffer names, and
+@c file names.  Completion occurs when @key{TAB}, @key{SPC} or @key{RET}
+@c is typed.  @xref{Completion}.@refill
+補完とは、省略された名前からEmacsが自動的に完全な名前に補うことである。
+入力として正しいものが既知の場合には、
+ミニバッファ《参照》引数に対して補完が行われる。
+たとえば、コマンド名、バッファ名、ファイル名である。
+@key{TAB}、@key{SPC}、@key{RET}を打ち込むと補完が行われる。
+@pxref{Completion}。@refill
+
+@c ==jitem けいぞくぎょう
+@c @item Continuation Line
+@item 継続行（Continuation Line）
+@c When a line of text is longer than the width of the window, it
+@c takes up more than one screen line when displayed.  We say that the
+@c text line is continued, and all screen lines used for it after the
+@c first are called continuation lines.  @xref{Basic,Continuation,Basic
+@c Editing}.
+テキスト行がウィンドウの幅より長いと、表示すると画面上では1行を越える。
+このようなテキスト行は継続しているといい、
+テキスト行に対応する表示行の2行目以降のすべての表示行を継続行と呼ぶ。
+@pxref{Basic,Continuation,Basic Editing}。
+
+@c ==jitem こんとろーるもじ
+@c @item Control Character
+@item コントロール文字（Control Character）
+@c A control character is a character that you type by holding down the
+@c @key{CTRL} key.  Some control characters also have their own keys, so
+@c that you can type them without using @key{CTRL}.  For example,
+@c @key{RET}, @key{TAB}, @key{ESC} and @key{DEL} are all control
+@c characters.  @xref{User Input}.
+コントロール文字とは、@key{CTRL}キーを押し下げたまま
+打ち込んだ文字のことである。
+コントロール文字のなかには独自のキーを持つものもあり、
+それらは@key{CTRL}を使わずに打ち込める。
+たとえば、@key{RET}、@key{TAB}、@key{ESC}、@key{DEL}は
+コントロール文字である。
+@pxref{User Input}。
+
+@c ==jitem あすきーもじCOPYLEFT
+@item Copyleft
+@c A copyleft is a notice giving the public legal permission to
+@c redistribute a program or other work of art.  Copylefts are used by
+@c left-wing programmers to promote freedom and cooperation, just as
+@c copyrights are used by right-wing programmers to gain power over other
+@c people.
+copyleft（コピーレフト）とは、プログラムやその他の創作結果を再配布することを
+合法的に公に許可を与える旨の告示である。
+自由と協調を推進する左派のプログラマはcopyleftを使い、
+他人に権力を振いたい右派のプログラマはcopyright（コピーライト）を使う。
+
+@c The particular form of copyleft used by the GNU project is called the
+@c GNU General Public License.  @xref{Copying}.
+GNUプロジェクトで用いているcopyleftは、
+GNU一般公有使用許諾書（GNU General Public License）と呼ばれる。
+@pxref{Copying}。
+
+@c ==jitem かれんとばっふぁ
+@c @item Current Buffer
+@item カレントバッファ（Current Buffer）
+@c The current buffer in Emacs is the Emacs buffer on which most editing
+@c commands operate.  You can select any Emacs buffer as the current one.
+@c @xref{Buffers}.
+Emacsのカレントバッファとは、
+ほとんどの編集コマンドが実行されるEmacsバッファのことである。
+任意のEmacsバッファをカレントバッファとして選択できる。
+@pxref{Buffers}。
+
+@c ==jitem げんざいぎょう
+@c @item Current Line
+@item 現在行（Current Line）
+@c The line point is on (@pxref{Point}).
+ポイント（@pxref{Point}）がある行。
+
+@c ==jitem げんざいのだんらく
+@c @item Current Paragraph
+@item 現在の段落（Current Paragraph）
+@c The paragraph that point is in.  If point is between paragraphs, the
+@c current paragraph is the one that follows point.  @xref{Paragraphs}.
+ポイントがある段落。
+段落のあいだにポイントがある場合には、
+現在の段落はポイントのうしろにあるものである。
+@pxref{Paragraphs}。
+
+@c ==jitem げんざいのかんすうていぎ
+@c @item Current Defun
+@item 現在の関数定義（Current Defun）
+@c The defun (q.v.@:) that point is in.  If point is between defuns, the
+@c current defun is the one that follows point.  @xref{Defuns}.
+ポイントがある関数定義（defun）《参照》。
+関数定義のあいだにポイントがある場合には、
+現在の関数定義はポイントのうしろにあるものである。
+@pxref{Defuns}。
+
+@c ==jitem かーそる
+@c @item Cursor
+@item カーソル（Cursor）
+@c The cursor is the rectangle on the screen which indicates the position
+@c called point (q.v.@:) at which insertion and deletion takes place.
+@c The cursor is on or under the character that follows point.  Often
+@c people speak of `the cursor' when, strictly speaking, they mean
+@c `point'.  @xref{Basic,Cursor,Basic Editing}.
+カーソルとは、挿入や削除が行われるポイント《参照》と呼ばれる位置を
+表す画面上の矩形である。
+カーソルは、ポイントのうしろにある文字の前景か背景にある。
+「ポイント」のことを意味して「カーソル」ということが多い。
+@pxref{Basic,Cursor,Basic Editing}。
+
+@c ==jitem かすたまいず
+@c @item Customization
+@item カスタマイズ（Customization）
+@c Customization is making minor changes in the way Emacs works.  It is
+@c often done by setting variables (@pxref{Variables}) or by rebinding
+@c key sequences (@pxref{Keymaps}).
+カスタマイズとは、Emacsの動作を少々変更することである。
+変数（@pxref{Variables}）を設定したり、
+キー列をリバインド（再束縛）する（@pxref{Keymaps}）ことで
+カスタマイズを行うことが多い。
+
+@c ==jitem でふぉるとひきすう
+@c @item Default Argument
+@item デフォルト引数（Default Argument）
+@c The default for an argument is the value that will be assumed if you
+@c do not specify one.  When the minibuffer is used to read an argument,
+@c the default argument is used if you just type @key{RET}.
+@c @xref{Minibuffer}.
+引数のデフォルトとは、特に指定しないときに仮定される値のことである。
+引数を読むのにミニバッファを使うとき、
+@key{RET}だけを打ち込むとデフォルト引数が使われる。
+@pxref{Minibuffer}。
+
+@c ==jitem でふぉるとでぃれくとり
+@c @item Default Directory
+@item デフォルトディレクトリ（Default Directory）
+@c When you specify a file name that does not start with @samp{/} or @samp{~},
+@c it is interpreted relative to the current buffer's default directory.
+@c @xref{Minibuffer File,Default Directory}.
+@samp{/}や@samp{~}で始まらないファイル名を指定すると、
+それはカレントバッファのデフォルトディレクトリ相対に解釈される。
+@pxref{Minibuffer File,Default Directory}。
+
+@c ==jitem かんすうていぎ
+@c @item Defun
+@item 関数定義（Defun）
+@c A defun is a list at the top level of parenthesis or bracket structure
+@c in a program.  It is so named because most such lists in Lisp programs
+@c are calls to the Lisp function @code{defun}.  @xref{Defuns}.
+defunは、プログラムのトップレベルにある括弧構造のリストである。
+この名称は、Lispプログラムにおいてこのようなリストが、
+（関数を定義する）Lisp関数defunの呼び出しになっていることに由来する。
+@pxref{Defuns}。
+
+@c ==jitem あすきーもじDEL
+@item @key{DEL}
+@c @key{DEL} is a character that runs the command to delete one character of
+@c text.  @xref{Basic,DEL,Basic Editing}.
+@key{DEL}は、テキストの1文字を削除するコマンドを実行する文字である。
+@pxref{Basic,DEL,Basic Editing}。
+
+@c ==jitem さくじょ
+@c @item Deletion
+@item 削除（Deletion）
+@c Deletion means erasing text without copying it into the kill ring
+@c (q.v.@:).  The alternative is killing (q.v.@:).  @xref{Killing,Deletion}.
+削除とは、キルリング《参照》へコピーせずにテキストを除去することである。
+他の手段にはキル《参照》がある。
+@pxref{Killing,Deletion}。
+
+@c ==jitem ふぁいるのさくじょ
+@c @item Deletion of Files
+@item ファイルの削除（Deletion of Files）
+@c Deleting a file means erasing it from the file system.
+@c @xref{Misc File Ops}.
+ファイルの削除とは、それをファイルシステムから除去することである。
+@pxref{Misc File Ops}。
+
+@c ==jitem めっせーじのさくじょ
+@c @item Deletion of Messages
+@item メッセージの削除（Deletion of Messages）
+@c Deleting a message means flagging it to be eliminated from your mail
+@c file.  Until you expunge (q.v.@:) the Rmail file, you can still undelete
+@c the messages you have deleted.  @xref{Rmail Deletion}.
+メッセージの削除とは、メイルファイルから除去する旨の印（削除印）を
+付けることである。
+rmailファイルを抹消（expunge）《参照》しない限り、
+削除したメッセージを復元できる。
+@pxref{Rmail Deletion}。
+
+@c ==jitem うぃんどうのさくじょ
+@c @item Deletion of Windows
+@item ウィンドウの削除（Deletion of Windows）
+@c Deleting a window means eliminating it from the screen.  Other windows
+@c expand to use up the space.  The deleted window can never come back,
+@c but no actual text is thereby lost.  @xref{Windows}.
+ウィンドウの削除とは、画面からウィンドウを除去することである。
+空いた場所を埋めるように他のウィンドウが延びる。
+削除したウィンドウは二度ともとに戻らないが、
+それで実際のテキストが失われるわけではない。
+@pxref{Windows}。
+
+@c ==jitem でぃれくとり
+@c @item Directory
+@item ディレクトリ（Directory）
+@c File directories are named collections in the file system, within which
+@c you can place individual files or subdirectories.  @xref{Directories}.
+ファイルディレクトリとは、
+ファイルシステムにおいて名前が付けられた集まりであり、
+その中にはファイルやサブディレクトリを置くことができる。
+@pxref{Directories}。
+
+@c ==jitem あすきーもじDIRED
+@item Dired
+@c Dired is the Emacs facility that displays the contents of a file
+@c directory and allows you to ``edit the directory,'' performing
+@c operations on the files in the directory.  @xref{Dired}.
+diredとは、ファイルディレクトリの中身を表示し、
+ディレクトリ内のファイルを操作して『ディレクトリの編集』を可能にする
+Emacsの機能である。
+@pxref{Dired}。
+
+@c ==jitem しようきんしこまんど
+@c @item Disabled Command
+@item 使用禁止コマンド（Disabled Command）
+@c A disabled command is one that you may not run without special
+@c confirmation.  The usual reason for disabling a command is that it is
+@c confusing for beginning users.  @xref{Disabling}.
+使用禁止コマンドとは、特別な確認なしには実行できないコマンドである。
+コマンドを使用禁止にしておくのは、そのコマンドが初心者を困惑させるからである。
+@pxref{Disabling}。
+
+@c ==jitem おしさげいべんと
+@c @item Down Event
+@item 押し下げイベント（Down Event）
+@c Short for `button down event'.
+「ボタン押し下げイベント」の略。
+
+@c ==jitem どらっぐいべんと
+@c @item Drag Event
+@item ドラッグイベント（Drag Event）
+@c A drag event is the kind of input event generated when you press a mouse
+@c button, move the mouse, and then release the button.  @xref{Mouse
+@c Buttons}.
+ドラッグイベントとは、入力イベントの一種であり、
+マウスボタンを押し下げたままマウスを動かしてからボタンを放すと発生する。
+@pxref{Mouse Buttons}。
+
+@c ==jitem どりぶるふぁいる
+@c @item Dribble File
+@item ドリブルファイル（Dribble File）
+@c A file into which Emacs writes all the characters that the user types
+@c on the keyboard.  Dribble files are used to make a record for
+@c debugging Emacs bugs.  Emacs does not make a dribble file unless you
+@c tell it to.  @xref{Bugs}.
+ユーザーがキーボードから打ち込んだすべての文字を書き込むファイル。
+ドリブルファイルは、Emacsのバグのデバッグ用の記録を作るために使われる。
+指示しない限りEmacsはドリブルファイルを作成しない。
+@pxref{Bugs}。
+
+@c ==jitem えこーりょういき
+@c @item Echo Area
+@item エコー領域（Echo Area）
+@c The echo area is the bottom line of the screen, used for echoing the
+@c arguments to commands, for asking questions, and printing brief messages
+@c (including error messages).  The messages are stored in the buffer
+@c @samp{*Messages*} so you can review them later.  @xref{Echo Area}.
+エコー領域は、画面の最後の行であり、コマンドの引数を表示したり、
+問い合わせたり、（エラーメッセージを含む）簡素なメッセージの表示に使われる。
+メッセージはバッファ@samp{*Messages*}に保存されるので、
+あとから見ることもできる。
+@pxref{Echo Area}。
+
+@c ==jitem えこー
+@c @item Echoing
+@item エコー（Echoing）
+@c Echoing is acknowledging the receipt of commands by displaying them (in
+@c the echo area).  Emacs never echoes single-character key sequences;
+@c longer key sequences echo only if you pause while typing them.
+エコーとは、（エコー領域に）表示することでコマンドを
+受理したことを伝えることである。
+Emacsは1文字のキー列をけっしてエコーしない。
+2文字以上のキー列の場合、打ち込みに間を置くとエコーする。
+
+@c ==jitem えれくとりっく
+@c @item Electric
+@item エレクトリック（Electric）
+@c We say that a character is electric if it is normally self-inserting
+@c (q.v.), but the current major mode (q.v.) redefines it to do something
+@c else as well.  For example, some programming language major modes define
+@c particular delimiter characters to reindent the line or insert one or
+@c more newlines in addition to self-insertion.
+通常は自己挿入《参照》と定義されていて、現在のメジャーモード《参照》では
+別のものにも再定義されているような文字を、エレクトリックであるという。
+たとえば、プログラム言語用のメジャーモードでは、特定の区切り文字を
+自己挿入に加えて、行を字下げし直したり、空行を挿入するように定義する。
+
+@c ==jitem えらー
+@c @item Error
+@item エラー（Error）
+@c An error occurs when an Emacs command cannot execute in the current
+@c circumstances.  When an error occurs, execution of the command stops
+@c (unless the command has been programmed to do otherwise) and Emacs
+@c reports the error by printing an error message (q.v.@:).  Type-ahead
+@c is discarded.  Then Emacs is ready to read another editing command.
+現在の状況ではEmacsコマンドを実行できないときに、エラーが起きる。
+エラーが起きると、コマンドの実行は
+（コマンドが何か別のことをするようにプログラムされていない限り）止まり、
+Emacsはエラーメッセージ《参照》を表示してエラーを報告する。
+すでに打ち込んだ文字は捨てられる。
+そして、Emacsは他の編集コマンドを読める状態になる。
+
+@c ==jitem えらーめっせーじ
+@c @item Error Message
+@item エラーメッセージ（Error Message）
+@c An error message is a single line of output displayed by Emacs when the
+@c user asks for something impossible to do (such as, killing text
+@c forward when point is at the end of the buffer).  They appear in the
+@c echo area, accompanied by a beep.
+エラーメッセージとは、ユーザーが（バッファの最後にポイントがあるのに、
+ポイントよりうしろのテキストをキルするなどの）実行不可能なことを要求したときに、
+Emacsが表示する1行のメッセージである。
+エラーメッセージはエコー領域に表示されベルが鳴る。
+
+@c ==jitem あすきーもじESC
+@item @key{ESC}
+@c @key{ESC} is a character used as a prefix for typing Meta characters on
+@c keyboards lacking a @key{META} key.  Unlike the @key{META} key (which,
+@c like the @key{SHIFT} key, is held down while another character is
+@c typed), you press the @key{ESC} key as you would press a letter key, and
+@c it applies to the next character you type.
+@key{ESC}は、@key{META}キーがないキーボードで、
+メタ文字を入力するためのプレフィックスとして利用する文字である。
+（@key{SHIFT}キーのようにキーを押し下げたまま別の文字を打ち込む）
+@key{META}キーと違い、普通の文字キーを打ち込むように@key{ESC}キーを打ち込むと、
+つぎに打ち込んだ文字に（@key{ESC}キーが）適用される。
+
+@c ==jitem まっしょう
+@c @item Expunging
+@item 抹消（Expunging）
+@c Expunging an Rmail file or Dired buffer is an operation that truly
+@c discards the messages or files you have previously flagged for deletion.
+rmailファイルやdiredバッファにおける抹消とは、
+事前に削除の印を付けたメッセージやファイルを実際に捨て去る操作である。
+
+@c ==jitem ふぁいるろっく
+@c @item File Locking
+@item ファイルロック（File Locking）
+@c Emacs used file locking to notice when two different users
+@c start to edit one file at the same time.  @xref{Interlocking}.
+Emacsは、異なる2人のユーザーが同時に1つのファイルを編集し始めたときに、
+そのことを告知するためにファイルロックを利用する。
+@pxref{Interlocking}。
+
+@c ==jitem ふぁいるめい
+@c @item File Name
+@item ファイル名（File Name）
+@c A file name is a name that refers to a file.  File names may be relative
+@c or absolute; the meaning of a relative file name depends on the current
+@c directory, but an absolute file name refers to the same file regardless
+@c of which directory is current.  On GNU and Unix systems, an absolute
+@c file name starts with a slash (the root directory) or with @samp{~/} or
+@c @samp{~@var{user}/} (a home directory).
+ファイル名とはファイルを指す名前である。
+ファイル名は相対的か絶対的である。
+相対ファイル名の意味はカレントディレクトリに依存するが、
+一方、絶対ファイル名は現在どのディレクトリにいるかに関係なく
+つねに同じファイルを指す。
+GNUやUNIXシステムでは、絶対ファイル名は
+（ルートディレクトリである）スラッシュや
+（ホームディレクトリである）@samp{~/}や@samp{~@var{user}/}で始まる。
+
+@c Some people use the term ``pathname'' for file names, but we do not;
+@c we use the word ``path'' only in the term ``search path'' (q.v.).
+ファイル名のかわりに『パス名』という用語を使う人もいるが、
+本書では使わない。
+単語『パス』は『探索パス』《参照》という用語にしか使わない。
+
+@c ==jitem ふぁいるめいのこうせいようそ
+@c @item File-Name Component
+@item ファイル名の構成要素（File-Name Component）
+@c A file-name component names a file directly within a particular
+@c directory.  On GNU and Unix systems, a file name is a sequence of
+@c file-name components, separated by slashes.  For example, @file{foo/bar}
+@c is a file name containing two components, @samp{foo} and @samp{bar}; it
+@c refers to the file named @samp{bar} in the directory named @samp{foo} in
+@c the current directory.
+ファイル名の構成要素は、あるディレクトリ内のファイルを直接指名する。
+GNUやUNIXシステムでは、ファイル名とは
+ファイル名の構成要素をスラッシュで区切った列である。
+たとえば、@file{foo/bar}は2つの構成要素、@samp{foo}と@samp{bar}から成り、
+カレントディレクトリ内の@samp{foo}という名前のディレクトリ内の
+@samp{bar}というファイルを指す。
+
+@c ==jitem つめこみせっとうじ
+@c @item Fill Prefix
+@item 詰め込み接頭辞（Fill Prefix）
+@c The fill prefix is a string that should be expected at the beginning
+@c of each line when filling is done.  It is not regarded as part of the
+@c text to be filled.  @xref{Filling}.
+詰め込み接頭辞とは、詰め込みが完了したときに、
+各行の先頭にあるべき文字列のことである。
+これは詰め込むべきテキストの一部としてはみなされない。
+@pxref{Filling}。
+
+@c ==jitem つめこみ
+@c @item Filling
+@item 詰め込み（Filling）
+@c Filling text means shifting text between consecutive lines so that all
+@c the lines are approximately the same length.  @xref{Filling}.
+テキストの詰め込みとは、すべての行がほぼ同じ長さになるように、
+連続した行のテキストの配置を変えることである。
+@pxref{Filling}。
+
+@c ==jitem せいけいずみてきすと
+@c @item Formatted Text
+@item 整形済みテキスト（Formatted Text）
+@c Formatted text is text that displays with formatting information while
+@c you edit.  Formatting information includes fonts, colors, and specified
+@c margins.  @xref{Formatted Text}.
+整形済みテキストとは、編集中に整形情報に従って表示されるテキストである。
+整形情報には、フォント、表示色、左右端などがある。
+@pxref{Formatted Text}。
+
+@c ==jitem ふれーむ
+@c @item Frame
+@item フレーム（Frame）
+@c A frame is a rectangular cluster of Emacs windows.  Emacs starts out
+@c with one frame, but you can create more.  You can subdivide each frame
+@c into Emacs windows (q.v.).  When you are using X windows, all the frames
+@c can be visible at the same time.  @xref{Frames}.
+フレームとは、Emacsウィンドウの長方形の集まりである。
+Emacsは1つのフレームで始めるがいくつでも作成できる。
+各フレームはEmacsウィンドウ《参照》に分割できる。
+Xウィンドウシステムを利用している場合には、
+すべてのフレームを同時に眺めることができる。
+@pxref{Frames}。
+
+@c ==jitem ふぁんくしょんきー
+@c @item Function Key
+@item ファンクションキー（Function Key）
+@c A function key is a key on the keyboard that sends input but does not
+@c correspond to any character.  @xref{Function Keys}.
+ファンクションキーは、どの文字にも対応しない入力を送出する
+キーボードのキーである。
+@pxref{Function Keys}。
+
+@c ==jitem ぐろーばる
+@c @item Global
+@item グローバル（Global）
+@c Global means `independent of the current environment; in effect
+@c throughout Emacs'.  It is the opposite of local (q.v.@:).  Particular
+@c examples of the use of `global' appear below.
+グローバル（大域的）というのは、
+「現在の環境とは独立であり、実質的にEmacs全体に適用する」ということである。
+これは、ローカル（局所的）《参照》とは反対の概念である。
+「グローバル」の典型的な利用例は以下にある。
+
+@c ==jitem ぐろーばるりゃくご
+@c @item Global Abbrev
+@item グローバル略語（Global Abbrev）
+@c A global definition of an abbrev (q.v.@:) is effective in all major
+@c modes that do not have local (q.v.@:) definitions for the same abbrev.
+@c @xref{Abbrevs}.
+略語《参照》のグローバルな定義は、ローカル《参照》な定義に同じ略語がない
+すべてのメジャーモードにおいて有効である。
+@pxref{Abbrevs}。
+
+@c ==jitem ぐろーばるきーまっぷ
+@c @item Global Keymap
+@item グローバルキーマップ（Global Keymap）
+@c The global keymap (q.v.@:) contains key bindings that are in effect
+@c except when overridden by local key bindings in a major mode's local
+@c keymap (q.v.@:).  @xref{Keymaps}.
+グローバルキーマップ《参照》は、
+メジャーモードのローカルキーマップ《参照》により
+ローカルキーバインドが優先する場合を除いて
+有効になるキーバインドを保持する。
+@pxref{Keymaps}。
+
+@c ==jitem ぐろーばるまーくりんぐ
+@c @item Global Mark Ring
+@item グローバルマークリング（Global Mark Ring）
+@c The global mark ring records the series of buffers you have recently set
+@c a mark in.  In many cases you can use this to backtrack through buffers
+@c you have been editing in, or in which you have found tags.  @xref{Global
+@c Mark Ring}.
+グローバルマークリングには、
+最近にマークを置いたバッファの系列を記録する。
+多くの場合、今までに編集したバッファやタグを探したバッファを
+辿り直すのにこのリングを使える。
+@pxref{Global Mark Ring}。
+
+@c ==jitem ぐろーばるちかん
+@c @item Global Substitution
+@item グローバル置換（Global Substitution）
+@c Global substitution means replacing each occurrence of one string by
+@c another string through a large amount of text.  @xref{Replace}.
+グローバル置換とは、長大なテキストにおいて、
+ある文字列を他の文字列で置き換えることである。
+@pxref{Replace}。
+
+@c ==jitem ぐろーばるへんすう
+@c @item Global Variable
+@item グローバル変数（Global Variable）
+@c The global value of a variable (q.v.@:) takes effect in all buffers
+@c that do not have their own local (q.v.@:) values for the variable.
+@c @xref{Variables}.
+変数《参照》のグローバルな値は、
+バッファ独自に変数のローカルな値を持たないすべてのバッファに影響する。
+@pxref{Variables}。
+
+@c ==jitem ずけいもじ
+@c @item Graphic Character
+@item 図形文字（Graphic Character）
+@c Graphic characters are those assigned pictorial images rather than
+@c just names.  All the non-Meta (q.v.@:) characters except for the
+@c Control (q.v.@:) characters are graphic characters.  These include
+@c letters, digits, punctuation, and spaces; they do not include
+@c @key{RET} or @key{ESC}.  In Emacs, typing a graphic character inserts
+@c that character (in ordinary editing modes).  @xref{Basic,,Basic Editing}.
+図形文字とは、名称だけでなく絵的な像も割り当てられた文字である。
+メタ《参照》でないすべての文字は、コントロール《参照》文字を除いて
+図形文字である。
+アルファベット、数字、区切り文字、空白が含まれるが、
+@key{RET}や@key{ESC}は含まれない。
+Emacsでは、（通常の編集モードでは）図形文字を打ち込むとその文字が挿入される。
+@pxref{Basic,,Basic Editing}。
+
+@c ==jitem きょうちょうひょうじ
+@c @item Highlighting
+@item 強調表示（Highlighting）
+@c Highlighting text means displaying it with a different foreground and/or
+@c background color to make it stand out from the rest of the text in the
+@c buffer.
+テキストを強調表示するとは、バッファ内の他のテキストに比してめだつように
+前景色や背景色を変えて表示することである。
+
+@c ==jitem はーどこぴー
+@c @item Hardcopy
+@item ハードコピー（Hardcopy）
+@c Hardcopy means printed output.  Emacs has commands for making printed
+@c listings of text in Emacs buffers.  @xref{Hardcopy}.
+ハードコピーとは、印刷した出力のことである。
+Emacsには、Emacsバッファ内のテキストを印刷するコマンドがある。
+@pxref{Hardcopy}。
+
+@c ==jitem あすきーもじHELP
+@item @key{HELP}
+@c @key{HELP} is the Emacs name for @kbd{C-h} or @key{F1}.  You can type
+@c @key{HELP} at any time to ask what options you have, or to ask what any
+@c command does.  @xref{Help}.
+@key{HELP}とは、@kbd{C-h}や@key{F1}を指すEmacsの名前である。
+どのような選択枝があるかを調べたり、コマンドが何をするかを調べるには、
+いつでも@key{HELP}を押せばよい。
+@pxref{Help}。
+
+@c ==jitem はいぱー
+@c @item Hyper
+@item ハイパー（Hyper）
+@c Hyper is the name of a modifier bit which a keyboard input character may
+@c have.  To make a character Hyper, type it while holding down the
+@c @key{HYPER} key.  Such characters are given names that start with
+@c @kbd{Hyper-} (usually written @kbd{H-} for short).  @xref{User Input,
+@c Hyper}.
+ハイパーは、キーボードからの入力文字に付く修飾ビットの名前である。
+ハイパー文字にするには、@key{HYPER}キーを押し下げたまま文字を打ち込む。
+このような文字は、@kbd{Hyper-}（普通は縮めて@kbd{H-}）で始まる名前になる。
+@pxref{User Input, Hyper}。
+
+@c ==jitem あすきーもじINBOX
+@item Inbox
+@c An inbox is a file in which mail is delivered by the operating system.
+@c Rmail transfers mail from inboxes to Rmail files (q.v.@:) in which the
+@c mail is then stored permanently or until explicitly deleted.
+@c @xref{Rmail Inbox}.
+inboxとは、
+オペレーティングシステムが配達するメイルを収めるファイルである。
+rmailは、inboxからrmailファイル《参照》にメイルを移動する。
+rmailファイル内のメイルは、明示的に消さない限り、恒久的に保存される。
+
+@c ==jitem じさげ
+@c @item Indentation
+@item 字下げ（Indentation）
+@c Indentation means blank space at the beginning of a line.  Most
+@c programming languages have conventions for using indentation to
+@c illuminate the structure of the program, and Emacs has special
+@c commands to adjust indentation.
+@c @xref{Indentation}.
+字下げとは、行の始めにある空白のことである。
+ほとんどのプログラム言語では、プログラムの構造を明らかにするために
+字下げを使う習慣がある。
+Emacsには、字下げを調整する特別なコマンドがある。
+@pxref{Indentation}。
+
+@c ==jitem かんせつばっふぁ
+@c @item Indirect Buffer
+@item 間接バッファ（Indirect Buffer）
+@c An indirect buffer is a buffer that shares the text of another buffer,
+@c called its base buffer.  @xref{Indirect Buffers}.
+間接バッファとは、
+ベースバッファと呼ばれる別のバッファとテキストを共有するバッファである。
+@pxref{Indirect Buffers}。
+
+@c ==jitem にゅうりょくいべんと
+@c @item Input Event
+@item 入力イベント（Input Event）
+@c An input event represents, within Emacs, one action taken by the user on
+@c the terminal.  Input events include typing characters, typing function
+@c keys, pressing or releasing mouse buttons, and switching between Emacs
+@c frames.  @xref{User Input}.
+Emacsにおいて、入力イベントはユーザーが端末で行った1つの操作を表す。
+入力イベントには、文字の打ち込み、ファンクションキーの打ち込み、
+マウスボタンを押したり放したりすること、Emacsフレームの切り替えがある。
+
+@c ==jitem にゅうりょほうしき
+@c @item Input Method
+@item 入力方式（Input Method）
+@c An input method is a system for entering non-ASCII text characters by
+@c typing sequences of ASCII characters (q.v.@:).  @xref{Input Methods}.
+入力方式とは、ASCII文字《参照》の列を打ち込んで
+非ASCIIのテキスト文字を入力する方法である。
+@pxref{Input Methods}。
+
+@c ==jitem そうにゅう
+@c @item Insertion
+@item 挿入（Insertion）
+@c Insertion means copying text into the buffer, either from the keyboard
+@c or from some other place in Emacs.
+挿入とは、キーボードやEmacs内の他の場所から
+バッファにテキストをコピーすることである。
+
+@c ==jitem そうごろっく
+@c @item Interlocking
+@item 相互ロック（Interlocking）
+@c Interlocking is a feature for warning when you start to alter a file
+@c that someone else is already editing.  @xref{Interlocking,,Simultaneous
+@c Editing}.
+相互ロックとは、
+すでに誰かが編集しているファイルを変更しようとすると警告する機能である。
+@pxref{Interlocking,,Simultaneous Editing}。
+
+@c ==jitem ぎょうそろえ
+@c @item Justification
+@item 行揃え（Justification）
+@c Justification means adding extra spaces to lines of text to make them
+@c come exactly to a specified width.  @xref{Filling,Justification}.
+行揃えとは、指定した幅にちょうど収まるように
+テキスト行に余分な空白を加えることである。
+@pxref{Filling,Justification}。
+
+@c ==jitem きーぼーどまくろ
+@c @item Keyboard Macro
+@item キーボードマクロ（Keyboard Macro）
+@c Keyboard macros are a way of defining new Emacs commands from
+@c sequences of existing ones, with no need to write a Lisp program.
+@c @xref{Keyboard Macros}.
+キーボードマクロとは、Lispプログラムを書かずに、
+既存のコマンド列から新たなEmacsコマンドを定義する方法である。
+@pxref{Keyboard Macros}。
+
+@c ==jitem きーれつ
+@c @item Key Sequence
+@item キー列（Key Sequence）
+@c A key sequence (key, for short) is a sequence of input events (q.v.@:)
+@c that are meaningful as a single unit.  If the key sequence is enough to
+@c specify one action, it is a complete key (q.v.@:); if it is not enough,
+@c it is a prefix key (q.v.@:).  @xref{Keys}.
+キー列（縮めてキー）とは、
+1つの単位として意味がある入力イベント《参照》の列である。
+キー列が1つの動作を特定するのに十分な長さがあれば、
+それは完結キー《参照》である。
+十分でなければプレフィックスキー《参照》である。
+@pxref{Keys}。
+
+@c ==jitem きーまっぷ
+@c @item Keymap
+@item キーマップ（Keymap）
+@c The keymap is the data structure that records the bindings (q.v.@:) of
+@c key sequences to the commands that they run.  For example, the global
+@c keymap binds the character @kbd{C-n} to the command function
+@c @code{next-line}.  @xref{Keymaps}.
+キーマップとは、コマンドを起動するキー列のバインディング《参照》を
+記録したデータ構造である。
+たとえば、グローバルキーマップでは、
+文字@kbd{C-n}をコマンド関数@code{next-line}にバインド（束縛）する。
+@pxref{Keymaps}。
+
+@c ==jitem きーぼーどへんかんひょう
+@c @item Keyboard Translation Table
+@item キーボード変換表（Keyboard Translation Table）
+@c The keyboard translation table is an array that translates the character
+@c codes that come from the terminal into the character codes that make up
+@c key sequences.  @xref{Keyboard Translations}.
+キーボード変換表とは、
+端末からの入力文字コードをキー列を構成する文字コードへ変換する配列である。
+@pxref{Keyboard Translations}。
+
+@c ==jitem きるりんぐ
+@c @item Kill Ring
+@item キルリング（Kill Ring）
+@c The kill ring is where all text you have killed recently is saved.
+@c You can reinsert any of the killed text still in the ring; this is
+@c called yanking (q.v.@:).  @xref{Yanking}.
+キルリングとは、
+最近にキルしたすべてのテキストを保存する場所である。
+リングの中にあるキルしたテキストは、いつでも再度挿入できる。
+これをヤンク《参照》するという。
+@pxref{Yanking}。
+
+@c ==jitem きる
+@c @item Killing
+@item キル（Killing）
+@c Killing means erasing text and saving it on the kill ring so it can be
+@c yanked (q.v.@:) later.  Some other systems call this ``cutting.''
+@c Most Emacs commands to erase text do killing, as opposed to deletion
+@c (q.v.@:).  @xref{Killing}.
+キルとは、テキストを取り去り、
+あとでヤンク《参照》できるようにキルリングに保存することである。
+他のシステムではこれを『カット』と呼ぶ。
+テキストを取り去るほとんどのEmacsコマンドは、
+削除《参照》ではなくキルを行う。
+@pxref{Killing}。
+
+@c ==jitem じょぶのきょうせいしゅうりょう
+@c @item Killing Jobs
+@item ジョブの強制終了（Killing Jobs）
+@c Killing a job (such as, an invocation of Emacs) means making it cease
+@c to exist.  Any data within it, if not saved in a file, is lost.
+@c @xref{Exiting}.
+（Emacsの起動などの）ジョブを強制終了するとは、
+ジョブの存続を終らせることである。
+ジョブ内のデータは、ファイルに保存していなければ失われる。
+@pxref{Exiting}。
+
+@c ==jitem げんごかんきょう
+@c @item Language Environment
+@item 言語環境（Language Environment）
+@c Your choice of language environment specifies defaults for the input
+@c method (q.v.@:) and coding system (q.v.@:).  @xref{Language
+@c Environments}.  These defaults are relevant if you edit non-ASCII text
+@c (@pxref{International}).
+言語環境を選ぶと、
+入力方式《参照》とコーディングシステム《参照》のデフォルトが指定される。
+@pxref{Language Environments}。
+これらのデフォルトは、非ASCIIのテキストを編集する人に関係ある。
+（@pxref{International}）。
+
+@c ==jitem りすと
+@c @item List
+@item リスト（List）
+@c A list is, approximately, a text string beginning with an open
+@c parenthesis and ending with the matching close parenthesis.  In C mode
+@c and other non-Lisp modes, groupings surrounded by other kinds of matched
+@c delimiters appropriate to the language, such as braces, are also
+@c considered lists.  Emacs has special commands for many operations on
+@c lists.  @xref{Lists}.
+リストとは、おおざっぱにいえば、
+開き括弧で始まり対応する閉じ括弧で終るテキスト文字列である。
+Cモードや他のLisp以外のモードでは、
+言語にとって適切な対応をとる中括弧などの
+区切り文字で囲んだものもリストとみなす。
+Emacsには、リストにさまざまな操作を行う特別なコマンドがある。
+@pxref{Lists}。
+
+@c ==jitem ろーかる
+@c @item Local
+@item ローカル（Local）
+@c Local means `in effect only in a particular context'; the relevant
+@c kind of context is a particular function execution, a particular
+@c buffer, or a particular major mode.  It is the opposite of `global'
+@c (q.v.@:).  Specific uses of `local' in Emacs terminology appear below.
+ローカル（局所的）とは、「特定の文脈だけに影響する」という意味である。
+特定の文脈とは、関数の実行、バッファ、メジャーモードなどである。
+これは、グローバル（大域的）《参照》とは反対の概念である。
+Emacsにおける「ローカル」の用法の例は以下ある。
+
+@c ==jitem ろーかるりゃくご
+@c @item Local Abbrev
+@item ローカル略語（Local Abbrev）
+@c A local abbrev definition is effective only if a particular major mode
+@c is selected.  In that major mode, it overrides any global definition
+@c for the same abbrev.  @xref{Abbrevs}.
+ローカル略語の定義は、特定のメジャーモードが選ばれているときだけ有効である。
+そのメジャーモードでは、同じ略語のグローバルな定義に優先する。
+@pxref{Abbrevs}。
+
+@c ==jitem ろーかるきーまっぷ
+@c @item Local Keymap
+@item ローカルキーマップ（Local Keymap）
+@c A local keymap is used in a particular major mode; the key bindings
+@c (q.v.@:) in the current local keymap override global bindings of the
+@c same key sequences.  @xref{Keymaps}.
+ローカルキーマップは、特定のメジャーモードで使われる。
+現在のローカルキーマップのキーバインド《参照》は、
+同じキー列に対するグローバルなバインドに優先する。
+@pxref{Keymaps}。
+
+@c ==jitem ろーかるへんすう
+@c @item Local Variable
+@item ローカル変数（Local Variable）
+@c A local value of a variable (q.v.@:) applies to only one buffer.
+@c @xref{Locals}.
+1つのバッファのみに適用される変数《参照》のローカルな値。
+@pxref{Locals}。
+
+@c ==jitem あすきーもじM-
+@item @kbd{M-}
+@c @kbd{M-} in the name of a character is an abbreviation for @key{META},
+@c one of the modifier keys that can accompany any character.
+@c @xref{User Input}.
+文字の名前の中の@kbd{M-}は、@key{META}の省略形であり、
+任意の文字に付くことが可能な修飾キーの1つである。
+@pxref{User Input}。
+
+@c ==jitem あすきーもじM-C-
+@item @kbd{M-C-}
+@c @kbd{M-C-} in the name of a character is an abbreviation for
+@c Control-Meta; it means the same thing as @kbd{C-M-}.  If your
+@c terminal lacks a real @key{META} key, you type a Control-Meta character by
+@c typing @key{ESC} and then typing the corresponding Control character.
+@c @xref{User Input,C-M-}.
+文字の名前の中の@kbd{M-C-}は、
+コントロール・メタ（Control-Meta）の略であり、
+@kbd{C-M-}と同じ意味である。
+@key{META}キーがない端末では、
+コントロール・メタ文字を打ち込むには、
+@key{ESC}を打ち込んでから該当するコントロール文字を打ち込む。
+@pxref{User Input,C-M-}。
+
+@c ==jitem あすきーもじM-x
+@item @kbd{M-x}
+@c @kbd{M-x} is the key sequence which is used to call an Emacs command by
+@c name.  This is how you run commands that are not bound to key sequences.
+@c @xref{M-x}.
+@kbd{M-x}は、Emacsコマンドを名前で呼び出すために用いるキー列である。
+これにより、キー列にバインド（束縛）されていないコマンドを実行できる。
+@pxref{M-x}。
+
+@c ==jitem めいる
+@c @item Mail
+@item メイル（Mail）
+@c Mail means messages sent from one user to another through the computer
+@c system, to be read at the recipient's convenience.  Emacs has commands for
+@c composing and sending mail, and for reading and editing the mail you have
+@c received.  @xref{Sending Mail}.  @xref{Rmail}, for how to read mail.
+メイルとは、コンピュータシステムを介してあるユーザーが他のユーザーへ送った
+メッセージであり、受け手の都合のよいときに読んでもらう。
+Emacsには、メイルを書いて送ったり、
+受け取ったメイルを読んだり編集するコマンドがある。
+@pxref{Sending Mail}。
+メイルの読み方は、@pxref{Rmail}。
+
+@c ==jitem めいるさくせいほうほう
+@c @item Mail Composition Method
+@item メイル作成方法（Mail Composition Method）
+@c A mail composition method is a program runnable within Emacs for editing
+@c and sending a mail message.  Emacs lets you select from several
+@c alternative mail composition methods.  @xref{Mail Methods}.
+メイル作成方法とは、
+メイルメッセージを編集したり送ったりするための
+Emacs内で実行できるプログラムである。
+Emacsでは何種類かのメイル作成方法を選択できる。
+@pxref{Mail Methods}。
+
+@c ==jitem めじゃーもーど
+@c @item Major Mode
+@item メジャーモード（Major Mode）
+@c The Emacs major modes are a mutually exclusive set of options, each of
+@c which configures Emacs for editing a certain sort of text.  Ideally,
+@c each programming language has its own major mode.  @xref{Major Modes}.
+Emacsのメジャーモードとは、互いに排他的なオプションの集まりであり、
+各メジャーモードは特定種類のテキストを編集するためにEmacsの設定を変更する。
+理想的には、各プログラム言語ごとに独自のメジャーモードがある。
+@pxref{Major Modes}。
+
+@c ==jitem まーく
+@c @item Mark
+@item マーク（Mark）
+@c The mark points to a position in the text.  It specifies one end of the
+@c region (q.v.@:), point being the other end.  Many commands operate on
+@c all the text from point to the mark.  Each buffer has its own mark.
+@c @xref{Mark}.
+マークは、テキスト内の位置を指し示す。
+マークでリージョン《参照》の端を指し、ポイントでもう一方の端を指す。
+ポイントからマークまでのテキスト全体を操作するコマンドが数多くある。
+各バッファにはそれぞれ独自のマークがある。
+@pxref{Mark}。
+
+@c ==jitem まーくりんぐ
+@c @item Mark Ring
+@item マークリング（Mark Ring）
+@c The mark ring is used to hold several recent previous locations of the
+@c mark, just in case you want to move back to them.  Each buffer has its
+@c own mark ring; in addition, there is a single global mark ring (q.v.).
+@c @xref{Mark Ring}.
+マークリングは、以前のマークへ戻りたくなった場合に備えて、
+最近の数個のマークの位置を保持する。
+各バッファには独自のマークリングがある。
+さらに、グローバルマークリング《参照》が1つある。
+@pxref{Mark Ring}。
+
+@c ==jitem めにゅーばー
+@c @item Menu Bar
+@item メニューバー（Menu Bar）
+@c The menu bar is the line at the top of an Emacs frame.  It contains
+@c words you can click on with the mouse to bring up menus.  The menu bar
+@c feature is supported only with X.  @xref{Menu Bars}.
+メニューバーはEmacsフレームの最上段にある。
+これには、マウスでクリックしてメニューを出すための単語が並んでいる。
+メニューバーの機能は、X上でのみ利用できる。
+@pxref{Menu Bars}。
+
+@c ==jitem めっせーじ
+@c @item Message
+@item メッセージ（Message）
+@c See `mail'.
+「メイル」を参照。
+
+@c ==jitem めた
+@c @item Meta
+@item メタ（Meta）
+@c Meta is the name of a modifier bit which a command character may have.
+@c It is present in a character if the character is typed with the
+@c @key{META} key held down.  Such characters are given names that start
+@c with @kbd{Meta-} (usually written @kbd{M-} for short).  For example,
+@c @kbd{M-<} is typed by holding down @key{META} and at the same time
+@c typing @kbd{<} (which itself is done, on most terminals, by holding
+@c down @key{SHIFT} and typing @kbd{,}).  @xref{User Input,Meta}.
+メタは、コマンド文字に付きうる修飾ビットの名前である。
+@key{META}を押し下げたまま打ち込んだ文字に付く。
+そのような文字は、
+@kbd{Meta-}（普通は縮めて@kbd{M-}）で始まる名前になる。
+たとえば、@kbd{M-<}は、@key{META}を押し下げたまま
+（ほとんどの端末では、@key{SHIFT}を押し下げたまま@kbd{,}を打ち）
+@kbd{<}を打ち込む。
+@pxref{User Input,Meta}。
+
+@c ==jitem めたもじ
+@c @item Meta Character
+@item メタ文字（Meta Character）
+@c A Meta character is one whose character code includes the Meta bit.
+メタ文字とは、メタビットが立っている文字コードである。
+
+@c ==jitem みにばっふぁ
+@c @item Minibuffer
+@item ミニバッファ（Minibuffer）
+@c The minibuffer is the window that appears when necessary inside the
+@c echo area (q.v.@:), used for reading arguments to commands.
+@c @xref{Minibuffer}.
+ミニバッファは、必要なときにエコー領域《参照》に現れ、
+コマンドの引数を読み取るのに使われる。
+@pxref{Minibuffer}。
+
+@c ==jitem みにばっふぁりれき
+@c @item Minibuffer History
+@item ミニバッファ履歴（Minibuffer History）
+@c The minibuffer history records the text you have specified in the past
+@c for minibuffer arguments, so you can conveniently use the same text
+@c again.  @xref{Minibuffer History}.
+ミニバッファ履歴は、
+それまでにミニバッファ引数に指定したテキストを記録するもので、
+同じテキストを再利用するのに便利である。
+@pxref{Minibuffer History}。
+
+@c ==jitem まいなもーど
+@c @item Minor Mode
+@item マイナモード（Minor Mode）
+@c A minor mode is an optional feature of Emacs which can be switched on
+@c or off independently of all other features.  Each minor mode has a
+@c command to turn it on or off.  @xref{Minor Modes}.
+マイナモードとは、他のすべての機能とは独立に
+オン／オフできるEmacsのオプションの機能である。
+各マイナモードには、機能をオン／オフするコマンドがある。
+@pxref{Minor Modes}。
+
+@c ==jitem まいなもーどきーまっぷ
+@c @item Minor Mode Keymap
+@item マイナモードキーマップ（Minor Mode Keymap）
+@c A keymap that belongs to a minor mode and is active when that mode is
+@c enabled.  Minor mode keymaps take precedence over the buffer's local
+@c keymap, just as the local keymap takes precedence over the global
+@c keymap.  @xref{Keymaps}.
+マイナモードに属するキーマップのことであり、
+マイナモードがオンのときに使われる。
+ローカルキーマップがグローバルキーマップに優先するように、
+マイナモードキーマップはバッファのローカルキーマップに優先する。
+@pxref{Keymaps}。
+
+@c ==jitem もーどぎょう
+@c @item Mode Line
+@item モード行（Mode Line）
+@c The mode line is the line at the bottom of each window (q.v.@:), giving
+@c status information on the buffer displayed in that window.  @xref{Mode
+@c Line}.
+モード行とは、各ウィンドウ《参照》のいちばん底にある行であり、
+ウィンドウに表示中のバッファの状態に関する情報を与える。
+@pxref{Mode Line}。
+
+@c ==jitem へんこうしたばっふぁ
+@c @item Modified Buffer
+@item 変更したバッファ（Modified Buffer）
+@c A buffer (q.v.@:) is modified if its text has been changed since the
+@c last time the buffer was saved (or since when it was created, if it
+@c has never been saved).  @xref{Saving}.
+バッファを保存してから（あるいは、新規作成）以降にテキストを変更した
+（あるいは、一度も保存していない）場合、
+バッファは変更されたという。
+@pxref{Saving}。
+
+@c ==jitem てきすとのいどう
+@c @item Moving Text
+@item テキストの移動（Moving Text）
+@c Moving text means erasing it from one place and inserting it in
+@c another.  The usual way to move text by killing (q.v.@:) and then
+@c yanking (q.v.@:).  @xref{Killing}.
+テキストの移動とは、
+ある場所からテキストを取り去り、別の場所へ挿入することである。
+テキストを移動するもっとも普通の方法は、
+キル《参照》してからヤンク《参照》することである。
+@pxref{Killing}。
+
+@c ==jitem あすきーもじMULE
+@c @item MULE
+@item MULE（ミュール）
+@c MULE refers to the Emacs features for editing non-ASCII text
+@c using multibyte characters (q.v.@:).  @xref{International}.
+MULEとは、マルチバイト文字《参照》の機能を用いて非ASCIIテキストを
+編集するEmacsの機能を指す。
+@pxref{International}。
+
+@c ==jitem まるちばいともじ
+@c @item Multibyte Character
+@item マルチバイト文字（Multibyte Character）
+@c A multibyte character is a character that takes up several buffer
+@c positions.  Emacs uses multibyte characters to represent non-ASCII text,
+@c since the number of non-ASCII characters is much more than 256.
+@c @xref{International Intro}.
+マルチバイト文字とは、バッファの数個の場所を占める文字である。
+非ASCII文字の個数は256を大幅に超えるので、
+非ASCII文字のテキストを表現するためにマルチバイト文字を使う。
+@pxref{International Intro}。
+
+@c ==jitem なまえつきまーく
+@c @item Named Mark
+@item 名前付きマーク（Named Mark）
+@c A named mark is a register (q.v.@:) in its role of recording a
+@c location in text so that you can move point to that location.
+@c @xref{Registers}.
+名前付きマークとは、レジスタ《参照》であり、
+その場所へポイントを移動できるようにテキスト内の場所を記録する役割がある。
+@pxref{Registers}。
+
+@c ==jitem なろいんぐ
+@c @item Narrowing
+@item ナロイング（Narrowing）
+@c Narrowing means creating a restriction (q.v.@:) that limits editing in
+@c the current buffer to only a part of the text in the buffer.  Text
+@c outside that part is inaccessible to the user until the boundaries are
+@c widened again, but it is still there, and saving the file saves it
+@c all.  @xref{Narrowing}.
+ナロイングとは、カレントバッファのテキストの一部分のみが
+編集対象となるように制限《参照》を設けることである。
+境界を広げない限り、境界の外側にあるテキストを参照することはできないが、
+テキストは存続しているので
+ファイルへ保存するとバッファの内容すべてが保存される。
+@pxref{Narrowing}。
+
+@c ==jitem かいぎょう
+@c @item Newline
+@item 改行（Newline）
+@c Control-J characters in the buffer terminate lines of text and are
+@c therefore also called newlines.  @xref{Text Characters,Newline}.
+バッファ内の文字Control-Jは、テキストの行の終りなので、
+改行と呼ばれる。
+@pxref{Text Characters,Newline}。
+
+@c ==jitem すうひきすう
+@c @item Numeric Argument
+@item 数引数（Numeric Argument）
+@c A numeric argument is a number, specified before a command, to change
+@c the effect of the command.  Often the numeric argument serves as a
+@c repeat count.  @xref{Arguments}.
+数引数は数であり、コマンドよりまえに指定してコマンドの効果を変える。
+多くの場合、数引数は反復回数を指定する。
+@pxref{Arguments}。
+
+@c ==jitem うわがきもーど
+@c @item Overwrite Mode
+@item 上書きモード（Overwrite Modes）
+@c Overwrite mode is a minor mode.  When it is enabled, ordinary text
+@c characters replace the existing text after point rather than pushing
+@c it to the right.  @xref{Minor Modes}.
+上書き（overwrite）モードは、マイナモードである。
+このモードが有効であると、
+普通のテキスト文字は、ポイント直後に押し込まれるのではなく、
+ポイント直後の既存のテキストを置き換える。
+@pxref{Minor Modes}。
+
+@c ==jitem ぺーじ
+@c @item Page
+@item ページ（Page）
+@c A page is a unit of text, delimited by formfeed characters (ASCII
+@c control-L, code 014) coming at the beginning of a line.  Some Emacs
+@c commands are provided for moving over and operating on pages.
+@c @xref{Pages}.
+ページは、テキストの1つの単位であり、
+行の先頭のページ送り文字（ASCIIのコントロールL、コードは014）で区切られる。
+Emacsには、ページ間を移動したり、ページを操作するコマンドがある。
+@pxref{Pages}。
+
+@c ==jitem だんらく
+@c @item Paragraph
+@item 段落（Paragraph）
+@c Paragraphs are the medium-size unit of English text.  There are
+@c special Emacs commands for moving over and operating on paragraphs.
+@c @xref{Paragraphs}.
+段落とは、英文テキストの中程度の大きさの塊である。
+段落間を移動したり段落を操作する専用のEmacsコマンドがある。
+@pxref{Paragraphs}。
+
+@c ==jitem こうぶんかいせき
+@c @item Parsing
+@item 構文解析（Parsing）
+@c We say that certain Emacs commands parse words or expressions in the
+@c text being edited.  Really, all they know how to do is find the other
+@c end of a word or expression.  @xref{Syntax}.
+Emacsコマンドの中には、
+編集中のテキストを単語や式として構文解析するものがある。
+実際には、単語や式の端をみつける方法を知っている程度である。
+@pxref{Syntax}。
+
+@c ==jitem ぽいんと
+@c @item Point
+@item ポイント（Point）
+@c Point is the place in the buffer at which insertion and deletion
+@c occur.  Point is considered to be between two characters, not at one
+@c character.  The terminal's cursor (q.v.@:) indicates the location of
+@c point.  @xref{Basic,Point}.
+ポイントとは、挿入や削除を行うバッファ内の場所である。
+ポイントは、2つの文字のあいだにあると考えられ、どちらかの文字にあるのではない。
+端末のカーソル《参照》はポイントの位置を示す。
+@pxref{Basic,Point}。
+	
+@c ==jitem ぜんちひきすう
+@c @item Prefix Argument
+@item 前置引数（Prefix Argument）
+@c See `numeric argument'.
+「数引数」を参照。
+
+@c ==jitem ぷれふぃっくすきー
+@c @item Prefix Key
+@item プレフィックスキー（Prefix Key）
+@c A prefix key is a key sequence (q.v.@:) whose sole function is to
+@c introduce a set of longer key sequences.  @kbd{C-x} is an example of
+@c prefix key; any two-character sequence starting with @kbd{C-x} is
+@c therefore a legitimate key sequence.  @xref{Keys}.
+プレフィックスキーとは、
+より長いキー列の導入部としてのみ機能するキー列である。
+@kbd{C-x}は、プレフィックスキーの例である。
+したがって、@kbd{C-x}で始まる2文字のキー列は正当なキー列である。
+@pxref{Keys}。
+
+@c ==jitem しゅrmailふぁいる
+@c @item Primary Rmail File
+@item 主rmailファイル（Primary Rmail File）
+@c Your primary Rmail file is the file named @samp{RMAIL} in your home
+@c directory.  That's where Rmail stores your incoming mail, unless you
+@c specify a different file name.  @xref{Rmail}.
+主rmailファイルとは、ホームディレクトリにある@samp{RMAIL}という
+名前のファイルである。
+別のファイル名を指定しない限り、
+rmailが届いたメイルを保存する場所である。
+@pxref{Rmail}。
+
+@c ==jitem いちじせれくしょん
+@c @item Primary Selection
+@item 一次セレクション（Primary Selection）
+@c The primary selection is one particular X selection (q.v.@:); it is the
+@c selection that most X applications use for transferring text to and from
+@c other applications.
+一次セレクションとは、Xのセレクション《参照》の一種であり、
+アプリケーション間でテキストを転送するために
+Xの数多くのアプリケーションが用いるセレクションである。
+
+@c The Emacs kill commands set the primary selection and the yank command
+@c uses the primary selection when appropriate.  @xref{Killing}.
+Emacsのキルコマンドは、一次セレクションを設定し、
+ヤンクコマンドは、適切ならば、一次セレクションを用いる。
+@pxref{Killing}。
+
+@c ==jitem ぷろんぷと
+@c @item Prompt
+@item プロンプト（Prompt）
+@c A prompt is text printed to ask the user for input.  Displaying a prompt
+@c is called prompting.  Emacs prompts always appear in the echo area
+@c (q.v.@:).  One kind of prompting happens when the minibuffer is used to
+@c read an argument (@pxref{Minibuffer}); the echoing which happens when
+@c you pause in the middle of typing a multi-character key sequence is also
+@c a kind of prompting (@pxref{Echo Area}).
+プロンプトとは、ユーザーに入力を促すために表示されるテキストである。
+プロンプトを表示することをプロンプティングという。
+Emacsのプロンプトは、つねにエコー領域《参照》に現れる。
+プロンプトを出す例は
+引数を読むためにミニバッファ（@pxref{Minibuffer}）を使う場合である。
+長いキー列を打ち込む途中で間を置いたときに起きる表示も、
+プロンプトの一種である。
+（@pxref{Echo Area}）。
+
+@c ==jitem ちゅうだん
+@c @item Quitting
+@item 中断（Quitting）
+@c Quitting means canceling a partially typed command or a running
+@c command, using @kbd{C-g} (or @kbd{C-@key{BREAK}} on MS-DOS).  @xref{Quitting}.
+中断とは、@kbd{C-g}（MS-DOSでは@kbd{C-@key{BREAK}}）を使って、
+打鍵途中のコマンドや実行中のコマンドを取り消すことである。
+@pxref{Quitting}。
+
+@c ==jitem くぉーと
+@c @item Quoting
+@item クォート（Quoting）
+@c Quoting means depriving a character of its usual special significance.
+@c The most common kind of quoting in Emacs is with @kbd{C-q}.  What
+@c constitutes special significance depends on the context and on
+@c convention.  For example, an ``ordinary'' character as an Emacs command
+@c inserts itself; so in this context, a special character is any character
+@c that does not normally insert itself (such as @key{DEL}, for example),
+@c and quoting it makes it insert itself as if it were not special.  Not
+@c all contexts allow quoting.  @xref{Basic,Quoting,Basic Editing}.
+クォートとは、文字が通常有する特別な意味を奪うことである。
+Emacsにおいてもっとも一般的なクォートは、@kbd{C-q}を使う。
+何が特別な意味となるかは、文脈や約束事に依存する。
+たとえば、Emacsのコマンドとしての『普通』の文字は、その文字自身を挿入する。
+したがって、この文脈においては、特別な文字とは、
+（たとえば、@key{DEL}などの）文字自身を挿入しない文字のことであり、
+クォートすると、特別な文字ではないとして、文字自身を挿入する。
+どんな文脈でもクォートが許されるとは限らない。
+@pxref{Basic,Quoting,Basic Editing}。
+
+@c ==jitem ふぁいるめいのくぉーと
+@c @item Quoting File Names
+@item ファイル名のクォート（Quoting File Names）
+@c Quoting a file name turns off the special significance of constructs
+@c such as @samp{$}, @samp{~} and @samp{:}.  @xref{Quoted File Names}.
+ファイル名をクォートすると、
+@samp{$}、@samp{~}、@samp{:}などの構成要素の特別な意味を抑える。
+@pxref{Quoted File Names}。
+
+@c ==jitem よみだしせんようばっふぁ
+@c @item Read-Only Buffer
+@item 読み出し専用バッファ（Read-Only Buffer）
+@c A read-only buffer is one whose text you are not allowed to change.
+@c Normally Emacs makes buffers read-only when they contain text which
+@c has a special significance to Emacs; for example, Dired buffers.
+@c Visiting a file that is write-protected also makes a read-only buffer.
+@c @xref{Buffers}.
+読み出し専用バッファとは、変更が許されないテキストを持つバッファである。
+通常、Emacsにとって重要な意味を持ったテキストを含むバッファは
+読み出し専用になる。
+たとえば、diredバッファである。
+書き込み禁止のファイルを訪れても、バッファは読み出し専用になる。
+@pxref{Buffers}。
+
+@c ==jitem くけいりょういき
+@c @item Rectangle
+@item 矩形領域（Rectangle）
+@c A rectangle consists of the text in a given range of columns on a given
+@c range of lines.  Normally you specify a rectangle by putting point at
+@c one corner and putting the mark at the opposite corner.
+@c @xref{Rectangles}.
+矩形領域は、与えられた範囲の行の与えられた範囲の桁のテキストから成る。
+通常、矩形領域を指定するには、一方の角にポイントを置き、対角にマークを置く。
+@pxref{Rectangles}。
+
+@c ==jitem さいきへんしゅうれべる
+@c @item Recursive Editing Level
+@item 再帰編集レベル（Recursive Editing Level）
+@c A recursive editing level is a state in which part of the execution of
+@c a command involves asking the user to edit some text.  This text may
+@c or may not be the same as the text to which the command was applied.
+@c The mode line indicates recursive editing levels with square brackets
+@c (@samp{[} and @samp{]}).  @xref{Recursive Edit}.
+再帰編集レベルとは、コマンドの実行過程において、
+ユーザーにテキスト編集を依頼した状態のことである。
+このテキストは、コマンドを適用したテキストと同じかもしれないし、
+違うかもしれない。
+モード行には、角括弧（@samp{[}と@samp{]}）で再帰編集レベルが示される。
+@pxref{Recursive Edit}。
+
+@c ==jitem さいひょうじ
+@c @item Redisplay
+@item 再表示（Redisplay）
+@c Redisplay is the process of correcting the image on the screen to
+@c correspond to changes that have been made in the text being edited.
+@c @xref{Screen,Redisplay}.
+再表示とは、編集中のテキストの変更に対応するように、
+画面上の表示を修正する処理のことである。
+@pxref{Screen,Redisplay}。
+
+@c ==jitem あすきーもじREGEXP
+@item Regexp
+@c See `regular expression'.
+「正規表現」を参照。
+
+@c ==jitem りーじょん
+@c @item Region
+@item リージョン（Region）
+@c The region is the text between point (q.v.@:) and the mark (q.v.@:).
+@c Many commands operate on the text of the region.  @xref{Mark,Region}.
+リージョンとは、ポイント《参照》とマーク《参照》のあいだにあるテキストである。
+数多くのコマンドがリージョンのテキストを操作する。
+@pxref{Mark,Region}。
+
+@c ==jitem れじすた
+@c @item Registers
+@item レジスタ（Registers）
+@c Registers are named slots in which text or buffer positions or
+@c rectangles can be saved for later use.  @xref{Registers}.
+レジスタとは、あとで使えるように、テキスト、バッファの位置、
+矩形領域を保持できる名前が付いた場所である。
+@pxref{Registers}。
+
+@c ==jitem せいきひょうげん
+@c @item Regular Expression
+@item 正規表現（Regular Expression）
+@c A regular expression is a pattern that can match various text strings;
+@c for example, @samp{l[0-9]+} matches @samp{l} followed by one or more
+@c digits.  @xref{Regexps}.
+正規表現とは、さまざまなテキスト文字列に一致可能なパターンである。
+たとえば、@samp{l[0-9]+}は、
+@samp{l}のうしろに1個以上の数字が続いた文字列に一致する。
+@pxref{Regexps}。
+
+@c ==jitem はんぷくかいすう
+@c @item Repeat Count
+@item 反復回数（Repeat Count）
+@c See `numeric argument'.
+「数引数」を参照。
+
+@c ==jitem ちかん
+@c @item Replacement
+@item 置換（Replacement）
+@c See `global substitution'.
+「グローバル置換」を参照。
+
+@c ==jitem せいげん
+@c @item Restriction
+@item 制限（Restriction）
+@c A buffer's restriction is the amount of text, at the beginning or the
+@c end of the buffer, that is temporarily inaccessible.  Giving a buffer a
+@c nonzero amount of restriction is called narrowing (q.v.@:).
+@c @xref{Narrowing}.
+バッファの制限とは、バッファの先頭や末尾で
+一時的に参照不可になっているテキスト量のことである。
+バッファにゼロでない制限を課すことを、ナロイング《参照》と呼ぶ。
+@pxref{Narrowing}。
+
+@c ==jitem あすきーもじRET
+@item @key{RET}
+@c @key{RET} is a character that in Emacs runs the command to insert a
+@c newline into the text.  It is also used to terminate most arguments
+@c read in the minibuffer (q.v.@:).  @xref{User Input,Return}.
+@key{RET}は、Emacsにおいて、
+テキストに改行を挿入するコマンドを実行する文字である。
+ミニバッファ《参照》においては、ほとんどの引数読み取りの完了にも使う。
+@pxref{User Input,Return}。
+
+@c ==jitem あすきーもじRMAILふぁいる
+@c @item Rmail File
+@item rmailファイル（Rmail File）
+@c An Rmail file is a file containing text in a special format used by
+@c Rmail for storing mail.  @xref{Rmail}.
+rmailファイルは、rmailがメイルを保存するために使用する
+特別な形式のテキストを収めたファイルである。
+@pxref{Rmail}。
+
+@c ==jitem ほぞん
+@c @item Saving
+@item 保存（Saving）
+@c Saving a buffer means copying its text into the file that was visited
+@c (q.v.@:) in that buffer.  This is the way text in files actually gets
+@c changed by your Emacs editing.  @xref{Saving}.
+バッファを保存するとは、
+そのバッファで訪問《参照》したファイルへバッファのテキストを
+コピーすることである。
+こうすることで、Emacsでの編集結果が実際にファイル内のテキストに反映される。
+@pxref{Saving}。
+
+@c ==jitem すくろーるばー
+@c @item Scroll Bar
+@item スクロールバー（Scroll Bar）
+@c A scroll bar is a tall thin hollow box that appears at the side of a
+@c window.  You can use mouse commands in the scroll bar to scroll the
+@c window.  The scroll bar feature is supported only with X.  @xref{Scroll
+@c Bars}.
+スクロールバーは、ウィンドウの端に現れる細長い中空の箱である。
+ウィンドウをスクロールするには、
+スクロールバー内でマウスコマンドを使う。
+スクロールバーの機能はXだけで使える。
+@pxref{Scroll Bars}。
+
+@c ==jitem すくろーる
+@c @item Scrolling
+@item スクロール（Scrolling）
+@c Scrolling means shifting the text in the Emacs window so as to see a
+@c different part of the buffer.  @xref{Display,Scrolling}.
+スクロールとは、Emacsウィンドウ内のテキストを動かして、
+バッファの別の部分が見えるようにすることである。
+@pxref{Display,Scrolling}。
+
+@c ==jitem たんさく
+@c @item Searching
+@item 探索（Searching）
+@c Searching means moving point to the next occurrence of a specified
+@c string or the next match for a specified regular expression.
+@c @xref{Search}.
+探索とは、指定した文字列のつぎの出現位置、
+あるいは、指定した正規表現のつぎの一致位置へポイントを動かすことである。
+@pxref{Search}。
+
+@c ==jitem たんさくぱす
+@c @item Search Path
+@item 探索パス（Search Path）
+@c A search path is a list of directory names, to be used for searching for
+@c files for certain purposes.  For example, the variable @code{load-path}
+@c holds a search path for finding Lisp library files.  @xref{Lisp Libraries}.
+探索パスとは、ディレクトリ名のリストであり、
+ある目的に使うファイルを探すために利用される。
+たとえば、変数@code{load-path}は、
+Lispのライブラリファイルを探すための探索パスを保持する。
+@pxref{Lisp Libraries}。
+
+@c ==jitem にじせれくしょん
+@c @item Secondary Selection
+@item 二次セレクション（Secondary Selection）
+@c The secondary selection is one particular X selection; some X
+@c applications can use it for transferring text to and from other
+@c applications.  Emacs has special mouse commands for transferring text
+@c using the secondary selection.  @xref{Secondary Selection}.
+二次セレクションとは、Xのセレクションの一種である。
+Xのアプリケーションには、
+他のアプリケーションとテキストを転送するために二次セレクションを
+使うものがある。
+Emacsには、二次セレクションを使ってテキストを
+転送する特別なマウスコマンドがある。
+@pxref{Secondary Selection}。
+
+@c ==jitem せんたくする
+@c @item Selecting
+@item 選択する（Selecting）
+@c Selecting a buffer means making it the current (q.v.@:) buffer.
+@c @xref{Buffers,Selecting}.
+バッファを選択するとは、
+そのバッファをカレントバッファ《参照》とすることである。
+@pxref{Buffers,Selecting}。
+
+@c ==jitem せれくしょん
+@c @item Selection
+@item セレクション（Selection）
+@c The X window system allows an application program to specify named
+@c selections whose values are text.  A program can also read the
+@c selections that other programs have set up.  This is the principal way
+@c of transferring text between window applications.  Emacs has commands to
+@c work with the primary (q.v.@:) selection and the secondary (q.v.@:)
+@c selection.
+Xウィンドウシステムでは、
+アプリケーションプログラムが
+テキストを値とする名前付きのセレクションを指定できる。
+プログラムは、他のプログラムが設定したセレクションを読むこともできる。
+これは、ウィンドウアプリケーションのあいだでテキストを転送する
+もっとも基本的な方法である。
+Emacsには、一次セレクション《参照》と二次セレクション《参照》に
+対処するコマンドがある。
+
+@c ==jitem せるふどきゅめんと
+@c @item Self-Documentation
+@item セルフドキュメント（Self-Documentation）
+@c Self-documentation is the feature of Emacs which can tell you what any
+@c command does, or give you a list of all commands related to a topic
+@c you specify.  You ask for self-documentation with the help character,
+@c @kbd{C-h}.  @xref{Help}.
+セルフドキュメントとは、コマンドが何をするものか教えたり、
+指定した話題に関係するすべてのコマンドの一覧を提示するEmacsの機能である。
+ヘルプ文字@kbd{C-h}でセルフドキュメントを読むことができる。
+@pxref{Help}。
+
+@c ==jitem じこそうにゅうもじ
+@c @item Self-Inserting Character
+@item 自己挿入文字（Self-Inserting Character）
+@c A character is self-inserting if typing that character inserts that
+@c character in the buffer.  Ordinary printing and whitespace characters
+@c are self-inserting in Emacs, except in certain special major modes.
+打ち込んだ文字自身がバッファに挿入される場合、その文字は自己挿入である。
+Emacsでは、特定のメジャーモードを除いて、普通の印字文字や白文字は
+自己挿入文字である。
+
+@c ==jitem せつ
+@c @item Sentences
+@item 節（Sentences）
+@c Emacs has commands for moving by or killing by sentences.
+@c @xref{Sentences}.
+Emacsには、節単位に移動したり削除するコマンドがある。
+@pxref{Sentences}。
+
+@c ==jitem あすきーもじSEXP
+@c @item Sexp
+@item S式（Sexp）
+@c A sexp (short for `s-expression') is the basic syntactic unit of Lisp
+@c in its textual form: either a list, or Lisp atom.  Many Emacs commands
+@c operate on sexps.  The term `sexp' is generalized to languages other
+@c than Lisp, to mean a syntactically recognizable expression.
+@c @xref{Lists,Sexps}.
+S式（sexpは「s-expression」の短縮形）とは、
+Lispのテキスト形式における基本的な文法単位であり、リストかLispのアトムである。
+Emacsには、S式を操作する数多くのコマンドがある。
+「sexp」という用語は、Lisp以外の言語に対しても一般化され、
+構文則で認識可能な式を意味する。
+@pxref{Lists,Sexps}。
+
+@c ==jitem どうじへんしゅう
+@c @item Simultaneous Editing
+@item 同時編集（Simultaneous Editing）
+@c Simultaneous editing means two users modifying the same file at once.
+@c Simultaneous editing if not detected can cause one user to lose his
+@c work.  Emacs detects all cases of simultaneous editing and warns one of
+@c the users to investigate.  @xref{Interlocking,,Simultaneous Editing}.
+同時編集とは、同じファイルを一度に2人のユーザーで編集することを意味する。
+同時編集を検知できないと、一方のユーザーの作業結果が失われる危険性がある。
+Emacsは、同時編集が起こるすべての状況を検知し、一方のユーザーに注意を促す。
+@pxref{Interlocking,,Simultaneous Editing}。
+
+@c ==jitem もじれつ
+@c @item String
+@item 文字列（String）
+@c A string is a kind of Lisp data object which contains a sequence of
+@c characters.  Many Emacs variables are intended to have strings as
+@c values.  The Lisp syntax for a string consists of the characters in the
+@c string with a @samp{"} before and another @samp{"} after.  A @samp{"}
+@c that is part of the string must be written as @samp{\"} and a @samp{\}
+@c that is part of the string must be written as @samp{\\}.  All other
+@c characters, including newline, can be included just by writing them
+@c inside the string; however, backslash sequences as in C, such as
+@c @samp{\n} for newline or @samp{\241} using an octal character code, are
+@c allowed as well.
+文字列とは、Lispのデータオブジェクトの一種であり、文字の列を持つ。
+Emacsの数多くの変数は、値として文字列をとることを意図している。
+文字列を表すLispの構文では、文字列の始めに@samp{"}があり、
+文字列の終りに@samp{"}がある。
+文字列に@samp{"}を含めるには@samp{\"}と書き、 
+文字列に@samp{\}を含めるには@samp{\\}と書く。
+改行を含む他のすべての文字は、文字列に含めて書けばよい。
+なお、改行を表す@samp{\n}、8進文字コードを表す@samp{\241}のような
+Cのバックスラッシュ表現も許される。
+
+@c ==jitem もじれつちかん
+@c @item String Substitution
+@item 文字列置換（String Substitution）
+@c See `global substitution'.
+「グローバル置換」を参照。
+
+@c ==jitem こうぶんてーぶる
+@c @item Syntax Table
+@item 構文テーブル（Syntax Table）
+@c The syntax table tells Emacs which characters are part of a word,
+@c which characters balance each other like parentheses, etc.
+@c @xref{Syntax}.
+構文テーブルは、単語を構成する文字、括弧のような互いに釣り合う文字などを、
+Emacsに教える。
+@pxref{Syntax}。
+
+@c ==jitem すーぱー
+@c @item Super
+@item スーパー（Super）
+@c Super is the name of a modifier bit which a keyboard input character may
+@c have.  To make a character Super, type it while holding down the
+@c @key{SUPER} key.  Such characters are given names that start with
+@c @kbd{Super-} (usually written @kbd{s-} for short).  @xref{User Input,
+@c Super}.
+スーパーは、キーボードからの入力文字に付く修飾ビットの名前である。
+スーパー文字にするには、@key{SUPER}キーを押し下げたまま文字を打ち込む。
+このような文字は、@kbd{Super-}（普通は縮めて@kbd{s-}）で始まる名前になる。
+@pxref{User Input, Super}。
+
+@c ==jitem たぐてーぶる
+@c @item Tags Table
+@item タグテーブル（Tags Table）
+@c A tags table is a file that serves as an index to the function
+@c definitions in one or more other files.  @xref{Tags}.
+タグテーブルとは、
+複数のファイルに定義された関数の索引の役割を果たすファイルである。
+@pxref{Tags}。
+
+@c ==jitem あすきーもじTERMSCRIPTふぁいる
+@c @item Termscript File
+@item termscriptファイル（Termscript File）
+@c A termscript file contains a record of all characters sent by Emacs to
+@c the terminal.  It is used for tracking down bugs in Emacs redisplay.
+@c Emacs does not make a termscript file unless you tell it to.
+@c @xref{Bugs}.
+termscriptファイルには、Emacsが端末に送ったすべての文字が記録される。
+Emacsの再表示のバグを追跡するために使う。
+指示しない限りtermpscriptファイルは作成されない。
+@pxref{Bugs}。
+
+@c ==jitem てきすと
+@c @item Text
+@item テキスト（Text）
+@c Two meanings (@pxref{Text}):
+2つの意味がある（@pxref{Text}）
+
+@itemize @bullet
+@item
+@c Data consisting of a sequence of characters, as opposed to binary
+@c numbers, images, graphics commands, executable programs, and the like.
+@c The contents of an Emacs buffer are always text in this sense.
+文字の列から成るデータであり、
+2進数、画像、図形コマンド、実行ファイルなどと対比される。
+Emacsバッファの内容は、この意味においてつねにテキストである。
+@item
+@c Data consisting of written human language, as opposed to programs,
+@c or following the stylistic conventions of human language.
+自然言語で書かれたデータであり、
+プログラム、自然言語の文体を変換したのもと対比される。
+@end itemize
+
+@c ==jitem とっぷれべる
+@c @item Top Level
+@item トップレベル（Top Level）
+@c Top level is the normal state of Emacs, in which you are editing the
+@c text of the file you have visited.  You are at top level whenever you
+@c are not in a recursive editing level (q.v.@:) or the minibuffer
+@c (q.v.@:), and not in the middle of a command.  You can get back to top
+@c level by aborting (q.v.@:) and quitting (q.v.@:).  @xref{Quitting}.
+トップレベルとは、Emacsの通常の状態であり、
+この状態において訪れたファイルを編集している。
+再帰編集レベル《参照》やミニバッファ《参照》に入っていない、
+コマンドの実行途中でないならば、トップレベルにいる。
+アボート《参照》したり中断《参照》すると、トップレベルに戻ることができる。
+@pxref{Quitting}。
+
+@c ==jitem てんち
+@c @item Transposition
+@item 転置（Transposition）
+@c Transposing two units of text means putting each one into the place
+@c formerly occupied by the other.  There are Emacs commands to transpose
+@c two adjacent characters, words, sexps (q.v.@:) or lines
+@c (@pxref{Transpose}).
+テキストの2つの塊を転置するとは、
+それぞれをもう一方が占めていた場所へ置くことである。
+Emacsには、連続した文字、単語、S式《参照》、行を転置するコマンドがある。
+（@pxref{Transpose}）。
+
+@c ==jitem きりすて
+@c @item Truncation
+@item 切り捨て（Truncation）
+@c Truncating text lines in the display means leaving out any text on a
+@c line that does not fit within the right margin of the window
+@c displaying it.  See also `continuation line'.
+@c @xref{Basic,Truncation,Basic Editing}.
+表示画面においてテキスト行を切り捨てるとは、
+テキストを表示するウィンドウの右端に収まらない部分を無視することである。
+「継続行」も参照。
+@pxref{Basic,Truncation,Basic Editing}。
+
+@c ==jitem あんどぅ
+@c @item Undoing
+@item アンドゥ（Undoing）
+@c Undoing means making your previous editing go in reverse, bringing
+@c back the text that existed earlier in the editing session.
+@c @xref{Undo}.
+アンドゥとは、編集過程で（時間的に）まえに存在していたテキストをもとに戻して、
+以前に行った編集の効果を逆向きにすることである。
+@pxref{Undo}。
+
+@c ==jitem ゆーざおぷしょん
+@c @item User Option
+@item ユーザーオプション（User Option）
+@c A user option is a variable (q.v.@:) that exists so that you can customize
+@c Emacs by setting it to a new value.  @xref{Variables}.
+ユーザーオプションとは、
+新たな値を設定してEmacsのカスタマイズを可能にする変数《参照》である。
+@pxref{Variables}。
+
+@c ==jitem へんすう
+@c @item Variable
+@item 変数（Variable）
+@c A variable is an object in Lisp that can store an arbitrary value.
+@c Emacs uses some variables for internal purposes, and has others (known
+@c as `user options' (q.v.@:)) just so that you can set their values to
+@c control the behavior of Emacs.  The variables used in Emacs that you
+@c are likely to be interested in are listed in the Variables Index in
+@c this manual.  @xref{Variables}, for information on variables.
+変数とは、任意の値を格納できるLispオブジェクトである。
+Emacsには、内部目的の変数もあれば、
+値を設定してEmacsのふるまいを制御する
+（「ユーザーオプション」《参照》として知られる）変数もある。
+読者の関心を引くようなEmacsの変数の一覧は、本書の変数索引にある。
+変数についての情報は、@pxref{Variables}。
+
+@c ==jitem はんかんり
+@c @item Version Control
+@item 版管理（Version Control）
+@c Version control systems keep track of multiple versions of a source file.
+@c They provide a more powerful alternative to keeping backup files (q.v.@:).
+@c @xref{Version Control}.
+版管理（バージョンコントロール）システムは、
+ソースファイルの複数の版の記録を取っておく。
+バックアップファイル《参照》を取っておくよりもずっと強力な方法を提供する。
+@pxref{Version Control}。
+
+@c ==jitem ほうもん
+@c @item Visiting
+@item 訪問（Visiting）
+@c Visiting a file means loading its contents into a buffer (q.v.@:)
+@c where they can be edited.  @xref{Visiting}.
+ファイルを訪問する（訪れる）とは、
+その内容を編集できるようにバッファ《参照》に読み込むことである。
+@pxref{Visiting}。
+
+@c ==jitem しろもじ
+@c @item Whitespace
+@item 白文字（Whitespace）
+@c Whitespace is any run of consecutive formatting characters (space,
+@c tab, newline, and backspace).
+白文字とは、連続した整形用の文字（空白（スペース）、
+タブ、改行、バックスペース）である。
+
+@c ==jitem わいどにんぐ
+@c @item Widening
+@item ワイドニング（Widening）
+@c Widening is removing any restriction (q.v.@:) on the current buffer;
+@c it is the opposite of narrowing (q.v.@:).  @xref{Narrowing}.
+ワイドニングとは、カレントバッファの制限《参照》を取り去ることである。
+ナロイング《参照》の反対である。
+@pxref{Narrowing}。
+
+@c ==jitem うぃんどう
+@c @item Window
+@item ウィンドウ（Window）
+@c Emacs divides a frame (q.v.@:) into one or more windows, each of which
+@c can display the contents of one buffer (q.v.@:) at any time.
+@c @xref{Screen}, for basic information on how Emacs uses the screen.
+@c @xref{Windows}, for commands to control the use of windows.
+Emacsでは、フレーム《参照》を複数のウィンドウに分割し、
+各ウィンドウにはつねに1つのバッファ《参照》の内容を表示できる。
+Emacsの画面の利用法に関する基本的なことがらについては、@pxref{Screen}。
+ウィンドウの使用法を制御するコマンドについては、@pxref{Windows}。
+
+@c ==jitem たんごのりゃくご
+@c @item Word Abbrev
+@item 単語の略語（Word Abbrev）
+@c Synonymous with `abbrev'.
+「略語」の同義語。
+
+@c ==jitem たんごたんさく
+@c @item Word Search
+@item 単語探索（Word Search）
+@c Word search is searching for a sequence of words, considering the
+@c punctuation between them as insignificant.  @xref{Word Search}.
+単語探索とは、単語の区切りを無視して単語の列を探索することである。
+@pxref{Word Search}。
+
+@c ==jitem あすきーもじWYSIWYG
+@item WYSIWYG
+@c WYSIWYG stands for `What you see is what you get.'  Emacs generally
+@c provides WYSIWYG editing for files of characters; in Enriched mode
+@c (@pxref{Formatted Text}), it provides WYSIWYG editing for files that
+@c include text formatting information.
+WYSIWYGは、「What you see is what you get」（見たとおりを得る）の略語である。
+Emacsでは、一般に、文字ファイルの編集にはWYSIWYGを提供する。
+エンリッチ（enriched）モード（@pxref{Formatted Text}）では、
+テキスト整形情報を含むファイルの編集にもWYSIWYGを提供する。
+
+@c ==jitem やんく
+@c @item Yanking
+@item ヤンク（Yanking）
+@c Yanking means reinserting text previously killed.  It can be used to
+@c undo a mistaken kill, or for copying or moving text.  Some other
+@c systems call this ``pasting.''  @xref{Yanking}.
+ヤンクとは、以前にキルしたテキストを再挿入することである。
+誤ったキルを取り消したり、テキストの移動やコピーに利用できる。
+他のシステムでは『ペースト』と呼ぶ。
+@pxref{Yanking}。
+@c ==jend
+@end table
+

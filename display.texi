@@ -1,0 +1,715 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Display, Search, Registers, Top
+@c @chapter Controlling the Display
+@chapter 画面の制御
+
+@c   Since only part of a large buffer fits in the window, Emacs tries to
+@c show a part that is likely to be interesting.  Display-control commands
+@c allow you to specify which part of the text you want to see, and how to
+@c display it.
+大きなバッファの一部しかウィンドウには収まりませんから、
+Emacsは必要そうな部分を表示しようとします。
+画面制御コマンドを使って、
+テキストのどの部分を表示したいのか、また、
+どのように表示するか指定できます。
+
+@menu
+* Scrolling::	           Moving text up and down in a window.
+* Horizontal Scrolling::   Moving text left and right in a window.
+* Follow Mode::            Follow mode lets two windows scroll as one.
+* Selective Display::      Hiding lines with lots of indentation.
+* Optional Mode Line::     Optional mode line display features.
+* Text Display::           How text characters are normally displayed.
+* Display Vars::           Information on variables for customizing display.
+@end menu
+
+@node Scrolling
+@c @section Scrolling
+@section スクロール
+
+@c   If a buffer contains text that is too large to fit entirely within a
+@c window that is displaying the buffer, Emacs shows a contiguous portion of
+@c the text.  The portion shown always contains point.
+バッファを表示しているウィンドウに全部を表示するには
+大きすぎるテキストが入っているバッファでは、
+Emacsはテキストの連続する一部分を表示します。
+表示する部分にはつねにポイントが入っています。
+
+@c @cindex scrolling
+@cindex スクロール
+@c   @dfn{Scrolling} means moving text up or down in the window so that
+@c different parts of the text are visible.  Scrolling forward means that text
+@c moves up, and new text appears at the bottom.  Scrolling backward moves
+@c text down and new text appears at the top.
+@dfn{スクロール}（scroll）とは、
+ウィンドウ内でテキストを上下に動かして、
+テキストの異なる部分を表示することです。
+前向きのスクロールでは、テキストを上へ移動して、
+新たなテキストがウィンドウの最下端から現れます。
+後向きのスクロールでは、テキストを下に移動して、
+新たなテキストがウィンドウの最上端から現れます。
+
+@c   Scrolling happens automatically if you move point past the bottom or top
+@c of the window.  You can also explicitly request scrolling with the commands
+@c in this section.
+ポイントをウィンドウの下端や上端を超えて移動すると、
+自動的にスクロールします。
+本節で紹介するコマンドを使って、明示的にスクロールすることもできます。
+
+@table @kbd
+@item C-l
+@c Clear screen and redisplay, scrolling the selected window to center
+@c point vertically within it (@code{recenter}).
+画面をクリアして再表示し、選択されたウィンドウではポイントが
+縦方向の中央に位置するようにスクロールする
+（@code{recenter}）
+@item C-v
+@c Scroll forward (a windowful or a specified number of lines) (@code{scroll-up}).
+（ウィンドウ1面分か指定した行数だけ）前向きにスクロールする
+（@code{scroll-up}）。
+@item @key{NEXT}
+@c Likewise, scroll forward.
+同様に前向きにスクロールする。
+@item M-v
+@c Scroll backward (@code{scroll-down}).
+後向きにスクロールする（@code{scroll-down}）。
+@item @key{PRIOR}
+@c Likewise, scroll backward.
+同じく後向きにスクロールする。
+@item @var{arg} C-l
+@c Scroll so point is on line @var{arg} (@code{recenter}).
+ポイントが@var{arg}行目にくるようにスクロールする（@code{recenter}）。
+@item C-M-l
+@c Scroll heuristically to bring useful information onto the screen
+@c (@code{reposition-window}).
+有益な情報が画面上にくるように発見的方法でスクロールする
+（@code{reposition-window}）。
+@end table
+
+@kindex C-l
+@findex recenter
+@c   The most basic scrolling command is @kbd{C-l} (@code{recenter}) with
+@c no argument.  It clears the entire screen and redisplays all windows.
+@c In addition, it scrolls the selected window so that point is halfway
+@c down from the top of the window.
+もっとも基本的なスクロールコマンドは、
+引数を指定しない@kbd{C-l}（@code{recenter}）です。
+このコマンドは、画面全体をクリアして、すべてのウィンドウを再表示します。
+さらに、ポイントがウィンドウの中央の行に位置するように、
+選択されているウィンドウをスクロールします。
+
+@kindex C-v
+@kindex M-v
+@kindex NEXT
+@kindex PRIOR
+@findex scroll-up
+@findex scroll-down
+@c   The scrolling commands @kbd{C-v} and @kbd{M-v} let you move all the text
+@c in the window up or down a few lines.  @kbd{C-v} (@code{scroll-up}) with an
+@c argument shows you that many more lines at the bottom of the window, moving
+@c the text and point up together as @kbd{C-l} might.  @kbd{C-v} with a
+@c negative argument shows you more lines at the top of the window.
+@c @kbd{M-v} (@code{scroll-down}) is like @kbd{C-v}, but moves in the
+@c opposite direction.  The function keys @key{NEXT} and @key{PRIOR} are
+@c equivalent to @kbd{C-v} and @kbd{M-v}.
+スクロールコマンド@kbd{C-v}と@kbd{M-v}は、
+ウィンドウ内の全テキストを上下に何行か移動します。
+@kbd{C-v}（@code{scroll-up}）に引数を指定すると、
+@kbd{C-l}と同じようにテキストとポイントを一緒に上へ移動して、
+追加分（引数分）の行をウィンドウの下部に表示します。
+@kbd{C-v}に負の引数を指定した場合は、
+ウィンドウの上端に追加分の行を表示します。
+@kbd{M-v}（@code{scroll-down}）は@kbd{C-v}に似ていますが、
+スクロール方向が逆です。
+ファンクションキーの@key{NEXT}と@key{PRIOR}は、
+@kbd{C-v}と@kbd{M-v}に等価です。
+
+@c   The names of scroll commands are based on the direction that the text
+@c moves in the window.  Thus, the command to scroll forward is called
+@c @code{scroll-up} because it moves the text upward on the screen.
+スクロールコマンドの名前は、
+ウィンドウ内でテキストを動かす向きに基づいています。
+したがって、前向きにスクロールするコマンドは、
+画面上ではテキストを上へ移動するため、
+@code{scroll-up}と呼ばれます。
+
+@vindex next-screen-context-lines
+@c   To read the buffer a windowful at a time, use @kbd{C-v} with no argument.
+@c It takes the last two lines at the bottom of the window and puts them at
+@c the top, followed by nearly a whole windowful of lines not previously
+@c visible.  If point was in the text scrolled off the top, it moves to the
+@c new top of the window.  @kbd{M-v} with no argument moves backward with
+@c overlap similarly.  The number of lines of overlap across a @kbd{C-v} or
+@c @kbd{M-v} is controlled by the variable @code{next-screen-context-lines}; by
+@c default, it is 2.
+一度にウィンドウ1面分のバッファを読んでいくには、
+引数を指定せずに@kbd{C-v}を使います。
+ウィンドウの下端2行を上端に持っていき、
+それに続けてこれまで表示されていなかったほぼ
+ウィンドウ1面分の行を表示します。
+ポイントがウィンドウの上端より上に出てしまう場合には、
+ポイントはウィンドウの新たな上端の行に移動します。
+引数を指定しない@kbd{M-v}も同様に、
+テキストを重複させながら、後向きに移動します。
+@kbd{C-v}や@kbd{M-v}で重複させる行数は、
+変数@code{next-screen-context-lines}で制御します。
+デフォルトでは2です。
+
+@vindex scroll-preserve-screen-position
+@c   Some users like the full-screen scroll commands to keep point at the
+@c same screen line.  To enable this behavior, set the variable
+@c @code{scroll-preserve-screen-position} to a non-@code{nil} value.  This
+@c mode is convenient for browsing through a file by scrolling by
+@c screenfuls; if you come back to the screen where you started, point goes
+@c back to the line where it started.  However, this mode is inconvenient
+@c when you move to the next screen in order to move point to the text
+@c there.
+画面上でのポイント位置を保ったまま
+1画面分のスクロールを行うコマンドを好むユーザーもいます。
+このようにするには、変数@code{scroll-preserve-screen-position}に
+@code{nil}以外を設定します。
+このモードは、
+1画面分ずつスクロールしながらファイルを閲覧するような場合に便利です。
+スクロールを始めた画面に戻ると、ポイントは開始時の行位置に戻ります。
+しかし、つぎの画面に移動して、
+そこに表示されているテキストにポイントを
+移動するような使い方にはむいていません。
+
+@c   Another way to do scrolling is with @kbd{C-l} with a numeric argument.
+@c @kbd{C-l} does not clear the screen when given an argument; it only scrolls
+@c the selected window.  With a positive argument @var{n}, it repositions text
+@c to put point @var{n} lines down from the top.  An argument of zero puts
+@c point on the very top line.  Point does not move with respect to the text;
+@c rather, the text and point move rigidly on the screen.  @kbd{C-l} with a
+@c negative argument puts point that many lines from the bottom of the window.
+@c For example, @kbd{C-u - 1 C-l} puts point on the bottom line, and @kbd{C-u
+@c - 5 C-l} puts it five lines from the bottom.  Just @kbd{C-u} as argument,
+@c as in @kbd{C-u C-l}, scrolls point to the center of the selected window.
+スクロールのもう1つの方法は、数引数を指定した@kbd{C-l}を使うことです。
+引数を指定すると、@kbd{C-l}は画面をクリアしません。
+選択されているウィンドウだけをスクロールします。
+正の引数@var{n}を指定すると、
+ポイント位置が上端から@var{n}行目にくるように、
+テキストの位置を変更します。
+引数として0を指定すると、ポイント位置は最上端の行になります。
+ポイントがテキストに対して動くわけではなくて、
+テキストとポイントは一緒に画面上を動きます。
+@kbd{C-l}に負の引数を指定すると、
+ポイントはウィンドウの下端から指定行数にきます。
+たとえば、@kbd{C-u - 1 C-l}とするとポイントは最下行になり、
+@kbd{C-u - 5 C-l}とすれば下から5行目にポイントがきます。
+@kbd{C-u C-l}のように@kbd{C-u}だけを引数に指定すると、
+ポイントが画面中央にくるようにスクロールします。
+
+@kindex C-M-l
+@findex reposition-window
+@c   The @kbd{C-M-l} command (@code{reposition-window}) scrolls the current
+@c window heuristically in a way designed to get useful information onto
+@c the screen.  For example, in a Lisp file, this command tries to get the
+@c entire current defun onto the screen if possible.
+@kbd{C-M-l}コマンド（@code{reposition-window}）は、
+有益な情報を画面上に持ってくるようにように設計された発見的手法で、
+カレントウィンドウをスクロールします。
+たとえば、Lispファイルでは、このコマンドは、
+可能であれば現在の関数定義（defun）全体を画面上にもってこようとします。
+
+@vindex scroll-conservatively
+@c   Scrolling happens automatically if point has moved out of the visible
+@c portion of the text when it is time to display.  Normally, automatic
+@c scrolling centers point vertically within the window.  However, if you
+@c set @code{scroll-conservatively} to a small number @var{n}, then if you
+@c move point just a little off the screen---less than @var{n} lines---then
+@c Emacs scrolls the text just far enough to bring point back on screen.
+@c By default, @code{scroll-conservatively} is 0.
+表示の際、ポイントがテキストの表示部分から飛び出してしまうと、
+自動的にスクロールします。
+通常、この自動スクロールでは、
+ポイントがウィンドウ縦方向の中央に位置するように画面を移動します。
+しかし、@code{scroll-conservatively}に小さな数@var{n}を設定しておくと、
+ポイントが画面から少しだけ（@var{n}行未満）はみだすと、
+Emacsはポイントを画面内に戻すのに必要な分だけスクロールします。
+デフォルトでは、@code{scroll-conservatively}は0です。
+
+@vindex scroll-margin
+@c   The variable @code{scroll-margin} restricts how close point can come
+@c to the top or bottom of a window.  Its value is a number of screen
+@c lines; if point comes within that many lines of the top or bottom of the
+@c window, Emacs recenters the window.  By default, @code{scroll-margin} is
+@c 0.
+変数@code{scroll-margin}は、
+ポイントをウィンドウの上端や下端にどれだけ近づけられるかを制限します。
+その値は画面上での行数です。
+ポイントがウィンドウの上端や下端からその行数以内にくると、
+Emacsはウィンドウを中央に位置付けし直します。
+デフォルトでは、@code{scroll-margin}は0です。
+
+@node Horizontal Scrolling
+@c @section Horizontal Scrolling
+@section 水平スクロール
+@c @cindex horizontal scrolling
+@cindex 水平スクロール
+
+@c   @dfn{Horizontal scrolling} means shifting all the lines sideways
+@c within a window---so that some of the text near the left margin
+@c is not displayed at all.
+@dfn{水平スクロール}（horizontal scrolling）とは、
+すべての行をウィンドウ内で横方向に動かすことです。
+これにより、左端近くのテキストは表示されなくなります。
+
+@table @kbd
+@item C-x <
+@c Scroll text in current window to the left (@code{scroll-left}).
+カレントウィンドウのテキストを左にスクロールする（@code{scroll-left}）。
+@item C-x >
+@c Scroll to the right (@code{scroll-right}).
+右にスクロールする（@code{scroll-right}）。
+@end table
+
+@c   When a window has been scrolled horizontally, text lines are truncated
+@c rather than continued (@pxref{Continuation Lines}), with a @samp{$}
+@c appearing in the first column when there is text truncated to the left,
+@c and in the last column when there is text truncated to the right.
+ウィンドウが水平方向にスクロールされているときには、
+テキスト行を継続（@pxref{Continuation Lines}）しないで切り捨てます。
+テキストの左側を切り捨てているときは最初の桁に@samp{$}を表示し、
+右側を切り捨てているときには最後の桁に@samp{$}を表示します。
+
+@kindex C-x <
+@kindex C-x >
+@findex scroll-left
+@findex scroll-right
+@c   The command @kbd{C-x <} (@code{scroll-left}) scrolls the selected
+@c window to the left by @var{n} columns with argument @var{n}.  This moves
+@c part of the beginning of each line off the left edge of the window.
+@c With no argument, it scrolls by almost the full width of the window (two
+@c columns less, to be precise).
+コマンド@kbd{C-x <}（@code{scroll-left}）は、
+選択されたウィンドウを引数@var{n}の桁数だけ左にスクロールします。
+各行の最初の部分はウィンドウの左端から出てしまいます。
+引数を指定しないと、ほぼウィンドウ幅（正確には2桁少ない桁数）
+だけスクロールします。
+
+@c   @kbd{C-x >} (@code{scroll-right}) scrolls similarly to the right.  The
+@c window cannot be scrolled any farther to the right once it is displayed
+@c normally (with each line starting at the window's left margin);
+@c attempting to do so has no effect.  This means that you don't have to
+@c calculate the argument precisely for @w{@kbd{C-x >}}; any sufficiently large
+@c argument will restore the normal display.
+@kbd{C-x >}（@code{scroll-right}）は、同様に右にスクロールします。
+ウィンドウが（各行がウィンドウの左端から始まっている）通常の表示をしていると、
+それ以上はスクロールできません。
+スクロールさせようとしても何も起こりません。
+つまり、@w{@kbd{C-x >}}に与える引数を正確に計算する必要はないのです。
+十分に大きな引数を指定すれば、通常の表示に戻せます。
+
+@c @cindex Hscroll mode
+@c @cindex mode, Hscroll
+@cindex 水平スクロールモード（Hscroll mode）
+@cindex モード、Hscroll
+@findex hscroll-mode
+@c   You can request automatic horizontal scrolling by enabling Hscroll
+@c mode.  When this mode is enabled, Emacs scrolls a window horizontally
+@c whenever that is necessary to keep point visible and not too far from
+@c the left or right edge.  The command to enable or disable this mode is
+@c @kbd{M-x hscroll-mode}.
+水平スクロール（hscroll）モードをオンにすると、
+自動的に水平スクロールを行います。
+このモードがオンであると、
+ポイントが左右端から離れすぎない場所に見えるように
+Emacsが水平方向にウィンドウをスクロールします。
+このモードのオン／オフを切り替えるコマンドは、@kbd{M-x hscroll-mode}です。
+
+@node Follow Mode
+@c @section Follow Mode
+@section 追従モード
+@c @cindex Follow mode
+@cindex 追従モード（Follow mode）
+@c @cindex mode, Follow
+@cindex モード、Follow
+
+@c   @dfn{Follow mode} is a minor mode that makes two windows showing the
+@c same buffer scroll as one tall ``virtual window.''  To use Follow mode,
+@c go to a frame with just one window, split it into two side-by-side
+@c windows using @kbd{C-x 3}, and then type @kbd{M-x follow-mode}.  From
+@c then on, you can edit the buffer in either of the two windows, or scroll
+@c either one; the other window follows it.
+@dfn{追従（follow）モード}は、
+同じバッファを表示している2つのウィンドウを、
+1つの『仮想ウィンドウ』としてスクロールするマイナモードです。
+追従（follow）モードを使うには、
+ウィンドウが1つだけのフレームに移動して、
+@kbd{C-x 3}を使って左右に並んだ2つのウィンドウに分割してから、
+@kbd{M-x follow-mode}と打ちます。
+これ以後、いずれのウィンドウのバッファでも編集できますし、
+どちらをスクロールしてもかまいません。
+もう一方のウィンドウは他方に追従します。
+
+@c   To turn off Follow mode, type @kbd{M-x follow-mode} a second time.
+追従（follow）モードをオフにするには、もう一度@kbd{M-x follow-mode}を打ちます。
+
+@node Selective Display
+@c @section Selective Display
+@section 選択的な表示
+@findex set-selective-display
+@kindex C-x $
+
+@c   Emacs has the ability to hide lines indented more than a certain number
+@c of columns (you specify how many columns).  You can use this to get an
+@c overview of a part of a program.
+Emacsには、（指定した）桁数以上字下げしてある行を隠す機能があります。
+プログラムの一部を概観するのにこの機能を使えます。
+
+@c   To hide lines, type @kbd{C-x $} (@code{set-selective-display}) with a
+@c numeric argument @var{n}.  Then lines with at least @var{n} columns of
+@c indentation disappear from the screen.  The only indication of their
+@c presence is that three dots (@samp{@dots{}}) appear at the end of each
+@c visible line that is followed by one or more hidden ones.
+行を隠すには、数引数@var{n}を指定して@kbd{C-x $}
+（@code{set-selective-display}）と打ちます。
+これにより、@var{n}桁以上字下げしてある行は画面から消えます。
+1行以上の不可視行に先行する可視行の末尾には、
+3つのドット（@samp{@dots{}}）を表示します。
+この印が不可視行の存在を示す唯一のものです。
+
+@c   The commands @kbd{C-n} and @kbd{C-p} move across the hidden lines as
+@c if they were not there.
+コマンド@kbd{C-n}や@kbd{C-p}は、
+不可視行が存在しないかのように不可視行を飛び越えて移動します。
+
+@c   The hidden lines are still present in the buffer, and most editing
+@c commands see them as usual, so you may find point in the middle of the
+@c hidden text.  When this happens, the cursor appears at the end of the
+@c previous line, after the three dots.  If point is at the end of the
+@c visible line, before the newline that ends it, the cursor appears before
+@c the three dots.
+不可視行は依然としてバッファ内に存在しています。
+たいていの編集コマンドはそれらを通常と同じように扱うので、
+隠蔽されたテキスト内にポイントを移動してしまうことも起こりえます。
+このような場合、カーソルは先行する行の末尾の3つのドットの直後に
+表示されます。
+ポイントが可視行の行末の改行文字の直前にあるときには、
+3つのドットの直前にカーソルが現れます。
+
+@c   To make all lines visible again, type @kbd{C-x $} with no argument.
+すべての行をふたたび表示するには、引数を指定せずに@kbd{C-x $}を打ちます。
+
+@vindex selective-display-ellipses
+@c   If you set the variable @code{selective-display-ellipses} to
+@c @code{nil}, the three dots do not appear at the end of a line that
+@c precedes hidden lines.  Then there is no visible indication of the
+@c hidden lines.  This variable becomes local automatically when set.
+変数@code{selective-display-ellipses}に@code{nil}を設定すると、
+不可視行に先行する可視行の末尾には3つのドットを表示しなくなります。
+すると、不可視行の存在を示すものは何もありません。
+この変数を設定すると、自動的にローカルになります。
+
+@node Optional Mode Line
+@c @section Optional Mode Line Features
+@section モード行の付加機能
+
+@c @cindex Line Number mode
+@c @cindex mode, Line Number
+@cindex 行番号モード（line-number mode）
+@cindex モード、Line Number
+@findex line-number-mode
+@c   The current line number of point appears in the mode line when Line
+@c Number mode is enabled.  Use the command @kbd{M-x line-number-mode} to
+@c turn this mode on and off; normally it is on.  The line number appears
+@c before the buffer percentage @var{pos}, with the letter @samp{L} to
+@c indicate what it is.  @xref{Minor Modes}, for more information about
+@c minor modes and about how to use this command.
+行番号（line-number）モードがオンであると、
+ポイントの現在の行番号をモード行に表示します。
+このモードのオン／オフを切り替えるには、
+コマンド@kbd{M-x line-number-mode}を使います。
+通常はオンです。
+行番号は、バッファの百分率を示す@var{pos}のまえに、
+行番号であること示す文字@samp{L}とともに表示されます。
+マイナモードやこのコマンドの使用方法について詳しくは、
+@xref{Minor Modes}。
+
+@vindex line-number-display-limit
+@c   If the buffer is very large (larger than the value of
+@c @code{line-number-display-limit}), then the line number doesn't appear.
+@c Emacs doesn't compute the line number when the buffer is large, because
+@c that would be too slow.  If you have narrowed the buffer
+@c (@pxref{Narrowing}), the displayed line number is relative to the
+@c accessible portion of the buffer.
+バッファが非常に大きい（@code{line-number-display-limit}の値以上に大きい）
+場合には、この行番号を表示しません。
+計算が非常に遅くなるので、
+バッファが大きい場合にはEmacsは行番号を計算しません。
+バッファをナロイング（@pxref{Narrowing}）してある場合、
+表示される行番号はバッファの参照可能な部分に対するものです。
+
+@c @cindex Column Number mode
+@c @cindex mode, Column Number
+@cindex 桁番号モード（Column Number mode）
+@cindex モード、Column Number
+@findex column-number-mode
+@c   You can also display the current column number by turning on Column
+@c Number mode.  It displays the current column number preceded by the
+@c letter @samp{C}.  Type @kbd{M-x column-number-mode} to toggle this mode.
+桁番号（column-number）モードをオンにすると、現在の桁番号も表示できます。
+このモードでは、@samp{C}に続けて現在の桁番号を表示します。
+このモードのオン／オフを切り替えるには、
+@kbd{M-x column-number-mode}と打ちます。
+
+@findex display-time
+@c @cindex time (on mode line)
+@cindex モード行での時刻表示
+@cindex 時刻表示（モード行）
+@c   Emacs can optionally display the time and system load in all mode
+@c lines.  To enable this feature, type @kbd{M-x display-time}.  The
+@c information added to the mode line usually appears after the buffer
+@c name, before the mode names and their parentheses.  It looks like this:
+Emcasでは、すべてのモード行に、時刻とシステムの負荷状況を表示できます。
+この機能をオンにするには、@kbd{M-x display-time}と打ちます。
+このときモード行に追加される情報は、
+通常は、バッファ名のあと、括弧で囲まれたモード名のまえに表示されます。
+その表示はつぎのようになります。
+
+@example
+@var{hh}:@var{mm}pm @var{l.ll}
+@end example
+
+@noindent
+@vindex display-time-24hr-format
+@c Here @var{hh} and @var{mm} are the hour and minute, followed always by
+@c @samp{am} or @samp{pm}.  @var{l.ll} is the average number of running
+@c processes in the whole system recently.  (Some fields may be missing if
+@c your operating system cannot support them.)  If you prefer time display
+@c in 24-hour format, set the variable @code{display-time-24hr-format}
+@c to @code{t}.
+ここで、@var{hh}と@var{mm}は、時分を表し、
+つねに@samp{am}か@samp{pm}が続きます。
+@var{l.ll}は、システム全体で実行中のプロセスの個数の最近の平均数です。
+（オペレーティングシステムが情報を提供しなければ、
+いくつかの内容が消えていることもある。）
+時刻を24時間表示したければ、
+変数@code{display-time-24hr-format}に@code{t}を設定します。
+
+@c @cindex mail (on mode line)
+@cindex メイル（モード行）
+@c   The word @samp{Mail} appears after the load level if there is mail
+@c for you that you have not read yet.
+負荷レベル表示に続く語@samp{Mail}は、
+未読のメイルがある場合に表示されます。
+
+@node Text Display
+@c @section How Text Is Displayed
+@section テキストの表示方法
+@c @cindex characters (in text)
+@cindex 文字（テキスト中）
+
+@c   ASCII printing characters (octal codes 040 through 0176) in Emacs
+@c buffers are displayed with their graphics.  So are non-ASCII multibyte
+@c printing characters (octal codes above 0400).
+Emacsバッファ内のASCII印字文字（8進コードで040から0176）は、
+それぞれの図形で表示されます。
+非ASCIIのマルチバイトの印字文字（8進コード0400以上）も同様です。
+
+@c   Some ASCII control characters are displayed in special ways.  The
+@c newline character (octal code 012) is displayed by starting a new line.
+@c The tab character (octal code 011) is displayed by moving to the next
+@c tab stop column (normally every 8 columns).
+ASCIIコントロール文字の中には、特別な方法で表示されるものもあります。
+改行文字（8進コード012）は、新たな行を始めるという形で表示されます。
+タブ文字（8進コード011）は、つぎのタブストップ位置
+（通常は8桁ごと）まで移動するという形で表示されます。
+
+@c   Other ASCII control characters are normally displayed as a caret
+@c (@samp{^}) followed by the non-control version of the character; thus,
+@c control-A is displayed as @samp{^A}.
+その他のASCIIコントロール文字は、通常、
+カレット（@samp{^}）に続けてコントロール変種でない文字で表示されます。
+つまり、control-Aは@samp{^A}のように表示されます。
+
+@c   Non-ASCII characters 0200 through 0377 are displayed with octal escape
+@c sequences; thus, character code 0243 (octal) is displayed as
+@c @samp{\243}.  However, if you enable European display, most of these
+@c characters become non-ASCII printing characters, and are displayed using
+@c their graphics (assuming your terminal supports them).
+@c @xref{Single-Byte European Support}.
+0200から0377までの非ASCII文字は、8進のエスケープシーケンスで表示されます。
+たとえば、文字コード0243（8進）は、@samp{\243}と表示されます。
+しかし、ヨーロッパ向けの表示をオンにしていると、
+これらのたいていの文字は非ASCII印字文字として扱われ、
+（端末がこれらの文字を表示できると仮定して）それぞれの図形で表示されます。
+@xref{Single-Byte European Support}。
+
+@node Display Vars
+@c @section Variables Controlling Display
+@section 表示を制御する変数
+
+@c   This section contains information for customization only.  Beginning
+@c users should skip it.
+本節は、カスタマイズに関する情報のみです。
+初心者の方は読み飛ばしてください。
+
+@vindex mode-line-inverse-video
+@c   The variable @code{mode-line-inverse-video} controls whether the mode
+@c line is displayed in inverse video (assuming the terminal supports it);
+@c @code{nil} means don't do so.  @xref{Mode Line}.  If you specify the
+@c foreground color for the @code{modeline} face, and
+@c @code{mode-line-inverse-video} is non-@code{nil}, then the default
+@c background color for that face is the usual foreground color.
+@c @xref{Faces}.
+変数@code{mode-line-inverse-video}は、
+（端末が反転表示を扱えると仮定して）
+モード行を反転表示するかどうかを制御します。
+@code{nil}は反転表示しないことを意味します。
+@xref{Mode Line}。
+@code{modeline}フェイスに前景色を指定していて、しかも、
+@code{mode-line-inverse-video}が@code{nil}以外であれば、
+@code{modeline}フェイスのデフォルトの背景色は通常の前景色です。
+@xref{Faces}。
+
+@vindex inverse-video
+@c   If the variable @code{inverse-video} is non-@code{nil}, Emacs attempts
+@c to invert all the lines of the display from what they normally are.
+変数@code{inverse-video}が@code{nil}以外である場合、
+Emacsは画面上のすべての行を通常の状態から反転表示します。
+
+@vindex visible-bell
+@c   If the variable @code{visible-bell} is non-@code{nil}, Emacs attempts
+@c to make the whole screen blink when it would normally make an audible bell
+@c sound.  This variable has no effect if your terminal does not have a way
+@c to make the screen blink.@refill
+変数@code{visible-bell}が@code{nil}以外の場合、
+Emacsは、通常は端末のベルを鳴らす場面では、画面全体を点滅します。
+端末に画面を点滅する機能がなければ、この変数は何の効果もありません。
+
+@vindex no-redraw-on-reenter
+@c   When you reenter Emacs after suspending, Emacs normally clears the
+@c screen and redraws the entire display.  On some terminals with more than
+@c one page of memory, it is possible to arrange the termcap entry so that
+@c the @samp{ti} and @samp{te} strings (output to the terminal when Emacs
+@c is entered and exited, respectively) switch between pages of memory so
+@c as to use one page for Emacs and another page for other output.  Then
+@c you might want to set the variable @code{no-redraw-on-reenter}
+@c non-@code{nil}; this tells Emacs to assume, when resumed, that the
+@c screen page it is using still contains what Emacs last wrote there.
+Emacsを休止したあとで再開した場合、通常Emacsは画面をクリアし、
+画面全体を再表示します。
+ページメモリを複数個備えた端末では、termcapの定義を変更して、
+（それぞれ、Emacsを起動するときと抜けるときに端末に出力される）
+文字列@samp{ti}と@samp{te}でページメモリを切り替えて、
+1ページをEmacs用に使い、もう1ページを他の出力用に使うようにできます。
+そして、変数@code{no-redraw-on-reenter}に@code{nil}以外を設定します。
+こうすると、Emacsは、再開時には
+最後に出力した内容が画面ページに入っているものと仮定します。
+
+@vindex echo-keystrokes
+@c   The variable @code{echo-keystrokes} controls the echoing of multi-character
+@c keys; its value is the number of seconds of pause required to cause echoing
+@c to start, or zero meaning don't echo at all.  @xref{Echo Area}.
+変数@code{echo-keystrokes}は、複数個の文字キーのエコーを制御します。
+設定する値は、エコーを開始するまでの待機時間の秒数です。
+ゼロを指定するとエコーしません。
+@xref{Echo Area}。
+
+@vindex ctl-arrow
+@c   If the variable @code{ctl-arrow} is @code{nil}, control characters in
+@c the buffer are displayed with octal escape sequences, except for newline
+@c and tab.  Altering the value of @code{ctl-arrow} makes it local to the
+@c current buffer; until that time, the default value is in effect.  The
+@c default is initially @code{t}.  @xref{Display Tables,, Display Tables,
+@c elisp, The Emacs Lisp Reference Manual}.
+変数@code{ctl-arrow}に@code{nil}を設定すると、
+改行とタブを除いて、バッファ内のコントロール文字を
+8進のエスケープシーケンスで表示します。
+変数@code{ctl-arrow}の値を変更すると、
+この変数はカレントバッファにローカルになります。
+それまでは、デフォルトの値が使われます。
+デフォルトの初期値は@code{t}です。
+@xref{Display Tables,, 表示テーブル, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@vindex tab-width
+@c   Normally, a tab character in the buffer is displayed as whitespace which
+@c extends to the next display tab stop position, and display tab stops come
+@c at intervals equal to eight spaces.  The number of spaces per tab is
+@c controlled by the variable @code{tab-width}, which is made local by
+@c changing it, just like @code{ctl-arrow}.  Note that how the tab character
+@c in the buffer is displayed has nothing to do with the definition of
+@c @key{TAB} as a command.  The variable @code{tab-width} must have an
+@c integer value between 1 and 1000, inclusive.
+通常、バッファ内のタブ文字は、つぎのタブストップ位置までの
+空白として表示され、タブストップは8個分の空白と同じ間隔です。
+タブ1個あたりの空白の文字数は、変数@code{tab-width}で制御します。
+この変数も@code{ctl-arrow}と同様に、変更するとバッファにローカルになります。
+バッファ内のタブ文字をどのように表示するかと、
+コマンドとしての@key{TAB}の定義とは無関係であることに注意してください。
+変数@code{tab-width}の値は1以上1000以下の整数である必要があります。
+
+@c @c @vindex truncate-lines  @c No index entry here, because we have one
+@c @c in the continuation section.
+@c   If the variable @code{truncate-lines} is non-@code{nil}, then each
+@c line of text gets just one screen line for display; if the text line is
+@c too long, display shows only the part that fits.  If
+@c @code{truncate-lines} is @code{nil}, then long text lines display as
+@c more than one screen line, enough to show the whole text of the line.
+@c @xref{Continuation Lines}.  Altering the value of @code{truncate-lines}
+@c makes it local to the current buffer; until that time, the default value
+@c is in effect.  The default is initially @code{nil}.
+変数@code{truncate-lines}に@code{nil}以外を設定すると、
+テキストの各行は表示上は画面の1行を占有します。
+テキスト行が長すぎる場合は、画面に収まる範囲だけを表示します。
+一方、@code{truncate-lines}に@code{nil}を設定すると、
+長いテキスト行は、画面上では2行以上にわたってテキスト行の表示に必要なだけの
+行数で表示されます。
+@xref{Continuation Lines}。
+変数@code{truncate-lines}の値を変更すると、
+カレントバッファにローカルになります。
+それまでは、デフォルトが使われます。
+デフォルトの初期値は@code{nil}です。
+
+@c @c @vindex truncate-partial-width-windows  @c Idx entry is in Split Windows.
+@c   If the variable @code{truncate-partial-width-windows} is
+@c non-@code{nil}, it forces truncation rather than continuation in any
+@c window less than the full width of the screen or frame, regardless of
+@c the value of @code{truncate-lines}.  For information about side-by-side
+@c windows, see @ref{Split Window}.  See also @ref{Display,, Display,
+@c elisp, The Emacs Lisp Reference Manual}.
+変数@code{truncate-partial-width-windows}に@code{nil}以外を設定すると、
+画面やフレームの幅に満たないウィンドウでは、
+テキストの表示方法は@code{truncate-lines}の値とは無関係に、
+継続行ではなく切り捨てて表示します。
+左右に並べたウィンドウに関しては、@xref{Split Window}。
+@ref{Display,, Emacsの画面表示, elisp,
+Emacs Lisp リファレンスマニュアル}も
+参照してください。
+
+@vindex baud-rate
+@c   The variable @code{baud-rate} holds the output speed of the
+@c terminal, as far as Emacs knows.  Setting this variable does not change
+@c the speed of actual data transmission, but the value is used for
+@c calculations such as padding.  It also affects decisions about whether
+@c to scroll part of the screen or redraw it instead---even when using a
+@c window system.  (We designed it this way, despite the fact that a window
+@c system has no true ``output speed,'' to give you a way to tune these
+@c decisions.)
+変数@code{baud-rate}は、Emacsにとっての端末の出力速度を保持します。
+この変数の値を設定したとしても、
+実際のデータ転送速度を変更できるわけではなく、
+この値はパディングの計算などに用いられます。
+さらに、ウィンドウシステムを使用している場合であっても、
+画面の一部をスクロールするのか、再表示するのかの決定にも影響します。
+（ウィンドウシステムには正しい『出力速度』がないにしても、
+スクロール／再表示を調整できるようにこのように設計してある。）
+
+@c   You can customize the way any particular character code is displayed
+@c by means of a display table.  @xref{Display Tables,, Display Tables,
+@c elisp, The Emacs Lisp Reference Manual}.
+どんな文字コードの表示方法も、表示テーブルを用いてカスタマイズできます。
+@xref{Display Tables,, 表示テーブル, elisp,
+Emacs Lisp リファレンスマニュアル}。

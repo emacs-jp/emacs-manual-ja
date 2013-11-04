@@ -1,0 +1,468 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Registers, Display, Killing, Top
+@c @chapter Registers
+@chapter レジスタ
+@c @cindex registers
+@cindex レジスタ
+
+@c   Emacs @dfn{registers} are places you can save text or positions for
+@c later use.  Once you save text or a rectangle in a register, you can
+@c copy it into the buffer once or many times; you can move point to a
+@c position saved in a register once or many times.
+Emacsの@dfn{レジスタ}（registers）は、
+あとで使うためにテキストやポイント位置を保存するための場所です。
+テキストや矩形領域をレジスタにいったん保存すれば、
+何度でもバッファにコピーできます。
+また、レジスタに保存した位置には何度でもポイントを移動できます。
+
+@findex view-register
+@c   Each register has a name which is a single character.  A register can
+@c store a piece of text, a rectangle, a position, a window configuration,
+@c or a file name, but only one thing at any given time.  Whatever you
+@c store in a register remains there until you store something else in that
+@c register.  To see what a register @var{r} contains, use @kbd{M-x
+@c view-register}.
+各レジスタには1文字の名前が付いています。
+レジスタには、テキストの一部、矩形領域、位置、
+ウィンドウの構成情報、ファイル名を保存できますが、
+1度にはそのうちの1つしか保存できません。
+レジスタに保存した内容は、そのレジスタに他のものを保存するまでは
+保持され続けます。
+レジスタ@var{r}に何が入っているか調べるには、
+@kbd{M-x view-register}を使います。
+
+@table @kbd
+@item M-x view-register @key{RET} @var{r}
+@c Display a description of what register @var{r} contains.
+レジスタ@var{r}の内容を表示する。
+@end table
+
+@menu
+* Position: RegPos.           Saving positions in registers.
+* Text: RegText.              Saving text in registers.
+* Rectangle: RegRect.         Saving rectangles in registers.
+* Configurations: RegConfig.  Saving window configurations in registers.
+* Files: RegFiles.            File names in registers.
+* Numbers: RegNumbers.        Numbers in registers.
+* Bookmarks::                 Bookmarks are like registers, but persistent.
+@end menu
+
+@node RegPos
+@c @section Saving Positions in Registers
+@section レジスタに位置を保存する
+
+@c   Saving a position records a place in a buffer so that you can move
+@c back there later.  Moving to a saved position switches to that buffer
+@c and moves point to that place in it.
+位置を保存するとは、
+あとで戻ってこられるようにバッファ中の位置を記録することです。
+保存した位置に移動すると、そのバッファに切り替えてから
+ポイントをその位置に移動します。
+
+@table @kbd
+@item C-x r @key{SPC} @var{r}
+@c Save position of point in register @var{r} (@code{point-to-register}).
+ポイント位置をレジスタ@var{r}に保存する（@code{point-to-register}）。
+@item C-x r j @var{r}
+@c Jump to the position saved in register @var{r} (@code{jump-to-register}).
+レジスタ@var{r}に保存した位置に移動する（@code{jump-to-register}）。
+@end table
+
+@kindex C-x r SPC
+@findex point-to-register
+@c   To save the current position of point in a register, choose a name
+@c @var{r} and type @kbd{C-x r @key{SPC} @var{r}}.  The register @var{r}
+@c retains the position thus saved until you store something else in that
+@c register.
+ポイントの現在位置をレジスタに保存するには、名前@var{r}を選んでから、
+@kbd{C-x r @key{SPC} @var{r}}と打ちます。
+他のものを保存するまで、
+レジスタ@var{r}はこうして保存した位置を保持し続けます。
+
+@kindex C-x r j
+@findex jump-to-register
+@c   The command @kbd{C-x r j @var{r}} moves point to the position recorded
+@c in register @var{r}.  The register is not affected; it continues to
+@c record the same position.  You can jump to the saved position any number
+@c of times.
+コマンド@kbd{C-x r j @var{r}}は、
+レジスタ@var{r}に記録した位置にポイントを移動します。
+レジスタは変わらず、同じ位置を記録し続けます。
+何度でも保存した位置に移動できます。
+
+@c   If you use @kbd{C-x r j} to go to a saved position, but the buffer it
+@c was saved from has been killed, @kbd{C-x r j} tries to create the buffer
+@c again by visiting the same file.  Of course, this works only for buffers
+@c that were visiting files.
+@kbd{C-x r j}を使って保存位置に移動しようとしたとき、
+その対象となるバッファがすでに消去されていた場合には、
+@kbd{C-x r j}は同じファイルを訪問するバッファを作成し直そうとします。
+もちろん、これはファイルを訪問したバッファに対してのみ働きます。
+
+@node RegText
+@c @section Saving Text in Registers
+@section レジスタにテキストを保存する
+
+@c   When you want to insert a copy of the same piece of text several
+@c times, it may be inconvenient to yank it from the kill ring, since each
+@c subsequent kill moves that entry further down the ring.  An alternative
+@c is to store the text in a register and later retrieve it.
+テキストの同じ部分のコピーを頻繁に挿入する場合、
+キルリングからヤンクするのは便利ではないでしょう。
+というのは、キルするごとに、必要な部分がリングの下方に徐々に
+移動してしまうからです。
+別の手段としては、レジスタにテキストを保存しておき、
+レジスタから取り込むという方法があります。
+
+@table @kbd
+@item C-x r s @var{r}
+@c Copy region into register @var{r} (@code{copy-to-register}).
+レジスタ@var{r}にリージョンをコピーする（@code{copy-to-register}）。
+@item C-x r i @var{r}
+@c Insert text from register @var{r} (@code{insert-register}).
+レジスタ@var{r}からテキストを挿入する（@code{insert-register}）。
+@end table
+
+@kindex C-x r s
+@kindex C-x r i
+@findex copy-to-register
+@findex insert-register
+@c   @kbd{C-x r s @var{r}} stores a copy of the text of the region into the
+@c register named @var{r}.  Given a numeric argument, @kbd{C-x r s @var{r}}
+@c deletes the text from the buffer as well.
+@kbd{C-x r s @var{r}}は、リージョンのテキストのコピーを
+@var{r}という名前のレジスタに保存します。
+@kbd{C-x r s @var{r}}に数引数を指定すると、
+保存すると同時にバッファからテキストを削除します。
+
+@c   @kbd{C-x r i @var{r}} inserts in the buffer the text from register
+@c @var{r}.  Normally it leaves point before the text and places the mark
+@c after, but with a numeric argument (@kbd{C-u}) it puts point after the
+@c text and the mark before.
+@kbd{C-x r i @var{r}}はレジスタ@var{r}からテキストをバッファに挿入します。
+通常、テキストの直前にポイントを置き、直後にマークを置きます。
+しかし、数引数（@kbd{C-u}）を指定すると、
+テキストの直後にポイントを置き、直前にマークを置きます。
+
+@node RegRect
+@c @section Saving Rectangles in Registers
+@section レジスタに矩形領域を保存する
+
+@c   A register can contain a rectangle instead of linear text.  The
+@c rectangle is represented as a list of strings.  @xref{Rectangles}, for
+@c basic information on how to specify a rectangle in the buffer.
+レジスタには、連続したテキスト以外にも、矩形領域を保持できます。
+矩形領域は、文字列のリストとして表されます。
+バッファ内での矩形領域の指定方法に関する基礎情報については、
+@xref{Rectangles}。
+
+@table @kbd
+@findex copy-rectangle-to-register
+@kindex C-x r r
+@item C-x r r @var{r}
+@c Copy the region-rectangle into register @var{r}
+@c (@code{copy-rectangle-to-register}).  With numeric argument, delete it as
+@c well.
+矩形領域をレジスタ@var{r}にコピーする
+（@code{copy-rectangle-to-register}）。
+数引数を指定すると、コピー後に矩形領域を削除する。
+@item C-x r i @var{r}
+@c Insert the rectangle stored in register @var{r} (if it contains a
+@c rectangle) (@code{insert-register}).
+レジスタ@var{r}に保存した矩形領域（が存在すればそれ）を挿入する
+（@code{insert-register}）。
+@end table
+
+@c   The @kbd{C-x r i @var{r}} command inserts a text string if the
+@c register contains one, and inserts a rectangle if the register contains
+@c one.
+@kbd{C-x r i @var{r}}コマンドは、レジスタにテキストが入っていれば、
+そのテキストの文字列を挿入しますし、
+矩形領域があれば矩形領域を挿入します。
+
+@c   See also the command @code{sort-columns}, which you can think of
+@c as sorting a rectangle.  @xref{Sorting}.
+コマンド@code{sort-columns}も参照してください。
+このコマンドは矩形領域をソートすると考えられます。
+@xref{Sorting}。
+
+@node RegConfig
+@c @section Saving Window Configurations in Registers
+@section レジスタにウィンドウ構成を保存する
+
+@findex window-configuration-to-register
+@findex frame-configuration-to-register
+@kindex C-x r w
+@kindex C-x r f
+@c   You can save the window configuration of the selected frame in a
+@c register, or even the configuration of all windows in all frames, and
+@c restore the configuration later.
+選択したフレームのウィンドウ構成をレジスタに保存したり、
+すべてのフレームのすべてのウィンドウ構成を保存したりできて、
+しかも、あとでその構成に戻せます。
+
+@table @kbd
+@item C-x r w @var{r}
+@c Save the state of the selected frame's windows in register @var{r}
+@c (@code{window-configuration-to-register}).
+選択したフレームのウィンドウの状態をレジスタ@var{r}に保存する
+（@code{window-configuration-to-register}）。
+@item C-x r f @var{r}
+@c Save the state of all frames, including all their windows, in register
+@c @var{r} (@code{frame-configuration-to-register}).
+全フレームの状態を、各フレームのすべてのウィンドウを含めて、
+レジスタ@var{r}に保存する
+（@code{frame-configuration-to-register}）。
+@end table
+
+@c   Use @kbd{C-x r j @var{r}} to restore a window or frame configuration.
+@c This is the same command used to restore a cursor position.  When you
+@c restore a frame configuration, any existing frames not included in the
+@c configuration become invisible.  If you wish to delete these frames
+@c instead, use @kbd{C-u C-x r j @var{r}}.
+ウィンドウやフレームの構成をもとに戻すには、
+@kbd{C-x r j @var{r}}を使います。
+これは、カーソル位置を復元するコマンドと同じです。
+フレームの構成を復元すると、
+構成情報に含まれていない既存のフレームは隠れた状態になります。
+これらのフレームを削除したければ、@kbd{C-u C-x r j @var{r}}を使います。
+
+@node RegNumbers
+@c @section Keeping Numbers in Registers
+@section レジスタに数値を保持する
+
+@c   There are commands to store a number in a register, to insert
+@c the number in the buffer in decimal, and to increment it.  These commands
+@c can be useful in keyboard macros (@pxref{Keyboard Macros}).
+レジスタに数値を保存しておき、数値を10進数でバッファに挿入してから
+数値を増やすコマンドがあります。
+これらのコマンドは、キーボードマクロで役立ちます
+（@pxref{Keyboard Macros}）。
+
+@table @kbd
+@item C-u @var{number} C-x r n @var{reg}
+@kindex C-x r n
+@findex number-to-register
+@c Store @var{number} into register @var{reg} (@code{number-to-register}).
+数値@var{number}をレジスタ@var{reg}に保存する
+（@code{number-to-register}）。
+@item C-u @var{number} C-x r + @var{reg}
+@kindex C-x r +
+@findex increment-register
+@c Increment the number in register @var{reg} by @var{number}
+@c (@code{increment-register}).
+レジスタ@var{reg}内の数値を@var{number}だけ増やす
+（@code{increment-register}）。
+@item C-x r g @var{reg}
+@c Insert the number from register @var{reg} into the buffer.
+レジスタ@var{reg}の数値をバッファに挿入する。
+@end table
+
+@c   @kbd{C-x r g} is the same command used to insert any other
+@c sort of register contents into the buffer.
+@kbd{C-x r g}は、レジスタの数値以外の内容をバッファに挿入するために
+使うコマンドと同じです。
+
+@node RegFiles
+@c @section Keeping File Names in Registers
+@section レジスタにファイル名を保持する
+
+@c   If you visit certain file names frequently, you can visit them more
+@c conveniently if you put their names in registers.  Here's the Lisp code
+@c used to put a file name in a register:
+特定のファイル名を頻繁に訪問する場合には、
+これらの名前をレジスタに置いておくと、
+より簡単にファイルを訪問できます。
+ファイル名をレジスタに置くLispコードをつぎに示します。
+
+@smallexample
+(set-register ?@var{r} '(file . @var{name}))
+@end smallexample
+
+@need 3000
+@noindent
+@c For example,
+たとえば、
+
+@smallexample
+(set-register ?z '(file . "/gd/gnu/emacs/19.0/src/ChangeLog"))
+@end smallexample
+
+@noindent
+@c puts the file name shown in register @samp{z}.
+とすると、上に示したファイル名をレジスタ@samp{z}に保存します。
+
+@c   To visit the file whose name is in register @var{r}, type @kbd{C-x r j
+@c @var{r}}.  (This is the same command used to jump to a position or
+@c restore a frame configuration.)
+レジスタ@var{r}に入れた名前のファイルを訪問するには、
+@kbd{C-x r j @var{r}}と打ちます。
+（このコマンドは、保存位置に移動したり
+フレーム構成を復元するために使うコマンドと同じ。）
+
+@node Bookmarks
+@c @section Bookmarks
+@section ブックマーク
+@c @cindex bookmarks
+@cindex ブックマーク
+
+@c   @dfn{Bookmarks} are somewhat like registers in that they record
+@c positions you can jump to.  Unlike registers, they have long names, and
+@c they persist automatically from one Emacs session to the next.  The
+@c prototypical use of bookmarks is to record ``where you were reading'' in
+@c various files.
+@dfn{ブックマーク}（bookmarks）とは、
+移動先の位置を記録しておくためのレジスタのようなものです。
+レジスタと違って、長い名前を付けることができて、
+自動的につぎのEmacsセッションに引き継がれます。
+ブックマークの典型的な使い方は、
+各ファイルの『どこを読んでいるか』を記録しておくことです。
+
+@table @kbd
+@item C-x r m @key{RET}
+@c Set the bookmark for the visited file, at point.
+訪問先のファイルのポイント位置にブックマークを設定する。
+
+@item C-x r m @var{bookmark} @key{RET}
+@findex bookmark-set
+@c Set the bookmark named @var{bookmark} at point (@code{bookmark-set}).
+ポイント位置に、@var{bookmark}という名前のブックマークを設定する
+（@code{bookmark-set}）。
+
+@item C-x r b @var{bookmark} @key{RET}
+@findex bookmark-jump
+@c Jump to the bookmark named @var{bookmark} (@code{bookmark-jump}).
+名前が@var{bookmark}であるブックマークに移動する
+（@code{bookmark-jump}）。
+
+@item C-x r l
+@findex list-bookmarks
+@c List all bookmarks (@code{list-bookmarks}).
+すべてのブックマークを一覧表示する（@code{list-bookmarks}）。
+
+@item M-x bookmark-save
+@findex bookmark-save
+@c Save all the current bookmark values in the default bookmark file.
+現在のすべてのブックマークの値を
+デフォルトのブックマークファイルに保存する。
+@end table
+
+@kindex C-x r m
+@findex bookmark-set
+@kindex C-x r b
+@findex bookmark-jump
+@c   The prototypical use for bookmarks is to record one current position
+@c in each of several files.  So the command @kbd{C-x r m}, which sets a
+@c bookmark, uses the visited file name as the default for the bookmark
+@c name.  If you name each bookmark after the file it points to, then you
+@c can conveniently revisit any of those files with @kbd{C-x r b}, and move
+@c to the position of the bookmark at the same time.
+ブックマークの典型的な使い方は、
+各ファイルごとに現在のポイント位置を保存しておくことです。
+ブックマークを設定するコマンド@kbd{C-x r m}は、
+訪問先のファイルの名前をブックマーク名のデフォルトとして使います。
+ブックマークが指すファイルをもとにブックマークの名前を付ければ、
+@kbd{C-x r b}で任意のファイルを再訪問して、
+同時にブックマーク位置に移動するという操作を楽に行えます。
+
+@kindex C-x r l
+@c   To display a list of all your bookmarks in a separate buffer, type
+@c @kbd{C-x r l} (@code{list-bookmarks}).  If you switch to that buffer,
+@c you can use it to edit your bookmark definitions or annotate the
+@c bookmarks.  Type @kbd{C-h m} in that buffer for more information about
+@c its special editing commands.
+設定したすべてのブックマークの一覧を別のバッファに表示するには、
+@kbd{C-x r l}（@code{list-bookmarks}）と打ちます。
+そのバッファに切り替えれば、ブックマークの定義を編集したり、
+ブックマークに注記を付けたりできます。
+このバッファで使える特別な編集コマンドについての情報を得るには、
+このバッファで@kbd{C-h m}と打ちます。
+
+@c   When you kill Emacs, Emacs offers to save your bookmark values in your
+@c default bookmark file, @file{~/.emacs.bmk}, if you have changed any
+@c bookmark values.  You can also save the bookmarks at any time with the
+@c @kbd{M-x bookmark-save} command.  The bookmark commands load your
+@c default bookmark file automatically.  This saving and loading is how
+@c bookmarks persist from one Emacs session to the next.
+内容を変更したブックマークがある場合、Emacsを終了する時点で、
+Emacsはブックマークの値をデフォルトの
+ブックマークファイル@file{~/.emacs.bmk}に保存するかどうか聞いてきます。
+@kbd{M-x bookmark-save}コマンドを使っても、
+変更したブックマークをいつでも保存できます。
+ブックマークコマンドは、個人のデフォルトのブックマークファイルを
+自動的に読み込みます。
+これらの保存と読み込みによって、
+ブックマークの内容をつぎのEmacsセッションに引き継げるのです。
+
+@vindex bookmark-save-flag
+@c   If you set the variable @code{bookmark-save-flag} to 1, then each
+@c command that sets a bookmark will also save your bookmarks; this way,
+@c you don't lose any bookmark values even if Emacs crashes.  (The value,
+@c if a number, says how many bookmark modifications should go by between
+@c saving.)
+変数@code{bookmark-save-flag}に1を設定しておくと、
+ブックマークを設定する各コマンドは、ブックマークの保存も行います。
+こうしておけば、Emacsがクラッシュした場合でも、
+ブックマークデータを失わなくてすみます。
+（この変数の値が数値であれば、
+ブックマークを何回変更したら保存するという意味。）
+
+@vindex bookmark-search-size
+@c   Bookmark position values are saved with surrounding context, so that
+@c @code{bookmark-jump} can find the proper position even if the file is
+@c modified slightly.  The variable @code{bookmark-search-size} says how
+@c many characters of context to record, on each side of the bookmark's
+@c position.
+ブックマークの位置情報は、その周辺の文脈情報と一緒に保存されるので、
+ファイルが少し変更されていたとしても、
+@code{bookmark-jump}は正しい位置をみつけだせます。
+変数@code{bookmark-search-size}で、
+ブックマーク位置の前後何文字分の内容を保存するかを指定します。
+
+@c   Here are some additional commands for working with bookmarks:
+ブックマークを用いるコマンドには、以下のものもあります。
+
+@table @kbd
+@item M-x bookmark-load @key{RET} @var{filename} @key{RET}
+@findex bookmark-load
+@c Load a file named @var{filename} that contains a list of bookmark
+@c values.  You can use this command, as well as @code{bookmark-write}, to
+@c work with other files of bookmark values in addition to your default
+@c bookmark file.
+ブックマークデータのリストを収めた@var{filename}という名前の
+ファイルをロードする。
+デフォルトのブックマークファイル以外の
+ブックマークデータを収めたファイルに対しても、
+コマンド@code{bookmark-write}と同じく、このコマンドを使える。
+
+@item M-x bookmark-write @key{RET} @var{filename} @key{RET}
+@findex bookmark-write
+@c Save all the current bookmark values in the file @var{filename}.
+現在設定されているブックマークデータを
+ファイル@var{filename}に保存する。
+
+@item M-x bookmark-delete @key{RET} @var{bookmark} @key{RET}
+@findex bookmark-delete
+@c Delete the bookmark named @var{bookmark}.
+@var{bookmark}という名前のブックマークを削除する。
+
+@item M-x bookmark-insert-location @key{RET} @var{bookmark} @key{RET}
+@findex bookmark-insert-location
+@c Insert in the buffer the name of the file that bookmark @var{bookmark}
+@c points to.
+ブックマーク@var{bookmark}が指しているファイルの名前を
+バッファに挿入する。
+
+@item M-x bookmark-insert @key{RET} @var{bookmark} @key{RET}
+@findex bookmark-insert
+@c Insert in the buffer the @emph{contents} of the file that bookmark
+@c @var{bookmark} points to.
+ブックマーク@var{bookmark}が指すファイルの@emph{内容}を
+バッファに挿入する。
+@end table

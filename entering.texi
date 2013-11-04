@@ -1,0 +1,262 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 1986, 1987, 1993, 1994, 1995 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Entering Emacs, Basic, User Input, Top
+@c @chapter Entering and Exiting Emacs
+@chapter Emacsの起動と終了
+@c @cindex entering Emacs
+@c @cindex starting Emacs 
+@cindex Emacsの起動
+@cindex Emacsの始動
+
+@c   The usual way to invoke Emacs is with the shell command @samp{emacs}.
+@c Emacs clears the screen and then displays an initial help message and
+@c copyright notice.  Some operating systems discard all type-ahead when
+@c Emacs starts up; they give Emacs no way to prevent this.  Therefore, it
+@c is advisable to wait until Emacs clears the screen before typing your
+@c first editing command.
+Emacsを起動する普通の方法は、シェルコマンドの@samp{emacs}です。
+Emacsは、画面をクリアし、初期ヘルプメッセージとコピーライトを表示します。
+オペレーティングシステムによっては、Emacsが起動するまでに
+先打ちした入力をすべて破棄してしまうことがあります。
+Emacs側ではこれを防ぐことはできません。
+したがって、編集コマンドを打ち始めるまえに、
+Emacsが画面をクリアするまで待つように推奨します。
+
+@c   If you run Emacs from a shell window under the X Window System, run it
+@c in the background with @samp{emacs&}.  This way, Emacs does not tie up
+@c the shell window, so you can use that to run other shell commands while
+@c Emacs operates its own X windows.  You can begin typing Emacs commands
+@c as soon as you direct your keyboard input to the Emacs frame.
+Xウィンドウシステム上のシェルウィンドウからEmacsを起動するのであれば、
+@samp{emacs&}のようにバックグラウンドで実行するようにしましょう。
+こうすれば、Emacsがシェルウィンドウを拘束することがないので、
+Emacsが専用のXのウィンドウで動作中でも、
+別のシェルコマンドを実行できます。
+キーボード入力をEmacsのフレームに向ければ、
+ただちにEmacsコマンドを打ち始められます。
+
+@vindex initial-major-mode
+@c   When Emacs starts up, it makes a buffer named @samp{*scratch*}.
+@c That's the buffer you start out in.  The @samp{*scratch*} buffer uses Lisp
+@c Interaction mode; you can use it to type Lisp expressions and evaluate
+@c them, or you can ignore that capability and simply doodle.  (You can
+@c specify a different major mode for this buffer by setting the variable
+@c @code{initial-major-mode} in your init file.  @xref{Init File}.)
+Emacsが動き始めると、@samp{*scratch*}という名前のバッファを作ります。
+ユーザーはこのバッファから始めます。
+バッファ@samp{*scratch*}は、Lisp対話（lisp-interaction）モードですから、
+Lisp式を打ち込んでそれを評価できますし、あるいは、
+この機能を無視して単なる落書用として使ってもかまいません。
+（個人の初期化ファイル中で変数@code{initial-major-mode}を設定すれば、
+このバッファに別のメジャーモードを指定できる。
+@pxref{Init File}。）
+
+@c   It is possible to specify files to be visited, Lisp files to be
+@c loaded, and functions to be called, by giving Emacs arguments in the
+@c shell command line.  @xref{Command Arguments}.  But we don't recommend
+@c doing this.  The feature exists mainly for compatibility with other
+@c editors.
+シェルのコマンド行でEmacsに引数を与えて、
+訪問するファイル、ロードするLispファイル、呼び出す関数を指定できます。
+@xref{Command Arguments}。
+ただし、これはお勧めしません。
+この機能は、主に、他のエディタとの互換性のためにあるのです。
+
+@c   Many other editors are designed to be started afresh each time you
+@c want to edit.  You edit one file and then exit the editor.  The next
+@c time you want to edit either another file or the same one, you must run
+@c the editor again.  With these editors, it makes sense to use a
+@c command-line argument to say which file to edit.
+他のエディタの多くは、編集を行うたびに新たに起動するように設計されています。
+1つのファイルを編集し終えると、エディタを終了します。
+つぎに別のファイルや同じファイルを編集したければ、
+再度、エディタを起動する必要があります。
+これらのエディタでは、
+コマンド行の引数で編集するファイルを指定する意味があります。
+
+@c   But starting a new Emacs each time you want to edit a different file
+@c does not make sense.  For one thing, this would be annoyingly slow.  For
+@c another, this would fail to take advantage of Emacs's ability to visit
+@c more than one file in a single editing session.  And it would lose the
+@c other accumulated context, such as registers, undo history, and the mark
+@c ring.
+しかし、別のファイルを編集するたびに新たにEmacsを起動するのはナンセンスです。
+1つには、起動はじれったいほど遅いでしょう。
+また、このようにすると、1つの編集セッションで複数のファイルを
+扱えるEmacsの利点を活かせません。
+さらに、レジスタやアンドゥ履歴、マークリングといった、
+それまでに蓄積した内容も失ってしまいます。
+
+@c   The recommended way to use GNU Emacs is to start it only once, just
+@c after you log in, and do all your editing in the same Emacs session.
+@c Each time you want to edit a different file, you visit it with the
+@c existing Emacs, which eventually comes to have many files in it ready
+@c for editing.  Usually you do not kill the Emacs until you are about to
+@c log out.  @xref{Files}, for more information on visiting more than one
+@c file.
+GNU Emacsの推奨される使い方は、ログイン後に1度だけEmacsを起動して、
+すべての編集を同じEmacsセッションで行うことです。
+別のファイルを編集するには、既存のEmacsでそのファイルを訪問します。
+そうすると、ついには、多くのファイルをすぐに編集できる状態で
+保持することになります。
+通常、ログアウトするまで、Emacsを終了する必要はありません。
+複数のファイルを訪問することに関して詳しくは、@xref{Files}。
+
+@node Exiting, Basic, Entering Emacs, Top
+@c @section Exiting Emacs
+@section Emacsの終了
+@c @cindex exiting
+@c @cindex killing Emacs
+@c @cindex suspending
+@c @cindex leaving Emacs
+@c @cindex quitting Emacs
+@cindex 終了
+@cindex Emacsの終了
+@cindex 休止
+@cindex Emacsの休止
+
+@c   There are two commands for exiting Emacs because there are two kinds
+@c of exiting: @dfn{suspending} Emacs and @dfn{killing} Emacs.
+Emacsの抜け方には、@dfn{休止}（suspending）する、
+@dfn{終了}（killing）するの2種類があるので、
+Emacsを抜けるコマンドも2つあります。
+
+@c   @dfn{Suspending} means stopping Emacs temporarily and returning
+@c control to its parent process (usually a shell), allowing you to resume
+@c editing later in the same Emacs job, with the same buffers, same kill
+@c ring, same undo history, and so on.  This is the usual way to exit.
+@dfn{休止}（suspending）は、一時的にEmacsを止めて、
+親プロセス（通常はシェル）に制御を戻します。
+こうすると、同じバッファ、同じキルリング、同じアンドゥ履歴を保持したままの
+同じEmacsジョブをあとで再開できます。
+これが通常の抜け方
+@footnote{【訳注】これは、画面端末を使っている場合の話。}です。
+
+@c   @dfn{Killing} Emacs means destroying the Emacs job.  You can run Emacs
+@c again later, but you will get a fresh Emacs; there is no way to resume
+@c the same editing session after it has been killed.
+@dfn{終了}（killing）は、Emacsジョブの破壊を意味します。
+あとでまたEmacsを起動できますが、新たなEmacs環境です。
+終了したあとでは、同じ編集セッションを再開する方法はありません。
+
+@table @kbd
+@item C-z
+@c Suspend Emacs (@code{suspend-emacs}) or iconify a frame
+@c (@code{iconify-or-deiconify-frame}).
+Emacsを休止する、あるいは、フレームをアイコン化する
+（@code{iconify-or-deiconify-frame}）。
+@item C-x C-c
+@c Kill Emacs (@code{save-buffers-kill-emacs}).
+Emacsを終了する（@code{save-buffers-kill-emacs}）。
+@end table
+
+@kindex C-z
+@findex suspend-emacs
+@c   To suspend Emacs, type @kbd{C-z} (@code{suspend-emacs}).  This takes
+@c you back to the shell from which you invoked Emacs.  You can resume
+@c Emacs with the shell command @samp{%emacs} in most common shells.
+Emacsを休止するには、@kbd{C-z}（@code{suspend-emacs}）と打ちます。
+すると、Emacsを起動したシェルに戻ります。
+ほとんどの一般的なシェルでは、
+シェルコマンド@samp{%emacs}でEmacsを再開できます。
+
+@c   On systems that do not support suspending programs, @kbd{C-z} starts
+@c an inferior shell that communicates directly with the terminal.
+@c Emacs waits until you exit the subshell.  (The way to do that is
+@c probably with @kbd{C-d} or @samp{exit}, but it depends on which shell
+@c you use.)  The only way on these systems to get back to the shell from
+@c which Emacs was run (to log out, for example) is to kill Emacs.
+プログラムを休止できないシステムでは、
+@kbd{C-z}は、端末と直接やりとりする下位シェルを起動します。
+Emacsは、ユーザーがこのサブシェルから抜け出るまで待ちます。
+（普通、@kbd{C-d}や@samp{exit}でサブシェルを終了するはずだが、
+使っているシェルに依存する。）
+このようなシステムでは、
+Emacsを起動したシェルに（たとえばログアウトのために）戻るには、
+Emacsを終了する以外に方法はありません。
+
+@c   Suspending also fails if you run Emacs under a shell that doesn't
+@c support suspending programs, even if the system itself does support it.
+@c In such a case, you can set the variable @code{cannot-suspend} to a
+@c non-@code{nil} value to force @kbd{C-z} to start an inferior shell.
+@c (One might also describe Emacs's parent shell as ``inferior'' for
+@c failing to support job control properly, but that is a matter of taste.)
+プログラムを休止できるシステムであっても、
+プログラムを休止できないシェル上で実行しているEmacsは休止できません。
+このような場合、変数@code{cannot-suspend}に@code{nil}以外の値を設定して、
+@kbd{C-z}に下位シェルの実行を強制できます。
+（適切なジョブ制御をできないEmacsの親シェルを
+『下位』と呼ぶこともできるが、これは好みの問題。）
+
+@c   When Emacs communicates directly with an X server and creates its own
+@c dedicated X windows, @kbd{C-z} has a different meaning.  Suspending an
+@c applications that uses its own X windows is not meaningful or useful.
+@c Instead, @kbd{C-z} runs the command @code{iconify-or-deiconify-frame},
+@c which temporarily closes up the selected Emacs frame (@pxref{Frames}).
+@c The way to get back to a shell window is with the window manager.
+EmacsがXサーバーと直接通信して専用のXのウィンドウを作っている場合には、
+@kbd{C-z}は別の意味になります。
+専用のXのウィンドウを持つアプリケーションを休止しても、
+あまり意味がありませんし、便利なわけでもありません。
+そのかわり、@kbd{C-z}は、選択されているEmacsフレーム（@pxref{Frames}）を
+一時的に閉じるコマンド@code{iconify-or-deiconify-frame}を実行します。
+シェルウィンドウに戻るには、ウィンドウマネージャの機能を使います。
+
+@kindex C-x C-c
+@findex save-buffers-kill-emacs
+@c   To kill Emacs, type @kbd{C-x C-c} (@code{save-buffers-kill-emacs}).  A
+@c two-character key is used for this to make it harder to type.  This
+@c command first offers to save any modified file-visiting buffers.  If you
+@c do not save them all, it asks for reconfirmation with @kbd{yes} before
+@c killing Emacs, since any changes not saved will be lost forever.  Also,
+@c if any subprocesses are still running, @kbd{C-x C-c} asks for
+@c confirmation about them, since killing Emacs will kill the subprocesses
+@c immediately.
+Emacsを終了するには、@kbd{C-x C-c}
+（@code{save-buffers-kill-emacs}）と打ちます。
+これを2文字のキーにしてあるのは、少々打ちづらく@footnote{【訳注】
+簡単に終了してしまっては、困るので。}するためです。
+このコマンドは、まず、変更したバッファを保存するかどうか聞いてきます。
+未保存のものがあるとそれらを永久に失うことになるので、
+Emacsを終了するまえに@kbd{yes}での再確認を求めてきます。
+Emacsを終了するとサブプロセスもただちに終了されられてしまうため、
+サブプロセスが走っている場合にも、それらに関して確認を求めてきます。
+
+@c   There is no way to restart an Emacs session once you have killed it.
+@c You can, however, arrange for Emacs to record certain session
+@c information, such as which files are visited, when you kill it, so that
+@c the next time you restart Emacs it will try to visit the same files and
+@c so on.  @xref{Saving Emacs Sessions}.
+一度Emacsを終了してしまうと、Emacsセッションを再開する方法はありません。
+しかしながら、終了時に訪問していたファイルなどの
+特定のセッション情報を記録するようにEmacsに指示しておけば、
+つぎにEmacsを起動し直したときに、
+同じファイルを訪問するなどを試みるようになります。
+@xref{Saving Emacs Sessions}。
+
+@c   The operating system usually listens for certain special characters
+@c whose meaning is to kill or suspend the program you are running.
+@c @b{This operating system feature is turned off while you are in Emacs.}
+@c The meanings of @kbd{C-z} and @kbd{C-x C-c} as keys in Emacs were
+@c inspired by the use of @kbd{C-z} and @kbd{C-c} on several operating
+@c systems as the characters for stopping or killing a program, but that is
+@c their only relationship with the operating system.  You can customize
+@c these keys to run any commands of your choice (@pxref{Keymaps}).
+オペレーティングシステムは、通常、実行中のプログラムを終了させたり
+休止させたりする特定の特殊文字を監視しています。
+@b{Emacsを使っているときには、
+オペレーティングシステムのこの機能はオフになっています
+@footnote{【訳注】Emacsが専用のXのウィンドウを使っている場合は関係ない。}
+。}
+Emacsのキーとしての@kbd{C-z}や@kbd{C-x C-c}の意味は、
+いくつかのオペレーティングシステムでプログラムを
+休止させたり終了させたりするために用いる文字、
+@kbd{C-z}と@kbd{C-c}にヒントを得たものですが、
+オペレーティングシステムとの関係はそれだけです。
+これらのキーで好きなコマンドを実行するようにカスタマイズできます
+（@pxref{Keymaps}）。

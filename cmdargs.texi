@@ -1,0 +1,1745 @@
+@c =============================================================
+@c = 元 翻 訳: 田中聡＠東京女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Command Arguments, X Resources, Quitting, Top
+@c @appendix Command Line Arguments
+@appendix コマンド行引数
+@c @cindex command line arguments
+@c @cindex arguments (command line)
+@c @cindex options (command line)
+@c @cindex switches (command line)
+@c @cindex startup (command line arguments)
+@cindex コマンド行引数
+@cindex 引数（コマンド行）
+@cindex オプション（コマンド行）
+@cindex スイッチ（コマンド行）
+@cindex 起動（コマンド行引数）
+
+@c   GNU Emacs supports command line arguments to request various actions
+@c when invoking Emacs.  These are for compatibility with other editors and
+@c for sophisticated activities.  We don't recommend using them for
+@c ordinary editing.
+GNU Emacsでは、コマンド行引数によりEmacs起動時にさまざまな動作を指定できます。
+これらは他のエディタとの互換性のためや
+洗練されたふるまいを担うものです。
+通常の編集作業にはそれらを使うことはお勧めしません。
+
+@c   Arguments starting with @samp{-} are @dfn{options}.  Other arguments
+@c specify files to visit.  Emacs visits the specified files while it
+@c starts up.  The last file name on your command line becomes the current
+@c buffer; the other files are also present in other buffers.  As usual,
+@c the special argument @samp{--} says that all subsequent arguments
+@c are file names, not options, even if they start with @samp{-}.
+@samp{-}で始まる引数は@dfn{オプション}（option）です。
+それ以外の引数は訪れるべきファイルを指定します。
+Emacsは、起動すると指定したファイルを読み込みます。
+コマンド行のいちばん最後のファイル名がカレントバッファとなりますが、
+それ以外のファイルも別々のバッファに入っています。
+他のGNUのコマンドと同様に、
+特殊な引数@samp{--}は、これよりあとの引数が@samp{-}で始まっている場合でも、
+すべてファイル名であることを指定します。
+
+@c   Emacs command options can specify many things, such as the size and
+@c position of the X window Emacs uses, its colors, and so on.  A few
+@c options support advanced usage, such as running Lisp functions on files
+@c in batch mode.  The sections of this chapter describe the available
+@c options, arranged according to their purpose.
+Emacsのコマンドオプションでは、
+Emacsが使用するXのウィンドウのサイズや位置、表示色などの
+さまざまなことを指定できます。
+バッチモードでLisp関数を実行するなどの進んだ利用のための
+オプションも若干あります。
+ここでは、目的別に利用可能なオプションを説明します。
+
+@c   There are two ways of writing options: the short forms that start with
+@c a single @samp{-}, and the long forms that start with @samp{--}.  For
+@c example, @samp{-d} is a short form and @samp{--display} is the
+@c corresponding long form.
+オプションの書き方は2通りあります。
+1文字の@samp{-}で始まる短い形式と、@samp{--}で始まる長い形式です。
+たとえば、@samp{-d}は短い形式であり、
+@samp{--display}はこれに対応した長い形式です。
+
+@c   The long forms with @samp{--} are easier to remember, but longer to
+@c type.  However, you don't have to spell out the whole option name; any
+@c unambiguous abbreviation is enough.  When a long option takes an
+@c argument, you can use either a space or an equal sign to separate the
+@c option name and the argument.  Thus, you can write either
+@c @samp{--display sugar-bombs:0.0} or @samp{--display=sugar-bombs:0.0}.
+@c We recommend an equal sign because it makes the relationship clearer,
+@c and the tables below always show an equal sign.
+@samp{--}で始まる長い形式のほうが覚えやすいですが、
+打ち込むのは面倒です。
+しかし、オプション名を完全にすべて入力する必要はありません。
+曖昧でないように省略すれば十分です。
+長いオプションが引数をとる場合には、
+オプション名と引数のあいだに空白か等号を置きます。
+つまり、
+@samp{--display sugar-bombs:0.0}と書くか、
+@samp{--display=sugar-bombs:0.0}と書きます。
+関係が明瞭になることもあり、以下の例でもつねに等号を使っていますので、
+等号を使うようお勧めします。
+
+@c @cindex initial options (command line)
+@c @cindex action options (command line)
+@cindex 初期化オプション（コマンド行）
+@cindex 動作オプション（コマンド行）
+@c   Most options specify how to initialize Emacs, or set parameters for
+@c the Emacs session.  We call them @dfn{initial options}.  A few options
+@c specify things to do: for example, load libraries, call functions, or
+@c exit Emacs.  These are called @dfn{action options}.  These and file
+@c names together are called @dfn{action arguments}.  Emacs processes all
+@c the action arguments in the order they are written.
+ほとんどのオプションは、Emacsをどう初期化するか、あるいは、
+Emacsセッションのパラメータをどう設定するか指示します。
+これらを@dfn{初期化オプション}（initial options）と呼びます。
+動作を指定するオプションもいくつかあります。
+たとえば、ライブラリをロードする、関数を呼び出す、Emacsを終了するなどです。
+これらを@dfn{動作オプション}（action options）と呼びます。
+これらとファイル名をあわせて@dfn{動作引数}（action arguments）と呼びます。
+Emacsはすべての動作引数を書かれた順に処理します。
+
+@menu
+* Action Arguments::	Arguments to visit files, load libraries,
+			  and call functions.
+* Initial Options::     Arguments that take effect while starting Emacs.
+* Command Example::     Examples of using command line arguments.
+* Resume Arguments::	Specifying arguments when you resume a running Emacs.
+* Environment::         Environment variables that Emacs uses.
+
+* Display X::           Changing the default display and using remote login.
+* Font X::	        Choosing a font for text, under X.
+* Colors X::	        Choosing colors, under X.
+* Window Size X::       Start-up window size, under X.
+* Borders X::	        Internal and external borders, under X.
+* Title X::             Specifying the initial frame's title.
+* Icons X::             Choosing what sort of icon to use, under X.
+* Resources X::         Advanced use of classes and resources, under X.
+* Lucid Resources::     X resources for Lucid menus.
+* Motif Resources::     X resources for Motif menus.
+@end menu
+
+@node Action Arguments
+@c @appendixsec Action Arguments
+@appendixsec 動作引数
+
+@c   Here is a table of the action arguments and options:
+以下は、動作引数とオプションとその引数の一覧です。
+
+@table @samp
+@item @var{file}
+@c Visit @var{file} using @code{find-file}.  @xref{Visiting}.
+@code{find-file}を使ってファイル@var{file}を訪れる。
+@pxref{Visiting}。
+
+@item +@var{linenum} @var{file}
+@c Visit @var{file} using @code{find-file}, then go to line number
+@c @var{linenum} in it.
+@code{find-file}を使ってファイル@var{file}を訪れ、
+その中の行番号@var{linenum}の行に移動する。
+
+@need 3000
+@item -l @var{file}
+@itemx --load=@var{file}
+@c Load a Lisp library named @var{file} with the function @code{load}.
+@c @xref{Lisp Libraries}.  The library can be found either in the current
+@c directory, or in the Emacs library search path as specified
+@c with @code{EMACSLOADPATH} (@pxref{General Variables}).
+関数@code{load}を使って@var{file}という名前のLispライブラリをロードする。
+@pxref{Lisp Libraries}。
+ライブラリは、カレントディレクトリか
+@code{EMACSLOADPATH}（@pxref{General Variables}）で指定された
+Emacsのライブラリ探索パスから探す。
+
+@item -f @var{function}
+@itemx --funcall=@var{function}
+@c Call Lisp function @var{function} with no arguments.
+引数なしでLisp関数@var{function}を呼び出す。
+
+@item --eval @var{expression}
+@c Evaluate Lisp expression @var{expression}.
+Lisp式@var{expression}を評価する。
+
+@item --insert=@var{file}
+@c Insert the contents of @var{file} into the current buffer.  This is like
+@c what @kbd{M-x insert-file} does.  @xref{Misc File Ops}.
+ファイル@var{file}の内容をカレントバッファに挿入する。
+これは@kbd{M-x insert-file}と同じ動作。
+@pxref{Misc File Ops}。
+
+@item --kill
+@c Exit from Emacs without asking for confirmation.
+問い合わせずにEmacsを終了する。
+@end table
+
+@vindex command-line-args
+@c   The init file can access the values of the action arguments as the
+@c elements of a list in the variable @code{command-line-args}.  The init
+@c file can override the normal processing of the action arguments, or
+@c define new ones, by reading and setting this variable.
+初期化ファイルでは、変数@code{command-line-args}内のリストの要素として
+動作引数の値を参照できます。
+初期化ファイルでは、この変数を読んだり設定することで、
+動作引数の通常の処理を無効にしたり新たなものを定義したりできます。
+
+@node Initial Options
+@c @appendixsec Initial Options
+@appendixsec 初期化オプション
+
+@c   The initial options specify parameters for the Emacs session.  This
+@c section describes the more general initial options; some other options
+@c specifically related to X Windows appear in the following sections.
+初期化オプションはEmacsセッションのパラメータを指定します。
+ここでは、より一般的な初期化オプションを説明します。
+Xウィンドウシステムに関連する他のオプションはこのあとの節にあります。
+
+@c   Some initial options affect the loading of init files.  The normal
+@c actions of Emacs are to first load @file{site-start.el} if it exists,
+@c then your own init file @file{~/.emacs} if it exists, and finally
+@c @file{default.el} if it exists; certain options prevent loading of some
+@c of these files or substitute other files for them.
+初期化ファイルのロードに影響する初期化オプションもあります。
+Emacsの通常の動作は、
+まず@file{site-start.el}（が存在すればそれ）をロードし、
+続いて個人用の@file{~/.emacs}（が存在すればそれ）をロードし、
+最後に@file{default.el}（が存在すればそれ）をロードします。
+これらのファイルのロードを抑制したり、
+代替ファイルを指定するオプションがあります。
+
+@table @samp
+@item -t @var{device}
+@itemx --terminal=@var{device}
+@c Use @var{device} as the device for terminal input and output.
+入出力端末装置として@var{device}を使う。
+
+@item -d @var{display}
+@itemx --display=@var{display}
+@c Use the X Window System and use the display named @var{display} to open
+@c the initial Emacs frame.
+Xウィンドウシステムを用い、ディスプレイ名@var{display}のディスプレイに
+Emacsの初期フレームを開く。
+
+@item -nw
+@itemx --no-windows
+@c Don't communicate directly with X, disregarding the @code{DISPLAY}
+@c environment variable even if it is set.
+環境変数@code{DISPLAY}が設定されている場合でもそれを無視し、
+Xとは直接通信しない。
+
+@need 3000
+@c @cindex batch mode
+@cindex バッチモード
+@item -batch
+@itemx --batch
+@c Run Emacs in @dfn{batch mode}, which means that the text being edited is
+@c not displayed and the standard terminal interrupt characters such as
+@c @kbd{C-z} and @kbd{C-c} continue to have their normal effect.  Emacs in
+@c batch mode outputs to @code{stderr} only what would normally be printed
+@c in the echo area under program control.
+Emacsを@dfn{バッチモード}で実行する。
+つまり、編集中のテキストを表示せずに、
+@kbd{C-z}と@kbd{C-c}などの標準の端末割り込み文字は通常の効果をもつ。
+バッチモードのEmacsでは、プログラムの制御に従って
+通常エコー領域に表示されるもののみを@code{stderr}へ出力する。
+
+@c Batch mode is used for running programs written in Emacs Lisp from
+@c shell scripts, makefiles, and so on.  Normally the @samp{-l} option
+@c or @samp{-f} option will be used as well, to invoke a Lisp program
+@c to do the batch processing.
+バッチモードは、
+シェルスクリプトやmakefileなどからEmacs Lispで書いたプログラムを
+実行するために使う。
+バッチ処理を行うLispプログラムを起動するために、通常、
+オプション@samp{-l}や@samp{-f}も使われる。
+
+@c @samp{-batch} implies @samp{-q} (do not load an init file).  It also causes
+@c Emacs to kill itself after all command options have been processed.  In
+@c addition, auto-saving is not done except in buffers for which it has been
+@c explicitly requested.
+@samp{-batch}は、（初期化ファイルをロードしない）@samp{-q}を含む。
+また、すべてのコマンドオプションを処理し終えるとEamcsは終了する。
+さらに、明示的に指定しない限りバッファを自動的に保存しない。
+
+@item -q
+@itemx --no-init-file
+@c Do not load your Emacs init file @file{~/.emacs}, or @file{default.el}
+@c either.
+個人の初期化ファイル@file{~/.emacs}も@file{default.el}もロードしない。
+
+@item --no-site-file
+@c Do not load @file{site-start.el}.  The options @samp{-q}, @samp{-u}
+@c and @samp{-batch} have no effect on the loading of this file---this is
+@c the only option that blocks it.
+@file{site-start.el}をロードしない。
+オプション、@samp{-q}、@samp{-u}、@samp{-batch}は、
+このファイルのロードには影響しない。
+ファイル@file{site-start.el}のロードを抑止する唯一のオプションである。
+
+@item -u @var{user}
+@itemx --user=@var{user}
+@c Load @var{user}'s Emacs init file @file{~@var{user}/.emacs} instead of
+@c your own.
+自分の初期化ファイルのかわりに
+ユーザー@var{user}のEmacs初期化ファイル@file{~@var{user}/.emacs}をロードする。
+
+@item --debug-init
+@c Enable the Emacs Lisp debugger for errors in the init file.
+初期化ファイル内でのエラーに対しEmacs Lispデバッガを利用可能にする。
+
+@item --unibyte
+@c @cindex unibyte operation
+@cindex ユニバイト操作
+@c Set up to do almost everything with single-byte buffers and strings.
+@c All buffers and strings are unibyte unless you (or a Lisp program)
+@c explicitly ask for a multibyte buffer or string.  Setting the
+@c environment variable @code{EMACS_UNIBYTE} has the same effect.
+ユニバイトバッファやユニバイト文字列を使うようにすべてを設定する。
+ユーザー（やLispプログラム）がマルチバイトバッファやマルチバイト文字列の使用を
+明示しない限り、すべてのバッファや文字列はユニバイトである。
+環境変数@code{EMACS_UNIBYTE}を設定しても同じ効果になる。
+
+@item --multibyte
+@c Inhibit the effect of @code{EMACS_UNIBYTE}, so that Emacs
+@c uses multibyte characters by default, as usual.
+@code{EMACS_UNIBYTE}の効果を禁止し、
+通常のように、Emacsはデフォルトでマルチバイト文字を使う。
+@end table
+
+@node Command Example
+@c @appendixsec Command Argument Example
+@appendixsec コマンド引数の例
+
+@c   Here is an example of using Emacs with arguments and options.  It
+@c assumes you have a Lisp program file called @file{hack-c.el} which, when
+@c loaded, performs some useful operation on the current buffer, expected
+@c to be a C program.
+以下は、引数やオプションを指定したEmacsの使用例です。
+ファイル@file{hack-c.el}にはLispプログラムが入っているものとします。
+これをロードすると、Cのプログラムを内容とするカレントバッファに対して
+なんらかの有用な操作を行うものとします。
+
+@example
+emacs -batch foo.c -l hack-c -f save-buffer >& log
+@end example
+
+@noindent
+@c This says to visit @file{foo.c}, load @file{hack-c.el} (which makes
+@c changes in the visited file), save @file{foo.c} (note that
+@c @code{save-buffer} is the function that @kbd{C-x C-s} is bound to), and
+@c then exit back to the shell (because of @samp{-batch}).  @samp{-batch}
+@c also guarantees there will be no problem redirecting output to
+@c @file{log}, because Emacs will not assume that it has a display terminal
+@c to work with.
+この意味は、@file{foo.c}を訪れ、
+（訪れたファイルを変更する）@file{hack-c.el}をロードし、
+@file{foo.c}に保存し
+（@code{save-buffer}は@kbd{C-x C-s}にバインドされた関数）、
+（@samp{-batch}があるので）終了してシェルへ戻ります。
+また、@samp{-batch}によりEmacsは表示端末を利用できないと仮定するので、
+出力を@file{log}へリダイレクトしても問題ないことが保証されます。
+
+@node Resume Arguments
+@c @appendixsec Resuming Emacs with Arguments
+@appendixsec 引数を指定したEmacsの再開
+
+@c   You can specify action arguments for Emacs when you resume it after
+@c a suspension.  To prepare for this, put the following code in your
+@c @file{.emacs} file (@pxref{Hooks}):
+Emacsをいったん休止したあとで再開するときには動作引数を指定できます。
+その準備として、
+個人の@file{.emacs}につぎのコードを入れておきます（@pxref{Hooks}）。
+
+@example
+(add-hook 'suspend-hook 'resume-suspend-hook)
+(add-hook 'suspend-resume-hook 'resume-process-args)
+@end example
+
+@c   As further preparation, you must execute the shell script
+@c @file{emacs.csh} (if you use csh as your shell) or @file{emacs.bash} (if
+@c you use bash as your shell).  These scripts define an alias named
+@c @code{edit}, which will resume Emacs giving it new command line
+@c arguments such as files to visit.
+さらに、（cshを使っているなら）シェルスクリプト@file{emacs.csh}か、
+（bashを使っているなら）@file{emacs.bash}を実行する必要があります。
+これらのスクリプトは@code{edit}という別名（エイリアス）を定義します。
+この別名は、訪れるべきファイルなどのコマンド行引数を新たに与えて
+Emacsを（休止状態から）再開します。
+
+@c   Only action arguments work properly when you resume Emacs.  Initial
+@c arguments are not recognized---it's too late to execute them anyway.
+Emacsを再開する場合には動作引数しか使えません。
+初期化引数は認識されません。
+なぜなら、初期化を行うには遅すぎるのです。
+
+@c   Note that resuming Emacs (with or without arguments) must be done from
+@c within the shell that is the parent of the Emacs job.  This is why
+@c @code{edit} is an alias rather than a program or a shell script.  It is
+@c not possible to implement a resumption command that could be run from
+@c other subjobs of the shell; no way to define a command that could be
+@c made the value of @code{EDITOR}, for example.  Therefore, this feature
+@c does not take the place of the Emacs Server feature (@pxref{Emacs
+@c Server}).
+（引数の有無に関わらず）
+Emacsの再開はEmacsジョブの親であるシェルから行う必要があります。
+@code{edit}が、プログラムやシェルスクリプトではなく、
+別名であるのはこのためです。
+シェルの別のサブジョブから実行できる再開コマンドを実現することは不可能です。
+たとえば、環境変数@code{EDITOR}の値に指定できる
+コマンドを定義する方法はありません。
+したがって、
+この機能でEmacsサーバーの機能（@pxref{Emacs Server}）を
+置き換えることはできません。
+
+@c   The aliases use the Emacs Server feature if you appear to have a
+@c server Emacs running.  However, they cannot determine this with complete
+@c accuracy.  They may think that a server is still running when in
+@c actuality you have killed that Emacs, because the file
+@c @file{/tmp/.esrv@dots{}} still exists.  If this happens, find that
+@c file and delete it.
+別名@code{edit}は、Emacsサーバーが稼働中ならEmacsサーバーの機能を使います。
+しかし、このことを完全に正確に調べる方法はありません。
+実際にはEmacsが終了していても、ファイル@file{/tmp/.esrv@dots{}}が存在すると
+サーバーが稼働中であると誤認してしまいます。
+そのような場合には、そのファイルを探して削除してください。
+
+@node Environment
+@c @appendixsec Environment Variables
+@c @cindex environment variables
+@appendixsec 環境変数
+@cindex 環境変数
+
+@c This appendix describes how Emacs uses environment variables.  An
+@c environment variable is a string passed from the operating system to
+@c Emacs, and the collection of environment variables is known as the
+@c environment.  Environment variable names are case sensitive and it is
+@c conventional to use upper case letters only.
+ここでは、Emacsがどうのように環境変数を使うか説明します。
+環境変数とは、オペレーティングシステムからEmacsへ渡される文字列であり、
+環境変数の集まりが環境です。
+環境変数名では大文字小文字を区別し大文字だけを使う習慣があります。
+
+@c Because environment variables come from the operating system there is no
+@c general way to set them; it depends on the operating system and
+@c especially the shell that you are using.  For example, here's how to set
+@c the environment variable @code{ORGANIZATION} to @samp{not very much}
+@c using bash:
+環境変数はオペレーティングシステムが与えるものなので、
+それらを設定する一般的な方法はありません。
+設定方法は、オペレーティングシステム、特に、使用するシェルに依存します。
+たとえば、bashを使って環境変数@code{ORGANIZATION}に
+@samp{not very much}を設定するにはつぎのようにします。
+
+@example
+export ORGANIZATION="not very much"
+@end example
+
+@noindent
+@c and here's how to do it in csh or tcsh:
+cshやtcshの場合にはつぎのようにします。
+
+@example
+setenv ORGANIZATION "not very much"
+@end example
+
+@c When Emacs is set-up to use the X windowing system, it inherits the
+@c use of a large number of environment variables from the X library.  See
+@c the X documentation for more information.
+EmacsがXウィンドウシステムを使うようになっている場合には、
+EmacsはXライブラリから非常に多数の環境変数を受け継ぎます。
+詳しくはXのドキュメントを参照してください。
+
+@menu
+* General Variables::   Environment variables that all versions of Emacs use.
+* Misc Variables::      Certain system-specific variables.
+@end menu
+
+@node General Variables
+@c @appendixsubsec General Variables
+@appendixsubsec 一般的な変数
+
+@table @code
+@item AUTHORCOPY
+@c The name of a file used to archive news articles posted with the @sc{gnus}
+@c package.
+@sc{gnus}パッケージで投稿したニュース記事の保管用ファイルの名前。
+@item CDPATH
+@c Used by the @code{cd} command to search for the directory you specify,
+@c when you specify a relative directory name.
+相対ディレクトリ名を指定したときに、
+そのディレクトリを探索するために@code{cd}コマンドが使う。
+@item DOMAINNAME
+@c The name of the Internet domain that the machine running Emacs is
+@c located in.  Used by the @sc{gnus} package.
+Emacsが動いているマシンが属するInternetのドメイン名。
+@sc{gnus}パッケージが使う。
+@item EMACS_UNIBYTE
+@c @cindex unibyte operation
+@cindex ユニバイト操作
+@c Defining this environment variable directs Emacs to do almost everything
+@c with single-byte buffers and strings.  It is equivalent to using the
+@c @samp{--unibyte} command-line option on each invocation.  @xref{Initial
+@c Options}.
+この環境変数を定義すると、
+Emacsはユニバイトバッファやユニバイト文字列を使うようにすべてを設定する。
+起動時に、毎回、コマンド行オプション@samp{--unibyte}を使うのと等価である。
+@pxref{Initial Options}。
+@item EMACSDATA
+@c Used to initialize the variable @code{data-directory} used to locate the
+@c architecture-independent files that come with Emacs.  Setting this
+@c variable overrides the setting in @file{paths.h} when Emacs was built.
+Emacsに付属の機種独立なファイルを探すために使う
+変数@code{data-direcotry}の初期化に用いる。
+Emacs作成時の@file{paths.h}での設定に優先する。
+@item EMACSLOADPATH
+@c A colon-separated list of directories from which to load Emacs Lisp
+@c files.  Setting this variable overrides the setting in @file{paths.h}
+@c when Emacs was built.
+ロードすべきEmacs Lispファイルを探索するディレクトリをコロンで区切った並び。
+Emacs作成時の@file{paths.h}での設定に優先する。
+@item EMACSLOCKDIR
+@c The directory that Emacs places lock files---files used to protect
+@c users from editing the same files simultaneously.  Setting this variable
+@c overrides the setting in @file{paths.h} when Emacs was built.
+複数のユーザーが同じファイルを同時に編集するの防ぐために用いる
+ロックファイルを置くディレクトリ。
+Emacs作成時の@file{paths.h}での設定に優先する。
+@item EMACSPATH
+@c The location of Emacs-specific binaries.  Setting this variable
+@c overrides the setting in @file{paths.h} when Emacs was built.
+Emacsに特有のバイナリファイルを置く場所。
+Emacs作成時の@file{paths.h}での設定に優先する。
+@item ESHELL
+@c Used for shell-mode to override the @code{SHELL} environment variable.
+シェル（shell）モードで使い、環境変数@code{SHELL}の設定に優先する。
+@item HISTFILE
+@c The name of the file that shell commands are saved in between logins.
+@c This variable defaults to @file{~/.history} if you use (t)csh as shell,
+@c to @file{~/.bash_history} if you use bash, to @file{~/.sh_history} if
+@c you use ksh, and to @file{~/.history} otherwise.
+ログインとつぎのログインのあいだでシェルコマンドを保存しておくファイルの名前。
+この変数のデフォルトは、
+シェルとしてcshやtcshを使う場合は@file{~/.history}、
+bashの場合は@file{~/.bash_history}、
+kshの場合は@file{~/.sh_history}、
+その他の場合には@file{~/.history}である。
+@item HOME
+@c The location of the user's files in the directory tree; used for
+@c expansion of file names starting with a tilde (@file{~}).  On MS-DOS, it
+@c defaults to the directory from which Emacs was started, with @samp{/bin}
+@c removed from the end if it was present.
+ディレクトリ木構造上でのユーザーのファイルの置き場所。
+ティルダ（@file{~}）で始まるファイル名の展開に使われる。
+MS-DOSでは、Emacsが起動されたディレクトリがデフォルトであるが、
+@samp{/bin}で終る場合には@samp{/bin}は取り除く。
+@item HOSTNAME
+@c The name of the machine that Emacs is running on.
+Emacsが動いているマシンの名前。
+@item INCPATH 
+@c A colon-separated list of directories.  Used by the @code{complete} package
+@c to search for files.
+コロンで区切ったディレクトリの並び。
+@code{complete}パッケージがファイルを探すために使う。
+@item INFOPATH
+@c A colon-separated list of directories holding info files.  Setting this
+@c variable overrides the setting in @file{paths.el} when Emacs was built.
+infoファイルを収めたディレクトリをコロンで区切った並び。
+Emacs作成時の@file{paths.h}での設定に優先する。
+@item LANG
+@itemx LC_ALL
+@itemx LC_CTYPE
+@c The user's preferred locale.  A locale name which contains
+@c @samp{8859-@var{n}}, @samp{8859_@var{n}} or @samp{8859@var{n}}, where
+@c @var{n} is between 1 and 4, automatically specifies the
+@c @samp{Latin-@var{n}} language environment when Emacs starts up.  If
+@c @var{n} is 9, that specifies @samp{Latin-5}.
+ユーザーの好みのローケル。
+ローケル名に、@var{n}を1から4として、
+@samp{8859-@var{n}}、@samp{8859_@var{n}}、@samp{8859@var{n}}が
+含まれると、自動的に@samp{Latin-@var{n}}をEmacs起動時の言語環境に指定する。
+@var{n}が9であると@samp{Latin-5}を指定する。
+@item LOGNAME
+@c The user's login name.  See also @code{USER}.
+ユーザーのログイン名。
+@code{USER}も参照。
+@item MAIL
+@c The name of the user's system mail inbox.
+ユーザーのシステムメイルスプールの名前。
+@item MAILRC
+@c Name of file containing mail aliases.  This defaults to
+@c @file{~/.mailrc}.
+メイルの別名を収めたファイルの名前。
+デフォルトは@file{~/.mailrc}。
+@item MH
+@c Name of setup file for the mh system.  This defaults to
+@c @file{~/.mh_profile}.
+mhシステムの設定ファイルの名前。
+デフォルトは@file{~/.mh_profile}。
+@item NAME
+@c The real-world name of the user.
+ユーザーの実世界での名前。
+@item NNTPSERVER
+@c The name of the news server.  Used by the mh and @sc{gnus} packages.
+ニュースサーバーの名前。
+mhや@sc{gnus}パッケージで用いる。
+@item ORGANIZATION
+@c The name of the organization to which you belong.  Used for setting the
+@c `Organization:' header in your posts from the @sc{gnus} package.
+読者が所属している組織の名前。
+@sc{gnus}パッケージで投稿する記事のヘッダ「Organization:」の設定に使う。
+@item PATH
+@c A colon-separated list of directories in which executables reside.  (On
+@c MS-DOS, it is semicolon-separated instead.)  This variable is used to
+@c set the Emacs Lisp variable @code{exec-path} which you should consider
+@c to use instead.
+実行ファイルを置いたディレクトリをコロンで区切った並び。
+（MS-DOSではセミコロンで区切る。）
+この変数はEmacs Lispの変数@code{exec-path}の設定に使われる。
+Emacsの中ではこのLisp変数の値を使うことになる。
+@item PWD
+@c If set, this should be the default directory when Emacs was started.
+設定すると、Emacs起動時のデフォルトディレクトリになる。
+@item REPLYTO
+@c If set, this specifies an initial value for the variable
+@c @code{mail-default-reply-to}.  @xref{Mail Headers}.
+設定すると、変数@code{mail-default-reply-to}の初期値を指定する。
+@pxref{Mail Headers}。
+@item SAVEDIR
+@c The name of a directory in which news articles are saved by default.
+@c Used by the @sc{gnus} package.
+ニュース記事を保存するデフォルトのディレクトリ名。
+@sc{gnus}パッケージが使う。
+@item SHELL
+@c The name of an interpreter used to parse and execute programs run from
+@c inside Emacs.
+Emacs内から起動するプログラムの解析や実行に用いるインタープリタの名前。
+@item TERM
+@c The name of the terminal that Emacs is running on.  The variable must be
+@c set unless Emacs is run in batch mode.  On MS-DOS, it defaults to
+@c @samp{internal}, which specifies a built-in terminal emulation that
+@c handles the machine's own display.
+Emacsが動いている端末の名前。
+バッチモードでの実行でなければこの変数を設定する必要がある。
+MS-DOSではデフォルトは@samp{internal}であり、
+マシン固有の画面を扱う内蔵の端末エミュレータを意味する。
+@item TERMCAP
+@c The name of the termcap library file describing how to program the
+@c terminal specified by the @code{TERM} variable.  This defaults to
+@c @file{/etc/termcap}.
+変数@code{TERM}で指定した端末をどのように制御するか記述した
+termcapライブラリファイルの名前。
+デフォルトは@file{/etc/termcap}。
+@item TMPDIR
+@c Used by the Emerge package as a prefix for temporary files.
+Emergeパッケージが使い、作業用ファイルの接頭辞。
+@item TZ
+@c This specifies the current time zone and possibly also daylight savings
+@c information.  On MS-DOS, the default is based on country code; see the
+@c file @file{msdos.c} for details.
+現在のタイムゾーン（時刻帯）を指定し必要なら夏時間も指定する。
+MS-DOSではデフォルトは国別コードに基づく。
+詳しくはファイル@file{msdos.c}を参照。
+@item USER
+@c The user's login name.  See also @code{LOGNAME}.  On MS-DOS, this
+@c defaults to @samp{root}.
+ユーザーのログイン名。
+@code{LOGNAME}も参照。
+MS-DOSではデフォルトは@samp{root}。
+@item VERSION_CONTROL
+@c Used to initialize the @code{version-control} variable (@pxref{Backup
+@c Names}).
+変数@code{version-control}（@pxref{Backup Names}）の初期化に使う。
+@end table
+
+@node Misc Variables
+@c @appendixsubsec Miscellaneous Variables
+@appendixsubsec その他の変数
+
+@c These variables are used only on particular configurations:
+これらの変数は特定の場合に限って使われます。
+
+@table @code
+@item COMSPEC
+@c On MS-DOS, the name of the command interpreter to use.  This is used to
+@c make a default value for the @code{SHELL} environment variable.
+MS-DOSにおいて、使用するコマンドインタープリタの名前。
+環境変数@code{SHELL}のデフォルト値になる。
+
+@item NAME
+@c On MS-DOS, this variable defaults to the value of the @code{USER}
+@c variable.
+MS-DOSにおいて、この変数は変数@code{USER}のデフォルト値になる。
+
+@item TEMP
+@itemx TMP
+@c On MS-DOS, these specify the name of the directory for storing temporary
+@c files in.
+MS-DOSにおいて、作業用ファイルを置くディレクトリの名前を指定する。
+
+@item EMACSTEST
+@c On MS-DOS, this specifies a file to use to log the operation of the
+@c internal terminal emulator.  This feature is useful for submitting bug
+@c reports.
+MS-DOSにおいて、
+内蔵の端末エミュレータの動作を記録するために使うファイルを指定する。
+この機能はバグレポートを提出するときに有益である。
+
+@item EMACSCOLORS
+@c Used on MS-DOS systems to set screen colors early, so that the screen
+@c won't momentarily flash the default colors when Emacs starts up.  The
+@c value of this variable should be two-character encoding of the
+@c foreground (the first character) and the background (the second
+@c character) colors of the default face.  Each character should be the
+@c hexadecimal code for the desired color on a standard PC text-mode
+@c display.
+MS-DOSシステムにおいて、スクリーンの初期表示色を設定して
+Emacs起動時に瞬間的にデフォルトの表示色が閃かないようにする。
+この変数の値は、デフォルトのフェイスの
+（1文字目で）前景色と（2文字目で）背景色を符号化した2文字であること。
+それぞれの文字は、標準的なPCのテキストモード画面の表示色を
+表す16進符号であること。
+
+@c The PC display usually supports only eight background colors.  However,
+@c Emacs switches the DOS display to a mode where all 16 colors can be used
+@c for the background, so all four bits of the background color are
+@c actually used.
+PCの画面では、通常、8色の背景色しか扱えない。
+しかし、EmacsはDOSの画面を16色の背景色のモードに切り替えるので、
+背景色の下位4bitすべてが実際に使われる。
+
+@item WINDOW_GFX
+@c Used when initializing the Sun windows system.
+Sunのウィンドウシステムを初期化するときに使う。
+@end table
+
+@node Display X
+@c @appendixsec Specifying the Display Name 
+@c @cindex display name (X Windows)
+@c @cindex @code{DISPLAY} environment variable
+@appendixsec ディスプレイ名の指定
+@cindex ディスプレイ名（Xウィンドウシステム）
+@cindex 環境変数@code{DISPLAY}
+@cindex @code{DISPLAY}（環境変数）
+
+@c   The environment variable @code{DISPLAY} tells all X clients, including
+@c Emacs, where to display their windows.  Its value is set up by default
+@c in ordinary circumstances, when you start an X server and run jobs
+@c locally.  Occasionally you may need to specify the display yourself; for
+@c example, if you do a remote login and want to run a client program
+@c remotely, displaying on your local screen.
+環境変数@code{DISPLAY}は、Emacsを含むすべてのXクライアントに
+ウィンドウをどこに表示するかを教えます。
+普通の状況では、
+Xサーバーを起動してローカルでジョブを走らせると、
+この変数の値はデフォルトで設定されます。
+場合によっては、自分でディスプレイを指定する必要があるでしょう。
+たとえば、リモートログインしてリモート側でクライアントプログラムを実行し、
+表示はローカルの画面にする場合です。
+
+@c   With Emacs, the main reason people change the default display is to
+@c let them log into another system, run Emacs on that system, but have the
+@c window displayed at their local terminal.  You might need to use login
+@c to another system because the files you want to edit are there, or
+@c because the Emacs executable file you want to run is there.
+Emacsを使う場合、デフォルトのディスプレイを変更する主な理由は、
+他のシステムにログインしてそのシステム上でEmacsを実行し、
+ウィンドウはローカルの画面に表示するためです。
+他のシステムにログインするのは、そのシステム上に編集したいファイルがあるか、
+あるいは、
+実行したいEmacsの実行ファイルがそのシステムにあるからでしょう。
+
+@c   The syntax of the @code{DISPLAY} environment variable is
+@c @samp{@var{host}:@var{display}.@var{screen}}, where @var{host} is the
+@c host name of the X Window System server machine, @var{display} is an
+@c arbitrarily-assigned number that distinguishes your server (X terminal)
+@c from other servers on the same machine, and @var{screen} is a
+@c rarely-used field that allows an X server to control multiple terminal
+@c screens.  The period and the @var{screen} field are optional.  If
+@c included, @var{screen} is usually zero.
+環境変数@code{DISPLAY}の書式は
+@samp{@var{host}:@var{display}.@var{screen}}です。
+@var{host}はXウィンドウシステムのサーバーマシンの名前、
+@var{display}は同じマシンの別のサーバーと読者のサーバー（X端末）を
+区別するために任意に割り振られた番号、
+@var{screen}は稀にしか使いませんが
+1つのXサーバーで複数の端末画面を制御する場合に使います。
+ピリオドと@var{screen}は省いてかまいません。
+指定する場合、@var{screen}は普通はゼロです。
+
+@c   For example, if your host is named @samp{glasperle} and your server is
+@c the first (or perhaps the only) server listed in the configuration, your
+@c @code{DISPLAY} is @samp{glasperle:0.0}.
+たとえば、読者のホストの名前は@samp{glasperle}であり、
+読者のサーバーは使用できるサーバーのうちで最初（でたぶん唯一）のもので
+あるとすれば、@code{DISPLAY}は@samp{glasperle:0.0}となります。
+
+@c   You can specify the display name explicitly when you run Emacs, either
+@c by changing the @code{DISPLAY} variable, or with the option @samp{-d
+@c @var{display}} or @samp{--display=@var{display}}.  Here is an example:
+Emacsを実行するときに明示的にディスプレイ名を指定できます。
+変数@code{DISPLAY}を変更する、あるいは、オプションの@samp{-d @var{display}}や
+@samp{--display=@var{display}}を指定します。
+たとえばつぎのようにします
+
+@smallexample
+emacs --display=glasperle:0 &
+@end smallexample
+
+@c   You can inhibit the direct use of X with the @samp{-nw} option.  This
+@c is also an initial option.  It tells Emacs to display using ordinary
+@c ASCII on its controlling terminal.
+オプション@samp{-nw}を指定するとXを直接使用することを禁止できます。
+これも初期化オプションです。
+Emacsに対して制御端末に通常のASCII文字を表示するように指示します。
+
+@c   Sometimes, security arrangements prevent a program on a remote system
+@c from displaying on your local system.  In this case, trying to run Emacs
+@c produces messages like this:
+セキュリティの設定によっては、リモートシステムのプログラムから
+読者のローカルのシステムに表示するのが禁止されます。
+この場合、Emacsを走らせるとつぎのようなメッセージが出力されます。
+
+@smallexample
+Xlib:  connection to "glasperle:0.0" refused by server
+@end smallexample
+
+@noindent
+@c You might be able to overcome this problem by using the @code{xhost}
+@c command on the local system to give permission for access from your
+@c remote machine.
+この問題は、@code{xhost}コマンド
+@footnote{【訳注】ホスト単位でアクセスを制御する@code{xhost}コマンドより、
+ユーザー単位でアクセスを制御する@code{xauth}のほうが望ましいだろう。}
+を用いて、ローカルマシンにリモートシステムからのアクセス許可を
+与えれば解決できます。
+
+@node Font X
+@c @appendixsec Font Specification Options
+@c @cindex font name (X Windows)
+@appendixsec フォント指定オプション
+@cindex フォント名（Xウィンドウシステム）
+
+@c   By default, Emacs displays text in the font named @samp{9x15}, which
+@c makes each character nine pixels wide and fifteen pixels high.  You can
+@c specify a different font on your command line through the option
+@c @samp{-fn @var{name}}.
+デフォルトでは、Emacsは@samp{9x15}という名前のフォントでテキストを表示します。
+この場合、各文字の幅は9ピクセル、高さは15ピクセルです。
+コマンド行のオプション@samp{-fn @var{name}}で別のフォントを指定できます。
+
+@table @samp
+@item -fn @var{name}
+@c Use font @var{name} as the default font.
+デフォルトのフォントとしてフォント@var{name}を使う。
+
+@item --font=@var{name}
+@c @samp{--font} is an alias for @samp{-fn}.
+@samp{--font}は、@samp{-fn}の別名。
+@end table
+
+@c   Under X, each font has a long name which consists of eleven words or
+@c numbers, separated by dashes.  Some fonts also have shorter
+@c nicknames---@samp{9x15} is such a nickname.  You can use either kind of
+@c name.  You can use wildcard patterns for the font name; then Emacs lets
+@c X choose one of the fonts that match the pattern.  Here is an example,
+@c which happens to specify the font whose nickname is @samp{6x13}:
+Xにおいては、各フォントは
+ダッシュで区切った11個の単語や数字からなる長い名前を持ちます。
+短い愛称を持つフォントもあり、@samp{9x15}はそのような愛称です。
+どちらの名前を用いてもかまいません。
+フォント名にはワイルドカードパターンを使えますが、
+その場合には、EmacsはXにパターンに一致するフォントを1つ選ばせます。
+以下の例は、@samp{6x13}という愛称を持つフォントを指定することになります。
+
+@smallexample
+emacs -fn "-misc-fixed-medium-r-semicondensed--13-*-*-*-c-60-iso8859-1" &
+@end smallexample
+
+@noindent
+@c You can also specify the font in your @file{.Xdefaults} file:
+個人のファイル@file{.Xdefaults}でもフォントを指定できます。
+
+@smallexample
+emacs.font: -misc-fixed-medium-r-semicondensed--13-*-*-*-c-60-iso8859-1
+@end smallexample
+
+@c   A long font name has the following form:
+長いフォント名はつぎのような形式です。
+
+@smallexample
+-@var{maker}-@var{family}-@var{weight}-@var{slant}-@var{widthtype}-@var{style}@dots{}
+@dots{}-@var{pixels}-@var{height}-@var{horiz}-@var{vert}-@var{spacing}-@var{width}-@var{charset}
+@end smallexample
+
+@table @var
+@item family
+@c This is the name of the font family---for example, @samp{courier}.
+フォントファミリ名。
+たとえば@samp{courier}。
+@item weight
+@c This is normally @samp{bold}, @samp{medium} or @samp{light}.  Other
+@c words may appear here in some font names.
+通常、@samp{bold}、@samp{medium}、@samp{light}のいずれか。
+フォントによっては他の単語もありえる。
+@item slant
+@c This is @samp{r} (roman), @samp{i} (italic), @samp{o} (oblique),
+@c @samp{ri} (reverse italic), or @samp{ot} (other).
+@samp{r}（roman）、@samp{i}（italic）、@samp{o}（oblique）、
+@samp{ri}（reverse italic）、@samp{ot}（other）のいずれか。
+@item widthtype
+@c This is normally @samp{condensed}, @samp{extended}, @samp{semicondensed}
+@c or @samp{normal}.  Other words may appear here in some font names.
+通常、@samp{condensed}、@samp{extended}、@samp{semicondensed}、
+@samp{normal}のいずれか。
+フォントによっては他の単語もありえる。
+@item style
+@c This is an optional additional style name.  Usually it is empty---most
+@c long font names have two hyphens in a row at this point.
+付加的な書体名。
+この部分は普通は空であり、ほとんどの長いファイル名では2つのハイフンである。
+@item pixels
+@c This is the font height, in pixels.
+ピクセル単位でのフォントの高さ。
+@item height
+@c This is the font height on the screen, measured in tenths of a printer's
+@c point---approximately 1/720 of an inch.  In other words, it is the point
+@c size of the font, times ten.  For a given vertical resolution,
+@c @var{height} and @var{pixels} are proportional; therefore, it is common
+@c to specify just one of them and use @samp{*} for the other.
+印刷機の「ポイント」の1/10（約1/720インチ）を
+単位とした画面上でのフォントの高さ。
+いいかえれば、フォントのポイントサイズの10倍。
+垂直解像度を指定すれば、@var{height}と@var{pixels}は比例する。
+したがって、どちらか一方を指定して他方には@samp{*}を用いるのが一般的である。
+@item horiz
+@c This is the horizontal resolution, in pixels per inch, of the screen for
+@c which the font is intended.
+フォントが仮定するインチあたりのピクセル数で表した画面の水平解像度。
+@item vert
+@c This is the vertical resolution, in dots per inch, of the screen for
+@c which the font is intended.  Normally the resolution of the fonts on
+@c your system is the right value for your screen; therefore, you normally
+@c specify @samp{*} for this and @var{horiz}.
+フォントが仮定するインチあたりのドット数で表した画面の垂直解像度。
+通常、読者のシステムのフォントの解像度は読者の画面に適しているはずなので、
+これと@var{horiz}には普通は@samp{*}を指定する。
+@item spacing
+@c This is @samp{m} (monospace), @samp{p} (proportional) or @samp{c}
+@c (character cell).  Emacs can use @samp{m} and @samp{c} fonts.
+@samp{m}（monospace）、@samp{p}（proportional）、
+@samp{c}（character cell）のいずれか。
+Emacsでは@samp{m}と@samp{c}のフォントを利用できる。
+@item width
+@c This is the average character width, in pixels, multiplied by ten.
+ピクセル単位で表した文字の平均幅の10倍。
+@item charset
+@c This is the character set that the font depicts.
+@c Normally you should use @samp{iso8859-1}.
+フォントの描く文字集合。
+通常は@samp{iso8859-1}を使うであろう。
+@footnote{【訳注】日本語の場合は、通常、@samp{jisx0208.1983-0}などを使うであろう。}
+@end table
+
+@c   Use only fixed-width fonts---that is, fonts in which all characters
+@c have the same width; Emacs cannot yet handle display properly for
+@c variable-width fonts.  Any font with @samp{m} or @samp{c} in the
+@c @var{spacing} field of the long name is a fixed-width font.  Here's how
+@c to use the @code{xlsfonts} program to list all the fixed-width fonts
+@c available on your system:
+固定幅フォント、つまり、すべての文字が同じ幅のフォントだけを使ってください。
+Emacsはまだ可変幅のフォントを正しく表示できません。
+長いフォント名の@var{spacing}欄が@samp{m}や@samp{c}のフォントは
+固定幅フォントです。
+読者のシステムで利用可能な固定幅フォントをすべて表示するには、
+プログラム@code{xlsfotns}を用いてつぎのようにします。
+
+@example
+xlsfonts -fn '*x*' | egrep "^[0-9]+x[0-9]+"
+xlsfonts -fn '*-*-*-*-*-*-*-*-*-*-*-m*'
+xlsfonts -fn '*-*-*-*-*-*-*-*-*-*-*-c*'
+@end example
+
+@noindent
+@c To see what a particular font looks like, use the @code{xfd} command.
+@c For example:
+特定のフォントの字形を見るにはコマンド@code{xfd}を使います。
+たとえば、
+
+@example
+xfd -fn 6x13
+@end example
+
+@noindent
+@c displays the entire font @samp{6x13}.
+とするとフォント@samp{6x13}全体を表示します。
+
+@c   While running Emacs, you can set the font of the current frame
+@c (@pxref{Frame Parameters}) or for a specific kind of text
+@c (@pxref{Faces}).
+Emacsが動作中のときは、カレントフレーム（@pxref{Frame Parameters}）、
+あるいは、特定の種類のテキスト（@pxref{Faces}）のフォントを設定できます。
+
+@node Colors X
+@c @appendixsec Window Color Options
+@c @cindex color of window (X Windows)
+@appendixsec ウィンドウ表示色オプション
+@cindex ウィンドウ表示色（Xウィンドウシステム）
+
+@c   On a color display, you can specify which color to use for various
+@c parts of the Emacs display.  To find out what colors are available on
+@c your system, look at the @file{/usr/lib/X11/rgb.txt} file.  If you do
+@c not specify colors, the default for the background is white and the
+@c default for all other colors is black.  On a monochrome display, the
+@c foreground is black, the background is white, and the border is gray if
+@c the display supports that.
+カラーディスプレイでは、Emacsの表示画面のさまざまな部分に
+使う表示色を指定できます。
+システムで利用可能な表示色を調べるには
+ファイル@file{/usr/lib/X11/rgb.txt}@footnote{【訳注】
+表示色として指定できる『名前』がわかるだけ。
+どのような色に表示されるかは@code{xcolors}などのコマンドで調べるとよい。
+}を見ます。
+表示色を指定しないと、
+背景色のデフォルトは白、それ以外の表示色のデフォルトは黒です。
+モノクロディスプレイでは、前景色は黒、背景色は白、
+ディスプレイで表示できるなら境界部分は灰色です。
+
+@c   Here is a list of the options for specifying colors:
+以下は、表示色を指定するオプションの一覧です。
+
+@table @samp
+@item -fg @var{color} 
+@itemx --foreground-color=@var{color} 
+@c Specify the foreground color.
+前景色を指定する。
+@item -bg @var{color} 
+@itemx --background-color=@var{color} 
+@c Specify the background color.
+背景色を指定する。
+@item -bd @var{color} 
+@itemx --border-color=@var{color} 
+@c Specify the color of the border of the X window.
+Xのウィンドウの境界部分の表示色を指定する。
+@item -cr @var{color} 
+@itemx --cursor-color=@var{color} 
+@c Specify the color of the Emacs cursor which indicates where point is.
+ポイント位置を表すEmacsのカーソルの表示色を指定する。
+@item -ms @var{color} 
+@itemx --mouse-color=@var{color} 
+@c Specify the color for the mouse cursor when the mouse is in the Emacs window.
+マウスがEmacsのウィンドウ内にあるときのマウスカーソルの表示色を指定する。
+@item -r
+@itemx --reverse-video
+@c Reverse video---swap the foreground and background colors.
+反転表示する。
+背景色と前景色を入れ替える。
+@end table
+
+@c   For example, to use a coral mouse cursor and a slate blue text cursor,
+@c enter:
+たとえば、珊瑚色のマウスカーソルと青石板色のテキストカーソルを用いるには、
+つぎのように入力します。
+
+@example
+emacs -ms coral -cr 'slate blue' &
+@end example
+
+@c   You can reverse the foreground and background colors through the
+@c @samp{-r} option or with the X resource @samp{reverseVideo}.
+オプション@samp{-r}かXリソースの@samp{reverseVideo}で
+前景色と背景色を入れ替えられます。
+
+@node Window Size X
+@c @appendixsec Options for Window Geometry
+@c @cindex geometry (X Windows)
+@appendixsec ウィンドウジオメトリオプション
+@cindex ジオメトリ（Xウィンドウシステム）
+
+@c   The @samp{-geometry} option controls the size and position of the
+@c initial Emacs frame.  Here is the format for specifying the window
+@c geometry:
+オプション@samp{-geometry}は、Emacsの初期フレームのサイズと位置を制御します。
+ウィンドウのジオメトリ（サイズと位置）を指定する書式はつぎのとおりです。
+
+@table @samp
+@item -g @var{width}x@var{height}@r{@{}+-@r{@}}@var{xoffset}@r{@{}+-@r{@}}@var{yoffset}
+@c Specify window size @var{width} and @var{height} (measured in character
+@c columns and lines), and positions @var{xoffset} and @var{yoffset}
+@c (measured in pixels).
+@var{width}と@var{height}でウィンドウの（文字の桁数と行数で数えた）サイズを、
+@var{xoffset}と@var{yoffset}で（ピクセル単位で）位置を指定する。
+
+@item --geometry=@var{width}x@var{height}@r{@{}+-@r{@}}@var{xoffset}@r{@{}+-@r{@}}@var{yoffset}
+@c This is another way of writing the same thing.
+同じことを記述する別の方法。
+@end table
+
+@noindent
+@c @code{@r{@{}+-@r{@}}} means either a plus sign or a minus sign.  A plus
+@c sign before @var{xoffset} means it is the distance from the left side of
+@c the screen; a minus sign means it counts from the right side.  A plus
+@c sign before @var{yoffset} means it is the distance from the top of the
+@c screen, and a minus sign there indicates the distance from the bottom.
+@c The values @var{xoffset} and @var{yoffset} may themselves be positive or
+@c negative, but that doesn't change their meaning, only their direction.
+@code{@r{@{}+-@r{@}}}はプラス記号かマイナス記号のいずれかを意味します。
+@var{xoffset}のまえのプラス記号で画面左端からの距離を、
+マイナス記号で右端からの距離を意味します。
+@var{yoffset}のまえのプラス記号で画面上端からの距離を、
+マイナス記号で下端からの距離を意味します。
+@var{xoffset}と@var{yoffset}の値自体は正でも負でもよいのですが、
+その意味は変わらずに方向を変えるだけです。
+
+@c   Emacs uses the same units as @code{xterm} does to interpret the geometry.
+@c The @var{width} and @var{height} are measured in characters, so a large font
+@c creates a larger frame than a small font.  The @var{xoffset} and
+@c @var{yoffset} are measured in pixels.
+Emacsがジオメトリを解釈する単位は、@code{xterm}と同じ単位です。
+@var{width}と@var{height}は文字数で数えますから、
+大きなフォントでは小さいフォントよりも大きなフレームになります。
+@var{xoffset}と@var{yoffset}はピクセル単位で数えます。
+
+@c   Since the mode line and the echo area occupy the last 2 lines of the
+@c frame, the height of the initial text window is 2 less than the height
+@c specified in your geometry.  In non-X-toolkit versions of Emacs,
+@c the menu bar also takes one line of the specified number.
+モード行とエコー領域はフレームの最後の2行を占めるので、
+初期のテキストウィンドウの高さは
+ジオメトリで指定した高さより2だけ小さくなります。
+Xツールキット版でないEmacsでは、
+指定した数からさらに1行をメニューバーに利用します。
+
+@c   You do not have to specify all of the fields in the geometry
+@c specification.
+ジオメトリ指定のすべての部分を指定する必要はありません。
+
+@c   If you omit both @var{xoffset} and @var{yoffset}, the window manager
+@c decides where to put the Emacs frame, possibly by letting you place
+@c it with the mouse.  For example, @samp{164x55} specifies a window 164
+@c columns wide, enough for two ordinary width windows side by side, and 55
+@c lines tall.
+@var{xoffset}と@var{yoffset}の両方を省くと
+ウィンドウマネージャがEmacsのフレームの位置を決めますが、
+マウスで置き場所を指定できる場合もあります。
+たとえば、@samp{164x55}は
+（普通の幅のウィンドウを横に並べて2つ置けるサイズの）
+164桁で55行のウィンドウを指定します。
+
+@c   The default width for Emacs is 80 characters and the default height is
+@c 40 lines.  You can omit either the width or the height or both.  If
+@c you start the geometry with an integer, Emacs interprets it as the
+@c width.  If you start with an @samp{x} followed by an integer, Emacs
+@c interprets it as the height.  Thus, @samp{81} specifies just the width;
+@c @samp{x45} specifies just the height.
+デフォルトではEmacsの幅は80文字で高さは40行です。
+いずれか一方、あるいは、両方を省略できます。
+ジオメトリを数で始めると幅であると解釈します。
+@samp{x}で始まり数が続けば高さであると解釈します。
+したがって、@samp{81}は幅だけを指定し、
+@samp{x45}は高さだけを指定します。
+
+@c   If you start with @samp{+} or @samp{-}, that introduces an offset,
+@c which means both sizes are omitted.  Thus, @samp{-3} specifies the
+@c @var{xoffset} only.  (If you give just one offset, it is always
+@c @var{xoffset}.)  @samp{+3-3} specifies both the @var{xoffset} and the
+@c @var{yoffset}, placing the frame near the bottom left of the screen.
+@samp{+}か@samp{-}で始まれば位置指定となり、
+幅と高さの両方を省いたことを意味します。
+したがって、@samp{-3}は@var{xoffset}のみを指定します。
+（位置指定の要素が1つだけの場合にはつねに@var{xoffset}です。）
+@samp{+3-3}は@var{xoffset}と@var{yoffset}を指定し、
+画面の左底近くにフレームを置きます。
+
+@c   You can specify a default for any or all of the fields in
+@c @file{.Xdefaults} file, and then override selected fields with a
+@c @samp{--geometry} option.
+ファイル@file{.Xdefaults}ですべての部分か一部分のデフォルトを指定し、
+オプション@samp{--geometry}で特定の部分を上書きできます。
+
+@node Borders X
+@c @appendixsec Internal and External Borders
+@c @cindex borders (X Windows)
+@appendixsec 内部境界と外部境界
+@cindex 境界部分（Xウィンドウシステム）
+
+@c   An Emacs frame has an internal border and an external border.  The
+@c internal border is an extra strip of the background color around all
+@c four edges of the frame.  Emacs itself adds the internal border.  The
+@c external border is added by the window manager outside the internal
+@c border; it may contain various boxes you can click on to move or iconify
+@c the window.
+Emacsのフレームには内部境界と外部境界があります。
+内部境界はフレームの4辺の周りに付いた背景色の縁取りです。
+Emacs自身が内部境界を付加します。
+外部境界は、内部境界の外側にウィンドウマネージャが付加します。
+これには、ウィンドウを移動したりアイコン化するためにクリックできる
+さまざまな箱が付く場合もあります。
+
+@table @samp
+@item -ib @var{width}
+@itemx --internal-border=@var{width}
+@c Specify @var{width} as the width of the internal border.
+内部境界の幅として@var{width}を指定。
+
+@item -bw @var{width}
+@itemx --border-width=@var{width}
+@c Specify @var{width} as the width of the main border.
+@c = main border → external borderのまちがい？
+外部境界の幅として@var{width}を指定。
+@end table
+
+@c   When you specify the size of the frame, that does not count the
+@c borders.  The frame's position is measured from the outside edge of the
+@c external border.
+フレームのサイズ指定には境界は含みません。
+フレームの位置は外部境界の外側から測ります。
+
+@c   Use the @samp{-ib @var{n}} option to specify an internal border
+@c @var{n} pixels wide.  The default is 1.  Use @samp{-bw @var{n}} to
+@c specify the width of the external border (though the window manager may
+@c not pay attention to what you specify).  The default width of the
+@c external border is 2.
+内部境界の幅を@var{n}ピクセルにするには、
+オプション@samp{-ib @var{n}}を使います。
+デフォルトは1です。
+外部境界の幅を指定するには、
+（ウィンドウマネージャが指定を無視するかもしれませんが）
+@samp{-bw @var{n}}を使います。
+外部境界のデフォルトの幅は2です。
+
+@node Title X
+@c @appendixsec Frame Titles
+@appendixsec フレームタイトル
+
+@c   An Emacs frame may or may not have a specified title.  The frame
+@c title, if specified, appears in window decorations and icons as the name
+@c of the frame.  If an Emacs frame has no specified title, the default
+@c title is the name of the executable program (if there is only one frame)
+@c or the selected window's buffer name (if there is more than one frame).
+Emacsのフレームには、指定したタイトルがあるかもしれないし、ないかもしれません。
+フレームタイトルを指定すると、
+ウィンドウの装飾部分やアイコンにフレーム名として表示されます。
+Emacsのフレームにタイトルが指定されていなければ、
+デフォルトのタイトルは、
+（フレームが1つしかない場合には）実行プログラムの名前、あるいは、
+（複数のフレームがあれば）選択したウィンドウのバッファの名前になります。
+
+@c   You can specify a title for the initial Emacs frame with a command
+@c line option:
+コマンド行オプションでEmacsの初期フレームのタイトルを指定できます。
+
+@table @samp
+@item -title @var{title}
+@itemx --title=@var{title}
+@itemx -T @var{title}
+@c Specify @var{title} as the title for the initial Emacs frame.
+Emacsの初期フレームのタイトルとして@var{title}を指定する。
+@end table
+
+@c   The @samp{--name} option (@pxref{Resources X}) also specifies the title
+@c for the initial Emacs frame.
+オプション@samp{--name}（@pxref{Resources X}）も
+Emacsの初期フレームのタイトルを指定します。
+
+@node Icons X
+@c @appendixsec Icons
+@c @cindex icons (X Windows)
+@appendixsec アイコン
+@cindex アイコン（Xウィンドウシステム）
+
+@c   Most window managers allow the user to ``iconify'' a frame, removing
+@c it from sight, and leaving a small, distinctive ``icon'' window in its
+@c place.  Clicking on the icon window makes the frame itself appear again.
+@c If you have many clients running at once, you can avoid cluttering up
+@c the screen by iconifying most of the clients.
+ほとんどのウィンドウマネージャは、
+フレームを『アイコン化』することを許しています。
+つまり、フレームを見えなくしてから、その場所に
+小さな識別しやすい『アイコン』を置きます。
+アイコンウィンドウをクリックするとフレーム自体が再度表示されます。
+一度にたくさんのクライアントを動かしておく場合、
+クライアントのほとんどをアイコンにしておけば画面が乱雑にならずにすみます。
+
+@table @samp
+@item -i
+@itemx --icon-type
+@c Use a picture of a gnu as the Emacs icon.
+Emacsのアイコンとしてヌーの絵を使う。
+
+@item -iconic
+@itemx --iconic
+@c Start Emacs in iconified state.
+Emacsをアイコン化した状態で起動する。
+@end table
+
+@c   The @samp{-i} or @samp{--icon-type} option tells Emacs to use an icon
+@c window containing a picture of the GNU gnu.  If omitted, Emacs lets the
+@c window manager choose what sort of icon to use---usually just a small
+@c rectangle containing the frame's title.
+オプション@samp{-i}や@samp{--icon-type}は、
+GNUのヌーの絵を表示したアイコンウィンドウを使う指定です。
+省略すると、Emacsは使用するアイコンの種類をウィンドウマネージャに選ばせます。
+これは、通常、フレームのタイトルを含んだ小さな長方形のウィンドウです。
+@footnote{【訳注】uwm、twmなど古典的なウィンドウマネージャのふるまい。}
+
+@c   The @samp{-iconic} option tells Emacs to begin running as an icon,
+@c rather than opening a frame right away.  In this situation, the icon
+@c window provides only indication that Emacs has started; the usual text
+@c frame doesn't appear until you deiconify it.
+オプション@samp{-iconic}は、すぐにはフレームを開かずに
+アイコンで始めるようにEmacsを起動します。
+この場合、アイコンウィンドウはEmacsが起動したことだけを教えてくれます。
+アイコンを開くまで通常のテキストフレームは表示されません。
+
+@node Resources X
+@c @appendixsec X Resources
+@c @cindex resources
+@appendixsec Xリソース
+@cindex リソース
+
+@c   Programs running under the X Window System organize their user options
+@c under a hierarchy of classes and resources.  You can specify default
+@c values for these options in your X resources file, usually named
+@c @file{~/.Xdefaults}.
+Xウィンドウシステムで動いているプログラムでは、
+クラスとリソースの階層によってユーザーのオプションを取りまとめます。
+これらのオプションのデフォルト値は、
+@file{~/.Xdefaults}という名前の個人のXリソースファイルで指定できます。
+
+@c   Each line in the file specifies a value for one option or for a
+@c collection of related options, for one program or for several programs
+@c (optionally even for all programs).
+ファイル内の各行は、1つのオプション、関連したオプション群、
+1つのプログラム、あるいは、複数（または全部）のプログラムの
+値を指定します。
+
+@c   Programs define named resources with particular meanings.  They also
+@c define how to group resources into named classes.  For instance, in
+@c Emacs, the @samp{internalBorder} resource controls the width of the
+@c internal border, and the @samp{borderWidth} resource controls the width
+@c of the external border.  Both of these resources are part of the
+@c @samp{BorderWidth} class.  Case distinctions are significant in these
+@c names.
+プログラムは特定の意味を持ったリソース名を定義します。
+リソースをどのようにクラス名にグループ化するかも定義します。
+たとえば、Emacsでは、
+リソース@samp{internalBorder}は内部境界の幅を制御し、
+リソース@samp{borderWidth}は外部境界の幅を制御します。
+どちらのリソースもクラス@samp{BorderWidth}の一部です。
+これらの名前では大文字小文字を区別します。
+
+@c   In @file{~/.Xdefaults}, you can specify a value for a single resource
+@c on one line, like this:
+@file{~/.Xdefaults}では、以下のように1行に1つのリソースを指定します。
+
+@example
+emacs.borderWidth: 2
+@end example
+
+@noindent
+@c Or you can use a class name to specify the same value for all resources
+@c in that class.  Here's an example:
+あるいは、クラス内のすべてのリソースに同じ値を指定するには
+クラス名を使います。
+たとえば、つぎのようにします。
+
+@example
+emacs.BorderWidth: 2
+@end example
+
+@c   If you specify a value for a class, it becomes the default for all
+@c resources in that class.  You can specify values for individual
+@c resources as well; these override the class value, for those particular
+@c resources.  Thus, this example specifies 2 as the default width for all
+@c borders, but overrides this value with 4 for the external border:
+クラスに値を指定すると、
+それはそのクラス内のすべてのリソースのデフォルト値になります。
+個別にリソースの値を指定することもできます。
+その場合、特定のリソースの値はクラスの値に優先します。
+したがって、つぎの例では、
+すべての境界のデフォルトの幅として2を指定しますが、
+外部境界の値は4になります。
+
+@example
+emacs.Borderwidth: 2
+emacs.borderwidth: 4
+@end example
+
+@c   The order in which the lines appear in the file does not matter.
+@c Also, command-line options always override the X resources file.
+ファイル内での行の順番は関係ありません。
+また、コマンド行オプションはつねにXリソースファイルに優先します。
+
+@c   The string @samp{emacs} in the examples above is also a resource
+@c name.  It actually represents the name of the executable file that you
+@c invoke to run Emacs.  If Emacs is installed under a different name, it
+@c looks for resources under that name instead of @samp{emacs}.
+上の例の文字列@samp{emacs}もリソース名です。
+この名前は、Emacsを起動するために指定した実行ファイルの名前を表します。
+Emacsを別の名前でインストールしたならば、
+@samp{emacs}のかわりにその名前のリソースを探します。
+
+@table @samp
+@item -name @var{name}
+@itemx --name=@var{name}
+@c Use @var{name} as the resource name (and the title) for the initial
+@c Emacs frame.  This option does not affect subsequent frames, but Lisp
+@c programs can specify frame names when they create frames.
+Emacsの初期フレームのリソース名（およびタイトル）として@var{name}を使う。
+このオプションは、初期フレーム以外には影響しないが、
+Lispプログラムからはフレーム作成時にフレーム名を指定できる。
+
+@c If you don't specify this option, the default is to use the Emacs
+@c executable's name as the resource name.
+このオプションを指定しないと、
+デフォルトではEmacsの実行ファイル名をリソース名として使う。
+
+@item -xrm @var{resource-values}
+@itemx --xrm=@var{resource-values}
+@c Specify X resource values for this Emacs job (see below).
+EmacsのこのジョブだけのXリソースの値を指定する。
+（以下を参照）。
+@end table
+
+@c   For consistency, @samp{-name} also specifies the name to use for
+@c other resource values that do not belong to any particular frame.
+整合性のために、@samp{-name}は、
+どの特定のフレームにも属さないリソースの値を探すときの名前も指定します。
+
+@c   The resources that name Emacs invocations also belong to a class; its
+@c name is @samp{Emacs}.  If you write @samp{Emacs} instead of
+@c @samp{emacs}, the resource applies to all frames in all Emacs jobs,
+@c regardless of frame titles and regardless of the name of the executable
+@c file.  Here is an example:
+Emacsを起動するコマンド名と同じ名前のリソースはクラスにも属します。
+その名前は@samp{Emacs}です。
+@samp{emacs}のかわりに@samp{Emacs}と書けば、
+実行ファイルの名前やフレームタイトルに関わらず、
+すべてのEmacsジョブのすべてのフレームにリソースが適用されます。
+たとえば、つぎのようにします。
+
+@example
+Emacs.BorderWidth: 2
+Emacs.borderWidth: 4
+@end example
+
+@c   You can specify a string of additional resource values for Emacs to
+@c use with the command line option @samp{-xrm @var{resources}}.  The text
+@c @var{resources} should have the same format that you would use inside a file
+@c of X resources.  To include multiple resource specifications in
+@c @var{data}, put a newline between them, just as you would in a file.
+@c You can also use @samp{#include "@var{filename}"} to include a file full
+@c of resource specifications.  Resource values specified with @samp{-xrm}
+@c take precedence over all other resource specifications.
+コマンド行オプション@samp{-xrm @var{resources}}を使えば、
+追加のリソースの値をEmacsに指定できます。
+テキスト@var{resources}は、Xリソースファイルの中で使うものと同じ書式です。
+@var{data}で複数のリソースを指定するには、
+ファイルの場合と同様に、そのあいだに改行を置きます。
+また、@samp{#include "@var{filename}"}を使えば、
+ファイル内のリソース指定を取り込めます。
+@samp{-xrm}で指定したリソースの値は、これ以外のリソース指定に優先します。
+
+@c   The following table lists the resource names that designate options
+@c for Emacs, each with the class that it belongs to:
+以下は、Emacsのオプションを指定するリソース名とそれが属するクラスの一覧です。
+
+@table @asis
+@c @item @code{background} (class @code{Background})
+@item @code{background}（クラス@code{Background}）
+@c Background color name.
+背景の表示色名。
+
+@c @item @code{bitmapIcon} (class @code{BitmapIcon})
+@item @code{bitmapIcon}（クラス@code{BitmapIcon}）
+@c Use a bitmap icon (a picture of a gnu) if @samp{on}, let the window
+@c manager choose an icon if @samp{off}.
+@samp{on}ならば（ヌーの絵の）ビットマップアイコンを使う。
+@samp{off}ならばウィンドウマネージャにアイコンを選ばせる。
+
+@c @item @code{borderColor} (class @code{BorderColor})
+@item @code{borderColor}（クラス@code{BorderColor}）
+@c Color name for the external border.
+外部境界の表示色名。
+
+@c @item @code{borderWidth} (class @code{BorderWidth})
+@item @code{borderWidth}（クラス@code{BorderWidth}）
+@c Width in pixels of the external border.
+外部境界の（ピクセル単位の）幅。
+
+@c @item @code{cursorColor} (class @code{Foreground})
+@item @code{cursorColor}（クラス@code{Foreground}）
+@c Color name for text cursor (point).
+テキストカーソル（ポイント）の表示色名。
+
+@c @item @code{font} (class @code{Font})
+@item @code{font}（クラス@code{Font}）
+@c Font name for text (or fontset name, @pxref{Fontsets}).
+テキストのフォント名（あるいはフォントセット名 @pxref{Fontsets}）。
+
+@c @item @code{foreground} (class @code{Foreground})
+@item @code{foreground}（クラス@code{Foreground}）
+@c Color name for text.
+テキストの表示色名。
+
+@c @item @code{geometry} (class @code{Geometry})
+@item @code{geometry}（クラス@code{Geometry}）
+@c Window size and position.  Be careful not to specify this resource as
+@c @samp{emacs*geometry}, because that may affect individual menus as well
+@c as the Emacs frame itself.
+ウィンドウのサイズと位置。
+Emacsフレームだけでなく個々のメニューにも影響するので、
+このリソースを@samp{emacs*geometry}とは指定しないように注意すること。
+
+@c If this resource specifies a position, that position applies only to the
+@c initial Emacs frame (or, in the case of a resource for a specific frame
+@c name, only that frame).  However, the size if specified here applies to
+@c all frames.
+このリソースで指定した位置は、Emacsの初期フレーム
+（あるいは、特定のフレーム名を指定したリソースはそのフレーム）
+だけに適用される。
+しかし、サイズはすべてのフレームに適用される。
+
+@c @item @code{iconName} (class @code{Title})
+@item @code{iconName}（クラス@code{Title}）
+@c Name to display in the icon.
+アイコンに表示する名前。
+
+@c @item @code{internalBorder} (class @code{BorderWidth})
+@item @code{internalBorder}（クラス@code{BorderWidth}）
+@c Width in pixels of the internal border.
+内部境界の（ピクセル単位の）幅。
+
+@c @item @code{menuBar} (class @code{MenuBar})
+@item @code{menuBar}（クラス@code{MenuBar}）
+@c Give frames menu bars if @samp{on}; don't have menu bars if @samp{off}.
+@samp{on}ならばフレームにメニューバーを付ける。
+@samp{off}ならばメニューバーを付けない。
+
+@c @item @code{minibuffer} (class @code{Minibuffer})
+@item @code{minibuffer}（クラス@code{Minibuffer}）
+@c If @samp{none}, don't make a minibuffer in this frame.
+@c It will use a separate minibuffer frame instead.
+@samp{none}ならばこのフレームにミニバッファを付けない。
+かわりに、独立したミニバッファフレームを使う。
+
+@c @item @code{paneFont} (class @code{Font})
+@item @code{paneFont}（クラス@code{Font}）
+@c Font name for menu pane titles, in non-toolkit versions of Emacs.
+ツールキット版でないEmacsのメニューのタイトルに使うフォント名。
+
+@c @item @code{pointerColor} (class @code{Foreground})
+@item @code{pointerColor}（クラス@code{Foreground}）
+@c Color of the mouse cursor.
+マウスカーソルの表示色。
+
+@c @item @code{reverseVideo} (class @code{ReverseVideo})
+@item @code{reverseVideo}（クラス@code{ReverseVideo}）
+@c Switch foreground and background default colors if @samp{on}, use colors as
+@c specified if @samp{off}.
+@samp{on}ならば前景色と背景色を入れ替え、
+@samp{off}ならば指定された表示色を用いる。
+
+@c @item @code{verticalScrollBars} (class @code{ScrollBars})
+@item @code{verticalScrollBars}（クラス@code{ScrollBars}）
+@c Give frames scroll bars if @samp{on}; don't have scroll bars if
+@c @samp{off}.
+@samp{on}ならばフレームにスクロールバーを付ける。
+@samp{off}ならばスクロールバーを付けない。
+
+@c @item @code{selectionFont} (class @code{Font})
+@item @code{selectionFont}（クラス@code{Font}）
+@c Font name for pop-up menu items, in non-toolkit versions of Emacs.  (For
+@c toolkit versions, see @ref{Lucid Resources}, also see @ref{Motif
+@c Resources}.)
+ツールキット版でないEmacsのポップアップメニューの項目に使うフォント名。
+（ツールキット版では、@ref{Lucid Resources}、
+あるいは、@ref{Motif Resources}を参照。）
+
+@c @item @code{title} (class @code{Title})
+@item @code{title}（クラス@code{Title}）
+@c Name to display in the title bar of the initial Emacs frame.
+Emacsの初期フレームのタイトルバーに表示する名前。
+@end table
+
+@c   Here are resources for controlling the appearance of particular faces
+@c (@pxref{Faces}):
+以下は、特定のフェイス（@pxref{Faces}）の見え方を制御するリソースです。
+
+@table @code
+@item @var{face}.attributeFont
+@c Font for face @var{face}.
+フェイス@var{face}のフォント。
+@item @var{face}.attributeForeground
+@c Foreground color for face @var{face}.
+フェイス@var{face}の前景色。
+@item @var{face}.attributeBackground
+@c Background color for face @var{face}.
+フェイス@var{face}の背景色。
+@item @var{face}.attributeUnderline
+@c Underline flag for face @var{face}.  Use @samp{on} or @samp{true} for
+@c yes.
+フェイス@var{face}の下線フラグ。
+下線を使うには@samp{on}か@samp{true}を指定する。
+@end table
+
+@node Motif Resources
+@c @section Motif Menu X Resources
+@c @cindex Menu X Resources (Motif widgets)
+@c @cindex Motif Widget X Resources
+@section MotifメニューのXリソース
+@cindex メニューのXリソース（Motifウィジェット）
+@cindex MotifウィジェットのXリソース
+
+@c   If the Emacs installed at your site was built to use the X toolkit
+@c with the Motif widgets, then the menu bar is a separate widget and has
+@c its own resources.  The resource names contain @samp{pane.menubar}
+@c (following, as always, the name of the Emacs invocation or @samp{Emacs}
+@c which stands for all Emacs invocations).  Specify them like this:
+Motifウィジェットを含めたXツールキットを使う
+Emacsがインストールされている場合には、
+メニューバーは別のウィジェットであり独自のリソースを持ちます。
+リソース名には
+（Emacsの起動名かすべてのEmacsの起動を意味する@samp{Emacs}に続けて）
+@samp{pane.menubar}が含まれます。
+これらはつぎのように指定します。
+
+@smallexample
+Emacs.pane.menubar.@var{subwidget}.@var{resource}:  @var{value}
+@end smallexample
+
+@c   Each individual string in the menu bar is a subwidget; the subwidget's
+@c name is the same as the menu item string.  For example, the word
+@c @samp{Files} in the menu bar is part of a subwidget named
+@c @samp{emacs.pane.menubar.Files}.  Most likely, you want to specify the
+@c same resources for the whole menu bar.  To do this, use @samp{*} instead
+@c of a specific subwidget name.  For example, to specify the font
+@c @samp{8x16} for the menu-bar items, write this:
+メニューバーの個々の文字列はサブウィジェットです。
+サブウィジェットの名前はメニュー項目の文字列と同じです。
+たとえば、メニューバーの中の単語@samp{Files}は
+@samp{emacs.pane.menubar.Files}という名前のサブウィジェットの一部です。
+ほとんどの場合、メニューバー全体に同じリソースを指定するでしょう。
+それには、特定のサブウィジェット名のかわりに@samp{*}を使います。
+たとえば、@samp{8x16}フォントをメニューバーの項目に使うには、
+つぎのようにします。
+
+@smallexample
+Emacs.pane.menubar.*.fontList:  8x16
+@end smallexample
+
+@noindent
+@c This also specifies the resource value for submenus.
+これは、サブメニューのリソース値も指定します。
+
+@c   Each item in a submenu in the menu bar also has its own name for X
+@c resources; for example, the @samp{Files} submenu has an item named
+@c @samp{Save Buffer}.  A resource specification for a submenu item looks
+@c like this:
+メニューバー内のサブメニューの各項目には、
+それぞれ独自のXリソース名があります。
+たとえば、@samp{Files}サブメニューには項目@samp{Save Buffer}があります。
+サブメニューの項目のリソース指定はつぎのようになります。
+
+@smallexample
+Emacs.pane.menubar.popup_*.@var{menu}.@var{item}.@var{resource}: @var{value}
+@end smallexample
+
+@noindent
+@c For example, here's how to specify the font for the @samp{Save Buffer}
+@c item:
+たとえば、@samp{Save Buffer}のフォントを指定するには、
+つぎのようにします。
+
+@smallexample
+Emacs.pane.menubar.popup_*.Files.Save Buffer.fontList: 8x16
+@end smallexample
+
+@noindent
+@c For an item in a second-level submenu, such as @samp{Check Message}
+@c under @samp{Spell} under @samp{Edit}, the resource fits this template:
+@samp{Edit}の下の@samp{Spell}の下にある
+@samp{Check Message}のような2段下のサブメニューの項目では、
+リソースの雛型はつぎのようになります。
+
+@smallexample
+Emacs.pane.menubar.popup_*.popup_*.@var{menu}.@var{resource}: @var{value}
+@end smallexample
+
+@noindent
+@c For example,
+たとえば、つぎのようになります。
+
+@smallexample
+Emacs.pane.menubar.popup_*.popup_*.Spell.Check Message: @var{value}
+@end smallexample
+  
+@c   It's impossible to specify a resource for all the menu-bar items
+@c without also specifying it for the submenus as well.  So if you want the
+@c submenu items to look different from the menu bar itself, you must ask
+@c for that in two steps.  First, specify the resource for all of them;
+@c then, override the value for submenus alone.  Here is an example:
+サブメニューのリソースを指定せずに、
+すべてのメニューバーの項目のリソースを指定することは不可能です。
+サブメニューの項目をメニューバー自体とは異なる見え方にするには、
+2段階の指定が必要です。
+まずメニューバーのリソースを指定し、
+そのあとでサブメニューの値だけを上書きします。
+たとえば、つぎのようにします。
+
+@smallexample
+Emacs.pane.menubar.*.fontList:  8x16
+Emacs.pane.menubar.popup_*.fontList: 8x16
+@end smallexample
+
+@noindent
+@c For toolkit pop-up menus, use @samp{menu*} instead of
+@c @samp{pane.menubar}.  For example, to specify the font @samp{8x16} for
+@c the pop-up menu items, write this:
+ツールキットのポップアップメニューでは、
+@samp{pane.menubar}のかわりに@samp{menu*}を使います。
+たとえば、ポップアップメニューの項目に@samp{8x16}フォントを指定するには、
+つぎのように書きます。
+
+@smallexample
+Emacs.menu*.fontList:  8x16
+@end smallexample
+
+@iftex
+@medbreak
+@end iftex
+@c   Here is a list of the specific resources for menu bars and pop-up menus:
+以下は、メニューバーとポップアップメニューのリソース指定の一覧です。
+
+@table @code
+@item armColor
+@c The color to show in an armed button.
+押せるボタンの表示色。
+@item fontList
+@c The font to use.
+使用するフォント。
+@item marginBottom
+@itemx marginHeight
+@itemx marginLeft
+@itemx marginRight
+@itemx marginTop
+@itemx marginWidth
+@c Amount of space to leave around the item, within the border.
+境界内で項目の周りに置く空白の量。
+@item borderWidth
+@c The width of border around the menu item, on all sides.
+メニュー項目を縁取る境界の幅。
+@item shadowThickness
+@c The width of the border shadow.
+境界の影付けの幅。
+@item bottomShadowColor
+@c The color for the border shadow, on the bottom and the right.
+境界の下端と右端の影付けの表示色。
+@item topShadowColor
+@c The color for the border shadow, on the top and the left.
+境界の上端と左端の影付けの表示色。
+@end table

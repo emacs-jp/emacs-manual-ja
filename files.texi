@@ -1,0 +1,4180 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Files, Buffers, Keyboard Macros, Top
+@c @chapter File Handling
+@c @cindex files
+@chapter ファイルの扱い方
+@cindex ファイル
+
+@c   The operating system stores data permanently in named @dfn{files}.  So
+@c most of the text you edit with Emacs comes from a file and is ultimately
+@c stored in a file.
+オペレーティングシステムは、
+データを指定した@dfn{ファイル}（file）に恒久的に保存します。
+ですから、Emacsで編集するテキストの多くはファイルから取り込み、
+最終的にはファイルに格納されます。
+
+@c   To edit a file, you must tell Emacs to read the file and prepare a
+@c buffer containing a copy of the file's text.  This is called
+@c @dfn{visiting} the file.  Editing commands apply directly to text in the
+@c buffer; that is, to the copy inside Emacs.  Your changes appear in the
+@c file itself only when you @dfn{save} the buffer back into the file.
+ファイルを編集するには、
+Emacsに対してファイルを読むように指示して、
+ファイルの内容のコピーを入れたバッファを用意させる必要があります。
+これを、ファイルを@dfn{訪問する／訪れる}（visiting）といいます。
+編集コマンドはバッファ内のテキストに直接作用します。
+つまり、Emacs内にあるコピーを操作します。
+バッファをファイルに@dfn{保存}（save）した場合に限り、
+変更はファイルそのものに反映されます。
+
+@c   In addition to visiting and saving files, Emacs can delete, copy,
+@c rename, and append to files, keep multiple versions of them, and operate
+@c on file directories.
+ファイルを訪問したり保存したりすることに加えて、
+Emacsは、ファイルを、削除したり、コピーしたり、名前を変更したり、
+別のファイルへ追加したり、複数の版を保持したり、
+ファイルディレクトリを操作したりできます。
+
+@menu
+* File Names::          How to type and edit file-name arguments.
+* Visiting::            Visiting a file prepares Emacs to edit the file.
+* Saving::              Saving makes your changes permanent.
+* Reverting::           Reverting cancels all the changes not saved.
+* Auto Save::           Auto Save periodically protects against loss of data.
+* File Aliases::        Handling multiple names for one file.
+* Version Control::     Version control systems (RCS, CVS and SCCS).
+* Directories::         Creating, deleting, and listing file directories.
+* Comparing Files::     Finding where two files differ.
+* Misc File Ops::       Other things you can do on files.
+* Compressed Files::    Accessing compressed files.
+* Remote Files::        Accessing files on other sites.
+* Quoted File Names::   Quoting special characters in file names.
+@end menu
+
+@node File Names
+@c @section File Names
+@c @cindex file names
+@section ファイル名
+@cindex ファイル名
+
+@c   Most Emacs commands that operate on a file require you to specify the
+@c file name.  (Saving and reverting are exceptions; the buffer knows which
+@c file name to use for them.)  You enter the file name using the
+@c minibuffer (@pxref{Minibuffer}).  @dfn{Completion} is available, to make
+@c it easier to specify long file names.  @xref{Completion}.
+ファイルを操作するほとんどのEmacsコマンドには、
+ファイル名を指定する必要があります。
+（保存と復元の操作を除く。
+バッファはこれらの操作に対して使うファイル名を記録している。）
+ファイル名は、ミニバッファを使って入力します（@pxref{Minibuffer}）。
+長いファイル名の指定を簡単にする補完も使えます。
+@xref{Completion}。
+
+@c   For most operations, there is a @dfn{default file name} which is used
+@c if you type just @key{RET} to enter an empty argument.  Normally the
+@c default file name is the name of the file visited in the current buffer;
+@c this makes it easy to operate on that file with any of the Emacs file
+@c commands.
+多くの操作には、@dfn{デフォルトファイル名}があり、
+@key{RET}だけを打って空の引数を指定した場合に使われます。
+通常、デフォルトファイル名は、
+カレントバッファで訪問したファイルの名前です。
+こうすることで、
+Emacsのファイルコマンドで当該ファイルを操作するのが簡単になります。
+
+@vindex default-directory
+@c   Each buffer has a default directory, normally the same as the
+@c directory of the file visited in that buffer.  When you enter a file
+@c name without a directory, the default directory is used.  If you specify
+@c a directory in a relative fashion, with a name that does not start with
+@c a slash, it is interpreted with respect to the default directory.  The
+@c default directory is kept in the variable @code{default-directory},
+@c which has a separate value in every buffer.
+各バッファにはデフォルトディレクトリがあります。
+通常は、そのバッファの訪問先のファイルのディレクトリと同じです。
+ディレクトリを指定しないでファイル名を入力すると、
+デフォルトディレクトリを使います。
+スラッシュ（@samp{/}）で始まらない相対的なディレクトリを指定すると、
+デフォルトディレクトリ相対に解釈します。
+デフォルトディレクトリは変数@code{default-directory}に保持されていて、
+バッファごとに別々の値を持ちます。
+
+@c   For example, if the default file name is @file{/u/rms/gnu/gnu.tasks} then
+@c the default directory is @file{/u/rms/gnu/}.  If you type just @samp{foo},
+@c which does not specify a directory, it is short for @file{/u/rms/gnu/foo}.
+@c @samp{../.login} would stand for @file{/u/rms/.login}.  @samp{new/foo}
+@c would stand for the file name @file{/u/rms/gnu/new/foo}.
+たとえば、デフォルトファイル名が@file{/u/rms/gnu/gnu.tasks}ならば、
+デフォルトディレクトリは@file{/u/rms/gnu/}です。
+ディレクトリを指定しないで@samp{foo}とだけ打つと、
+@file{/u/rms/gnu/foo}を意味します。
+@samp{../.login}は、@file{/u/rms/.login}を意味します。
+@samp{new/foo}は、ファイル名@file{/u/rms/gnu/new/foo}を意味します。
+
+@findex cd
+@findex pwd
+@c   The command @kbd{M-x pwd} prints the current buffer's default
+@c directory, and the command @kbd{M-x cd} sets it (to a value read using
+@c the minibuffer).  A buffer's default directory changes only when the
+@c @code{cd} command is used.  A file-visiting buffer's default directory
+@c is initialized to the directory of the file that is visited there.  If
+@c you create a buffer with @kbd{C-x b}, its default directory is copied
+@c from that of the buffer that was current at the time.
+コマンド@kbd{M-x pwd}は、カレントバッファのデフォルトディレクトリを表示し、
+コマンド@kbd{M-x cd}は、それを（ミニバッファで読んだ値に）設定します。
+バッファのデフォルトディレクトリは、
+@code{cd}コマンドを使ったときだけ変更されます。
+ファイルを訪問しているバッファのデフォルトディレクトリは、
+訪問したファイルのディレクトリに初期化されます。
+@kbd{C-x b}で作ったバッファのデフォルトディレクトリは、
+その時点のカレントバッファのデフォルトディレクトリと同じです。
+
+@vindex insert-default-directory
+@c   The default directory actually appears in the minibuffer when the
+@c minibuffer becomes active to read a file name.  This serves two
+@c purposes: it @emph{shows} you what the default is, so that you can type
+@c a relative file name and know with certainty what it will mean, and it
+@c allows you to @emph{edit} the default to specify a different directory.
+@c This insertion of the default directory is inhibited if the variable
+@c @code{insert-default-directory} is set to @code{nil}.
+デフォルトディレクトリは、ミニバッファでファイル名を読むときに、
+実際にミニバッファに表示されます。
+これには2つの目的があります。
+デフォルトが何であるかを@emph{示す}ことで、
+相対ファイル名を打ち込めるようにし、しかも、
+その意味を確実に知ることができるようにします。
+もう1つは、デフォルトディレクトリを@emph{編集}して、
+別のディレクトリを指定できるようにします。
+変数@code{insert-default-directory}を@code{nil}に設定すると、
+デフォルトディレクトリを挿入しません。
+
+@c   Note that it is legitimate to type an absolute file name after you
+@c enter the minibuffer, ignoring the presence of the default directory
+@c name as part of the text.  The final minibuffer contents may look
+@c invalid, but that is not so.  For example, if the minibuffer starts out
+@c with @samp{/usr/tmp/} and you add @samp{/x1/rms/foo}, you get
+@c @samp{/usr/tmp//x1/rms/foo}; but Emacs ignores everything through the
+@c first slash in the double slash; the result is @samp{/x1/rms/foo}.
+@c @xref{Minibuffer File}.
+ミニバッファで入力するとき、
+テキストの一部として入っているデフォルトディレクトリを無視して、
+絶対ファイル名を打っても何の問題もありません。
+最終的なミニバッファの内容は不正なように見えても、
+そうではありません。
+たとえば、ミニバッファには@samp{/usr/tmp/}が入っていて
+@samp{/x1/rms/foo}を追加すると、@samp{/usr/tmp//x1/rms/foo}となります。
+Emacsは連続した2個のスラッシュの始めのスラッシュまでをすべて無視するので、
+結果として@samp{/x1/rms/foo}となります。
+@xref{Minibuffer File}。
+
+@c   @samp{$} in a file name is used to substitute environment variables.
+@c For example, if you have used the shell command @samp{export
+@c FOO=rms/hacks} to set up an environment variable named @code{FOO}, then
+@c you can use @file{/u/$FOO/test.c} or @file{/u/$@{FOO@}/test.c} as an
+@c abbreviation for @file{/u/rms/hacks/test.c}.  The environment variable
+@c name consists of all the alphanumeric characters after the @samp{$};
+@c alternatively, it may be enclosed in braces after the @samp{$}.  Note
+@c that shell commands to set environment variables affect Emacs only if
+@c done before Emacs is started.
+ファイル名の中の@samp{$}は環境変数で置き換えられます。
+たとえば、シェルコマンド@samp{export FOO=rms/hacks}で、
+環境変数@code{FOO}を設定してあるとします。
+そうすると、@file{/u/rms/hacks/test.c}の略称として
+@file{/u/$FOO/test.c}や@file{/u/$@{FOO@}/test.c}を使えます。
+環境変数の名前は、@samp{$}のうしろにある英数字全部です。
+あるいは、@samp{$}のうしろにある括弧で囲まれたものです。
+シェルコマンドで設定した環境変数がEmacsに影響を及ぼすのは、
+Emacsを起動するまえに設定したものに限ります。
+
+@c   To access a file with @samp{$} in its name, type @samp{$$}.  This pair
+@c is converted to a single @samp{$} at the same time as variable
+@c substitution is performed for single @samp{$}.  Alternatively, quote the
+@c whole file name with @samp{/:} (@pxref{Quoted File Names}).
+名前の中に@samp{$}があるファイルを参照するには、
+@samp{$$}と打ちます。
+1個の@samp{$}に対して変数の置き換えを行うときに、
+この2個の@samp{$}は1個の@samp{$}に変換されます。
+あるいは、ファイル名全体を@samp{/:}でクォートします
+（@pxref{Quoted File Names}）。
+
+@findex substitute-in-file-name
+@c   The Lisp function that performs the substitution is called
+@c @code{substitute-in-file-name}.  The substitution is performed only on
+@c file names read as such using the minibuffer.
+（変数の）置き換えを行うLisp関数は@code{substitute-in-file-name}です。
+置き換えは、ミニバッファで読んだファイル名だけに適用されます。
+
+@c   You can include non-ASCII characters in file names if you set the
+@c variable @code{file-name-coding-system} to a non-@code{nil} value.
+@c @xref{Specify Coding}.
+変数@code{file-name-coding-system}に@code{nil}以外を設定すると、
+ファイル名に非ASCIIを含めることができます。
+@xref{Specify Coding}。
+
+@node Visiting
+@c @section Visiting Files
+@c @cindex visiting files
+@section ファイルを訪問する
+@cindex ファイルを訪問する
+
+@c WideCommands
+@table @kbd
+@item C-x C-f
+@c Visit a file (@code{find-file}).
+ファイルを訪問する（@code{find-file}）。
+@item C-x C-r
+@c Visit a file for viewing, without allowing changes to it
+@c (@code{find-file-read-only}).
+ファイルを眺めるために訪問し、変更を許さない
+（@code{find-file-read-only}）。
+@item C-x C-v
+@c Visit a different file instead of the one visited last
+@c (@code{find-alternate-file}).
+最後に訪問したファイルのかわりに、別のファイルを訪問する
+（@code{find-alternate-file}）。
+@item C-x 4 f
+@c Visit a file, in another window (@code{find-file-other-window}).  Don't
+@c alter what is displayed in the selected window.
+別のウィンドウでファイルを訪問する
+（@code{find-file-other-window}）。
+選択されているウィンドウに表示されている内容は変化しない。
+@item C-x 5 f
+@c Visit a file, in a new frame (@code{find-file-other-frame}).  Don't
+@c alter what is displayed in the selected frame.
+新たなフレームでファイルを訪問する
+（@code{find-file-other-frame}）。
+選択されているフレームに表示されている内容は変化しない。
+@item M-x find-file-literally
+@c Visit a file with no conversion of the contents.
+ファイルの内容をいっさい変換せずに訪問する。
+@end table
+
+@c @cindex files, visiting and saving
+@c @cindex visiting files
+@c @cindex saving files
+@cindex ファイル、訪問と保存
+@cindex ファイルを訪問する
+@cindex ファイルを保存する
+@c   @dfn{Visiting} a file means copying its contents into an Emacs buffer
+@c so you can edit them.  Emacs makes a new buffer for each file that you
+@c visit.  We say that this buffer is visiting the file that it was created
+@c to hold.  Emacs constructs the buffer name from the file name by
+@c throwing away the directory, keeping just the name proper.  For example,
+@c a file named @file{/usr/rms/emacs.tex} would get a buffer named
+@c @samp{emacs.tex}.  If there is already a buffer with that name, a unique
+@c name is constructed by appending @samp{<2>}, @samp{<3>}, or so on, using
+@c the lowest number that makes a name that is not already in use.
+ファイルを@dfn{訪問する／訪れる}とは、
+ファイルの内容のコピーを編集できるようにEmacsバッファに入れることです。
+Emacsは、訪問する各ファイルごとに新たにバッファを作ります。
+バッファ名は、ディレクトリ部分を取りさったファイル名から作ります。
+たとえば、ファイル名@file{/usr/rms/emacs.tex}の
+バッファ名は@samp{emacs.tex}となります。
+その名前のバッファがすでに存在するならば、
+まだ使われていない名前になるようなもっとも小さい数を使って、
+@samp{<2>}, @samp{<3>}などを付加して唯一の名前を作ります。
+
+@c   Each window's mode line shows the name of the buffer that is being displayed
+@c in that window, so you can always tell what buffer you are editing.
+各ウィンドウのモード行にはウィンドウ内に表示している
+バッファ名が示されているので、
+編集しているバッファが何かいつでもわかります。
+
+@c   The changes you make with editing commands are made in the Emacs
+@c buffer.  They do not take effect in the file that you visited, or any
+@c place permanent, until you @dfn{save} the buffer.  Saving the buffer
+@c means that Emacs writes the current contents of the buffer into its
+@c visited file.  @xref{Saving}.
+編集コマンドによる変更は、Emacsバッファに対して行われます。
+バッファを@dfn{保存}するまでは、
+変更は、訪問先のファイルや他のどんな恒久的なものにも影響しません。
+バッファを保存するとは、
+バッファの現在の内容をそのバッファの訪問先のファイルに書き出すことです。
+@xref{Saving}。
+
+@c @cindex modified (buffer)
+@cindex 変更されたバッファ
+@c   If a buffer contains changes that have not been saved, we say the
+@c buffer is @dfn{modified}.  This is important because it implies that
+@c some changes will be lost if the buffer is not saved.  The mode line
+@c displays two stars near the left margin to indicate that the buffer is
+@c modified.
+バッファに未保存の変更がある場合、
+バッファは@dfn{変更されている}といいます。
+バッファを保存しないと変更内容が失われてしまうので、
+これは重要なことです。
+モード行の左端近くに2個の星印を表示して、
+バッファが変更されていることを示します。
+
+@kindex C-x C-f
+@findex find-file
+@c   To visit a file, use the command @kbd{C-x C-f} (@code{find-file}).  Follow
+@c the command with the name of the file you wish to visit, terminated by a
+@c @key{RET}.
+ファイルを訪問するには、コマンド@kbd{C-x C-f}（@code{find-file}）を使います。
+このコマンドに、訪問したいファイル名を続けて@key{RET}で終えます。
+
+@c   The file name is read using the minibuffer (@pxref{Minibuffer}), with
+@c defaulting and completion in the standard manner (@pxref{File Names}).
+@c While in the minibuffer, you can abort @kbd{C-x C-f} by typing @kbd{C-g}.
+ファイル名はミニバッファ（@pxref{Minibuffer}）で読まれ、
+このときデフォルトや標準的な方法の補完を使えます（@pxref{File Names}）。
+ミニバッファ内で@kbd{C-g}と打てば、@kbd{C-x C-f}をアボートできます。
+
+@c   Your confirmation that @kbd{C-x C-f} has completed successfully is the
+@c appearance of new text on the screen and a new buffer name in the mode
+@c line.  If the specified file does not exist and could not be created, or
+@c cannot be read, then you get an error, with an error message displayed
+@c in the echo area.
+@kbd{C-x C-f}が正しく完了したことは、画面上に新たに現れるテキストと
+モード行に現れる新たなバッファ名で確認できます。
+指定したファイルが存在せず作成もできない場合や読めない場合には、
+エコー領域にエラーメッセージが表示されます。
+
+@c   If you visit a file that is already in Emacs, @kbd{C-x C-f} does not make
+@c another copy.  It selects the existing buffer containing that file.
+@c However, before doing so, it checks that the file itself has not changed
+@c since you visited or saved it last.  If the file has changed, a warning
+@c message is printed.  @xref{Interlocking,,Simultaneous Editing}.
+すでに訪問しているファイルを再度訪問すると、
+@kbd{C-x C-f}は別のコピーを作らずに、
+そのファイルを入れた既存のバッファを選択します。
+しかし、そうするまえに、訪問してから、あるいは、保存してから以降に
+ファイルが変更されたかどうか検査します。
+ファイルが変更されていると警告メッセージを表示します。
+@xref{Interlocking}。
+
+@c @cindex creating files
+@cindex ファイルの新規作成
+@c   What if you want to create a new file?  Just visit it.  Emacs prints
+@c @samp{(New File)} in the echo area, but in other respects behaves as if
+@c you had visited an existing empty file.  If you make any changes and
+@c save them, the file is created.
+新たにファイルを作りたいときにはどうするのでしょう？@code{ }
+単に訪問すればよいのです。
+Emacsはエコー領域に@samp{(New File)}と表示しますが、
+それ以外に関しては、あたかも空のファイルが存在するかのようにふるまいます。
+変更してから保存すれば、ファイルを作成できます。
+
+@c   Emacs recognizes from the contents of a file which convention it uses
+@c to separate lines---newline (used on GNU/Linux and on Unix),
+@c carriage-return linefeed (used on Microsoft systems), or just
+@c carriage-return (used on the Macintosh)---and automatically converts the
+@c contents to the normal Emacs convention, which is that the newline
+@c character separates lines.  This is a part of the general feature of
+@c coding system conversion (@pxref{Coding Systems}), and makes it possible
+@c to edit files imported from various different operating systems with
+@c equal convenience.  If you change the text and save the file, Emacs
+@c performs the inverse conversion, changing newlines back into
+@c carriage-return linefeed or just carriage-return if appropriate.
+Emacsはファイルの内容から、行区切りの方法、
+すなわち、（GNU/LinuxやUNIXで使われる）改行、
+（Microsoftシステムで使われる）復帰改行、
+（Machintoshで使われる）復帰のみを認識します。
+さらに、Emacsの通常の方法、つまり、改行文字で行を区切るように
+内容を自動的に変換します。
+これは、コーディングシステム変換（@pxref{Coding Systems}）の
+一般的な機能の一部であり、
+さまざまの異なるオペレーティングシステムから持ってきた
+ファイルを同一の方法で編集できるようにします。
+テキストを変更してファイルに保存すると、
+Emacsは逆変換を行い、必要ならば、改行を
+復帰改行や復帰のみに戻します。
+
+@vindex find-file-run-dired
+@c   If the file you specify is actually a directory, @kbd{C-x C-f} invokes
+@c Dired, the Emacs directory browser, so that you can ``edit'' the contents
+@c of the directory (@pxref{Dired}).  Dired is a convenient way to delete,
+@c look at, or operate on the files in the directory.  However, if the
+@c variable @code{find-file-run-dired} is @code{nil}, then it is an error
+@c to try to visit a directory.
+指定したファイルが実際にはディレクトリならば、
+@kbd{C-x C-f}はEmacsのディレクトリブラウザであるdiredを起動するので、
+ディレクトリの内容を『編集』できます（@pxref{Dired}）。
+diredは、ディレクトリ内のファイルを、消去したり、眺めたり、
+操作するのに便利です。
+しかし、変数 @code{find-file-run-dired}が@code{nil}ならば、
+ディレクトリを訪問しようとするとエラーになります。
+
+@c   If the file name you specify contains wildcard characters, Emacs
+@c visits all the files that match it.  @xref{Quoted File Names}, if you
+@c want to visit a file whose name actually contains wildcard characters.
+指定したファイル名にワイルドカード文字が含まれていると、
+Emacsは一致するすべてのファイルを訪問します。
+ワイルドカード文字そのものを含む名前のファイルを訪問するには、
+@xref{Quoted File Names}。
+
+@c   If you visit a file that the operating system won't let you modify,
+@c Emacs makes the buffer read-only, so that you won't go ahead and make
+@c changes that you'll have trouble saving afterward.  You can make the
+@c buffer writable with @kbd{C-x C-q} (@code{vc-toggle-read-only}).
+@c @xref{Misc Buffer}.
+オペレーティングシステムが変更を許さないファイルを訪問すると、
+Emacsはバッファを読み出し専用に設定するので、
+修正できなかったり、修正できてもあとで保存に手間取ります。
+@kbd{C-x C-q}（@code{vc-toggle-read-only}）で、
+バッファを書き込み可能にできます。
+@xref{Misc Buffer}。
+
+@kindex C-x C-r
+@findex find-file-read-only
+@c   Occasionally you might want to visit a file as read-only in order to
+@c protect yourself from entering changes accidentally; do so by visiting
+@c the file with the command @kbd{C-x C-r} (@code{find-file-read-only}).
+ときには、自分でまちがって変更しないように、
+ファイルを読み出し専用で訪問したい場合があります。
+そういう場合には、コマンド@kbd{C-x C-r}（@code{find-file-read-only}）で
+ファイルを訪問します。
+
+@kindex C-x C-v
+@findex find-alternate-file
+@c   If you visit a nonexistent file unintentionally (because you typed the
+@c wrong file name), use the @kbd{C-x C-v} command
+@c (@code{find-alternate-file}) to visit the file you really wanted.
+@c @kbd{C-x C-v} is similar to @kbd{C-x C-f}, but it kills the current
+@c buffer (after first offering to save it if it is modified).  When it
+@c reads the file name to visit, it inserts the entire default file name in
+@c the buffer, with point just after the directory part; this is convenient
+@c if you made a slight error in typing the name.
+（ファイル名をまちがって打ったりして）
+存在しないファイルを意図せずに訪問してしまったときには、
+@kbd{C-x C-v}コマンド（@code{find-alternate-file}）を使って
+本当の目的のファイルを訪問します。
+@kbd{C-x C-v}は@kbd{C-x C-f}と同様ですが、
+（バッファが変更されていればまず保存するかどうか聞いてから）
+カレントバッファを消去します。
+訪問するファイル名を読むときには、
+ミニバッファにデフォルトファイル名全体を挿入し、
+ディレクトリ部分の直後にポイントを置きます。
+これは、ファイル名をほんの少しまちがって入力したときに便利です。
+
+@c   If you find a file which exists but cannot be read, @kbd{C-x C-f}
+@c signals an error.
+存在するのに読めないファイルを訪問すると、
+@kbd{C-x C-f}はエラーを通知します。
+
+@kindex C-x 4 f
+@findex find-file-other-window
+@c   @kbd{C-x 4 f} (@code{find-file-other-window}) is like @kbd{C-x C-f}
+@c except that the buffer containing the specified file is selected in another
+@c window.  The window that was selected before @kbd{C-x 4 f} continues to
+@c show the same buffer it was already showing.  If this command is used when
+@c only one window is being displayed, that window is split in two, with one
+@c window showing the same buffer as before, and the other one showing the
+@c newly requested file.  @xref{Windows}.
+@kbd{C-x 4 f}（@code{find-file-other-window}）は、
+別のウィンドウで、指定したファイルを入れたバッファを選択することを除けば、
+@kbd{C-x C-f}と同じです。
+@kbd{C-x 4 f}を実行するまえに選択されていたウィンドウは、
+同じバッファを表示したままです。
+ウィンドウを1つだけ表示しているときにこのコマンドを使うと、
+そのウィンドウを2つに分けて、一方のウィンドウにはまえと同様に同じバッファを
+表示しますが、もう一方には新たに指示したファイルを表示します。
+@xref{Windows}。
+
+@kindex C-x 5 f
+@findex find-file-other-frame
+@c   @kbd{C-x 5 f} (@code{find-file-other-frame}) is similar, but opens a
+@c new frame, or makes visible any existing frame showing the file you
+@c seek.  This feature is available only when you are using a window
+@c system.  @xref{Frames}.
+@kbd{C-x 5 f}（@code{find-file-other-frame}）も同様ですが、
+新たなフレームを開くか、
+捜しているファイルを表示している既存のフレームを見えるようにします。
+ウィンドウシステムを使っているときだけ、
+この機能を利用できます。
+@xref{Frames}。
+
+@findex find-file-literally
+@c   If you wish to edit a file as a sequence of characters with no special
+@c encoding or conversion, use the @kbd{M-x find-file-literally} command.
+@c It visits a file, like @kbd{C-x C-f}, but does not do format conversion
+@c (@pxref{Formatted Text}), character code conversion (@pxref{Coding
+@c Systems}), or automatic uncompression (@pxref{Compressed Files}).
+@c If you already have visited the same file in the usual (non-literal)
+@c manner, this command asks you whether to visit it literally instead.
+特別な符号化や変換をせずにファイルを文字の列として編集したいときには、
+@kbd{M-x find-file-literally}コマンドを使います。
+このコマンドは、@kbd{C-x C-f}のようにファイルを訪問しますが、
+形式変換（@pxref{Formatted Text}）、文字コード変換（@pxref{Coding Systems}）、
+（圧縮を）自動展開（@pxref{Compressed Files}）といったことをしません。
+（そのままの文字の列としてではなく）普通の方法で同じファイルを
+すでに訪問している場合には、このコマンドは、
+そのままの文字の列として訪問するかどうか聞いてきます。
+
+@vindex find-file-hooks
+@vindex find-file-not-found-hooks
+@c   Two special hook variables allow extensions to modify the operation of
+@c visiting files.  Visiting a file that does not exist runs the functions
+@c in the list @code{find-file-not-found-hooks}; this variable holds a list
+@c of functions, and the functions are called one by one until one of them
+@c returns non-@code{nil}.  Any visiting of a file, whether extant or not,
+@c expects @code{find-file-hooks} to contain a list of functions and calls
+@c them all, one by one.  In both cases the functions receive no
+@c arguments.  Of these two variables, @code{find-file-not-found-hooks}
+@c takes effect first.  These variables are @emph{not} normal hooks, and
+@c their names end in @samp{-hooks} rather than @samp{-hook} to indicate
+@c that fact.  @xref{Hooks}.
+2つの特別なフック変数で、ファイルを訪問する操作を修正して拡張できます。
+存在しないファイルを訪問すると、
+@code{find-file-not-found-hooks}のリスト内の関数群を実行します。
+この変数は関数のリストを保持していて、
+呼び出した関数の中のどれかが@code{nil}以外を返すまで1つ1つ順に呼び出します。
+ファイルが存在するかどうかに関わらず、
+どんなファイルを訪問するときでも
+@code{find-file-hooks}には関数のリストが入っていると仮定され、
+それらの1つ1つを順にすべて呼び出します。
+いずれの場合でも、関数は引数を受け取りません。
+2つの変数のうち、先に@code{find-file-not-found-hooks}を使います。
+これらの変数はノーマルフックではありま@emph{せん}。
+これらの名前が@samp{-hook}ではなくて@samp{-hooks}で終っていることで、
+その事実を表しています。
+@xref{Hooks}。
+
+@c   There are several ways to specify automatically the major mode for
+@c editing the file (@pxref{Choosing Modes}), and to specify local
+@c variables defined for that file (@pxref{File Variables}).
+編集するファイルに対して自動的にメジャーモード（@pxref{Choosing Modes}）を
+設定し、そのファイルに対して特別なローカル変数（@pxref{File Variables}）を
+定義する方法がいくつかあります。
+
+@node Saving
+@c @section Saving Files
+@section ファイルを保存する
+
+@c   @dfn{Saving} a buffer in Emacs means writing its contents back into the file
+@c that was visited in the buffer.
+Emacsにおいてバッファを@dfn{保存}するとは、
+バッファの内容をそのバッファの訪問先のファイルへ書き戻すことです。
+
+@table @kbd
+@item C-x C-s
+@c Save the current buffer in its visited file (@code{save-buffer}).
+カレントバッファを訪問先のファイルに保存する（@code{save-buffer}）。
+@item C-x s
+@c Save any or all buffers in their visited files (@code{save-some-buffers}).
+任意のバッファかすべてのバッファをそれぞれの訪問先のファイルに保存する
+（@code{save-some-buffers}）。
+@item M-~
+@c Forget that the current buffer has been changed (@code{not-modified}).
+カレントバッファを変更していないことにする（@code{not-modified}）。
+@item C-x C-w
+@c Save the current buffer in a specified file (@code{write-file}).
+カレントバッファを指定したファイルに保存する（@code{write-file}）。
+@item M-x set-visited-file-name
+@c Change file the name under which the current buffer will be saved.
+カレントバッファを保存するファイルの名前を変更する。
+@end table
+
+@kindex C-x C-s
+@findex save-buffer
+@c   When you wish to save the file and make your changes permanent, type
+@c @kbd{C-x C-s} (@code{save-buffer}).  After saving is finished, @kbd{C-x C-s}
+@c displays a message like this:
+ファイルを保存して変更を恒久的なものとするには、
+@kbd{C-x C-s}（@code{save-buffer}）と打ちます。
+保存を完了すると@kbd{C-x C-s}はつぎのようなメッセージを表示します。
+
+@example
+Wrote /u/rms/gnu/gnu.tasks
+@end example
+
+@noindent
+@c If the selected buffer is not modified (no changes have been made in it
+@c since the buffer was created or last saved), saving is not really done,
+@c because it would have no effect.  Instead, @kbd{C-x C-s} displays a message
+@c like this in the echo area:
+選択されているバッファが変更されていなければ
+（バッファを作って以降、あるいは、最後に保存して以降に、変更されていない）、
+保存しても何もならないので実際には保存しません。
+かわりに、@kbd{C-x C-s}はつぎのようなメッセージをエコー領域に表示します。
+
+@example
+(No changes need to be saved)
+@end example
+
+@kindex C-x s
+@findex save-some-buffers
+@c   The command @kbd{C-x s} (@code{save-some-buffers}) offers to save any
+@c or all modified buffers.  It asks you what to do with each buffer.  The
+@c possible responses are analogous to those of @code{query-replace}:
+コマンド@kbd{C-x s}（@code{save-some-buffers}）は、
+変更された任意のバッファやすべてのバッファを保存できるようにします。
+各バッファについて、何をするか聞いてきます。
+このとき選べる返答は、@code{query-replace}に対するものに似ています。
+
+@table @kbd
+@item y
+@c Save this buffer and ask about the rest of the buffers.
+このバッファを保存し、残りのバッファについても質問する。
+@item n
+@c Don't save this buffer, but ask about the rest of the buffers.
+このバッファを保存しないが、残りのバッファについては質問する。
+@item !
+@c Save this buffer and all the rest with no more questions.
+@c @c following generates acceptable underfull hbox
+このバッファを保存し、
+残りのすべてのバッファについても質問せずに保存する。
+@item @key{RET}
+@c Terminate @code{save-some-buffers} without any more saving.
+何も保存せずに@code{save-some-buffers}を終了する。
+@item .
+@c Save this buffer, then exit @code{save-some-buffers} without even asking
+@c about other buffers.
+このバッファを保存し、他のバッファについては何も聞かずに
+@code{save-some-buffers}を終える。
+@item C-r
+@c View the buffer that you are currently being asked about.  When you exit
+@c View mode, you get back to @code{save-some-buffers}, which asks the
+@c question again.
+質問対象のバッファを閲覧する。
+閲覧（view）モードから抜けると、@code{save-some-buffers}に戻りふたたび質問する。
+@item C-h
+@c Display a help message about these options.
+これらのオプションについてのヘルプメッセージを表示する。
+@end table
+
+@c   @kbd{C-x C-c}, the key sequence to exit Emacs, invokes
+@c @code{save-some-buffers} and therefore asks the same questions.
+Emacsから抜けるキー列@kbd{C-x C-c}は、
+@code{save-some-buffers}を起動するので、同じ質問をしてきます。
+
+@kindex M-~
+@findex not-modified
+@c   If you have changed a buffer but you do not want to save the changes,
+@c you should take some action to prevent it.  Otherwise, each time you use
+@c @kbd{C-x s} or @kbd{C-x C-c}, you are liable to save this buffer by
+@c mistake.  One thing you can do is type @kbd{M-~} (@code{not-modified}),
+@c which clears out the indication that the buffer is modified.  If you do
+@c this, none of the save commands will believe that the buffer needs to be
+@c saved.  (@samp{~} is often used as a mathematical symbol for `not'; thus
+@c @kbd{M-~} is `not', metafied.)  You could also use
+@c @code{set-visited-file-name} (see below) to mark the buffer as visiting
+@c a different file name, one which is not in use for anything important.
+@c Alternatively, you can cancel all the changes made since the file was
+@c visited or saved, by reading the text from the file again.  This is
+@c called @dfn{reverting}.  @xref{Reverting}.  You could also undo all the
+@c changes by repeating the undo command @kbd{C-x u} until you have undone
+@c all the changes; but reverting is easier.
+バッファを変更したけれども変更を保存したくないならば、
+それを避けるための処置をすべきでしょう。
+そうしないと、@kbd{C-x s}や@kbd{C-x C-c}を使うたびに、
+まちがってバッファを保存してしまいがちです。
+1つの方法は、@kbd{M-~}（@code{not-modified}）と打つことです。
+これは、バッファが変更されていることを示すフラグを消します。
+こうしておくと、保存コマンドはバッファを保存する必要がないと結論します。
+（@samp{~}は「否定」（not）を意味する数学記号としてしばしば使われる。
+よって@kbd{M-~}は、メタ付き「否定」。）
+@code{set-visited-file-name}（下記参照）を使って、
+別のファイルを訪問しているバッファである旨の印を付けることもできます。
+このときファイル名には、重要でない使っていないものを指定します。
+あるいは、ファイルからテキストを再度読み直して、
+ファイルを訪問したり保存したりした以降のすべての変更を取り消します。
+これを@dfn{復元}（reverting）といいます。
+@xref{Reverting}。
+すべての変更がもとに戻るまでアンドゥコマンド@kbd{C-x u}を繰り返し使って、
+変更しなかったことにもできます。
+しかし、復元のほうが簡単です。
+
+@findex set-visited-file-name
+@c   @kbd{M-x set-visited-file-name} alters the name of the file that the
+@c current buffer is visiting.  It reads the new file name using the
+@c minibuffer.  Then it specifies the visited file name and changes the
+@c buffer name correspondingly (as long as the new name is not in use).
+@c @code{set-visited-file-name} does not save the buffer in the newly
+@c visited file; it just alters the records inside Emacs in case you do
+@c save later.  It also marks the buffer as ``modified'' so that @kbd{C-x
+@c C-s} in that buffer @emph{will} save.
+@kbd{M-x set-visited-file-name}は、
+カレントバッファで訪問しているファイルの名前を変更します。
+このコマンドは、ミニバッファで新たなファイル名を読み取ります。
+そして、訪問先ファイル名を設定し直し、
+それに従って（新しい名前が使われていなければ）
+バッファ名も変更します。
+@code{set-visited-file-name}は、
+新たに指定した訪問先のファイルへはバッファを保存しません。
+あとで保存する場合に備えて、Emacs内部の記録を変更するだけです。
+また、バッファには『変更された』旨の印を付け、
+@kbd{C-x C-s}がそのバッファを保存@emph{しようとする}ようにします。
+
+@kindex C-x C-w
+@findex write-file
+@c   If you wish to mark the buffer as visiting a different file and save it
+@c right away, use @kbd{C-x C-w} (@code{write-file}).  It is precisely
+@c equivalent to @code{set-visited-file-name} followed by @kbd{C-x C-s}.
+@c @kbd{C-x C-s} used on a buffer that is not visiting a file has the
+@c same effect as @kbd{C-x C-w}; that is, it reads a file name, marks the
+@c buffer as visiting that file, and saves it there.  The default file name in
+@c a buffer that is not visiting a file is made by combining the buffer name
+@c with the buffer's default directory.
+別のファイルを訪問しているという旨の印をバッファに付けて、
+ただちに保存したい場合には、@kbd{C-x C-w}（@code{write-file}）を使います。
+このコマンドは、@code{set-visited-file-name}に続けて@kbd{C-x C-s}を
+実行するのと等価です。
+ファイルを訪問していないバッファに対して@kbd{C-x C-s}を使うことは、
+@kbd{C-x C-w}と同じ効果があります。
+つまり、ファイル名を読み取り、
+バッファにはそのファイルを訪問しているという印を付け、
+バッファをそのファイルに保存します。
+ファイルを訪問していないバッファのデフォルトのファイル名は、
+バッファのデフォルトディレクトリとバッファ名を組み合わせて作ります。
+
+@c   If the new file name implies a major mode, then @kbd{C-x C-w} switches
+@c to that major mode, in most cases.  The command
+@c @code{set-visited-file-name} also does this.  @xref{Choosing Modes}.
+新しいファイル名がメジャーモードを示唆するものであれば、
+@kbd{C-x C-w}は、多くの場合、そのメジャーモードに切り替えます。
+コマンド@code{set-visited-file-name}もそのようにします。
+@xref{Choosing Modes}。
+
+@c   If Emacs is about to save a file and sees that the date of the latest
+@c version on disk does not match what Emacs last read or wrote, Emacs
+@c notifies you of this fact, because it probably indicates a problem caused
+@c by simultaneous editing and requires your immediate attention.
+@c @xref{Interlocking,, Simultaneous Editing}.
+Emacsがファイルを保存しようとするときに、
+ディスク上の最新版の日付がEmacsが最後に読み書きしたものと合わなかったら、
+Emacsはそのことを通知します。
+というのは、同時に編集したために引き起こされた問題である可能性があるので、
+ユーザーにただちに知らせる必要があるからです。
+@xref{Interlocking}。
+
+@vindex require-final-newline
+@c   If the variable @code{require-final-newline} is non-@code{nil}, Emacs
+@c puts a newline at the end of any file that doesn't already end in one,
+@c every time a file is saved or written.  The default is @code{nil}.
+変数@code{require-final-newline}が@code{nil}以外だと、
+Emacsはファイルを保存するたびに、
+ファイルの末尾に改行がなければ改行を挿入します。
+デフォルトは@code{nil}です。
+
+@menu
+* Backup::              How Emacs saves the old version of your file.
+* Interlocking::        How Emacs protects against simultaneous editing
+                          of one file by two users.
+@end menu
+
+@node Backup
+@c @subsection Backup Files
+@c @cindex backup file
+@subsection バックアップファイル
+@cindex バックアップファイル
+@vindex make-backup-files
+@vindex vc-make-backup-files
+@vindex backup-enable-predicate
+
+@c   On most operating systems, rewriting a file automatically destroys all
+@c record of what the file used to contain.  Thus, saving a file from Emacs
+@c throws away the old contents of the file---or it would, except that
+@c Emacs carefully copies the old contents to another file, called the
+@c @dfn{backup} file, before actually saving.
+多くのオペレーティングシステムでは、
+ファイルを書き換えるとファイルに入っていたそれまでの記録は
+自動的に破棄されます。
+したがって、Emacsでファイルを保存すると、ファイルの古い内容は捨てられます。
+しかし、実際に保存するまえに、古い内容を@dfn{バックアップ}ファイル
+と呼ばれる別のファイルにEmacsが注意深くコピーすれば、
+古い内容は破棄されません。
+
+@c   For most files, the variable @code{make-backup-files} determines
+@c whether to make backup files.  On most operating systems, its default
+@c value is @code{t}, so that Emacs does write backup files.
+ほとんどのファイルでは、
+バックアップファイルを作るかどうかは
+変数@code{make-backup-files}で決まります。
+多くのオペレーティングシステムでは、この変数のデフォルト値は@code{t}であり、
+Emacsはバックアップファイルを作ります。 
+
+@c   For files managed by a version control system (@pxref{Version
+@c Control}), the variable @code{vc-make-backup-files} determines whether
+@c to make backup files.  By default, it is @code{nil}, since backup files
+@c are redundant when you store all the previous versions in a version
+@c control system.  @xref{VC Workfile Handling}.
+版管理システム（@pxref{Version Control}）が管理するファイルに対しては、
+バックアップファイルを作るかどうかは
+変数@code{vc-make-backup-files}で決まります。
+デフォルトは@code{nil}です。
+というのは、すべての古い版を版管理システムに保管してあるので、
+バックアップファイルは冗長だからです。
+@xref{VC Workfile Handling}。
+
+@c   The default value of the @code{backup-enable-predicate} variable
+@c prevents backup files being written for files in @file{/tmp}.
+変数@code{backup-enable-predicate}のデフォルト値は、
+@file{/tmp}にあるファイルのバックアップファイルを
+作らないようにします。
+
+@c   At your option, Emacs can keep either a single backup file or a series of
+@c numbered backup files for each file that you edit.
+Emacsでは、単一のバックアップファイルを保持することも、
+編集した各ファイルごとに一連の番号付きバックアップファイルを
+保持することもできます。
+
+@c   Emacs makes a backup for a file only the first time the file is saved
+@c from one buffer.  No matter how many times you save a file, its backup file
+@c continues to contain the contents from before the file was visited.
+@c Normally this means that the backup file contains the contents from before
+@c the current editing session; however, if you kill the buffer and then visit
+@c the file again, a new backup file will be made by the next save.
+Emacsがファイルのバックアップファイルを作るのは、
+バッファからそのファイルへ最初に保存したときだけです。
+たとえ何度ファイルを保存したとしても、
+そのバックアップファイルは、ファイルを訪問する以前の内容を保持し続けます。
+通常これは、今の編集セッションを始める以前の内容を
+バックアップファイルが保持していることを意味します。
+しかしながら、バッファを消去してから再度ファイルを訪問すると、
+それ以降に保存するときには新たにバックアップファイルを作ります。
+
+@c   You can also explicitly request making another backup file from a
+@c buffer even though it has already been saved at least once.  If you save
+@c the buffer with @kbd{C-u C-x C-s}, the version thus saved will be made
+@c into a backup file if you save the buffer again.  @kbd{C-u C-u C-x C-s}
+@c saves the buffer, but first makes the previous file contents into a new
+@c backup file.  @kbd{C-u C-u C-u C-x C-s} does both things: it makes a
+@c backup from the previous contents, and arranges to make another from the
+@c newly saved contents, if you save again.
+少なくとも一度は保存したとしても、
+バッファからもう1つバックアップファイルを作るように明示的に
+指示することもできます。
+@kbd{C-u C-x C-s}でバッファを保存すると、
+このとき保存した版は、バッファを再度保存するときには
+バックアップファイルになります。
+@kbd{C-u C-u C-x C-s}もバッファを保存しますが、
+まずファイルの古い内容をバックアップファイルにします。
+@kbd{C-u C-u C-u C-x C-s} はその両方を行います。
+ファイルの以前の内容からバックアップファイルを作り、
+さらに、バッファを再度保存するとこのとき保存した版から
+もう1つバックアップファイルを作るように準備します。
+
+@menu
+* Names: Backup Names.		How backup files are named;
+				  choosing single or numbered backup files.
+* Deletion: Backup Deletion.	Emacs deletes excess numbered backups.
+* Copying: Backup Copying.	Backups can be made by copying or renaming.
+@end menu
+
+@node Backup Names
+@c @subsubsection Single or Numbered Backups
+@subsubsection 単一バックアップファイルと番号付きバックアップファイル
+
+@c   If you choose to have a single backup file (this is the default),
+@c the backup file's name is constructed by appending @samp{~} to the
+@c file name being edited; thus, the backup file for @file{eval.c} would
+@c be @file{eval.c~}.
+単一バックアップファイルを作ることを選択すると（デフォルト）、
+バックアップファイルの名前は、
+編集しているファイルの名前に@samp{~}を付加したものになります。
+したがって、@file{eval.c}のバックアップファイルは@file{eval.c~}となります。
+
+@c   If you choose to have a series of numbered backup files, backup file
+@c names are made by appending @samp{.~}, the number, and another @samp{~} to
+@c the original file name.  Thus, the backup files of @file{eval.c} would be
+@c called @file{eval.c.~1~}, @file{eval.c.~2~}, and so on, through names
+@c like @file{eval.c.~259~} and beyond.
+番号付きの一連のバックアップファイルを作ることを選択すると、
+バックアップファイルの名前は、もとのファイル名に
+@samp{.~}と数字ともう1つ@samp{~}を付加したものになります。
+したがって、@file{eval.c}のバックアップファイルは、
+@file{eval.c.~1~}、@file{eval.c.~2~}、…、@file{eval.c.~259~}というように
+どこまでも続きます。
+
+@c   If protection stops you from writing backup files under the usual names,
+@c the backup file is written as @file{%backup%~} in your home directory.
+@c Only one such file can exist, so only the most recently made such backup is
+@c available.
+保護機構のために
+普通の名前でバックアップファイルを書けなくなると、
+ユーザーのホームディレクトリの@file{%backup%~}に
+バックアップファイルを書きます。
+そのファイルはたった1つしか存在できないので、
+最新のバックアップにしか利用できません。
+
+@vindex version-control
+@c   The choice of single backup or numbered backups is controlled by the
+@c variable @code{version-control}.  Its possible values are
+単一バックアップか番号付きバックアップかの選択は、
+変数@code{version-control}で制御されます。
+この変数に設定できる値はつぎのとおりです。
+
+@table @code
+@item t
+@c Make numbered backups.
+番号付きバックアップを作る。
+@item nil
+@c Make numbered backups for files that have numbered backups already.
+@c Otherwise, make single backups.
+ファイルに対して番号付きバックアップファイルがすでにあるならば
+番号付きバックアップを作る。
+さもなければ、単一バックアップを作る。
+@item never
+@c Do not in any case make numbered backups; always make single backups.
+どんな場合にも番号付きバックアップを作らない。
+つねに単一バックアップを作る。
+@end table
+
+@noindent
+@c You can set @code{version-control} locally in an individual buffer to
+@c control the making of backups for that buffer's file.  For example,
+@c Rmail mode locally sets @code{version-control} to @code{never} to make sure
+@c that there is only one backup for an Rmail file.  @xref{Locals}.
+各バッファではローカルに@code{version-control}を設定できるので、
+そのバッファのファイルに対するバックアップの作成方法を制御できます。
+たとえば、rmailモードでは、
+rmailファイルのバックアップを1個だけに限定するために、
+@code{version-control}にはローカルに@code{never}を設定します。
+@xref{Locals}。
+
+@c @cindex @code{VERSION_CONTROL} environment variable
+@cindex 環境変数@code{VERSION_CONTROL}
+@cindex @code{VERSION_CONTROL}（環境変数）
+@c   If you set the environment variable @code{VERSION_CONTROL}, to tell
+@c various GNU utilities what to do with backup files, Emacs also obeys the
+@c environment variable by setting the Lisp variable @code{version-control}
+@c accordingly at startup.  If the environment variable's value is @samp{t}
+@c or @samp{numbered}, then @code{version-control} becomes @code{t}; if the
+@c value is @samp{nil} or @samp{existing}, then @code{version-control}
+@c becomes @code{nil}; if it is @samp{never} or @samp{simple}, then
+@c @code{version-control} becomes @code{never}.
+環境変数@code{VERSION_CONTROL}を設定すると、
+さまざまなGNUユーティリティに
+どのようにバックアップファイルを扱うか指示できます。
+Emacsも環境変数に従って動作し、
+開始時にそれに一致するようにLisp変数@code{version-control}を設定します。
+環境変数の値が@samp{t}か@samp{numbered}なら、
+@code{version-control}は@code{t}になります。
+環境変数の値が@samp{nil}か@samp{existing}なら、
+@code{version-control}は@code{nil}になります。
+環境変数の値が@samp{never}か@samp{simple}なら、
+@code{version-control}は@code{never}になります。
+
+@node Backup Deletion
+@c @subsubsection Automatic Deletion of Backups
+@subsubsection バックアップの自動削除
+
+@c   To prevent unlimited consumption of disk space, Emacs can delete numbered
+@c backup versions automatically.  Generally Emacs keeps the first few backups
+@c and the latest few backups, deleting any in between.  This happens every
+@c time a new backup is made.
+ディスク容量を無限に浪費することを避けるために、
+Emacsは番号付きバックアップの版を自動的に削除できます。
+一般には、Emacsは始めの数個と最新の数個のバックアップを残して、
+そのあいだのものをすべて削除します。
+これは、新たにバックアップを作るごとに行われます。
+
+@vindex kept-old-versions
+@vindex kept-new-versions
+@c   The two variables @code{kept-old-versions} and
+@c @code{kept-new-versions} control this deletion.  Their values are,
+@c respectively the number of oldest (lowest-numbered) backups to keep and
+@c the number of newest (highest-numbered) ones to keep, each time a new
+@c backup is made.  Recall that these values are used just after a new
+@c backup version is made; that newly made backup is included in the count
+@c in @code{kept-new-versions}.  By default, both variables are 2.
+2つの変数@code{kept-old-versions}と@code{kept-new-versions}は、
+このような削除を制御します。
+それらの値は、それぞれ、新たにバックアップを作るときに、
+保持すべき最古（番号が最小）のバックアップの個数、
+保持すべき最新（番号が最大）のバックアップの個数です。
+それらの値は、バックアップの新版を作った直後に使われることに
+注意してください。
+新たに作ったバックアップも、@code{kept-new-versions}の数に含まれます。
+デフォルトでは、どちらの変数も2です。
+
+@vindex delete-old-versions
+@c   If @code{delete-old-versions} is non-@code{nil}, the excess
+@c middle versions are deleted without a murmur.  If it is @code{nil}, the
+@c default, then you are asked whether the excess middle versions should
+@c really be deleted.
+@code{delete-old-versions}が@code{nil}以外ならば、
+何もいわずに余分な中間の版を削除します。
+デフォルト値である@code{nil}ならば、
+余分な中間の版を削除するかどうかを聞いてきます。
+
+@c   Dired's @kbd{.} (Period) command can also be used to delete old versions.
+@c @xref{Dired Deletion}.
+diredの@kbd{.}（ピリオド）コマンドも古い版を削除するために使えます。
+@xref{Dired Deletion}。
+
+@node Backup Copying
+@c @subsubsection Copying vs.@: Renaming
+@subsubsection コピーと改名
+
+@c   Backup files can be made by copying the old file or by renaming it.  This
+@c makes a difference when the old file has multiple names.  If the old file
+@c is renamed into the backup file, then the alternate names become names for
+@c the backup file.  If the old file is copied instead, then the alternate
+@c names remain names for the file that you are editing, and the contents
+@c accessed by those names will be the new contents.
+バックアップファイルは、古いファイルをコピーする、あるいは、
+それを改名することで作ります。
+古いファイルに複数の名前があると、これには違いが出てきます。
+古いファイルを改名してバックアップファイルにすると、
+（古いファイルの）別の名前もバックアップファイルを指します。
+古いファイルをコピーした場合には、
+（古いファイルの）別の名前は編集しているファイルを指し続け、
+その名前で参照される内容も新しい内容になります。
+
+@c   The method of making a backup file may also affect the file's owner
+@c and group.  If copying is used, these do not change.  If renaming is used,
+@c you become the file's owner, and the file's group becomes the default
+@c (different operating systems have different defaults for the group).
+バックアップファイルを作る方法は、
+元ファイルの所有者とグループにも影響します。
+コピーするならば、何も変更されません。
+改名すると、ファイルの所有者はあなたになり、
+ファイルのグループはデフォルトになります
+（オペレーティングシステムごとにグループのデフォルトは異なる）。
+
+@c   Having the owner change is usually a good idea, because then the owner
+@c always shows who last edited the file.  Also, the owners of the backups
+@c show who produced those versions.  Occasionally there is a file whose
+@c owner should not change; it is a good idea for such files to contain
+@c local variable lists to set @code{backup-by-copying-when-mismatch}
+@c locally (@pxref{File Variables}).
+所有者を変更することは、多くの場合、よいことです。
+というのは、所有者がつねに最後にファイルを編集した人を表すからです。
+同様に、バックアップの所有者はその版を作った人を表します。
+ときには、ファイルの所有者を変更すべきでないファイルがあります。
+そのようなファイルについては、
+@code{backup-by-copying-when-mismatch}をローカルに設定する
+ローカル変数リストをファイルに入れておくのがよいです。
+
+@vindex backup-by-copying
+@vindex backup-by-copying-when-linked
+@vindex backup-by-copying-when-mismatch
+@c   The choice of renaming or copying is controlled by three variables.
+@c Renaming is the default choice.  If the variable
+@c @code{backup-by-copying} is non-@code{nil}, copying is used.  Otherwise,
+@c if the variable @code{backup-by-copying-when-linked} is non-@code{nil},
+@c then copying is used for files that have multiple names, but renaming
+@c may still be used when the file being edited has only one name.  If the
+@c variable @code{backup-by-copying-when-mismatch} is non-@code{nil}, then
+@c copying is used if renaming would cause the file's owner or group to
+@c change.  @code{backup-by-copying-when-mismatch} is @code{t} by default
+@c if you start Emacs as the superuser.
+改名するかコピーするかは、3つの変数で制御されます。
+デフォルトは、改名です。
+変数@code{backup-by-copying}が@code{nil}以外ならばコピーします。
+@code{nil}のときには、
+変数@code{backup-by-copying-when-linked}が@code{nil}以外ならば、
+複数の名前を持つファイルではコピーし、
+編集中のファイルには名前が1つだけなら改名します。
+変数@code{backup-by-copying-when-mismatch}が@code{nil}以外のときには、
+改名するとファイルの所有者やグループが変更されるときにはコピーします。
+スーパーユーザーでEmacsを起動すると、
+@code{backup-by-copying-when-mismatch}のデフォルトは@code{t}です。
+
+@c   When a file is managed with a version control system (@pxref{Version
+@c Control}), Emacs does not normally make backups in the usual way for
+@c that file.  But check-in and check-out are similar in some ways to
+@c making backups.  One unfortunate similarity is that these operations
+@c typically break hard links, disconnecting the file name you visited from
+@c any alternate names for the same file.  This has nothing to do with
+@c Emacs---the version control system does it.
+ファイルを版管理システム（@pxref{Version Control}）で管理している場合には、
+通常Emacsはそのファイルのバックアップを通常の方法では作りません。
+チェックインとチェックアウトは、
+ある意味でバックアップを作ることに似ています。
+残念なことに、
+これらの操作は典型的にはハードリンクを切るという
+類似性があります。
+つまり、あるファイルの別の名前を使っていたとすると
+そのファイル名がなくなるのです。
+Emacsにできることはありません。
+版管理システムが処理します。
+
+@node Interlocking
+@c @subsection Protection against Simultaneous Editing
+@subsection 同時編集に対する保護
+
+@c @cindex file dates
+@c @cindex simultaneous editing
+@cindex ファイルの日付
+@cindex 同時編集
+@c   Simultaneous editing occurs when two users visit the same file, both
+@c make changes, and then both save them.  If nobody were informed that
+@c this was happening, whichever user saved first would later find that his
+@c changes were lost.
+2人のユーザーが同じファイルを訪問し、両者がそれを編集し、
+両者がそれを保存すると、同時編集が発生します。
+こういったことが起きていることを誰も知らせなければ、
+最初に保存したユーザーは、あとになって自分の変更が失われていることを知るでしょう。
+
+@c   On some systems, Emacs notices immediately when the second user starts
+@c to change the file, and issues an immediate warning.  On all systems,
+@c Emacs checks when you save the file, and warns if you are about to
+@c overwrite another user's changes.  You can prevent loss of the other
+@c user's work by taking the proper corrective action instead of saving the
+@c file.
+ある種のシステムでは、2人目のユーザーがファイルを変更し始めたことを
+Emacsがただちに検知して警告を発します。
+すべてのシステムでは、ファイルを保存するときにEmacsが検査して、
+他人の変更を上書きしようとしているならば警告します。
+ファイルを保存するかわりに適切な修正操作を行えば、
+他人の作業結果を失うことを避けられます。
+
+@findex ask-user-about-lock
+@c @cindex locking files
+@cindex ファイルをロックする
+@c   When you make the first modification in an Emacs buffer that is
+@c visiting a file, Emacs records that the file is @dfn{locked} by you.
+@c (It does this by creating a symbolic link in the same directory with a
+@c different name.)  Emacs removes the lock when you save the changes.  The
+@c idea is that the file is locked whenever an Emacs buffer visiting it has
+@c unsaved changes.
+ファイルを訪問しているEmacsバッファで初めて修正を行うと、
+Emacsはそのユーザーがファイルを@dfn{ロック}したと記録します。
+（同じディレクトリ内に異なる名前のシンボリックリンクを作ることで実現する。）
+変更を保存するとEmacsはロックを消します。
+つまり、ファイルを訪問しているEmacsバッファに未保存の変更があるときには
+ファイルをロックしておくのです。
+
+@c @cindex collision
+@cindex 衝突
+@c   If you begin to modify the buffer while the visited file is locked by
+@c someone else, this constitutes a @dfn{collision}.  When Emacs detects a
+@c collision, it asks you what to do, by calling the Lisp function
+@c @code{ask-user-about-lock}.  You can redefine this function for the sake
+@c of customization.  The standard definition of this function asks you a
+@c question and accepts three possible answers:
+他人がロックしているファイルを訪問先とするバッファを
+修正し始めると@dfn{衝突}が起こります。
+Emacsが衝突を検知すると、Lisp関数@code{ask-user-about-lock}を呼び出して、
+どうするかを聞いてきます。
+この関数をカスタマイズのために再定義することもできます。
+この関数の標準の定義では、ユーザーに質問をし、3つの返答を受理します。
+
+@table @kbd
+@item s
+@c Steal the lock.  Whoever was already changing the file loses the lock,
+@c and you gain the lock.
+ロックを横取りする。
+ファイルをすでに変更していた人はロックを失い、
+あなたがロックを得る。
+@item p
+@c Proceed.  Go ahead and edit the file despite its being locked by someone else.
+続行する。
+誰かがファイルをロックしたままであるにもかかわらず、
+ファイルを編集する。
+@item q
+@c Quit.  This causes an error (@code{file-locked}) and the modification you
+@c were trying to make in the buffer does not actually take place.
+放棄する。
+これはエラー（@code{file-locked}）を引き起こし、
+バッファ内で修正しようとしたことは、実際には行われない。
+@end table
+
+@c   Note that locking works on the basis of a file name; if a file has
+@c multiple names, Emacs does not realize that the two names are the same file
+@c and cannot prevent two users from editing it simultaneously under different
+@c names.  However, basing locking on names means that Emacs can interlock the
+@c editing of new files that will not really exist until they are saved.
+ロックはファイル名に基づいて動作することに注意してください。
+ファイルに複数の名前があると、Emacsには2つの名前が同じファイルで
+あることはわからないので、
+2人のユーザーが異なる名前で同じファイルを編集することは防げません。
+しかし、名前に基づいたロックなので、
+保存しない限り実在しない新規ファイルの編集をEmacsはインターロック
+@footnote{【訳注】進行中の動作が完了するまでは、
+つぎの動作を開始させないようにすること。}
+できます。
+
+@c   Some systems are not configured to allow Emacs to make locks, and
+@c there are cases where lock files cannot be written.  In these cases,
+@c Emacs cannot detect trouble in advance, but it still can detect the
+@c collision when you try to save a file and overwrite someone else's
+@c changes.
+Emacsがロックを作れる構成になっていないシステムもあります。
+また、ロックファイルを書けない場合もあります。
+こういった状況では、
+Emacsがあらかじめトラブルを検知することはできませんが、
+他人の変更を上書きしてファイルを保存しようとしたときには、
+衝突を検知できます。
+
+@c   If Emacs or the operating system crashes, this may leave behind lock
+@c files which are stale.  So you may occasionally get warnings about
+@c spurious collisions.  When you determine that the collision is spurious,
+@c just use @kbd{p} to tell Emacs to go ahead anyway.
+Emacsやオペレーティングシステムがクラッシュすると、
+古いロックファイルが残っていることあります。
+そのため、ときどき偽の衝突についての警告を受けとることがあるかもしれません。
+偽の衝突であると確信できれば、
+Emacsにとにかく続行するように指示する@kbd{p}を使います。
+
+@c   Every time Emacs saves a buffer, it first checks the last-modification
+@c date of the existing file on disk to verify that it has not changed since the
+@c file was last visited or saved.  If the date does not match, it implies
+@c that changes were made in the file in some other way, and these changes are
+@c about to be lost if Emacs actually does save.  To prevent this, Emacs
+@c prints a warning message and asks for confirmation before saving.
+@c Occasionally you will know why the file was changed and know that it does
+@c not matter; then you can answer @kbd{yes} and proceed.  Otherwise, you should
+@c cancel the save with @kbd{C-g} and investigate the situation.
+Emacsは、バッファを保存するたびに、
+ディスク上のファイルの最終変更日時が最後に訪問／保存したときから
+更新されていないことをまず検査します。
+変更日時が不一致ならば、なんらかの方法でそのファイルが変更されたことを示し、
+Emacsが本当に保存するとそれらの変更が失われてしまいます。
+これを避けるために、Emacsは警告のメッセージを表示し、
+保存するまえに確認を求めます。
+ファイルが変更された理由を承知していて、
+それが問題でないことを知っていることもあるでしょう。
+そうならば、@kbd{yes}と答えて続行できます。
+さもなければ、@kbd{C-g}で保存を中断して、その事態を調査するべきです。
+
+@c   The first thing you should do when notified that simultaneous editing
+@c has already taken place is to list the directory with @kbd{C-u C-x C-d}
+@c (@pxref{Directories}).  This shows the file's current author.  You
+@c should attempt to contact him to warn him not to continue editing.
+@c Often the next step is to save the contents of your Emacs buffer under a
+@c different name, and use @code{diff} to compare the two files.@refill
+同時編集が発生したことを知らされたときにまず行うべきことは、
+@kbd{C-u C-x C-d}（@pxref{Directories}）でディレクトリ一覧を見ることです。
+このコマンドは、ファイルの現在の所有者を表示します。
+その人に連絡して、編集を続けないように警告しましょう。
+そのつぎの段階は、別の名前でEmacsバッファを保存して、
+@code{diff}で2つのファイルを比較することでしょう。
+
+@node Reverting
+@c @section Reverting a Buffer
+@section バッファを復元する
+@findex revert-buffer
+@c @cindex drastic changes
+@cindex 徹底的な変更
+
+@c   If you have made extensive changes to a file and then change your mind
+@c about them, you can get rid of them by reading in the previous version
+@c of the file.  To do this, use @kbd{M-x revert-buffer}, which operates on
+@c the current buffer.  Since reverting a buffer unintentionally could lose
+@c a lot of work, you must confirm this command with @kbd{yes}.
+広範囲にファイルを変更したあとで気が変わったときには、
+そのような変更を捨てるためにファイルのまえの版を読み込みます。
+これには、カレントバッファに作用する
+@kbd{M-x revert-buffer}を使います。
+意図せずにバッファを復元することは、
+たくさんの作業結果を失うことになるので、
+このコマンドには@kbd{yes}で確認を与える必要があります。
+
+@c   @code{revert-buffer} keeps point at the same distance (measured in
+@c characters) from the beginning of the file.  If the file was edited only
+@c slightly, you will be at approximately the same piece of text after
+@c reverting as before.  If you have made drastic changes, the same value of
+@c point in the old file may address a totally different piece of text.
+@code{revert-buffer}は、ファイルの先頭から同じ距離（文字数）に
+ポイントを保ちます。
+少し編集しただけなら、復元前後のポイント位置はだいたい同じ部分にあります。
+徹底的に変更してしまったときには、
+古いファイルでのポイント位置では
+まったく異なるテキスト部分に位置付けるでしょう。
+
+@c   Reverting marks the buffer as ``not modified'' until another change is
+@c made.
+復元すると、改めて変更するまでは、
+そのバッファには『変更なし』の印が付きます。
+
+@c   Some kinds of buffers whose contents reflect data bases other than files,
+@c such as Dired buffers, can also be reverted.  For them, reverting means
+@c recalculating their contents from the appropriate data base.  Buffers
+@c created explicitly with @kbd{C-x b} cannot be reverted; @code{revert-buffer}
+@c reports an error when asked to do so.
+diredバッファのように、ファイル以外のデータを反映するバッファでも
+復元できる場合があります。
+その場合、復元とは、適切なデータに基づいて内容を計算し直すことを意味します。
+@kbd{C-x b}で明示的に作ったバッファを復元することはできません。
+そういった指示をすると、@code{revert-buffer}はエラーを報告します。
+
+@vindex revert-without-query
+@c   When you edit a file that changes automatically and frequently---for
+@c example, a log of output from a process that continues to run---it may be
+@c useful for Emacs to revert the file without querying you, whenever you
+@c visit the file again with @kbd{C-x C-f}.
+自動的にかつ頻繁に変更されるファイル、
+たとえば、実行中のプロセスから出力されるログ、
+を編集するときには、@kbd{C-x C-f}でファイルを再訪問すると
+何も聞かずにファイルを復元できると便利です。
+
+@c   To request this behavior, set the variable @code{revert-without-query}
+@c to a list of regular expressions.  When a file name matches one of these
+@c regular expressions, @code{find-file} and @code{revert-buffer} will
+@c revert it automatically if it has changed---provided the buffer itself
+@c is not modified.  (If you have edited the text, it would be wrong to
+@c discard your changes.)
+こういったふるまいを指示するには、
+変数@code{revert-without-query}に正規表現のリストを設定します。
+これらの正規表現の1つにファイル名が一致すると、
+@code{find-file}と@code{revert-buffer}は、
+バッファが変更されていない限り、
+そのファイルが変更されていても復元します。
+（テキストを編集してしまったときには、
+変更を捨てさるのはまちがっている。）
+
+@node Auto Save
+@c @section Auto-Saving: Protection Against Disasters
+@c @cindex Auto Save mode
+@c @cindex mode, Auto Save
+@c @cindex crashes
+@section 自動保存、不慮の事故に対する備え
+@cindex 自動保存（Auto Save mode）
+@cindex モード、Auto Save
+@cindex クラッシュ
+
+@c   Emacs saves all the visited files from time to time (based on counting
+@c your keystrokes) without being asked.  This is called @dfn{auto-saving}.
+@c It prevents you from losing more than a limited amount of work if the
+@c system crashes.
+Emacsは（打鍵数に基づいて）定期的に、
+訪問しているすべてのファイルを何も聞かずに保存します。
+これを@dfn{自動保存}（auot-saving）と呼びます。
+これは、システムがクラッシュしたときに
+失ってしまう作業結果をある程度以下に制限します。
+
+@c   When Emacs determines that it is time for auto-saving, each buffer is
+@c considered, and is auto-saved if auto-saving is turned on for it and it
+@c has been changed since the last time it was auto-saved.  The message
+@c @samp{Auto-saving...} is displayed in the echo area during auto-saving,
+@c if any files are actually auto-saved.  Errors occurring during
+@c auto-saving are caught so that they do not interfere with the execution
+@c of commands you have been typing.
+自動保存を実施する時間になるとEmacsは各バッファを調べて、
+そのバッファに自動保存が指定されていて、かつ、
+最後に自動保存した以後に変更されている場合は、
+そのバッファを自動保存します。
+実際にファイルを自動保存すると、
+エコー領域にメッセージ@samp{Auto-saving...}を表示します。
+自動保存の最中に発生したエラーは捕獲されるので、
+打ち込んだコマンドの実行に干渉することはありません。
+
+@menu
+* Files: Auto Save Files.       The file where auto-saved changes are
+                                  actually made until you save the file.
+* Control: Auto Save Control.   Controlling when and how often to auto-save.
+* Recover::		        Recovering text from auto-save files.
+@end menu
+
+@node Auto Save Files
+@c @subsection Auto-Save Files
+@subsection 自動保存ファイル
+
+@c   Auto-saving does not normally save in the files that you visited, because
+@c it can be very undesirable to save a program that is in an inconsistent
+@c state when you have made half of a planned change.  Instead, auto-saving
+@c is done in a different file called the @dfn{auto-save file}, and the
+@c visited file is changed only when you request saving explicitly (such as
+@c with @kbd{C-x C-s}).
+自動保存は、通常、訪問先のファイルそのものへは保存しません。
+というのは、予定の半分を変更しただけでプログラムにまだ一貫性がないのに
+保存してしまうのは望ましくないからです。
+そのかわりに@dfn{自動保存ファイル}と呼ばれる別のファイルに自動保存し、
+（@kbd{C-x C-s}などで）明示的に保存するよう指示されたときだけ、
+訪問先のファイルに保存します。
+
+@c   Normally, the auto-save file name is made by appending @samp{#} to the
+@c front and rear of the visited file name.  Thus, a buffer visiting file
+@c @file{foo.c} is auto-saved in a file @file{#foo.c#}.  Most buffers that
+@c are not visiting files are auto-saved only if you request it explicitly;
+@c when they are auto-saved, the auto-save file name is made by appending
+@c @samp{#%} to the front and @samp{#} to the rear of buffer name.  For
+@c example, the @samp{*mail*} buffer in which you compose messages to be
+@c sent is auto-saved in a file named @file{#%*mail*#}.  Auto-save file
+@c names are made this way unless you reprogram parts of Emacs to do
+@c something different (the functions @code{make-auto-save-file-name} and
+@c @code{auto-save-file-name-p}).  The file name to be used for auto-saving
+@c in a buffer is calculated when auto-saving is turned on in that buffer.
+通常、自動保存ファイルの名前は、訪問先のファイルの名前の前後に
+@samp{#}を付加したものです。
+したがって、ファイル@file{foo.c}を訪問したバッファは、
+ファイル@file{#foo.c#}に自動保存されます。
+ファイルを訪問していないほとんどのバッファは、
+明示的に指定したときだけ自動保存されます。
+それらのバッファの自動保存ファイルの名前は、
+バッファ名のまえに@samp{#%}、あとに@samp{#}を付けたものになります。
+たとえば、送信するメッセージを作成するバッファ@samp{*mail*}は、
+@file{#%*mail*#}というファイルに自動保存されます。
+自動保存ファイルの名前は、Emacsの一部（関数@code{make-auto-save-file-name}と
+@code{auto-save-file-name-p}）をプログラムし直さない限り、
+この方法で作られます。
+バッファの自動保存に使うファイル名は、
+そのバッファで自動保存をオンにしたときに計算されます。
+
+@c   When you delete a substantial part of the text in a large buffer, auto
+@c save turns off temporarily in that buffer.  This is because if you
+@c deleted the text unintentionally, you might find the auto-save file more
+@c useful if it contains the deleted text.  To reenable auto-saving after
+@c this happens, save the buffer with @kbd{C-x C-s}, or use @kbd{C-u 1 M-x
+@c auto-save}.
+大きなバッファで相当量のテキストを削除したときには、
+そのバッファの自動保存を一時的にやめます。
+意図せずにテキストを削除してしまった場合には、
+自動保存ファイルに削除してしまったテキストが残っているほうが、
+自動保存ファイルとしてより役に立つからです。
+こうなったあとで自動保存をふたたびオンにするには、
+@kbd{C-x C-s}でバッファを保存するか、
+@kbd{C-u 1 M-x auto-save}を使います。
+
+@vindex auto-save-visited-file-name
+@c   If you want auto-saving to be done in the visited file, set the variable
+@c @code{auto-save-visited-file-name} to be non-@code{nil}.  In this mode,
+@c there is really no difference between auto-saving and explicit saving.
+訪問先のファイルそのものに自動保存を行いたい場合には、
+変数@code{auto-save-visited-file-name}に@code{nil}以外の値を設定します。
+こうすると、自動保存と明示的な保存には、何の違いもありません。
+
+@vindex delete-auto-save-files
+@c   A buffer's auto-save file is deleted when you save the buffer in its
+@c visited file.  To inhibit this, set the variable @code{delete-auto-save-files}
+@c to @code{nil}.  Changing the visited file name with @kbd{C-x C-w} or
+@c @code{set-visited-file-name} renames any auto-save file to go with
+@c the new visited name.
+訪問先のファイルにバッファを保存すると、
+バッファの自動保存ファイルは削除されます。
+これを禁止するには、
+変数@code{delete-auto-save-files}に@code{nil}を設定します。
+@kbd{C-x C-w}や@code{set-visited-file-name}で
+訪問先ファイル名を変更すると、
+新たな訪問先ファイル名に合わせて自動保存ファイルも改名されます。
+
+@node Auto Save Control
+@c @subsection Controlling Auto-Saving
+@subsection 自動保存の制御
+
+@vindex auto-save-default
+@findex auto-save-mode
+@c   Each time you visit a file, auto-saving is turned on for that file's
+@c buffer if the variable @code{auto-save-default} is non-@code{nil} (but not
+@c in batch mode; @pxref{Entering Emacs}).  The default for this variable is
+@c @code{t}, so auto-saving is the usual practice for file-visiting buffers.
+@c Auto-saving can be turned on or off for any existing buffer with the
+@c command @kbd{M-x auto-save-mode}.  Like other minor mode commands, @kbd{M-x
+@c auto-save-mode} turns auto-saving on with a positive argument, off with a
+@c zero or negative argument; with no argument, it toggles.
+変数@code{auto-save-default}が@code{nil}以外ならば、
+ファイルを訪問するたびにそのファイルのバッファの自動保存をオンにします
+（ただしバッチモードを除く。@pxref{Entering Emacs}）。
+この変数のデフォルトは@code{t}なので、
+通常、ファイルを訪問したバッファは自動保存されます。
+コマンド@kbd{M-x auto-save-mode}で、
+既存バッファの自動保存をオン／オフできます。
+他のマイナモードのコマンドと同じように、
+正の引数を指定すると@kbd{M-x auto-save-mode}は自動保存をオンにし、
+0か負の引数を指定すると自動保存をオフにし、
+引数を指定しないと自動保存のオン／オフを切り替えます。
+
+@vindex auto-save-interval
+@c   Emacs does auto-saving periodically based on counting how many characters
+@c you have typed since the last time auto-saving was done.  The variable
+@c @code{auto-save-interval} specifies how many characters there are between
+@c auto-saves.  By default, it is 300.
+Emacsは、最後に自動保存してから何文字打鍵したかに基づいて
+定期的に自動保存します。
+変数@code{auto-save-interval}には、自動保存の間隔を表す文字数を指定します。
+デフォルトは300です。
+
+@vindex auto-save-timeout
+@c   Auto-saving also takes place when you stop typing for a while.  The
+@c variable @code{auto-save-timeout} says how many seconds Emacs should
+@c wait before it does an auto save (and perhaps also a garbage
+@c collection).  (The actual time period is longer if the current buffer is
+@c long; this is a heuristic which aims to keep out of your way when you
+@c are editing long buffers, in which auto-save takes an appreciable amount
+@c of time.)  Auto-saving during idle periods accomplishes two things:
+@c first, it makes sure all your work is saved if you go away from the
+@c terminal for a while; second, it may avoid some auto-saving while you
+@c are actually typing.
+しばらく打鍵しないでいるときにも自動保存は行われます。
+変数@code{auto-save-timeout}は、自動保存（およびガベッジコレクション）を
+行うまでにEmacsが待つべき秒数を表します。
+（カレントバッファが大きいと、実際の時間間隔も長くなる。
+これは、大きなバッファの自動保存には時間がかかるので、
+その編集中は邪魔にならないようにするため。）
+アイドルのときには、自動保存はつぎの2つのことを達成します。
+1つは、端末からしばらく離れているときに、
+すべての作業結果が保存されることを保証すること。
+もう1つは、実際に打鍵しているときの自動保存を
+いくぶんでも避けるようにすることです。
+
+@c   Emacs also does auto-saving whenever it gets a fatal error.  This
+@c includes killing the Emacs job with a shell command such as @samp{kill
+@c %emacs}, or disconnecting a phone line or network connection.
+重大なエラーを受け取ったときにも、Emacsは自動保存を行います。
+これには、@samp{kill %emacs}のようなシェルコマンドで
+Emacsジョブを強制終了した場合や、
+電話回線やネットワーク接続が途切れた場合を含みます。
+
+@findex do-auto-save
+@c   You can request an auto-save explicitly with the command @kbd{M-x
+@c do-auto-save}.
+コマンド@kbd{M-x do-auto-save}で、自動保存の実施を明示的に指示できます。
+
+@node Recover
+@c @subsection Recovering Data from Auto-Saves
+@subsection 自動保存ファイルからのデータ回復
+
+@findex recover-file
+@c   You can use the contents of an auto-save file to recover from a loss
+@c of data with the command @kbd{M-x recover-file @key{RET} @var{file}
+@c @key{RET}}.  This visits @var{file} and then (after your confirmation)
+@c restores the contents from its auto-save file @file{#@var{file}#}.
+@c You can then save with @kbd{C-x C-s} to put the recovered text into
+@c @var{file} itself.  For example, to recover file @file{foo.c} from its
+@c auto-save file @file{#foo.c#}, do:@refill
+コマンド@kbd{M-x recover-file @key{RET} @var{file} @key{RET}}で、
+自動保存ファイルの内容から紛失データを復旧できます。
+このコマンドは、@var{file}を訪問してから、
+（確認したあとで）その自動保存ファイル@file{#@var{file}#}
+から内容を回復します。
+そのあとに、@kbd{C-x C-s}で@var{file}そのものに復旧したテキストを保存します。
+たとえば、@file{foo.c}の自動保存のファイル@file{#foo.c#}から
+@file{foo.c}を復旧するにはつぎのようにします。
+
+@example
+M-x recover-file @key{RET} foo.c @key{RET}
+yes @key{RET}
+C-x C-s
+@end example
+
+@c   Before asking for confirmation, @kbd{M-x recover-file} displays a
+@c directory listing describing the specified file and the auto-save file,
+@c so you can compare their sizes and dates.  If the auto-save file
+@c is older, @kbd{M-x recover-file} does not offer to read it.
+@kbd{M-x recover-file}は確認するまえに、
+指定したファイルと自動保存ファイルが置かれたディレクトリの一覧を表示するので、
+それらのサイズや日付を比較できます。
+自動保存ファイルのほうが古いと、
+@kbd{M-x recover-file}はそのファイルを読み込むようには
+聞いてきません。
+
+@findex recover-session
+@c   If Emacs or the computer crashes, you can recover all the files you
+@c were editing from their auto save files with the command @kbd{M-x
+@c recover-session}.  This first shows you a list of recorded interrupted
+@c sessions.  Move point to the one you choose, and type @kbd{C-c C-c}.
+Emacsやコンピュータがクラッシュしても、
+コマンド@kbd{M-x recover-session}を使えば、
+編集中だったすべてのファイルを自動保存ファイルから復旧できます。
+このコマンドは、まず、記録されている中断されたセッション一覧を表示します。
+希望する箇所へポイントを移動し、@kbd{C-c C-c}と打ちます。
+
+@c   Then @code{recover-session} asks about each of the files that were
+@c being edited during that session, asking whether to recover that file.
+@c If you answer @kbd{y}, it calls @code{recover-file}, which works in its
+@c normal fashion.  It shows the dates of the original file and its
+@c auto-save file, and asks once again whether to recover that file.
+つぎに、 @code{recover-session}はそのセッションで編集中だった
+各ファイルについてそのファイルを復旧するか聞いてきます。
+@kbd{y}を答えると、@code{recover-file}を呼び出し、
+普通のとおりに動作します。
+もとのファイルとその自動保存ファイルの日付を表示し、
+ファイルを復旧するかどうかをもう一度聞いてきます。
+
+@c   When @code{recover-session} is done, the files you've chosen to
+@c recover are present in Emacs buffers.  You should then save them.  Only
+@c this---saving them---updates the files themselves.
+@code{recover-session}が終了すると、
+復旧を選んだファイルはEmacsバッファに入っています。
+これらのバッファを保存してください。
+こうすることで初めてファイルに保存できます。
+
+@vindex auto-save-list-file-prefix
+@c   Interrupted sessions are recorded for later recovery in files named
+@c @file{~/.saves-@var{pid}-@var{hostname}}.  The @samp{~/.saves} portion of
+@c these names comes from the value of @code{auto-save-list-file-prefix}.
+@c You can arrange to record sessions in a different place by setting that
+@c variable in your @file{.emacs} file, but you'll have to redefine
+@c @code{recover-session} as well to make it look in the new place.  If you
+@c set @code{auto-save-list-file-prefix} to @code{nil} in your
+@c @file{.emacs} file, sessions are not recorded for recovery.
+中断されたセッションは、あとで復旧するために
+@file{~/.saves-@var{pid}-@var{hostname}}というファイルに記録されています。
+これらの名前の@samp{~/.saves}の部分は、
+@code{auto-save-list-file-prefix}の値です。
+この変数を個人の@file{.emacs}ファイルで設定すれば、
+別の場所にセッション記録を置くことができます。
+しかし、同様に@code{recover-session}も再定義して、
+変更した新しい場所を探すようにする必要があります。
+個人の@file{.emacs}ファイルで@code{auto-save-list-file-prefix}に
+@code{nil}を設定すると、復旧のためのセッションを記録しません。
+
+@node File Aliases
+@c @section File Name Aliases
+@section ファイル名の別名
+
+@c   Symbolic links and hard links both make it possible for several file
+@c names to refer to the same file.  Hard links are alternate names that
+@c refer directly to the file; all the names are equally valid, and no one
+@c of them is preferred.  By contrast, a symbolic link is a kind of defined
+@c alias: when @file{foo} is a symbolic link to @file{bar}, you can use
+@c either name to refer to the file, but @file{bar} is the real name, while
+@c @file{foo} is just an alias.  More complex cases occur when symbolic
+@c links point to directories.
+シンボリックリンクやハードリンクを使うことで、
+同じファイルをいくつかの異なるファイル名で指すことができます。
+ハードリンクは、ファイルを直接に指している別の名前です。
+すべての名前は等しく有効で、それらに優劣はありません。
+対照的に、シンボリックリンクは定義された別名の一種です。
+@file{foo}が@file{bar}へのシンボリックリンクであるとき、
+どちらの名前でもファイルを指せますが、
+@file{bar}が本当の名前であり、@file{foo}は別名にすぎません。
+シンボリックリンクがディレクトリを指しているときには、
+より複雑な状況になります。
+
+@c   If you visit two names for the same file, normally Emacs makes
+@c two different buffers, but it warns you about the situation.
+同一のファイルに対して2つの名前で訪問すると、
+Emacsは通常2つの別々のバッファを作成しますが、
+その状況を警告します。
+
+@vindex find-file-existing-other-name
+@c   If you wish to avoid visiting the same file in two buffers under
+@c different names, set the variable @code{find-file-existing-other-name}
+@c to a non-@code{nil} value.  Then @code{find-file} uses the existing
+@c buffer visiting the file, no matter which of the file's names you
+@c specify.
+同一のファイルを異なる名前で別々のバッファに訪問することを避けたいならば、
+変数@code{find-file-existing-other-name}に@code{nil}以外の値を設定します。
+そうすれば、どのファイル名を指定しようとも、
+@code{find-file}はファイルを訪問している既存のバッファを使います。
+
+@vindex find-file-visit-truename
+@c @cindex truenames of files
+@c @cindex file truenames
+@cindex ファイルの実名
+@c   If the variable @code{find-file-visit-truename} is non-@code{nil},
+@c then the file name recorded for a buffer is the file's @dfn{truename}
+@c (made by replacing all symbolic links with their target names), rather
+@c than the name you specify.  Setting @code{find-file-visit-truename} also
+@c implies the effect of @code{find-file-existing-other-name}.
+変数@code{find-file-visit-truename}が@code{nil}以外であれば、
+バッファに記録するファイル名は、ユーザーが指定した名前ではなくて、
+ファイルの（すべてのシンボリックリンクをその先の名前に置き換えて得られる）
+@dfn{実名}になります。
+@code{find-file-visit-truename}を設定すると、
+@code{find-file-existing-other-name}も暗に設定されます。
+
+@node Version Control
+@c @section Version Control
+@c @cindex version control
+@section VC（版管理、バージョンコントロール）
+@cindex バージョンコントロール
+@cindex 版管理
+
+@c   @dfn{Version control systems} are packages that can record multiple
+@c versions of a source file, usually storing the unchanged parts of the
+@c file just once.  Version control systems also record history information
+@c such as the creation time of each version, who created it, and a 
+@c description of what was changed in that version.
+@dfn{版管理システム}は、
+ファイルの変更されていない部分を通常は一度だけ格納して、
+ソースファイルの複数の版を記録できるパッケージです。
+版管理システムは、各版の作成時刻、作成者、
+その版の変更部分に関する記述などの履歴情報も記録します。
+
+@c   The Emacs version control interface is called VC.  Its commands work
+@c with three version control systems---RCS, CVS and SCCS.  The GNU project
+@c recommends RCS and CVS, which are free software and available from the
+@c Free Software Foundation.
+Emacsの版管理パッケージはVCと呼ばれます。
+このコマンドは、3つの版管理システム、RCS、CVS、SCCSで動作します。
+GNUプロジェクトでは、フリーソフトウェアでありFree Software Foundationから
+入手できるRCSとCVSを推奨します。
+
+@menu
+* Introduction to VC::  How version control works in general.
+* VC Mode Line::     How the mode line shows version control status.
+* Basic VC Editing::    How to edit a file under version control.
+* Old Versions::        Examining and comparing old versions.
+* Secondary VC Commands::    The commands used a little less frequently.
+* Branches::            Multiple lines of development.
+* Snapshots::           Sets of file versions treated as a unit.
+* Miscellaneous VC::    Various other commands and features of VC.
+* Customizing VC::      Variables that change VC's behavior.
+@end menu
+
+@node Introduction to VC
+@c @subsection Introduction to Version Control
+@subsection VC入門
+
+@c   VC allows you to use a version control system from within Emacs,
+@c integrating the version control operations smoothly with editing.  VC
+@c provides a uniform interface to version control, so that regardless of
+@c which version control system is in use, you can use it the same way.
+VCはEmacsから版管理システムを使えるようにして、
+編集作業を版管理操作に滑らかに統合します。
+VCは統一された版管理インターフェイスを提供するので、
+どの版管理システムを使っているかに関わらず、
+同じ使い方ができます。
+
+@c   This section provides a general overview of version control, and
+@c describes the version control systems that VC supports.  You can skip
+@c this section if you are already familiar with the version control system
+@c you want to use.
+本節では、版管理を概観するとともに、
+VCが扱う版管理システムの概要を説明します。
+使用する版管理システムにすでに慣れているならば、本節は読み飛ばしてください。
+
+@menu
+* Version Systems::  Supported version control back-end systems.
+* VC Concepts::      Words and concepts related to version control.
+@end menu
+
+@node Version Systems
+@c @subsubsection Supported Version Control Systems
+@subsubsection 利用可能な版管理システム
+
+@cindex RCS
+@c @cindex back end (version control)
+@cindex バックエンド（版管理）
+@c   VC currently works with three different version control systems or
+@c ``back ends'': RCS, CVS, and SCCS.
+VCでは、現在3つの版管理システム、
+つまり、バックエンドで動作します。
+RCS、CVS、SCCSの3つです。
+
+@c   RCS is a free version control system that is available from the Free
+@c Software Foundation.  It is perhaps the most mature of the supported
+@c back ends, and the VC commands are conceptually closest to RCS.  Almost
+@c everything you can do with RCS can be done through VC.
+RCSはフリーの版管理システムでFree Software Foundationから入手ができます。
+RCSは、扱えるバックエンドの中では、たぶん、もっとも成熟したものです。
+VCコマンド群は、RCSに概念的にもっとも近いものです。
+RCSでできるほとんどのことはVCからもできます。
+
+@cindex CVS
+@c   CVS is built on top of RCS, and extends the features of RCS, allowing
+@c for more sophisticated release management, and concurrent multi-user
+@c development.  VC supports basic editing operations under CVS, but for
+@c some less common tasks you still need to call CVS from the command line.
+@c Note also that before using CVS you must set up a repository, which is a
+@c subject too complex to treat here.
+CVSは、RCSの上に作られてRCSの機能を拡張していて、
+より洗練されたリリース管理、複数ユーザーの並行開発を許しています。
+CVSの下では、VCの基本的な編集操作を使えますが、
+あまり一般的でない操作に関しては、
+コマンド行からCVSを呼ぶ必要があります。
+CVSを使うには保管庫（リポジトリ、repository）を設定しなければなりませんが、
+ここで扱うには複雑すぎる話題です。
+
+@cindex SCCS
+@c   SCCS is a proprietary but widely used version control system.  In
+@c terms of capabilities, it is the weakest of the three that VC
+@c supports.  VC compensates for certain features missing in SCCS
+@c (snapshots, for example) by implementing them itself, but some other VC
+@c features, such as multiple branches, are not available with SCCS.  You
+@c should use SCCS only if for some reason you cannot use RCS.
+SCCSはフリーではありませんが、版管理システムとしては広く使われています。
+能力の観点からすれば、VCが扱える3つのうちでもっとも弱いです。
+SCCSに欠けている機能（たとえばスナップショット）はVC自身で
+実現して補っていますが、
+複数の枝分かれのようなVCの他のいくつかの機能はSCCSでは利用できません。
+RCSを使えない理由があるときに限ってSCCSを使うべきです。
+
+@node VC Concepts
+@c @subsubsection Concepts of Version Control
+@subsubsection VCの概念
+
+@c @cindex master file
+@c @cindex registered file
+@cindex マスタファイル
+@cindex 登録されたファイル
+@c    When a file is under version control, we also say that it is
+@c @dfn{registered} in the version control system.  Each registered file
+@c has a corresponding @dfn{master file} which represents the file's
+@c present state plus its change history---enough to reconstruct the
+@c current version or any earlier version.  Usually the master file also
+@c records a @dfn{log entry} for each version, describing in words what was
+@c changed in that version.
+ファイルが版管理の管理下にあるとき、
+そのファイルは版管理システムに@dfn{登録され}ているといいます。
+各登録されたファイルには、
+ファイルの現状とその変更履歴を記述した対応する
+@dfn{マスタファイル}が存在します。
+この情報は、現在の版や以前の版を再構成するのに十分です。
+通常、マスタファイルには、それぞれの版について、
+その版の変更点を言葉で記述した@dfn{記録項目}も記録されています。
+
+@c @cindex work file
+@c @cindex checking out files
+@cindex 作業ファイル
+@cindex ファイルをチェックアウトする
+@c   The file that is maintained under version control is sometimes called
+@c the @dfn{work file} corresponding to its master file.  You edit the work
+@c file and make changes in it, as you would with an ordinary file.  (With
+@c SCCS and RCS, you must @dfn{lock} the file before you start to edit it.)
+@c After you are done with a set of changes, you @dfn{check the file in},
+@c which records the changes in the master file, along with a log entry for
+@c them.
+版管理の下で管理されているファイルを、
+そのマスタファイルに対応する@dfn{作業ファイル}と呼ぶこともあります。
+普通のファイルと同様に、作業ファイルを編集して変更します。
+（SCCSやRCSでは、ファイルを編集するまえにファイルを@dfn{ロック}
+@footnote{【訳注】Emacsが同時編集を防ぐためのロックとは別のロック。}
+する必要がある。）
+一連の変更を終えたら、ファイルを@dfn{チェックイン}、つまり、
+記録項目とともに変更をマスタファイルに記録します。
+
+@c   With CVS, there are usually multiple work files corresponding to a
+@c single master file---often each user has his own copy.  It is also
+@c possible to use RCS in this way, but this is not the usual way to use
+@c RCS.
+CVSでは、1つのマスタファイルに対応する作業ファイルを複数個持てます。
+しばしば、各ユーザーが1個ずつ作業ファイルを持てます。
+RCSでもこのようにできますが、RCSの通常の使い方ではありません。
+
+@c @cindex locking and version control
+@cindex ロックと版管理
+@c   A version control system typically has some mechanism to coordinate
+@c between users who want to change the same file.  One method is
+@c @dfn{locking} (analogous to the locking that Emacs uses to detect
+@c simultaneous editing of a file, but distinct from it).  The other method
+@c is to merge your changes with other people's changes when you check them
+@c in.
+典型的な版管理システムには、複数のユーザーが同じファイルを使う際の
+調停を行うためのなんらかの機構が必要です。
+1つの方法は（Emacsが同時編集の検出に使うロックに類似だが、それとは別の）
+@dfn{ロック}を使うことです。
+別の方法は、ファイルをチェックインする時点で、
+他人の変更分を併合することです。
+
+@c   With version control locking, work files are normally read-only so
+@c that you cannot change them.  You ask the version control system to make
+@c a work file writable for you by locking it; only one user can do
+@c this at any given time.  When you check in your changes, that unlocks
+@c the file, making the work file read-only again.  This allows other users
+@c to lock the file to make further changes.  SCCS always uses locking, and
+@c RCS normally does.
+ロックを使う版管理の場合、作業ファイルは変更できないように
+通常は読み出し専用です。
+版管理システムに対して、
+書き込み可能な作業ファイルを作り、それをロックするように要求します。
+一度には1人のユーザーだけがこれをできます。
+自分の変更分をチェックインすると、
+ファイルのロックを外し、作業ファイルをふたたび読み出し専用にします。
+これにより、他のユーザーがさらに変更するために
+ファイルをロックできるようになります。
+SCCSはつねにロックを使いますし、RCSも通常はロックを使います。
+
+@c   The other alternative for RCS is to let each user modify the work file
+@c at any time.  In this mode, locking is not required, but it is
+@c permitted; check-in is still the way to record a new version.
+RCSでは別の方法もあって、各ユーザーがいつでも作業ファイルを変更できます。
+このモードではロックは必要ありませんが、使うこともできます。
+新版を記録する方法は、やはりチェックインです。
+
+@c   CVS normally allows each user to modify his own copy of the work file
+@c at any time, but requires merging with changes from other users at
+@c check-in time.  However, CVS can also be set up to require locking.
+@c (@pxref{Backend Options}).
+CVSでは、通常、各ユーザーはいつでも各自の作業ファイルを変更できますが、
+チェックイン時に他のユーザーの変更分を併合する必要があります。
+しかし、CVSでもロックを使うようにもできます
+（@pxref{Backend Options}）。
+
+@node VC Mode Line
+@c @subsection Version Control and the Mode Line
+@subsection VCとモード行
+
+@c   When you visit a file that is under version control, Emacs indicates
+@c this on the mode line.  For example, @samp{RCS-1.3} says that RCS is
+@c used for that file, and the current version is 1.3.
+版管理の下にあるファイルを訪問すると、
+Emacsはそのことをモード行に示します。
+たとえば、@samp{RCS-1.3}は、そのファイルにはRCSが使われていて、
+現在の版が1.3であることを表します。
+
+@c   The character between the back-end name and the version number
+@c indicates the version control status of the file.  @samp{-} means that
+@c the work file is not locked (if locking is in use), or not modified (if
+@c locking is not in use).  @samp{:} indicates that the file is locked, or
+@c that it is modified.  If the file is locked by some other user (for
+@c instance, @samp{jim}), that is displayed as @samp{RCS:jim:1.3}.
+バックエンドの名前と版番号のあいだの文字は、ファイルの版管理状態を示します。
+@samp{-}は、（ロックを使っているのであれば）
+作業ファイルがロックされていないこと、あるいは、
+（ロックを使っていないのであれば）ファイルが変更されていないことを表します。
+@samp{:}は他のユーザー（たとえば、@samp{jim}）がロックしていることを表し、
+@samp{RCS:jim:1.3}のように表示されます。
+
+@node Basic VC Editing
+@c @subsection Basic Editing under Version Control
+@subsection VC下の基本的な編集
+
+@c   The principal VC command is an all-purpose command that performs
+@c either locking or check-in, depending on the situation.
+主要なVCコマンドは、状況に応じてロックかチェックインを行う
+汎用コマンドです。
+
+@table @kbd
+@item C-x C-q
+@itemx C-x v v
+@c Perform the next logical version control operation on this file.
+このファイルに対して論理的なつぎの版管理操作を実施する。
+@end table
+
+@findex vc-next-action
+@findex vc-toggle-read-only
+@kindex C-x v v
+@c @kindex C-x C-q @r{(Version Control)}
+@kindex C-x C-q @r{（VC、版管理）}
+@c   Strictly speaking, the command for this job is @code{vc-next-action},
+@c bound to @kbd{C-x v v}.  However, the normal meaning of @kbd{C-x C-q} is
+@c to make a read-only buffer writable, or vice versa; we have extended it
+@c to do the same job properly for files managed by version control, by
+@c performing the appropriate version control operations.  When you type
+@c @kbd{C-x C-q} on a registered file, it acts like @kbd{C-x v v}.
+正確にいえば、この操作を行うコマンドは@code{vc-next-action}であって、
+@kbd{C-x v v}にバインドしてあります。
+しかし、@kbd{C-x C-q}の通常の意味は、
+読み出し専用バッファを書き込み可能にするか、あるいは、その逆を行います。
+この操作を、適切な版管理操作を実施することで
+版管理下で管理されているファイルに対しても同じことを
+正しく行うように拡張したのです。
+登録されたファイルに対して@kbd{C-x C-q}を打つと、
+@kbd{C-x v v}のように動作します。
+
+@c   The precise action of this command depends on the state of the file,
+@c and whether the version control system uses locking or not.  SCCS and
+@c RCS normally use locking; CVS normally does not use locking.
+このコマンドの正確な動作は、ファイルの状態と版管理システム（バックエンド）
+がロックを使うかどうかに依存します。
+SCCSとRCSは通常はロックを使いますが、CVSは通常はロックを使いません。
+
+@menu
+* VC with Locking::     RCS in its default mode, SCCS, and optionally CVS.
+* Without Locking::     Without locking: default mode for CVS.
+* Log Buffer::          Features available in log entry buffers.
+@end menu
+               
+@node VC with Locking
+@c @subsubsection Basic Version Control with Locking
+@subsubsection ロック使用時の基本的な編集
+
+@c   If locking is used for the file (as with SCCS, and RCS in its default
+@c mode), @kbd{C-x C-q} can either lock a file or check it in:
+（SCCSの場合とRCSのデフォルトの場合）ファイルに対してロックを使う場合、
+@kbd{C-x C-q}は、ファイルをロックする、あるいは、
+ファイルをチェックインするのいずれかを行います。
+
+@itemize @bullet
+@item
+@c If the file is not locked, @kbd{C-x C-q} locks it, and
+@c makes it writable so that you can change it.
+ファイルがロックされていなければ、
+@kbd{C-x C-q}はそれをロックし、
+変更できるように書き込み可能にする。
+
+@item
+@c If the file is locked by you, and contains changes, @kbd{C-x C-q} checks
+@c in the changes.  In order to do this, it first reads the log entry
+@c for the new version.  @xref{Log Buffer}.
+同じユーザーがファイルをロックしていて、かつ、変更されていれば、
+@kbd{C-x C-q}はチェックインを行う。
+このとき、新版に対する記録項目をまず読み取る。
+@pxref{Log Buffer}。
+
+@item
+@c If the file is locked by you, but you have not changed it since you
+@c locked it, @kbd{C-x C-q} releases the lock and makes the file read-only
+@c again.
+同じユーザーがファイルをロックしているが、
+ロックしてからまったく変更していないときには、
+@kbd{C-x C-q}はロックを外してファイルをふたたび読み出し専用にする。
+
+@item
+@c If the file is locked by some other user, @kbd{C-x C-q} asks you whether
+@c you want to ``steal the lock'' from that user.  If you say yes, the file
+@c becomes locked by you, but a message is sent to the person who had
+@c formerly locked the file, to inform him of what has happened.
+他のユーザーがファイルをロックしている場合、
+@kbd{C-x C-q}はそのユーザーから『ロックを横取りする』かどうか聞いてくる。
+横取りするように答えると、ファイルをロックし直すが、
+まえにロックしていたユーザーにはロックを横取りされたことを伝える。
+@end itemize
+
+@c   These rules also apply when you use CVS in locking mode, except
+@c that there is no such thing as stealing a lock.
+以上の規則は、CVSでロックを使用している場合にも適用できますが、
+『ロックを横取りする』ことはありません。
+
+@node Without Locking
+@c @subsubsection Basic Version Control without Locking
+@subsubsection ロック非使用時の基本的な編集
+
+@c   When there is no locking---the default for CVS---work files are always
+@c writable; you do not need to do anything before you begin to edit a
+@c file.  The status indicator on the mode line is @samp{-} if the file is
+@c unmodified; it flips to @samp{:} as soon as you save any changes in the
+@c work file.
+CVSのデフォルトのように、ロックを使わないときには、
+作業ファイルはいつでも書き込み可能です。
+ファイルを編集するまえにすべきことは何もありません。
+モード行の状態表示は、ファイルが変更されていなければ@samp{-}です。
+作業ファイルに変更を保存するとただちに@samp{:}に変わります。
+
+@c   Here is what @kbd{C-x C-q} does when using CVS:
+以下は、CVSを使っているときの@kbd{C-x C-q}の動作です。
+
+@itemize @bullet
+@item
+@c If some other user has checked in changes into the master file,
+@c Emacs asks you whether you want to merge those changes into your own
+@c work file (@pxref{Merging}).  You must do this before you can check in
+@c your own changes.
+他のユーザーが変更分をマスタファイルにチェックインしていると、
+それらを自分用の作業ファイルに併合（@pxref{Merging}）するかどうか聞いてくる。
+自分の変更分をチェックインするまえには、これを行う必要がある。
+
+@item
+@c If there are no new changes in the master file, but you have made
+@c modifications in your work file, @kbd{C-x C-q} checks in your changes.
+@c In order to do this, it first reads the log entry for the new version.
+@c @xref{Log Buffer}.
+マスタファイルに新たな変更がなくても、
+自分用の作業ファイルを変更してある場合には、
+@kbd{C-x C-q}はその変更をチェックインする。
+これを行うために、新版に対する記録項目をまず読み取る。
+@pxref{Log Buffer}。
+
+@item
+@c If the file is not modified, the @kbd{C-x C-q} does nothing.
+ファイルが変更されていなければ、@kbd{C-x C-q}は何もしない。
+@end itemize
+
+@c   These rules also apply when you use RCS in the mode that does not
+@c require locking, except that automatic merging of changes from the
+@c master file is not implemented.  Unfortunately, this means that nothing
+@c informs you if another user has checked in changes in the same file
+@c since you began editing it, and when this happens, his changes will be
+@c effectively removed when you check in your version (though they will
+@c remain in the master file, so they will not be entirely lost).  You must
+@c therefore verify the current version is unchanged, before you check in your
+@c changes.  We hope to eliminate this risk and provide automatic merging
+@c with RCS in a future Emacs version.
+以上の規則は、RCSのロックを使わないモードにも適用できますが、
+マスタファイルから自動的に変更を併合する機能は実装してありません。
+残念なことに、あなたが編集を始めたあとに、他のユーザーが同じファイルに変更を
+チェックインしても何も警告されないのです。
+しかも、このような事態が発生すると、あなたが自分の版をチェックインしたときに、
+そのユーザーの変更は実質的には取り除かれてしまいます
+（とはいえ、マスタファイルの中には残っているので、
+完全になくなるわけではない）。
+したがって、自分の変更をチェックインするまえには、
+現在の版が変更されていないことを確認する必要があります。
+Emacsの将来の版では、このような危険性を取り除き、
+RCSでも自動併合を行えるように考えています。
+
+@c   In addition, locking is possible with RCS even in this mode, although
+@c it is not required; @kbd{C-x C-q} with an unmodified file locks the
+@c file, just as it does with RCS in its normal (locking) mode.
+また、このモードでもRCSのロックを使えますが、必須ではありません。
+ファイルを変更していないときに@kbd{C-x C-q}を使うと、
+RCSの通常の（ロックを使う）モードのように、
+ファイルをロックします。
+
+@node Log Buffer
+@c @subsubsection Features of the Log Entry Buffer
+@subsubsection 記録項目用バッファの機能
+
+@c   When you check in changes, @kbd{C-x C-q} first reads a log entry.  It
+@c pops up a buffer called @samp{*VC-Log*} for you to enter the log entry.
+@c When you are finished, type @kbd{C-c C-c} in the @samp{*VC-Log*} buffer.
+@c That is when check-in really happens.
+変更をチェックインすると、@kbd{C-x C-q}は記録項目をまず読みます。
+記録項目を入力するように、@samp{*VC-Log*}というバッファを立ち上げます。
+入力し終えたら、@samp{*VC-Log*}で@kbd{C-c C-c}と打ちます。
+実際にチェックインを行うと、このように行われます。
+
+@c   To abort check-in, just @strong{don't} type @kbd{C-c C-c} in that
+@c buffer.  You can switch buffers and do other editing.  As long as you
+@c don't try to check in another file, the entry you were editing remains
+@c in the @samp{*VC-Log*} buffer, and you can go back to that buffer at any
+@c time to complete the check-in.
+チェックインをアボートするには、そのバッファでは@kbd{C-c C-c}を
+打た@strong{ない}でください。
+別のバッファに切り替えて、別の編集をします。
+別のファイルをチェックインしようとしない限り、
+入力していた記録項目は@samp{*VC-Log*}バッファに残っていますから、
+チェックインを完了するため、いつでもそのバッファに戻れます。
+
+@c   If you change several source files for the same reason, it is often
+@c convenient to specify the same log entry for many of the files.  To do
+@c this, use the history of previous log entries.  The commands @kbd{M-n},
+@c @kbd{M-p}, @kbd{M-s} and @kbd{M-r} for doing this work just like the
+@c minibuffer history commands (except that these versions are used outside
+@c the minibuffer).
+複数のソースファイルを同じ理由で変更したときには、
+多くのファイルに同じ記録項目を指定できると便利です。
+こうするには、まえの記録項目の履歴を使います。
+コマンド、@kbd{M-n}、@kbd{M-p}、@kbd{M-s}、@kbd{M-r}は、
+ミニバッファの履歴コマンドのように働きます
+（ただし、これらのコマンドはミニバッファの外部で使う）。
+
+@vindex vc-log-mode-hook
+@c   Each time you check in a file, the log entry buffer is put into VC Log
+@c mode, which involves running two hooks: @code{text-mode-hook} and
+@c @code{vc-log-mode-hook}.  @xref{Hooks}.
+ファイルにチェックインするたびに、
+記録項目用バッファはVC記録（vc-log）モードになります。
+このモードは2つのフック、@code{text-mode-hook}と@code{vc-log-mode-hook}を
+起動します。
+@xref{Hooks}。
+
+@node Old Versions
+@c @subsection Examining And Comparing Old Versions
+@subsection 旧版の調査と比較
+
+@c   One of the convenient features of version control is the ability
+@c to examine any version of a file, or compare two versions.
+版管理の便利な機能の1つは、ファイルの任意の版を調べたり、
+2つの版を比較できることです。
+
+@table @kbd
+@item C-x v ~ @var{version} @key{RET}
+@c Examine version @var{version} of the visited file, in a buffer of its
+@c own.
+訪問しているファイルの版@var{version}を
+それ専用のバッファで調べる。
+
+@item C-x v =
+@c Compare the current buffer contents with the latest checked-in version
+@c of the file.
+カレントバッファの内容とファイルのチェックインした最新版とを比較する。
+
+@item C-u C-x v = @var{file} @key{RET} @var{oldvers} @key{RET} @var{newvers} @key{RET}
+@c Compare the specified two versions of @var{file}.
+@var{file}の指定した2つの版を比較する。
+
+@item C-x v g
+@c Display the result of the CVS annotate command using colors.
+表示色を変えてCVSの注記コマンドの結果を表示する。
+@end table
+
+@findex vc-version-other-window
+@kindex C-x v ~
+@c   To examine an old version in toto, visit the file and then type
+@c @kbd{C-x v ~ @var{version} @key{RET}} (@code{vc-version-other-window}).
+@c This puts the text of version @var{version} in a file named
+@c @file{@var{filename}.~@var{version}~}, and visits it in its own buffer
+@c in a separate window.  (In RCS, you can also select an old version
+@c and create a branch from it.  @xref{Branches}.)
+1つの旧版を調べるには、ファイルを訪問して@kbd{C-x v ~ @var{version} @key{RET}}
+（@code{vc-version-other-window}）と打ちます。
+これにより、ファイルの版@var{version}のテキストを
+@file{@var{filename}.~@var{version}~}という名前のファイルに収め、
+別のウィンドウのそれ専用のバッファでそのファイルを訪問します。
+（RCSでは、旧版を選択して、それから枝分かれを作成できる。
+@pxref{Branches}。）
+
+@findex vc-diff
+@kindex C-x v =
+@c   But usually it is more convenient to compare two versions of the file,
+@c with the command @kbd{C-x v =} (@code{vc-diff}).  Plain @kbd{C-x v =}
+@c compares the current buffer contents (saving them in the file if
+@c necessary) with the last checked-in version of the file.  @kbd{C-u C-x v
+@c =}, with a numeric argument, reads a file name and two version numbers,
+@c then compares those versions of the specified file.
+しかし通常は、コマンド@kbd{C-x v =}（@code{vc-diff}）で
+ファイルの2つの版を比較したほうが、もっと便利です。
+引数を指定しない@kbd{C-x v =}では、カレントファイルの内容
+（必要があればファイルに保存する）とファイルのチェックインしてある
+最新版とを比較します。
+数引数を指定した@kbd{C-u C-x v =}では、
+ファイル名と2つの版番号を読み取ってから、
+指定したファイルの2つの版を比較します。
+
+@c   If you supply a directory name instead of the name of a registered
+@c file, this command compares the two specified versions of all registered
+@c files in that directory and its subdirectories.
+登録したファイルのかわりにディレクトリ名を指定すると、
+このコマンドは、そのディレクトリとその下にあるサブディレクトリに
+置かれているすべての登録されたファイルの指定した2つの版を比較します。
+
+@c   You can specify a checked-in version by its number; an empty input
+@c specifies the current contents of the work file (which may be different
+@c from all the checked-in versions).  You can also specify a snapshot name
+@c (@pxref{Snapshots}) instead of one or both version numbers.
+チェックインしてある版は、その番号で指定します。
+入力が空だと、（チェックインしてある版とは異なるかもしれない）作業ファイルの
+現在の内容を指定します。
+版番号のかわりに、スナップショット名（@pxref{Snapshots}）を指定することも
+できます。
+
+@c   This command works by running the @code{diff} utility, getting the
+@c options from the variable @code{diff-switches}.  It displays the output
+@c in a special buffer in another window.  Unlike the @kbd{M-x diff}
+@c command, @kbd{C-x v =} does not try to locate the changes in the old and
+@c new versions.  This is because normally one or both versions do not
+@c exist as files when you compare them; they exist only in the records of
+@c the master file.  @xref{Comparing Files}, for more information about
+@c @kbd{M-x diff}.
+このコマンドは、変数@code{diff-switches}で指定されるオプションを用いて、
+@code{diff}プログラムを実行して動作します。
+その出力は別のウィンドウの特別なバッファに表示されます。
+@kbd{M-x diff}コマンドと違って、@kbd{C-x v =}では新版と旧版の
+相違箇所には移動できません。
+というのは、通常、一方の版、あるいは、両方の版は、
+比較するときにはファイルとしては存在していないからです。
+それらは、マスタファイルの記録の中に存在するだけです。
+@kbd{M-x diff}についてより詳しくは、@xref{Comparing Files}。
+
+@findex vc-annotate
+@kindex C-x v g
+@c   For CVS-controlled files, you can display the result of the CVS
+@c annotate command, using colors to enhance the visual appearance.  Use
+@c the command @kbd{M-x vc-annotate} to do this.  Red means new, blue means
+@c old, and intermediate colors indicate intermediate ages.  A prefix
+@c argument @var{n} specifies a stretch factor for the time scale; it makes
+@c each color cover a period @var{n} times as long.
+CVSで管理しているファイルに関しては、
+一目でわかるように複数の表示色を使って、CVS注記コマンドの結果を表示できます。
+これには、@kbd{M-x vc-annotate}を使います。
+赤は新版、青は旧版、それらの中間色は中間の版を表します。
+数引数@var{n}は、時間尺度を伸ばします。
+つまり、ある表示色で表す期間を@var{n}倍します。
+
+@node Secondary VC Commands
+@c @subsection The Secondary Commands of VC
+@subsection VCの副次的なコマンド
+
+@c   This section explains the secondary commands of VC; those that you might
+@c use once a day.
+本節では、VCの副次的なコマンドを説明します。
+1日に一度くらい使うようなコマンドです。
+
+@menu
+* Registering::         Putting a file under version control.
+* VC Status::           Viewing the VC status of files.
+* VC Undo::             Cancelling changes before or after check-in.
+* VC Dired Mode::       Listing files managed by version control. 
+* VC Dired Commands::   Commands to use in a VC Dired buffer.
+@end menu
+
+@node Registering
+@c @subsubsection Registering a File for Version Control
+@subsubsection VCへのファイル登録
+
+@kindex C-x v i
+@findex vc-register
+@c   You can put any file under version control by simply visiting it, and
+@c then typing @w{@kbd{C-x v i}} (@code{vc-register}).
+ファイルを訪問してから@w{@kbd{C-x v i}}（@code{vc-register}）と打つだけで、
+ファイルを版管理の管理下に置けます。
+
+@table @kbd
+@item C-x v i
+@c Register the visited file for version control.
+訪問したファイルを版管理に登録する。
+@end table
+
+@vindex vc-default-back-end
+@c   To register the file, Emacs must choose which version control system
+@c to use for it.  You can specify your choice explicitly by setting
+@c @code{vc-default-back-end} to @code{RCS}, @code{CVS} or @code{SCCS}.
+@c Otherwise, if there is a subdirectory named @file{RCS}, @file{SCCS}, or
+@c @file{CVS}, Emacs uses the corresponding version control system.  In the
+@c absence of any specification, the default choice is RCS if RCS is
+@c installed, otherwise SCCS.
+ファイルを登録するには、Emacsはそのファイルに対してどの版管理システムを
+使うか選ぶ必要があります。
+@code{vc-default-back-end}に、@code{RCS}、@code{CVS}、@code{SCCS}の
+いずれかを設定すれば、明示的に指定できます。
+あるいは、@file{RCS}、@file{SCCS}、@file{CVS}という名前の
+サブディレクトリがあるなら、Emacsは対応する版管理システムを使います。
+指定がまったくなければ、デフォルトでは、
+RCSがインストールされていればRCS、さもなければSCCSを選びます。
+
+@c   If locking is in use, @kbd{C-x v i} leaves the file unlocked and
+@c read-only.  Type @kbd{C-x C-q} if you wish to start editing it.  After
+@c registering a file with CVS, you must subsequently commit the initial
+@c version by typing @kbd{C-x C-q}.
+ロックを使用している場合には、@kbd{C-x v i}は、
+ファイルのロックを解除し読み出し専用にします。
+ファイルの編集を始めたい場合には、@kbd{C-x C-q}と打ちます。
+CVSにファイルを登録したあとでは、
+@kbd{C-x C-q}と打って最初の版を記録する必要があります。
+
+@vindex vc-default-init-version
+@c   The initial version number for a newly registered file is 1.1, by
+@c default.  You can specify a different default by setting the variable
+@c @code{vc-default-init-version}, or you can give @kbd{C-x v i} a numeric
+@c argument; then it reads the initial version number for this particular
+@c file using the minibuffer.
+新しく登録されたファイルの最初の版番号は、デフォルトでは1.1です。
+異なるデフォルトを指定するには、
+変数@code{vc-default-init-version}に設定します。
+あるいは、@kbd{C-x v i}に数引数を指定すると、
+そのファイルだけに使う最初の版番号をミニバッファで読みます。
+
+@vindex vc-initial-comment
+@c   If @code{vc-initial-comment} is non-@code{nil}, @kbd{C-x v i} reads an
+@c initial comment to describe the purpose of this source file.  Reading
+@c the initial comment works like reading a log entry (@pxref{Log Buffer}).
+@code{vc-initial-comment}が@code{nil}以外ならば、
+@kbd{C-x v i}はこのソースファイルの目的を記した初期コメントを読みます。
+これは記録項目（@pxref{Log Buffer}）を読むのと同じように動作します。
+
+@node VC Status
+@c @subsubsection VC Status Commands
+@subsubsection VC状態表示コマンド
+
+@table @kbd
+@item C-x v l
+@c Display version control state and change history.
+版管理の状態と変更履歴を表示する。
+@end table
+
+@kindex C-x v l
+@findex vc-print-log
+@c   To view the detailed version control status and history of a file,
+@c type @kbd{C-x v l} (@code{vc-print-log}).  It displays the history of
+@c changes to the current file, including the text of the log entries.  The
+@c output appears in a separate window.
+ファイルの詳しい版管理状態や履歴を見るには、
+@kbd{C-x v l}（@code{vc-print-log}）と打ちます。
+記録項目を含めてカレントファイルの変更履歴を表示します。
+出力は別のウィンドウに表示されます。
+
+@node VC Undo
+@c @subsubsection Undoing Version Control Actions
+@subsubsection 版管理操作のアンドゥ
+
+@table @kbd
+@item C-x v u
+@c Revert the buffer and the file to the last checked-in version.
+バッファとファイルを最新のチェックインしてある版に復元する。
+
+@item C-x v c
+@c Remove the last-entered change from the master for the visited file.
+@c This undoes your last check-in.
+訪問先ファイルのマスタファイルに最後に入れた変更を取り除く。
+つまり、最後のチェックインをアンドゥする。
+@end table
+
+@kindex C-x v u
+@findex vc-revert-buffer
+@c   If you want to discard your current set of changes and revert to the
+@c last version checked in, use @kbd{C-x v u} (@code{vc-revert-buffer}).
+@c This leaves the file unlocked; if locking is in use, you must first lock
+@c the file again before you change it again.  @kbd{C-x v u} requires
+@c confirmation, unless it sees that you haven't made any changes since the
+@c last checked-in version.
+これまでの一連の変更を破棄してチェックインしてある最新版へ復元したいときは、
+@kbd{C-x v u}（@code{vc-revert-buffer}）を使います。
+ロックを使用しているときには、ファイルのロックを解除するので、
+変更を始めるまえにまずファイルをロックし直す必要があります。
+チェックインした最新版から変更していないと判断できない限り、
+@kbd{C-x v u}は確認を求めてきます。
+
+@c   @kbd{C-x v u} is also the command to unlock a file if you lock it and
+@c then decide not to change it.
+@kbd{C-x v u}は、
+ファイルをロックしたけれどもやはりファイルを変更しないと決めたときに、
+ロックを解除するコマンドでもあります。
+
+@kindex C-x v c
+@findex vc-cancel-version
+@c   To cancel a change that you already checked in, use @kbd{C-x v c}
+@c (@code{vc-cancel-version}).  This command discards all record of the
+@c most recent checked-in version.  @kbd{C-x v c} also offers to revert
+@c your work file and buffer to the previous version (the one that precedes
+@c the version that is deleted).
+すでにチェックインしてしまった変更を取り消すには、
+@kbd{C-x v c}（@code{vc-cancel-version}）を使います。
+このコマンドは、チェックインした最新版のすべての記録を捨てさります。
+さらに、@kbd{C-x v c}は、作業ファイルとバッファを
+以前の版（捨てた最新版の1つまえの版）に復元するかどうか
+聞いてきます。
+
+@c   If you answer @kbd{no}, VC keeps your changes in the buffer, and locks
+@c the file.  The no-revert option is useful when you have checked in a
+@c change and then discover a trivial error in it; you can cancel the
+@c erroneous check-in, fix the error, and check the file in again.
+@kbd{no}と答えると、VCはバッファでの変更を保持して
+ファイルもロックしたままにします。
+チェックインした変更に明らかなまちがいがあるとわかったときに、
+この「復元しない」という選択肢は便利です。
+誤りを含んだチェックインを取り消し、誤りを訂正してから、
+改めてファイルをチェックインできます。
+
+@c   When @kbd{C-x v c} does not revert the buffer, it unexpands all
+@c version control headers in the buffer instead (@pxref{Version Headers}).
+@c This is because the buffer no longer corresponds to any existing
+@c version.  If you check it in again, the check-in process will expand the
+@c headers properly for the new version number.
+@kbd{C-x v c}がバッファを復元しないときには、
+そのかわりに、バッファ内のすべての版管理ヘッダの展開形をもとの形に戻します
+（@pxref{Version Headers}）。
+なぜなら、バッファはもはや既存のどの版にも対応しないからです。
+ふたたびチェックインすると、チェックインの過程で、
+新たな版番号として正しくヘッダを展開します。
+
+@c   However, it is impossible to unexpand the RCS @samp{@w{$}Log$} header
+@c automatically.  If you use that header feature, you have to unexpand it
+@c by hand---by deleting the entry for the version that you just canceled.
+しかしながら、RCSの@samp{@w{$}Log$}ヘッダを
+自動的にもとの形に戻すことは不可能です。
+このヘッダの機能を使うなら、取り消した版に対応する項目を削除することで、
+もとの形に手で戻す必要があります。
+
+@c   Be careful when invoking @kbd{C-x v c}, as it is easy to lose a lot of
+@c work with it.  To help you be careful, this command always requires
+@c confirmation with @kbd{yes}.  Note also that this command is disabled
+@c under CVS, because canceling versions is very dangerous and discouraged
+@c with CVS.
+多くの作業結果を簡単に失ってしまうので、
+@kbd{C-x v c}を起動するときには十分注意してください。
+
+@node VC Dired Mode
+@c @subsubsection Dired under VC
+@subsubsection VC下のdired
+
+@kindex C-x v d
+@findex vc-directory
+@c   When you are working on a large program, it is often useful to find
+@c out which files have changed within an entire directory tree, or to view
+@c the status of all files under version control at once, and to perform
+@c version control operations on collections of files.  You can use the
+@c command @kbd{C-x v d} (@code{vc-directory}) to make a directory listing
+@c that includes only files relevant for version control.
+大きなプログラムを扱っているときは、ディレクトリの木構造全体の中で
+どのファイルが変更されたのかを調べたり、
+版管理の下に置かれているすべてのファイルの状態を一度に見られると便利です。
+コマンド@kbd{C-x v d}（@code{vc-directory}）を使えば、
+版管理に関連したファイルだけを含んだディレクトリ一覧を作れます。
+
+@vindex vc-dired-terse-display
+@c   @kbd{C-x v d} creates a buffer which uses VC Dired Mode.  This looks
+@c much like an ordinary Dired buffer (@pxref{Dired}); however, normally it
+@c shows only the noteworthy files (those locked or not up-to-date).  This
+@c is called @dfn{terse display}.  If you set the variable
+@c @code{vc-dired-terse-display} to @code{nil}, then VC Dired shows all
+@c relevant files---those managed under version control, plus all
+@c subdirectories (@dfn{full display}).  The command @kbd{v t} in a VC
+@c Dired buffer toggles between terse display and full display (@pxref{VC
+@c Dired Commands}).
+@kbd{C-x v d}は、VC diredモードを使うバッファを作ります。
+これは、普通のdiredバッファ（@pxref{Dired}）にそっくりですが、
+（ロックされていたり、未更新の）注意を払うべきファイルだけを
+通常は表示します。
+これを@dfn{簡素な表示}と呼びます。
+変数@code{vc-dired-terse-display}に@code{nil}を設定すると、
+VC diredは、関連するすべてのファイル、つまり、
+版管理の下に置かれたファイルとすべてのサブディレクトリを表示します
+（@dfn{完全な表示}）。
+VC diredバッファのコマンド@kbd{v t}は、
+簡素な表示と完全な表示を切り替えます。
+（@pxref{VC Dired Commands}。）
+
+@vindex vc-dired-recurse
+@c   By default, VC Dired produces a recursive listing of noteworthy or
+@c relevant files at or below the given directory.  You can change this by
+@c setting the variable @code{vc-dired-recurse} to @code{nil}; then VC
+@c Dired shows only the files in the given directory.
+デフォルトでは、VC diredは、指定したディレクトリやそれより下に置かれた
+注意を払うべきファイルや関連するファイルの再帰的な一覧を作ります。
+この動作を変えるには、
+変数@code{vc-dired-recurse}に@code{nil}を設定します。
+すると、VC diredは、指定したディレクトリにあるファイルだけを表示します。
+
+@c   The line for an individual file shows the version control state in the
+@c place of the hard link count, owner, group, and size of the file.  If
+@c the file is unmodified, in sync with the master file, the version
+@c control state shown is blank.  Otherwise it consists of text in
+@c parentheses.  Under RCS and SCCS, the name of the user locking the file
+@c is shown; under CVS, an abbreviated version of the @samp{cvs status}
+@c output is used.  Here is an example using RCS:
+各ファイルを表す行には、ハードリンク数、所有者、グループ、ファイルサイズの
+かわりに版管理状態があります。
+ファイルが変更されていなければ、つまり、
+マスタファイルの内容に同期しているならば、版管理状態は空です。
+そうでなければ、括弧で括ったテキストになります。
+RCSとSCCSでは、ファイルをロックしているユーザーの名前が示されます。
+CVSでは、cvs状態（@samp{cvs status}）を簡略化したものが示されます。
+つぎは、RCSを使っている場合の例です。
+
+@smallexample
+@group
+  /home/jim/project:
+
+  -rw-r--r-- (jim)      Apr  2 23:39 file1
+  -r--r--r--            Apr  5 20:21 file2
+@end group
+@end smallexample
+
+@noindent
+@c The files @samp{file1} and @samp{file2} are under version control,
+@c @samp{file1} is locked by user jim, and @samp{file2} is unlocked.
+ファイル、@samp{file1}と@samp{file2}が、版管理の下に置かれていて、
+@samp{file1}はユーザーjimがロックしていて、
+@samp{file2}はロックされていません。
+
+@c   Here is an example using CVS:
+つぎは、CVSを使っている場合の例です。
+
+@smallexample
+@group
+  /home/joe/develop:
+
+  -rw-r--r-- (modified) Aug  2  1997 file1.c
+  -rw-r--r--            Apr  4 20:09 file2.c
+  -rw-r--r-- (merge)    Sep 13  1996 file3.c
+@end group
+@end smallexample
+
+@c   Here @samp{file1.c} is modified with respect to the repository, and
+@c @samp{file2.c} is not.  @samp{file3.c} is modified, but other changes
+@c have also been checked in to the repository---you need to merge them
+@c with the work file before you can check it in.
+保管庫のものに比べて、@samp{file1.c}は変更されていますが、
+@samp{file2.c}は変更されていません。
+@samp{file3.c}も変更されていますが、
+保管庫には他の変更がチェックインされています。
+@samp{file3.c}をチェックインするまえに、
+それらの変更を併合する必要があります。
+
+@vindex vc-directory-exclusion-list
+@c   When VC Dired displays subdirectories (in the ``full'' display mode),
+@c it omits some that should never contain any files under version control.
+@c By default, this includes Version Control subdirectories such as
+@c @samp{RCS} and @samp{CVS}; you can customize this by setting the
+@c variable @code{vc-directory-exclusion-list}.
+VC diredで（『完全な表示』のときに）サブディレクトリを表示するときには、
+版管理の下には絶対に置かれないものは省略します。
+デフォルトでは、@samp{RCS}や@samp{CVS}などのVCのサブディレクトリが含まれます。
+これは、変数@code{vc-directory-exclusion-list}を設定して
+カスタマイズできます。
+
+@c   You can fine-tune VC Dired's format by typing @kbd{C-u C-x v d}---as in
+@c ordinary Dired, that allows you to specify additional switches for the
+@c @samp{ls} command.
+普通のdiredのように、@kbd{C-u C-x v d}と打てば、
+@samp{ls}プログラムに渡す追加オプションを指定して、
+VC diredの出力書式を微調整できます。
+
+@node VC Dired Commands
+@c @subsubsection VC Dired Commands
+@subsubsection VC diredコマンド
+
+@c   All the usual Dired commands work normally in VC Dired mode, except
+@c for @kbd{v}, which is redefined as the version control prefix.  You can
+@c invoke VC commands such as @code{vc-diff} and @code{vc-print-log} by
+@c typing @kbd{v =}, or @kbd{v l}, and so on.  Most of these commands apply
+@c to the file name on the current line.
+VC diredモードでも、通常のdiredコマンドはすべて普通に動作しますが、
+@kbd{v}は例外で、版管理プレフィックスとして再定義してあります。
+@code{vc-diff}や@code{vc-print-log}のようなVCコマンドは、
+@kbd{v =}や@kbd{v l}いうように打てば起動できます。
+これらのコマンドの多くは、現在行のファイルに作用します。
+
+@c   The command @kbd{v v} (@code{vc-next-action}) operates on all the
+@c marked files, so that you can lock or check in several files at once.
+@c If it operates on more than one file, it handles each file according to
+@c its current state; thus, it might lock one file, but check in another
+@c file.  This could be confusing; it is up to you to avoid confusing
+@c behavior by marking a set of files that are in a similar state.
+コマンド@kbd{v v}（@code{vc-next-action}）は、
+印を付けたすべてのファイルに作用するので、
+複数のファイルを一度にロックしたりチェックインしたりできます。
+複数のファイルに作用する場合、各ファイルの現状に応じて個別に扱います。
+つまり、あるファイルはロックしたり、別のファイルはチェックインしたりします。
+これは混乱の原因かもしれません。
+同じ状態の一連のファイルに印を付けて、
+混乱を防止するのはユーザーの責任です。
+
+@c   If any files call for check-in, @kbd{v v} reads a single log entry,
+@c then uses it for all the files being checked in.  This is convenient for
+@c registering or checking in several files at once, as part of the same
+@c change.
+ファイルをチェックインするときには、
+@kbd{v v}は1つの記録項目を読んで、それをチェックインするすべての
+ファイルに使います。
+これは、同じ変更に属する一連のファイルを一度にチェックインする場合に
+便利です。
+
+@findex vc-dired-toggle-terse-mode
+@findex vc-dired-mark-locked
+@c   You can toggle between terse display (only locked files, or files not
+@c up-to-date) and full display at any time by typing @kbd{v t}
+@c @code{vc-dired-toggle-terse-mode}.  There is also a special command
+@c @kbd{* l} (@code{vc-dired-mark-locked}), which marks all files currently
+@c locked (or, with CVS, all files not up-to-date).  Thus, typing @kbd{* l
+@c t k} is another way to delete from the buffer all files except those
+@c currently locked.
+@kbd{v t}（@code{vc-dired-toggle-terse-mode}）と打てばいつでも、
+（ロックされていたり、内容が未更新のものだけを表示する）
+簡素な表示と完全な表示とを切り替えられます。
+特別なコマンド@kbd{* l}（@code{vc-dired-mark-locked}）もあります。
+これは現在ロックされている（CVSの場合には、内容が未更新である）
+すべてのファイルに印を付けます。
+つまり、現在ロックされいるもの以外のすべてのファイルをバッファから
+削除する別の方法は、@kbd{* l t k}と打つことです。
+
+@node Branches
+@c @subsection Multiple Branches of a File
+@c @cindex branch (version control)
+@c @cindex trunk (version control)
+@subsection ファイルの複数の枝分かれ
+@cindex 枝（版管理）
+@cindex 幹（版管理）
+
+@c   One use of version control is to maintain multiple ``current''
+@c versions of a file.  For example, you might have different versions of a
+@c program in which you are gradually adding various unfinished new
+@c features.  Each such independent line of development is called a
+@c @dfn{branch}.  VC allows you to create branches, switch between
+@c different branches, and merge changes from one branch to another.
+@c Please note, however, that branches are only supported for RCS at the
+@c moment.
+版管理の用途の1つは、ファイルの複数の『現在』版を維持することです。
+たとえば、さまざまな完了していない新しい機能を徐々に付け加えている
+プログラムの異なる版を持つかもしれません。
+そういった開発の独立した流れを@dfn{枝}（branch）と呼びます。
+VCでは、枝を作ったり、別の枝へ切り替えたり、2つの枝を併合したりできます。
+しかし、今のところ、RCSだけで枝を使えることに注意してください。
+
+@c   A file's main line of development is usually called the @dfn{trunk}.
+@c The versions on the trunk are normally numbered 1.1, 1.2, 1.3, etc.  At
+@c any such version, you can start an independent branch.  A branch
+@c starting at version 1.2 would have version number 1.2.1.1, and consecutive
+@c versions on this branch would have numbers 1.2.1.2, 1.2.1.3, 1.2.1.4,
+@c and so on.  If there is a second branch also starting at version 1.2, it
+@c would consist of versions 1.2.2.1, 1.2.2.2, 1.2.2.3, etc.
+ファイルの開発の主要な流れを@dfn{幹}（trunk）と呼びます。
+幹にある版は、普通、1.1、1.2、1.3、…と番号が付けられます。
+そのような版のどれからでも、独立した枝を始めることができます。
+版1.2から始まる枝の版番号は1.2.1.1となり、
+同じ枝の後続の版番号は1.2.1.2、1.2.1.3、1.2.1.4、…となります。
+版1.2から始まる別の枝があれば、それらの版番号は、
+1.2.2.1、1.2.2.2、1.2.2.3、…となります。
+
+@c @cindex head version
+@cindex 先頭版
+@c   If you omit the final component of a version number, that is called a
+@c @dfn{branch number}.  It refers to the highest existing version on that
+@c branch---the @dfn{head version} of that branch.  The branches in the
+@c example above have branch numbers 1.2.1 and 1.2.2.
+版番号の最後の要素を省略したものを@dfn{枝番号}と呼びます。
+これは、その枝にある版の中でもっとも大きい番号の版、@dfn{先頭版}を指します。
+まえの例の枝は、枝番号1.2.1と1.2.2です。
+
+@menu
+* Switching Branches::    How to get to another existing branch.
+* Creating Branches::     How to start a new branch.
+* Merging::               Transferring changes between branches.
+* Multi-User Branching::  Multiple users working at multiple branches 
+                            in parallel.
+@end menu
+
+@node Switching Branches
+@c @subsubsection Switching between Branches
+@subsubsection 枝の切り替え
+
+@c   To switch between branches, type @kbd{C-u C-x C-q} and specify the
+@c version number you want to select.  This version is then visited
+@c @emph{unlocked} (write-protected), so you can examine it before locking
+@c it.  Switching branches in this way is allowed only when the file is not
+@c locked.
+枝を切り替えるには、@kbd{C-u C-x C-q}と打ってから、
+選択したい版番号を指定します。
+その版を@emph{ロックしない}（書き込み不可）で訪問するので、
+ロックするまえに調べることができます。
+このような枝の切り替えが可能なのは、
+ファイルがロックされていない場合に限ります。
+
+@c   You can omit the minor version number, thus giving only the branch
+@c number; this takes you to the head version on the chosen branch.  If you
+@c only type @key{RET}, Emacs goes to the highest version on the trunk.
+枝の中での版番号を省略して枝番号だけを指定できます。
+すると、その枝の先頭版を選ぶことになります。
+@key{RET}だけを打つと、Emacsは幹の上のもっとも大きい版を選びます。
+
+@c   After you have switched to any branch (including the main branch), you
+@c stay on it for subsequent VC commands, until you explicitly select some
+@c other branch.
+（幹を含む）どれかの枝へ切り替えたあとでは、
+明示的に他の枝を選択するまで、それ以降のVCコマンドはその枝を使います。
+
+@node Creating Branches
+@c @subsubsection Creating New Branches
+@subsubsection 新しい枝の作成
+
+@c   To create a new branch from a head version (one that is the latest in
+@c the branch that contains it), first select that version if necessary,
+@c lock it with @kbd{C-x C-q}, and make whatever changes you want.  Then,
+@c when you check in the changes, use @kbd{C-u C-x C-q}.  This lets you
+@c specify the version number for the new version.  You should specify a
+@c suitable branch number for a branch starting at the current version.
+@c For example, if the current version is 2.5, the branch number should be
+@c 2.5.1, 2.5.2, and so on, depending on the number of existing branches at
+@c that point.
+先頭版（枝の中にある最新版）から新たな枝を作るには、
+必要ならまずその版を選択してから、@kbd{C-x C-q}でそれをロックし、
+必要な変更を施します。
+そして、変更をチェックインするときに、@kbd{C-u C-x C-q}を使います。
+このコマンドでは、新版に対する版番号を指定できます。
+現在の版から始まる枝として適切な番号を指定する必要があります。
+たとえば、現在の版が2.5ならば、その時点で存在する枝の数に依存しますが、
+枝番号は、2.5.1、2.5.2、…です。
+
+@c   To create a new branch at an older version (one that is no longer the
+@c head of a branch), first select that version (@pxref{Switching
+@c Branches}), then lock it with @kbd{C-x C-q}.  You'll be asked to
+@c confirm, when you lock the old version, that you really mean to create a
+@c new branch---if you say no, you'll be offered a chance to lock the
+@c latest version instead.
+旧版（先頭版ではないもの）から新しい枝を作るには、
+その版をまず選択してから（@pxref{Switching Branches}）、
+それを@kbd{C-x C-q}でロックします。
+旧版をロックすると、本当に新しい枝を作るのかどうか確認してきます。
+noで答えると、かわりに、最新版をロックするかどうか聞いてきます。
+
+@c   Then make your changes and type @kbd{C-x C-q} again to check in a new
+@c version.  This automatically creates a new branch starting from the
+@c selected version.  You need not specially request a new branch, because
+@c that's the only way to add a new version at a point that is not the head
+@c of a branch.
+変更してから、ふたたび@kbd{C-x C-q}と打って新版にチェックインします。
+こうすると選択した版から始まる新しい枝を自動的に作ります。
+新しい枝を特に指定する必要はありません。
+なぜなら、枝の先頭版でないところに新版を付け加える唯一の方法だからです。
+
+@c   After the branch is created, you ``stay'' on it.  That means that
+@c subsequent check-ins create new versions on that branch.  To leave the
+@c branch, you must explicitly select a different version with @kbd{C-u C-x
+@c C-q}.  To transfer changes from one branch to another, use the merge
+@c command, described in the next section.
+枝を作ったあとでは、その枝に『留まり』ます。
+つまり、それ以降にチェックインすると、その枝に新版が作られます。
+枝を去るには、@kbd{C-u C-x C-q}で明示的に別の版を選ぶ必要があります。
+ある枝から別の枝へ変更を移すには、次節で説明する併合コマンドを使ってください。
+
+@node Merging
+@c @subsubsection Merging Branches
+@subsubsection 枝の併合
+
+@c @cindex merging changes
+@cindex 変更の併合
+@c   When you have finished the changes on a certain branch, you will
+@c often want to incorporate them into the file's main line of development
+@c (the trunk).  This is not a trivial operation, because development might
+@c also have proceeded on the trunk, so that you must @dfn{merge} the
+@c changes into a file that has already been changed otherwise.  VC allows
+@c you to do this (and other things) with the @code{vc-merge} command.
+ある枝で変更を完了したときには、それらの変更をファイルの開発の主流（幹）に
+取り込みたいことがしばしばあるでしょう。
+これは簡単な操作ではありません。
+というのは、幹でも開発は進行しているので、
+別の向きに変更されているファイルに変更を@dfn{併合}する必要があるからです。
+VCでは、@code{vc-merge}コマンドで併合（とそれ以外のことも）できます。
+
+@table @kbd
+@item C-x v m (vc-merge)
+@c Merge changes into the work file.
+作業ファイルに変更を併合する。
+@end table
+
+@kindex C-x v m
+@findex vc-merge
+@c   @kbd{C-x v m} (@code{vc-merge}) takes a set of changes and merges it
+@c into the current version of the work file.  It first asks you for a
+@c branch number or a pair of version numbers in the minibuffer.  Then it
+@c finds the changes from that branch, or between the two versions you
+@c specified, and merges them into the current version of the current file.
+@kbd{C-x v m}（@code{vc-merge}）は、
+一連の変更を作業ファイルの現在の版に併合します。
+このコマンドはまず、ミニバッファで枝番号か2つの版番号を読み取ります。
+そして、その枝での変更、あるいは、指定した2つの版のあいだの変更を調べ、
+それらをファイルの現在の版に併合します。
+
+@c   As an example, suppose that you have finished a certain feature on
+@c branch 1.3.1.  In the meantime, development on the trunk has proceeded
+@c to version 1.5.  To merge the changes from the branch to the trunk,
+@c first go to the head version of the trunk, by typing @kbd{C-u C-x C-q
+@c RET}.  Version 1.5 is now current.  If locking is used for the file,
+@c type @kbd{C-x C-q} to lock version 1.5 so that you can change it.  Next,
+@c type @kbd{C-x v m 1.3.1 RET}.  This takes the entire set of changes on
+@c branch 1.3.1 (relative to version 1.3, where the branch started, up to
+@c the last version on the branch) and merges it into the current version
+@c of the work file.  You can now check in the changed file, thus creating
+@c version 1.6 containing the changes from the branch.
+例として、枝1.3.1である機能を実装し終えたとしましょう。
+この間、幹でも開発が進んでいて版1.5になっています。
+枝での変更を幹に併合するには、
+まず、@kbd{C-u C-x C-q @key{RET}}と打って、幹の先頭版へ行きます。
+版1.5が現在の版になります。
+ファイルのロックを使っている場合には、@kbd{C-x C-q}と打って、
+版1.5をロックして変更できるようにします。
+続いて@kbd{C-x v m 1.3.1 @key{RET}}と打ちます。
+すると、枝1.3.1での（枝の開始点である版1.3から枝の中にある最新版までの）
+一連の変更を取り出して、それらを作業ファイルの現在の版に併合します。
+ここで、変更された作業ファイルをチェックインできます。
+つまり、枝での変更を取り込んだ版1.6を作れるのです。
+
+@c   It is possible to do further editing after merging the branch, before
+@c the next check-in.  But it is usually wiser to check in the merged
+@c version, then lock it and make the further changes.  This will keep
+@c a better record of the history of changes.
+チェックインするまえに、枝から併合したあとにさらに編集することも可能です。
+しかし、併合した版をチェックインしたあとで、
+ロックしてさらに編集するのが、普通は賢いやり方です。
+こうすれば、変更履歴をよりよく記録に残せます。
+
+@c @cindex conflicts
+@c @cindex resolving conflicts
+@cindex 矛盾
+@cindex 矛盾の解消
+@c   When you merge changes into a file that has itself been modified, the
+@c changes might overlap.  We call this situation a @dfn{conflict}, and
+@c reconciling the conflicting changes is called @dfn{resolving a
+@c conflict}.
+すでに修正されているファイルに変更を併合するときには、
+変更が重複する場合があります。
+この状況を@dfn{矛盾}と呼びます。
+矛盾した変更の辻褄を合わせることを@dfn{矛盾の解消}と呼びます。
+
+@c   Whenever conflicts occur during merging, VC detects them, tells you
+@c about them in the echo area, and asks whether you want help in merging.
+@c If you say yes, it starts an Ediff session (@pxref{Top,
+@c Ediff, Ediff, ediff, The Ediff Manual}).
+併合中に矛盾が起こると、VCはこれらを検出し、
+それらをエコー領域に表示してユーザーに伝え、
+併合を補佐してほしいかどうか聞いてきます。
+yesで答えると、ediffセッションを開始します
+（@pxref{Top, Ediff, Ediff, ediff, The Ediff Manual}）。
+
+@c   If you say no, the conflicting changes are both inserted into the
+@c file, surrounded by @dfn{conflict markers}.  The example below shows how
+@c a conflict region looks; the file is called @samp{name} and the current
+@c master file version with user B's changes in it is 1.11.
+noで答えると、矛盾する変更はどちらも@dfn{矛盾印}で囲ってファイルに挿入します。
+矛盾する部分は、下の例のようになります。
+作業ファイルの名前は@samp{name}であり、
+ユーザーBの変更を収めたマスタファイルの版は1.11です。
+
+@c @w here is so CVS won't think this is a conflict.
+@smallexample
+@group
+@w{<}<<<<<< name
+  @var{User A's version}
+=======
+  @var{User B's version}
+@w{>}>>>>>> 1.11
+@end group
+@end smallexample
+
+@c @cindex vc-resolve-conflicts
+@findex vc-resolve-conflicts
+@c   Then you can resolve the conflicts by editing the file manually.  Or
+@c you can type @code{M-x vc-resolve-conflicts} after visiting the file.
+@c This starts an Ediff session, as described above.
+この矛盾を解消するようにファイルを手で編集できます。
+あるいは、ファイルを訪問してから@code{M-x vc-resolve-conflicts}と打ちます。
+すると上に述べたediffセッションを開始します。
+
+@node Multi-User Branching
+@c @subsubsection Multi-User Branching
+@subsubsection 複数ユーザーの枝
+
+@c   It is often useful for multiple developers to work simultaneously on
+@c different branches of a file.  CVS allows this by default; for RCS, it
+@c is possible if you create multiple source directories.  Each source
+@c directory should have a link named @file{RCS} which points to a common
+@c directory of RCS master files.  Then each source directory can have its
+@c own choice of selected versions, but all share the same common RCS
+@c records.
+ファイルの異なる枝上で同時に複数の開発者が作業すると有益なことが
+しばしばあります。
+CVSでは、デフォルトで、これができます。
+RCSでは、複数のソースディレクトリを作れば可能です。
+RCSのマスタファイルを置いた共通のディレクトリを指す@file{RCS}という名前の
+リンクを各ソースディレクトリに置きます。
+こうすれば、各ソースディレクトリでは、それぞれ独自に版を選択できます。
+しかし、同じ共通のRCSレコードをすべてで共有します。
+
+@c   This technique works reliably and automatically, provided that the
+@c source files contain RCS version headers (@pxref{Version Headers}).  The
+@c headers enable Emacs to be sure, at all times, which version number is
+@c present in the work file.
+ソースファイルにRCSの版管理ヘッダ（@pxref{Version Headers}）が入っていれば、
+この技法は信頼性があり自動的に動作します。
+ヘッダにより、Emacsはいつでも作業ファイルに入っている版番号がわかります。
+
+@c   If the files do not have version headers, you must instead tell Emacs
+@c explicitly in each session which branch you are working on.  To do this,
+@c first find the file, then type @kbd{C-u C-x C-q} and specify the correct
+@c branch number.  This ensures that Emacs knows which branch it is using
+@c during this particular editing session.
+ファイルに版管理ヘッダが入っていないときには、
+各セッションごとにどの枝で作業しているかをEmacsに明示する必要があります。
+こうするには、ファイルを訪問してから、
+@kbd{C-u C-x C-q}と打ち、正しい枝番号を指定します。
+これにより、編集セッションではどの枝を操作しているかを
+Emacsが知っていることを保証します。
+
+@node Snapshots
+@c @subsection Snapshots
+@c @cindex snapshots and version control
+@subsection スナップショット
+@cindex スナップショットと版管理
+
+@c   A @dfn{snapshot} is a named set of file versions (one for each
+@c registered file) that you can treat as a unit.  One important kind of
+@c snapshot is a @dfn{release}, a (theoretically) stable version of the
+@c system that is ready for distribution to users.
+@dfn{スナップショット}とは、
+ファイルの版（登録されたファイルそれぞれに1つずつ）
+の集合に名前を付けたもので、一塊として扱うことができます。
+スナップショットの重要な種類の1つは、@dfn{リリース}です。
+これは、ユーザーへ配布する準備が整ったシステムの（理論的には）
+安定した版のことです。
+
+@menu
+* Making Snapshots::		The snapshot facilities.
+* Snapshot Caveats::		Things to be careful of when using snapshots.
+@end menu
+
+@node Making Snapshots
+@c @subsubsection Making and Using Snapshots
+@subsubsection スナップショットの作成と使用
+
+@c   There are two basic commands for snapshots; one makes a
+@c snapshot with a given name, the other retrieves a named snapshot.
+スナップショットに対しては、基本的なコマンドが2つあります。
+1つは名前を指定してスナップショットを作り、
+もう1つは指名したスナップショットを取り出すことです。
+
+@table @code
+@kindex C-x v s
+@findex vc-create-snapshot
+@item C-x v s @var{name} @key{RET}
+@c Define the last saved versions of every registered file in or under the
+@c current directory as a snapshot named @var{name}
+@c (@code{vc-create-snapshot}).
+カレントディレクトリやその下に置いてある登録されたファイルの
+それぞれの保存された最新版を@var{name}という名前の
+スナップショットとして定義する
+（@code{vc-create-snapshot}）。
+
+@kindex C-x v r
+@findex vc-retrieve-snapshot
+@item C-x v r @var{name} @key{RET}
+@c For all registered files at or below the current directory level, select
+@c whatever versions correspond to the snapshot @var{name}
+@c (@code{vc-retrieve-snapshot}).
+カレントディレクトリやその下に置いてある登録されたファイルすべてについて、
+スナップショット@var{name}に対応する版を選択する。
+
+@c This command reports an error if any files are locked at or below the
+@c current directory, without changing anything; this is to avoid
+@c overwriting work in progress.
+カレントディレクトリやその下に置いてある登録されたファイルのいずれかが
+ロックされていると、このコマンドは何も変更せずにエラーを報告する。
+これは、進行中の作業結果を上書きしてしまうことを避けるため。
+@end table
+
+@c   A snapshot uses a very small amount of resources---just enough to record
+@c the list of file names and which version belongs to the snapshot.  Thus,
+@c you need not hesitate to create snapshots whenever they are useful.
+スナップショットはとても少量の資源しか使いません。
+ファイル名一覧とスナップショットに属する版番号を
+記録するに十分な量だけでいいのです。
+したがって、使いものになるものをスナップショットにすることを
+躇うことはありません。
+
+@c   You can give a snapshot name as an argument to @kbd{C-x v =} or
+@c @kbd{C-x v ~} (@pxref{Old Versions}).  Thus, you can use it to compare a
+@c snapshot against the current files, or two snapshots against each other,
+@c or a snapshot against a named version.
+@kbd{C-x v =}や@kbd{C-x v ~}（@pxref{Old Versions}）の引数として、
+スナップショットの名前を指定できます。
+したがって、スナップショットと現在のファイル、あるいは、
+2つのスナップショット同士、あるいは、
+指定した名前の版とスナップショット同士を比較できます。
+
+@node Snapshot Caveats
+@c @subsubsection Snapshot Caveats
+@subsubsection スナップショットの弱点
+
+@c @cindex named configurations (RCS)
+@cindex 名前付きのコンフィギュレーション（RCS）
+@c   VC's snapshot facilities are modeled on RCS's named-configuration
+@c support.  They use RCS's native facilities for this, so under VC
+@c snapshots made using RCS are visible even when you bypass VC.
+VCのスナップショット機能は、RCSの名前付きコンフィギュレーションサポート
+（named-configuration support）をモデルにしています。
+RCS固有の機能を使っているため、RCSを使って作ったVCのスナップショット
+は、VCを使わなくても見えます。
+
+@c @c worded verbosely to avoid overfull hbox.
+@c   For SCCS, VC implements snapshots itself.  The files it uses contain
+@c name/file/version-number triples.  These snapshots are visible only
+@c through VC.
+SCCSでは、VC自身でスナップショット機能を実装しています。
+VCが使うファイルには、名前／ファイル／版番号の3つ組みが含まれます。
+これらのスナップショットは、VCを使ったときだけ見えます。
+
+@c   A snapshot is a set of checked-in versions.  So make sure that all the
+@c files are checked in and not locked when you make a snapshot.
+スナップショットはチェックインした版の集合です。
+ですから、スナップショットを作るときには、
+すべてのファイルをチェックインしてあり、
+しかもロックしていないことを確認してください。
+
+@c   File renaming and deletion can create some difficulties with snapshots.
+@c This is not a VC-specific problem, but a general design issue in version
+@c control systems that no one has solved very well yet.
+ファイルを改名したり削除すると、スナップショットに問題を生じます。
+これはVCに固有の問題ではなく、版管理システムに一般的な設計上の問題で、
+まだ誰も満足ゆく解決をできていません。
+
+@c   If you rename a registered file, you need to rename its master along
+@c with it (the command @code{vc-rename-file} does this automatically).  If
+@c you are using SCCS, you must also update the records of the snapshot, to
+@c mention the file by its new name (@code{vc-rename-file} does this,
+@c too).  An old snapshot that refers to a master file that no longer
+@c exists under the recorded name is invalid; VC can no longer retrieve
+@c it.  It would be beyond the scope of this manual to explain enough about
+@c RCS and SCCS to explain how to update the snapshots by hand.
+登録されたファイルを改名するなら、
+そのマスタファイルも一緒に改名する必要があります
+（コマンド@code{vc-rename-file}は自動的にこれを行う）。
+SCCSを使っているならば、ファイル名を新しい名前にして
+スナップショットの記録も更新する必要があります
+（@code{vc-rename-file}はこれも行う）。
+記録された名前ではもはや存在しないマスタファイルを参照する
+古いスナップショットは無効です。
+VCは（古い名前では）取り出せません。
+スナップショットを手で更新する方法を説明するために
+RCSやSCCSを詳しく説明することは、本書の範囲を越えています。
+
+@c   Using @code{vc-rename-file} makes the snapshot remain valid for
+@c retrieval, but it does not solve all problems.  For example, some of the
+@c files in the program probably refer to others by name.  At the very
+@c least, the makefile probably mentions the file that you renamed.  If you
+@c retrieve an old snapshot, the renamed file is retrieved under its new
+@c name, which is not the name that the makefile expects.  So the program
+@c won't really work as retrieved.
+@code{vc-rename-file}を使えば、
+取り出し操作に使える程度にはスナップショットを保てますが、
+すべての問題を解決できるわけではありません。
+たとえば、プログラムのいくつかのファイルでは、
+名前で他のファイルを参照しているでしょう。
+少なくとも、makefileでは、改名したファイルを指しているでしょう。
+古いスナップショットを取り出すと、
+改名したファイルは新しい名前で取り出しますが、
+makefileで使っている名前ではありません。
+ですから、取り出しただけではプログラムは動かないでしょう。
+
+@node Miscellaneous VC
+@c @subsection Miscellaneous Commands and Features of VC
+@subsection VCのその他のコマンドと機能
+
+@c   This section explains the less-frequently-used features of VC.
+本節では、使用頻度の少ないVCの機能を説明します。
+
+@menu
+* Change Logs and VC::  Generating a change log file from log entries.
+* Renaming and VC::     A command to rename both the source and master 
+                          file correctly.
+* Version Headers::     Inserting version control headers into working files.
+@end menu
+
+@node Change Logs and VC
+@c @subsubsection Change Logs and VC
+@subsubsection 変更記録とVC
+
+@c   If you use RCS or CVS for a program and also maintain a change log
+@c file for it (@pxref{Change Log}), you can generate change log entries
+@c automatically from the version control log entries:
+プログラムに対してRCSやCVSを使い、しかも、それらに変更記録ファイル
+（@pxref{Change Log}）を保持しているならば、
+版管理の記録項目から変更記録項目を自動的に生成できます。
+
+@table @kbd
+@item C-x v a
+@kindex C-x v a
+@findex vc-update-change-log
+@c Visit the current directory's change log file and, for registered files
+@c in that directory, create new entries for versions checked in since the
+@c most recent entry in the change log file.
+@c (@code{vc-update-change-log}).
+カレントディレクトリにある変更記録ファイルを訪れる。
+そして、そのディレクトリに置いてある登録された各ファイルについて、
+変更記録ファイルにある最新の項目以降にチェックインされた版に関する
+新たな項目を作成する。
+（@code{vc-update-change-log}）。
+
+@c This command works with RCS or CVS only, not with SCCS.
+このコマンドはRCSやCVSだけで動作し、SCCSでは動作しない。
+
+@item C-u C-x v a
+@c As above, but only find entries for the current buffer's file.
+上と同様であるが、カレントバッファのファイルに関する項目だけを探す。
+
+@item M-1 C-x v a
+@c As above, but find entries for all the currently visited files that are
+@c maintained with version control.  This works only with RCS, and it puts
+@c all entries in the log for the default directory, which may not be
+@c appropriate.
+上と同様だが、現在訪問しているファイルのうち版管理の下に置かれているファイル
+すべてに関する項目を探す。
+このコマンドはRCSでのみ動作する。
+しかも、デフォルトディレクトリに関する
+すべての項目を変更記録に追加するが、これは適切でないこともある。
+@end table
+
+@c   For example, suppose the first line of @file{ChangeLog} is dated
+@c 1999-04-10, and that the only check-in since then was by Nathaniel
+@c Bowditch to @file{rcs2log} on 1999-05-22 with log text @samp{Ignore log
+@c messages that start with `#'.}.  Then @kbd{C-x v a} visits
+@c @file{ChangeLog} and inserts text like this:
+たとえば、@file{ChangeLog}の最初の行の日付が1999年4月10日であり、
+それ以降のチェックインは
+Nathaniel Bowditchが1999年5月22日に
+@samp{Ignore log messages that start with `#'.}という記録で
+@file{rcs2log}にチェックインしたものだけだとしましょう。
+そうすると、@kbd{C-x v a}は@file{ChangeLog}を訪問して、
+つぎのようなテキストを挿入します。
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-05-22  Nathaniel Bowditch  <nat@@apn.org>
+
+        * rcs2log: Ignore log messages that start with `#'.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+@noindent
+@c You can then edit the new change log entry further as you wish.
+このあと、変更記録の新しい項目を好きなように編集できます。
+
+@c   Unfortunately, timestamps in ChangeLog files are only dates, so some
+@c of the new change log entry may duplicate what's already in ChangeLog.
+@c You will have to remove these duplicates by hand.
+残念ながら、ChangeLogファイルには日付しか記録していないので、
+新たな変更記録項目がChangeLogファイルの既存の項目と重複することがあります。
+そのような日付の重複は、手作業で削除する必要があります。
+
+@c   Normally, the log entry for file @file{foo} is displayed as @samp{*
+@c foo: @var{text of log entry}}.  The @samp{:} after @file{foo} is omitted
+@c if the text of the log entry starts with @w{@samp{(@var{functionname}):
+@c }}.  For example, if the log entry for @file{vc.el} is
+@c @samp{(vc-do-command): Check call-process status.}, then the text in
+@c @file{ChangeLog} looks like this:
+通常、ファイル@file{foo}に関する記録項目は、
+@samp{* foo: @var{text of log entry}}のように表示されます。
+記録項目のテキストが@w{@samp{(@var{functionname}):}}で始まると、
+@file{foo}のうしろの@samp{:}は省かれます。
+たとえば、@file{vc.el}に関する記録項目が
+@samp{(vc-do-command): Check call-process status.}であれば、
+@file{ChangeLog}の中のテキストはつぎのようになります。
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-05-06  Nathaniel Bowditch  <nat@@apn.org>
+
+        * vc.el (vc-do-command): Check call-process status.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+@c   When @kbd{C-x v a} adds several change log entries at once, it groups
+@c related log entries together if they all are checked in by the same
+@c author at nearly the same time.  If the log entries for several such
+@c files all have the same text, it coalesces them into a single entry.
+@c For example, suppose the most recent check-ins have the following log
+@c entries:
+@kbd{C-x v a}が複数の変更記録項目を一度に追加するときには、
+同じ作者がほぼ同じ日時にチェックインしたものならば、
+関連する記録項目をまとめます。
+そのようないくつかのファイルに対する記録項目がすべて同じテキストならば、
+1つの項目にまとめます。
+たとえば、最後にチェックインしたものに、以下の記録があったとします。
+
+@flushleft
+@c @bullet{} For @file{vc.texinfo}: @samp{Fix expansion typos.}
+@c @bullet{} For @file{vc.el}: @samp{Don't call expand-file-name.}
+@c @bullet{} For @file{vc-hooks.el}: @samp{Don't call expand-file-name.}
+@bullet{} @file{vc.texinfo}の記録項目: @samp{Fix expansion typos.}
+@bullet{} @file{vc.el}の記録項目: @samp{Don't call expand-file-name.}
+@bullet{} @file{vc-hooks.el}の記録項目: @samp{Don't call expand-file-name.}
+@end flushleft
+
+@noindent
+@c They appear like this in @file{ChangeLog}:
+これらは@file{ChangeLog}の中ではつぎのようになります。
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-04-01  Nathaniel Bowditch  <nat@@apn.org>
+
+        * vc.texinfo: Fix expansion typos.
+
+        * vc.el, vc-hooks.el: Don't call expand-file-name.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+@c   Normally, @kbd{C-x v a} separates log entries by a blank line, but you
+@c can mark several related log entries to be clumped together (without an
+@c intervening blank line) by starting the text of each related log entry
+@c with a label of the form @w{@samp{@{@var{clumpname}@} }}.  The label
+@c itself is not copied to @file{ChangeLog}.  For example, suppose the log
+@c entries are:
+通常、@kbd{C-x v a}は記録項目を空行で区切りますが、
+関連する記録項目のテキストを@w{@samp{@{@var{clumpname}@} }}のような
+ラベルで始めれば、関連する複数の記録項目を1つの塊にする
+（区切りの空行を入れない）ように印を付けられます。
+ラベル自体は@file{ChangeLog}にはコピーされません。
+たとえば、記録項目がつぎのようであるとします。
+
+@flushleft
+@c @bullet{} For @file{vc.texinfo}: @samp{@{expand@} Fix expansion typos.}
+@c @bullet{} For @file{vc.el}: @samp{@{expand@} Don't call expand-file-name.}
+@c @bullet{} For @file{vc-hooks.el}: @samp{@{expand@} Don't call expand-file-name.}
+@bullet{} @file{vc.texinfo}の記録項目: @samp{@{expand@} Fix expansion typos.}
+@bullet{} @file{vc.el}の記録項目: @samp{@{expand@} Don't call expand-file-name.}
+@bullet{} @file{vc-hooks.el}の記録項目: @samp{@{expand@} Don't call expand-file-name.}
+@end flushleft
+
+@noindent
+@c Then the text in @file{ChangeLog} looks like this:
+すると、@file{ChangeLog}のテキストはつぎのようになります。
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+@group
+1999-04-01  Nathaniel Bowditch  <nat@@apn.org>
+
+        * vc.texinfo: Fix expansion typos.
+        * vc.el, vc-hooks.el: Don't call expand-file-name.
+@end group
+@end smallexample
+@iftex
+@medbreak
+@end iftex
+
+@c   A log entry whose text begins with @samp{#} is not copied to
+@c @file{ChangeLog}.  For example, if you merely fix some misspellings in
+@c comments, you can log the change with an entry beginning with @samp{#}
+@c to avoid putting such trivia into @file{ChangeLog}.
+記録項目のテキストが@samp{#}で始まると、
+その記録項目は@file{ChangeLog}にはコピーされません。
+たとえば、コメントの綴りまちがいだけを変更したときには、
+記録項目を@samp{#}で始めれば、このような自明なものを@file{ChangeLog}に
+入れないですみます。
+
+@node Renaming and VC
+@c @subsubsection Renaming VC Work Files and Master Files
+@subsubsection VC作業ファイルとマスタファイルの改名
+
+@findex vc-rename-file
+@c   When you rename a registered file, you must also rename its master
+@c file correspondingly to get proper results.  Use @code{vc-rename-file}
+@c to rename the source file as you specify, and rename its master file
+@c accordingly.  It also updates any snapshots (@pxref{Snapshots}) that
+@c mention the file, so that they use the new name; despite this, the
+@c snapshot thus modified may not completely work (@pxref{Snapshot
+@c Caveats}).
+登録したファイルを改名するときには、そのマスタファイルも同様に改名して
+正しい結果を得られるようにする必要があります。
+指定どおりにソースファイルを改名し、それに従って
+マスタファイルも改名するには、@code{vc-rename-file}を使います。
+このコマンドは、当該ファイルを指名しているどんなスナップショット
+（@pxref{Snapshots}）も更新するので、スナップショットでも
+新しい名前を使うようになります。
+それにも関わらず、修正したスナップショットは動作しないかもしれません
+（@pxref{Snapshot Caveats}）。
+
+@c   You cannot use @code{vc-rename-file} on a file that is locked by
+@c someone else.
+誰かがロックしているファイルに対しては、
+@code{vc-rename-file}を使えません。
+
+@node Version Headers
+@c @subsubsection Inserting Version Control Headers
+@subsubsection 版管理ヘッダの挿入
+
+@c    Sometimes it is convenient to put version identification strings
+@c directly into working files.  Certain special strings called
+@c @dfn{version headers} are replaced in each successive version by the
+@c number of that version.
+版を識別する文字列を作業ファイルへ直接入れておくと便利なこともあります。
+@dfn{版管理ヘッダ}と呼ばれる特別な文字列は、
+各版ごとにその版番号で置き換えられます。
+
+@c   If you are using RCS, and version headers are present in your working
+@c files, Emacs can use them to determine the current version and the
+@c locking state of the files.  This is more reliable than referring to the
+@c master files, which is done when there are no version headers.  Note
+@c that in a multi-branch environment, version headers are necessary to
+@c make VC behave correctly (@pxref{Multi-User Branching}).
+RCSを使っていて、かつ、作業ファイルに版管理ヘッダが入っていれば、
+Emacsは、版管理ヘッダを使って現在の版とファイルのロック状態を決定できます。
+これは、版管理ヘッダがないときにマスタファイルを参照するより、
+信頼できます。
+複数の枝を使う環境では、
+VCが正しくふるまうためには版管理ヘッダが必要です
+（@pxref{Multi-User Branching}）。
+
+@c   Searching for version headers is controlled by the variable
+@c @code{vc-consult-headers}.  If it is non-@code{nil}, Emacs searches for
+@c headers to determine the version number you are editing.  Setting it to
+@c @code{nil} disables this feature.
+版管理ヘッダの探索は、変数@code{vc-consult-headers}で制御されます。
+@code{nil}以外ならば、編集中の版番号を決定するためにEmacsはヘッダを探します。
+@code{nil}を設定すると、この機能はオフになります。
+
+@kindex C-x v h
+@findex vc-insert-headers
+@c   You can use the @kbd{C-x v h} command (@code{vc-insert-headers}) to
+@c insert a suitable header string.
+適切なヘッダ文字列を入れるには、コマンド@kbd{C-x v h}
+（@code{vc-insert-headers}）を使います。
+
+@table @kbd
+@item C-x v h
+@c Insert headers in a file for use with your version-control system.
+版管理システムで使うヘッダをファイルに挿入する。
+@end table
+
+@vindex vc-header-alist
+@c   The default header string is @samp{@w{$}Id$} for RCS and
+@c @samp{@w{%}W%} for SCCS.  You can specify other headers to insert by
+@c setting the variable @code{vc-header-alist}.  Its value is a list of
+@c elements of the form @code{(@var{program} . @var{string})} where
+@c @var{program} is @code{RCS} or @code{SCCS} and @var{string} is the
+@c string to use.
+デフォルトのヘッダ文字列は、
+RCSでは@samp{@w{$}Id$}、SCCSでは@samp{@w{%}W%}です。
+変数@code{vc-header-alist}に設定すれば、他のヘッダを指定できます。
+この値は、@code{(@var{program} . @var{string})}の形式の
+要素から成るリストです。
+ここで、@var{program}は@code{RCS}または@code{SCCS}であり、
+@var{string}は使用する文字列です。
+
+@c   Instead of a single string, you can specify a list of strings; then
+@c each string in the list is inserted as a separate header on a line of
+@c its own.
+1つの文字列のかわりに、文字列のリストを指定することもできます。
+そうすると、リストの各文字列は、別々の行に別のヘッダとして挿入されます。
+
+@c   It is often necessary to use ``superfluous'' backslashes when writing
+@c the strings that you put in this variable.  This is to prevent the
+@c string in the constant from being interpreted as a header itself if the
+@c Emacs Lisp file containing it is maintained with version control.
+この変数に入れる文字列を書くときには、『余分な』バックスラッシュを
+使う必要がよくあります。
+この文字列を含むEmacs Lispファイルが版管理の下に置かれているときに、
+定数中の文字列がヘッダと解釈されることを防ぐためです。
+
+@vindex vc-comment-alist
+@c   Each header is inserted surrounded by tabs, inside comment delimiters,
+@c on a new line at point.  Normally the ordinary comment
+@c start and comment end strings of the current mode are used, but for
+@c certain modes, there are special comment delimiters for this purpose;
+@c the variable @code{vc-comment-alist} specifies them.  Each element of
+@c this list has the form @code{(@var{mode} @var{starter} @var{ender})}.
+各ヘッダは、ポイント位置の新しい行に、
+コメント区切りの内側にタブで囲んで挿入されます。
+通常、現在のモードのコメント開始文字列とコメント終了文字列を使いますが、
+特定のモードでは、この目的のための特別なコメント区切りがあります。
+変数@code{vc-comment-alist}がそれらを指定します。
+このリストの各要素は
+@code{(@var{mode} @var{starter} @var{ender})}という形式です。
+
+@vindex vc-static-header-alist
+@c   The variable @code{vc-static-header-alist} specifies further strings
+@c to add based on the name of the buffer.  Its value should be a list of
+@c elements of the form @code{(@var{regexp} . @var{format})}.  Whenever
+@c @var{regexp} matches the buffer name, @var{format} is inserted as part
+@c of the header.  A header line is inserted for each element that matches
+@c the buffer name, and for each string specified by
+@c @code{vc-header-alist}.  The header line is made by processing the
+@c string from @code{vc-header-alist} with the format taken from the
+@c element.  The default value for @code{vc-static-header-alist} is as follows:
+変数@code{vc-static-header-alist}は、
+バッファ名に基づいた追加の文字列を指定します。
+この値は、@code{(@var{regexp} . @var{format})}の形式の
+要素から成るリストでなくてはいけません。
+@var{regexp}がバッファ名に一致するたびに、
+@var{format}をヘッダの一部として挿入します。
+バッファ名に一致する各要素と@code{vc-header-alist}に指定された各文字列ごとに
+ヘッダ行を挿入します。
+@code{vc-header-alist}の文字列を要素の書式@var{format}で処理して
+ヘッダ行を作ります。
+@code{vc-static-header-alist}のデフォルト値はつぎのとおりです。
+
+@example
+@group
+(("\\.c$" .
+  "\n#ifndef lint\nstatic char vcid[] = \"\%s\";\n\
+#endif /* lint */\n"))
+@end group
+@end example
+
+@noindent
+@c It specifies insertion of text of this form:
+これは、つぎのようなテキストを挿入します。
+
+@example
+@group
+
+#ifndef lint
+static char vcid[] = "@var{string}";
+#endif /* lint */
+@end group
+@end example
+
+@noindent
+@c Note that the text above starts with a blank line.
+上のテキストは空行で始まっていることに注意してください。
+
+@c   If you use more than one version header in a file, put them close
+@c together in the file.  The mechanism in @code{revert-buffer} that
+@c preserves markers may not handle markers positioned between two version
+@c headers.
+複数の版管理ヘッダをファイルに入れる場合には、
+ファイル内ではそれらを一緒にまとめて入れておきます。
+@code{revert-buffer}のマーカを保存する機構は、
+2つの版管理ヘッダのあいだに置かれたマーカを扱えないこともあります。
+
+@node Customizing VC
+@c @subsection Customizing VC
+@subsection VCのカスタマイズ
+
+@c   There are many ways of customizing VC.  The options you can set fall
+@c into four categories, described in the following sections.
+VCをカスタマイズする方法はたくさんあります。
+設定可能なオプションは、次節に述べる4つに分類できます。
+
+@menu
+* Backend Options::       Customizing the back-end to your needs.
+* VC Workfile Handling::  Various options concerning working files.
+* VC Status Retrieval::   How VC finds the version control status of a file,
+                            and how to customize this.
+* VC Command Execution::  Which commands VC should run, and how.
+@end menu
+
+@node Backend Options
+@c @subsubsection Options for VC Backends
+@subsubsection VCのバックエンドに対するオプション
+
+@c @cindex backend options (VC)
+@c @cindex locking under version control
+@cindex バックエンドのオプション（VC）
+@cindex 版管理下のロック
+@c   You can tell RCS and CVS whether to use locking for a file or not
+@c (@pxref{VC Concepts}, for a description of locking).  VC automatically
+@c recognizes what you have chosen, and behaves accordingly.
+RCSとCVSには、ファイルのロックを使うかどうかを指定できます
+（ロックに関しては@pxref{VC Concepts}）。
+VCはどちらを選んだかを識別し、そのようにふるまいます。
+
+@c @cindex non-strict locking (RCS)
+@c @cindex locking, non-strict (RCS)
+@cindex 弱いロック（RCS）
+@cindex ロック、弱い（RCS）
+@c   For RCS, the default is to use locking, but there is a mode called
+@c @dfn{non-strict locking} in which you can check-in changes without
+@c locking the file first.  Use @samp{rcs -U} to switch to non-strict
+@c locking for a particular file, see the @samp{rcs} manpage for details.
+RCSでは、デフォルトはロックを使います。
+しかし、ファイルをロックしていなくても変更をチェックインできる、
+@dfn{弱いロック}と呼ばれるモードがあります。
+特定のファイルに対して弱いロックを使うように切り替えるには、
+@samp{rcs -U}を使います。
+詳しくは、@samp{rcs}のマニュアルページを参照してください。
+
+@c @cindex locking (CVS)
+@cindex ロック（CVS）
+@c   Under CVS, the default is not to use locking; anyone can change a work
+@c file at any time.  However, there are ways to restrict this, resulting
+@c in behavior that resembles locking.
+CVSでは、デフォルトはロックを使いません。
+いつでも誰もが作業ファイルを変更できます。
+しかし、これを制限する方法があり、ロックに似たふるまいをします。
+
+@c @cindex CVSREAD environment variable (CVS)
+@cindex CVSREAD（環境変数）（CVS）
+@cindex 環境変数CVSREAD（CVS）
+@c   For one thing, you can set the @code{CVSREAD} environment variable to
+@c an arbitrary value.  If this variable is defined, CVS makes your work
+@c files read-only by default.  In Emacs, you must type @kbd{C-x C-q} to
+@c make the file writeable, so that editing works in fact similar as if
+@c locking was used.  Note however, that no actual locking is performed, so
+@c several users can make their files writeable at the same time.  When
+@c setting @code{CVSREAD} for the first time, make sure to check out all
+@c your modules anew, so that the file protections are set correctly.
+1つの方法は、環境変数@code{CVSREAD}に何か値を設定することです。
+この変数が定義されていると、
+CVSはデフォルトでは作業ファイルを読み出し専用にします。
+Emacs内では、@kbd{C-x C-q}と打ってファイルを書き込み可能にする必要があります。
+そうすると、事実上ロックを使っているかのように編集できます。
+しかしながら、実際にロックされているわけではないので、
+複数のユーザーが各自のファイルを同時に書き込み可能にできてしまいます。
+@code{CVSREAD}を初めて設定するときには、
+ファイルの保護が正しく設定されるように、
+あなたのモジュールすべてを新たにチェックアウトしたことを確認してください。
+
+@c @cindex cvs watch feature
+@c @cindex watching files (CVS)
+@cindex cvs監視機能
+@cindex ファイルの監視（CVS）
+@c   Another way to achieve something similar to locking is to use the
+@c @dfn{watch} feature of CVS.  If a file is being watched, CVS makes it
+@c read-only by default, and you must also use @kbd{C-x C-q} in Emacs to
+@c make it writable.  VC calls @code{cvs edit} to make the file writeable,
+@c and CVS takes care to notify other developers of the fact that you
+@c intend to change the file.  See the CVS documentation for details on
+@c using the watch feature.
+ロックに似たふるまいを達成する別の方法は、CVSの@dfn{監視}機能を使うことです。
+ファイルを監視するようにしておくと、
+CVSはデフォルトでそのファイルを読み出し専用にします。
+そのため、Emacs内では@kbd{C-x C-q}を使って書き込み可能にする必要があります。
+VCは、@code{cvs edit}を実行してファイルを書き込み可能にします。
+すると、CVSは、あなたがファイルを変更しようとしていることを
+他の開発者に通知します。
+監視機能の詳しい使い方については、CVSの解説を参照してください。
+
+@vindex vc-handle-cvs
+@c   You can turn off use of VC for CVS-managed files by setting the
+@c variable @code{vc-handle-cvs} to @code{nil}.  If you do this, Emacs
+@c treats these files as if they were not registered, and the VC commands
+@c are not available for them.  You must do all CVS operations manually.
+変数@code{vc-handle-cvs}に@code{nil}を設定すれば、
+CVSの管理下に置いたファイルに対してVCを使わないようにできます。
+こうすると、Emacsは、これらのファイルを
+あたかも登録されていないかのように扱い、
+それらに対してVCコマンドは使えません。
+すべてのCVS操作を手動で行う必要があります。
+
+@node VC Workfile Handling
+@c @subsubsection VC Workfile Handling
+@subsubsection VC作業ファイルの扱い方
+
+@vindex vc-make-backup-files
+@c   Emacs normally does not save backup files for source files that are
+@c maintained with version control.  If you want to make backup files even
+@c for files that use version control, set the variable
+@c @code{vc-make-backup-files} to a non-@code{nil} value.
+Emacsは、版管理の下に置かれたソースファイルに対しては、
+通常バックアップファイルを作りません。
+版管理を使っているファイルに対してもバックアップファイルを作りたいなら、
+変数@code{vc-make-backup-files}に@code{nil}以外の値を設定します。
+
+@vindex vc-keep-workfiles
+@c   Normally the work file exists all the time, whether it is locked or
+@c not.  If you set @code{vc-keep-workfiles} to @code{nil}, then checking
+@c in a new version with @kbd{C-x C-q} deletes the work file; but any
+@c attempt to visit the file with Emacs creates it again.  (With CVS, work
+@c files are always kept.)
+ロックの状態に関わらず、
+普通、作業ファイルはつねに存在します。
+@code{vc-keep-workfiles}に@code{nil}を設定すると、
+@kbd{C-x C-q}で新版をチェックインすると、作業ファイルを削除します。
+しかし、Emacsでファイルを訪問しようとすると、作業ファイルをふたたび作ります。
+（CVSでは、作業ファイルはつねに存在する。）
+
+@vindex vc-follow-symlinks
+@c   Editing a version-controlled file through a symbolic link can be
+@c dangerous.  It bypasses the version control system---you can edit the
+@c file without locking it, and fail to check your changes in.  Also,
+@c your changes might overwrite those of another user.  To protect against
+@c this, VC checks each symbolic link that you visit, to see if it points
+@c to a file under version control.
+版管理されているファイルをシンボリックリンクを介して編集することは、
+危険なことになりえます。
+版管理システムを迂回してしまいます。
+つまり、ロックせずにファイルを編集できてしまい、
+変更のチェックインには失敗します。
+また、他のユーザーがあなたの変更を上書きしてしまうかもしれません。
+こういったことを防ぐために、
+VCは、訪問する各シンボリックリンクを検査して、
+それが版管理の下に置かれたファイルを指しているかどうか調べます。
+
+@c   The variable @code{vc-follow-symlinks} controls what to do when a
+@c symbolic link points to a version-controlled file.  If it is @code{nil},
+@c VC only displays a warning message.  If it is @code{t}, VC automatically
+@c follows the link, and visits the real file instead, telling you about
+@c this in the echo area.  If the value is @code{ask} (the default), VC
+@c asks you each time whether to follow the link.
+変数@code{vc-follow-symlinks}は、
+シンボリックリンクが版管理されているファイルを指しているときに
+どうするかを制御します。
+その値が@code{nil}ならば、VCは警告メッセージを表示するだけです。
+@code{t}ならば、VCは自動的にリンクを辿って、かわりに本当のファイルを訪問し、
+エコー領域にこのことを表示します。
+値が@code{ask}（デフォルト）ならば、
+VCはリンクを辿るかどうかを毎回聞いてきます。
+
+@node VC Status Retrieval
+@c @subsubsection VC Status Retrieval
+@subsubsection VC状態検索
+@c There is no need to tell users about vc-master-templates.
+
+@c   When deducing the locked/unlocked state of a file, VC first looks for
+@c an RCS version header string in the file (@pxref{Version Headers}).  If
+@c there is no header string, or if you are using SCCS, VC normally looks
+@c at the file permissions of the work file; this is fast.  But there might
+@c be situations when the file permissions cannot be trusted.  In this case
+@c the master file has to be consulted, which is rather expensive.  Also
+@c the master file can only tell you @emph{if} there's any lock on the
+@c file, but not whether your work file really contains that locked
+@c version.
+ファイルのロック状態を推測するとき、
+VCはまずファイルのRCSの版管理ヘッダ文字列を探します
+（@pxref{Version Headers}）。
+ヘッダ文字列がなかったり、SCCSを使っているときは、
+VCは通常、作業ファイルのパーミッションを調べます。
+ここまでは、すぐにできます。
+しかし、ファイルのパーミッションを信頼できない場合もあります。
+この場合、やや手間がかかりますが、マスタファイルを調べる必要があります。
+さらに、マスタファイルは、ファイルがロックされているかどうかは
+教えてくれますが、
+作業ファイルがロックされた版を本当に含んでいるかどうかは教えてくれません。
+
+@vindex vc-consult-headers
+@c   You can tell VC not to use version headers to determine lock status by
+@c setting @code{vc-consult-headers} to @code{nil}.  VC then always uses
+@c the file permissions (if it can trust them), or else checks the master
+@c file.
+ロック状態を調べるために版管理ヘッダを使わないようにVCに指示するには、
+変数@code{vc-consult-headers}に@code{nil}を設定します。
+すると、VCは（信頼できるなら）ファイルパーミッションを使うか、
+マスタファイルを調べます。
+
+@vindex vc-mistrust-permissions
+@c   You can specify the criterion for whether to trust the file
+@c permissions by setting the variable @code{vc-mistrust-permissions}.  Its
+@c value can be @code{t} (always mistrust the file permissions and check
+@c the master file), @code{nil} (always trust the file permissions), or a
+@c function of one argument which makes the decision.  The argument is the
+@c directory name of the @file{RCS}, @file{CVS} or @file{SCCS}
+@c subdirectory.  A non-@code{nil} value from the function says to mistrust
+@c the file permissions.  If you find that the file permissions of work
+@c files are changed erroneously, set @code{vc-mistrust-permissions} to
+@c @code{t}.  Then VC always checks the master file to determine the file's
+@c status.
+変数@code{vc-mistrust-permissions}を設定することで、
+ファイルパーミッションを信頼するかどうかの基準を指定できます。
+その値は、@code{t}（つねにファイルパーミッションを疑い、
+マスタファイルを調べる）、
+@code{nil}（つねにファイルパーミッションを信頼する）、あるいは、
+可否を決定する1引数の関数です。
+その引数は、サブディレクトリ、@file{RCS}、@file{CVS}、@file{SCCS}の
+いずれかの名前です。
+関数の戻り値が@code{nil}以外ならば、ファイルパーミッションを疑います。
+作業ファイルのパーミッションがまちがって変更されていると思うなら、 
+@code{vc-mistrust-permissions}に@code{t}を設定します。
+すると、VCはつねにファイルの状態を決定するためにマスタファイルを調べます。
+
+@node VC Command Execution
+@c @subsubsection VC Command Execution
+@subsubsection VCコマンドの実行
+
+@vindex vc-suppress-confirm
+@c   If @code{vc-suppress-confirm} is non-@code{nil}, then @kbd{C-x C-q}
+@c and @kbd{C-x v i} can save the current buffer without asking, and
+@c @kbd{C-x v u} also operates without asking for confirmation.  (This
+@c variable does not affect @kbd{C-x v c}; that operation is so drastic
+@c that it should always ask for confirmation.)
+@code{vc-suppress-confirm}が@code{nil}以外ならば、
+@kbd{C-x C-q}と@kbd{C-x v i}は確認せずにカレントバッファを保存し、
+@kbd{C-x v u}も確認せずに作用します。
+（この変数は@kbd{C-x v c}には影響しない。
+その操作は思い切ったものなので、つねに確認するべき。）
+
+@vindex vc-command-messages
+@c   VC mode does much of its work by running the shell commands for RCS,
+@c CVS and SCCS.  If @code{vc-command-messages} is non-@code{nil}, VC
+@c displays messages to indicate which shell commands it runs, and
+@c additional messages when the commands finish.
+VCモードは、RCS、CVS、SCCSのシェルコマンドを実行することで、
+その作業の多くを行います。
+@code{vc-command-messages}が@code{nil}以外ならば、
+VCはどのシェルコマンドを実行しているか表示し、
+コマンドが終了したときに追加メッセージを表示します。
+
+@vindex vc-path
+@c   You can specify additional directories to search for version control
+@c programs by setting the variable @code{vc-path}.  These directories are
+@c searched before the usual search path.  But the proper files are usually
+@c found automatically.
+変数@code{vc-path}を設定すれば、
+版管理プログラムを探すための追加のディレクトリを指定できます。
+これらのディレクトリは、通常の探索パスを探すまえに探されます。
+しかし、通常は適切なファイルを自動的にみつけられます。
+
+@node Directories
+@c @section File Directories
+@section ファイルディレクトリ
+
+@c @cindex file directory
+@c @cindex directory listing
+@cindex ファイルディレクトリ
+@cindex ディレクトリ一覧
+@c   The file system groups files into @dfn{directories}.  A @dfn{directory
+@c listing} is a list of all the files in a directory.  Emacs provides
+@c commands to create and delete directories, and to make directory
+@c listings in brief format (file names only) and verbose format (sizes,
+@c dates, and authors included).  There is also a directory browser called
+@c Dired; see @ref{Dired}.
+ファイルシステムは、ファイル群を@dfn{ディレクトリ}にまとめます。
+@dfn{ディレクトリ一覧}は、ディレクトリの中にある、
+すべてのファイルの一覧表です。
+Emacsには、ディレクトリを作成したり削除したりするコマンド、
+短形式（ファイル名のみ）や長形式（サイズ、日付、作者を含む）の
+ディレクトリ一覧を作成するコマンドがあります。
+diredと呼ばれるディレクトリブラウザもあります。
+@xref{Dired}。
+
+@table @kbd
+@item C-x C-d @var{dir-or-pattern} @key{RET}
+@c Display a brief directory listing (@code{list-directory}).
+短形式でディレクトリ一覧を表示する（@code{list-directory}）。
+@item C-u C-x C-d @var{dir-or-pattern} @key{RET}
+@c Display a verbose directory listing.
+長形式でディレクトリ一覧を表示する。
+@item M-x make-directory @key{RET} @var{dirname} @key{RET}
+@c Create a new directory named @var{dirname}.
+@var{dirname}という名前の新しいディレクトリを作る。
+@item M-x delete-directory @key{RET} @var{dirname} @key{RET}
+@c Delete the directory named @var{dirname}.  It must be empty,
+@c or you get an error.
+@var{dirname}という名前のディレクトリを削除する。
+ディレクトリは空である必要があり、さもないとエラー。
+@end table
+
+@findex list-directory
+@kindex C-x C-d
+@c   The command to display a directory listing is @kbd{C-x C-d}
+@c (@code{list-directory}).  It reads using the minibuffer a file name
+@c which is either a directory to be listed or a wildcard-containing
+@c pattern for the files to be listed.  For example,
+ディレクトリ一覧を表示するコマンドは
+@kbd{C-x C-d}（@code{list-directory}）です。
+表示するディレクトリや一覧に含めるファイルを指定するワイルドカードを含む
+パターンをミニバッファから読み取ります。
+たとえば、
+
+@example
+C-x C-d /u2/emacs/etc @key{RET}
+@end example
+
+@noindent
+@c lists all the files in directory @file{/u2/emacs/etc}.  Here is an
+@c example of specifying a file name pattern:
+とすると、
+ディレクトリ@file{/u2/emacs/etc}の中のすべてのファイルを表示します。
+ファイル名のパターンを指定した例はつぎのとおりです。
+
+@example
+C-x C-d /u2/emacs/src/*.c @key{RET}
+@end example
+
+@c   Normally, @kbd{C-x C-d} prints a brief directory listing containing
+@c just file names.  A numeric argument (regardless of value) tells it to
+@c make a verbose listing including sizes, dates, and authors (like
+@c @samp{ls -l}).
+通常、@kbd{C-x C-d}はファイル名だけを含んだ短形式のディレクトリ一覧を
+表示します。
+（値は無関係な）数引数を指定すると、
+（@samp{ls -l}のように）サイズ、日付、作者を含む長形式の一覧を作ります。
+
+@vindex list-directory-brief-switches
+@vindex list-directory-verbose-switches
+@c   The text of a directory listing is obtained by running @code{ls} in an
+@c inferior process.  Two Emacs variables control the switches passed to
+@c @code{ls}: @code{list-directory-brief-switches} is a string giving the
+@c switches to use in brief listings (@code{"-CF"} by default), and
+@c @code{list-directory-verbose-switches} is a string giving the switches to
+@c use in a verbose listing (@code{"-l"} by default).
+ディレクトリ一覧のテキストは、下位プロセスで@code{ls}を実行して取得します。
+Emacsの2つの変数で、@code{ls}へ渡すオプションを制御します。
+@code{list-directory-brief-switches}は、短形式一覧のときに使う
+オプションを与える文字列です（デフォルトは@code{"-CF"}）。
+@code{list-directory-verbose-switches}は、長形式一覧のときに使う
+オプションを与える文字列です（デフォルトは@code{"-l"}）。
+
+@node Comparing Files
+@c @section Comparing Files
+@c @cindex comparing files
+@section ファイルの比較
+@cindex ファイルの比較
+
+@findex diff
+@vindex diff-switches
+@c   The command @kbd{M-x diff} compares two files, displaying the
+@c differences in an Emacs buffer named @samp{*Diff*}.  It works by running
+@c the @code{diff} program, using options taken from the variable
+@c @code{diff-switches}, whose value should be a string.
+コマンド@kbd{M-x diff}は、2つのファイルを比較し、
+@samp{*Diff*}という名前のEmacsバッファにその違いを表示します。
+このコマンドは、値が文字列である変数@code{diff-switches}で指定された
+オプションを使って@code{diff}プログラムを実行します。
+
+@c   The buffer @samp{*Diff*} has Compilation mode as its major mode, so
+@c you can use @kbd{C-x `} to visit successive changed locations in the two
+@c source files.  You can also move to a particular hunk of changes and
+@c type @key{RET} or @kbd{C-c C-c}, or click @kbd{Mouse-2} on it, to move
+@c to the corresponding source location.  You can also use the other
+@c special commands of Compilation mode: @key{SPC} and @key{DEL} for
+@c scrolling, and @kbd{M-p} and @kbd{M-n} for cursor motion.
+@c @xref{Compilation}.
+バッファ@samp{*Diff*}のメジャーモードはコンパイル（compilation）モードです。
+ですから、@kbd{C-x `}を使って、
+2つのソースファイルで変更されている箇所を次々に訪れることができます。
+特定の変更箇所にポイントを移動してから、
+@key{RET}や@kbd{C-c C-c}を打つか、そこで@kbd{Mouse-2}をクリックすると、
+そこに対応するソースの場所へ移動できます。
+コンパイル（compilation）モードの他の特別なコマンドを使うこともできます。
+@key{SPC}と@key{DEL}でスクロール、
+@kbd{M-p}と@kbd{M-n}でカーソル移動できます。
+@xref{Compilation}。
+
+@findex diff-backup
+@c   The command @kbd{M-x diff-backup} compares a specified file with its most
+@c recent backup.  If you specify the name of a backup file,
+@c @code{diff-backup} compares it with the source file that it is a backup
+@c of.
+コマンド@kbd{M-x diff-backup}は、
+指定されたファイルとその最新のバックアップとを比較します。
+バックアップファイルの名前を指定すると、
+@code{diff-backup}はそのもとのファイルとバックアップファイルとを比較します。
+
+@findex compare-windows
+@c   The command @kbd{M-x compare-windows} compares the text in the current
+@c window with that in the next window.  Comparison starts at point in each
+@c window, and each starting position is pushed on the mark ring in its
+@c respective buffer.  Then point moves forward in each window, a character
+@c at a time, until a mismatch between the two windows is reached.  Then
+@c the command is finished.  For more information about windows in Emacs,
+@c @ref{Windows}.
+コマンド@kbd{M-x compare-windows}は、
+カレントウィンドウの中のテキストと、
+つぎのウィンドウの中のテキストを比較します。
+それぞれのウィンドウのポイント位置から比較を始めます。
+それぞれの開始位置は、各バッファのマークリングに積まれます。
+そして、各ウィンドウでそれぞれのポイントを1文字ずつ進めることを、
+両者のウィンドウで一致しないものに出会うまで行います。
+そして、コマンドは終了します。
+Emacsのウィンドウについてより詳しくは、@xref{Windows}。
+
+@vindex compare-ignore-case
+@c   With a numeric argument, @code{compare-windows} ignores changes in
+@c whitespace.  If the variable @code{compare-ignore-case} is
+@c non-@code{nil}, it ignores differences in case as well.
+数引数を指定すると、@code{compare-windows}は
+白文字の違いを無視します。
+変数@code{compare-ignore-case}が@code{nil}以外ならば、
+大文字小文字の違いも同様に無視します。
+
+@c   See also @ref{Emerge}, for convenient facilities for merging two
+@c similar files.
+2つの似たファイルの併合に便利な機能に関しては、@xref{Emerge}。
+
+@node Misc File Ops
+@c @section Miscellaneous File Operations
+@section その他のファイル操作
+
+@c   Emacs has commands for performing many other operations on files.
+@c All operate on one file; they do not accept wildcard file names.
+Emacsには、ファイルをさまざまに操作するコマンドがあります。
+それらすべては1つのファイルを操作します。
+これらのコマンドは、ワイルドカードを含むファイル名を受け付けません。
+
+@findex view-file
+@c @cindex viewing
+@c @cindex View mode
+@c @cindex mode, View
+@cindex 閲覧
+@cindex 閲覧モード（View mode）
+@cindex モード、View
+@c   @kbd{M-x view-file} allows you to scan or read a file by sequential
+@c screenfuls.  It reads a file name argument using the minibuffer.  After
+@c reading the file into an Emacs buffer, @code{view-file} displays the
+@c beginning.  You can then type @key{SPC} to scroll forward one windowful,
+@c or @key{DEL} to scroll backward.  Various other commands are provided
+@c for moving around in the file, but none for changing it; type @kbd{?}
+@c while viewing for a list of them.  They are mostly the same as normal
+@c Emacs cursor motion commands.  To exit from viewing, type @kbd{q}.
+@c The commands for viewing are defined by a special major mode called View
+@c mode.
+@kbd{M-x view-file}では、ファイルを1画面分ずつ順番に眺めることができます。
+このコマンドは、ミニバッファでファイル名を読み取ります。
+Emacsバッファにファイルを読み込んだあと、@code{view-file}は先頭を表示します。
+そうしたら、1ウィンドウ分先へスクロールするには@key{SPC}、
+逆向きにスクロールするには@key{DEL}を打ちます。
+ファイル内を動き廻るための他のいろいろなコマンドもありますが、
+変更するためのコマンドはありません。
+コマンド一覧を見るには、このモードで@kbd{?}と打ちます。
+コマンド群は、Emacsの普通のカーソル移動コマンドとほとんど同じです。
+ファイル閲覧を終了するには、@kbd{q}を打ちます。
+閲覧用のコマンドは、閲覧（view）モードと呼ばれる
+特別なメジャーモードで定義されています。
+
+@c   A related command, @kbd{M-x view-buffer}, views a buffer already present
+@c in Emacs.  @xref{Misc Buffer}.
+関連したコマンド、@kbd{M-x view-buffer}は、
+Emacsの既存のバッファを閲覧します。
+@xref{Misc Buffer}。
+
+@findex insert-file
+@c   @kbd{M-x insert-file} inserts a copy of the contents of the specified
+@c file into the current buffer at point, leaving point unchanged before the
+@c contents and the mark after them.
+@kbd{M-x insert-file}は、指定したファイルの内容を
+カレントバッファのポイント位置に挿入します。
+ポイントの位置はそのままですが、挿入された部分の直後にマークを設定します。
+
+@findex write-region
+@c   @kbd{M-x write-region} is the inverse of @kbd{M-x insert-file}; it
+@c copies the contents of the region into the specified file.  @kbd{M-x
+@c append-to-file} adds the text of the region to the end of the specified
+@c file.  @xref{Accumulating Text}.
+@kbd{M-x write-region}は、@kbd{M-x insert-file}の逆です。
+指定したファイルにリージョンの内容をコピーします。
+@kbd{M-x  append-to-file}は、
+指定したファイルの末尾にリージョンのテキストを付け加えます。
+@xref{Accumulating Text}。
+
+@findex delete-file
+@c @cindex deletion (of files)
+@cindex 削除（ファイル）
+@cindex ファイルの削除
+@c   @kbd{M-x delete-file} deletes the specified file, like the @code{rm}
+@c command in the shell.  If you are deleting many files in one directory, it
+@c may be more convenient to use Dired (@pxref{Dired}).
+@kbd{M-x delete-file}は、シェルの@code{rm}コマンドのように、
+指定したファイルを削除します。
+1つのディレクトリ内のたくさんのファイルを削除するのなら、
+diredを使うほうが便利です（@pxref{Dired}）。
+
+@findex rename-file
+@c   @kbd{M-x rename-file} reads two file names @var{old} and @var{new} using
+@c the minibuffer, then renames file @var{old} as @var{new}.  If a file named
+@c @var{new} already exists, you must confirm with @kbd{yes} or renaming is not
+@c done; this is because renaming causes the old meaning of the name @var{new}
+@c to be lost.  If @var{old} and @var{new} are on different file systems, the
+@c file @var{old} is copied and deleted.
+@kbd{M-x rename-file}は、ミニバッファで2つのファイル名、
+@var{old}と@var{new}を読み取り、ファイル@var{old}を@var{new}に改名します。
+@var{new}という名前のファイルが既存のときには、
+確認に@kbd{yes}で応答する必要があります。
+そうしないと、改名しません。
+これは、改名により名前@var{new}の古い意味が失われるからです。
+@var{old}と@var{new}が異なるファイルシステムの上にあるときには、
+ファイル@var{old}を（@var{new}に）コピーしてから削除します。
+
+@findex add-name-to-file
+@c   The similar command @kbd{M-x add-name-to-file} is used to add an
+@c additional name to an existing file without removing its old name.
+@c The new name must belong on the same file system that the file is on.
+似たコマンド@kbd{M-x add-name-to-file}は、
+既存ファイルの名前を消さずに別の名前を追加するために使います。
+新しい名前は、既存ファイルが置かれている同じファイルシステムに
+属している必要があります。
+
+@findex copy-file
+@c @cindex copying files
+@cindex ファイルのコピー
+@c   @kbd{M-x copy-file} reads the file @var{old} and writes a new file named
+@c @var{new} with the same contents.  Confirmation is required if a file named
+@c @var{new} already exists, because copying has the consequence of overwriting
+@c the old contents of the file @var{new}.
+@kbd{M-x copy-file}は、ファイル@var{old}を読んで、
+新しいファイル@var{new}に同じ内容を書き出します。
+@var{new}という名前のファイルが既存なら、確認を求めてきます。
+というのは、コピーするとファイル@var{new}の古い内容を上書きしてしまうからです。
+
+@findex make-symbolic-link
+@c   @kbd{M-x make-symbolic-link} reads two file names @var{target} and
+@c @var{linkname}, then creates a symbolic link named @var{linkname} and
+@c pointing at @var{target}.  The effect is that future attempts to open file
+@c @var{linkname} will refer to whatever file is named @var{target} at the
+@c time the opening is done, or will get an error if the name @var{target} is
+@c not in use at that time.  This command does not expand the argument
+@c @var{target}, so that it allows you to specify a relative name
+@c as the target of the link.
+@kbd{M-x make-symbolic-link}は、2つのファイル名、
+@var{target}と@var{linkname}を読み取って、
+@var{target}を指す@var{linkname}という名前のシンボリックリンクを作ります。
+この結果、将来@var{linkname}をオープンしようとすると、
+その時点で@var{target}という名前のファイルを参照します。
+その時点で名前@var{target}が使われていなければ、エラーになります。
+このコマンドは引数@var{target}を展開しないので、
+リンク先に相対名を書くことができます。
+
+@c   Confirmation is required when creating the link if @var{linkname} is
+@c in use.  Note that not all systems support symbolic links.
+@var{linkname}が使われていると、
+リンクを作るときに確認を求めます。
+すべてのシステムでシンボリックリンクを使えるわけではないことに
+注意してください。
+
+@node Compressed Files
+@c @section Accessing Compressed Files
+@section 圧縮されたファイルの参照
+@c @cindex compression
+@c @cindex uncompression
+@c @cindex Auto Compression mode
+@c @cindex mode, Auto Compression
+@cindex 圧縮
+@cindex 展開
+@cindex 自動圧縮モード（Auto Compression mode）
+@cindex モード、Auto Compression
+@pindex gzip
+
+@findex auto-compression-mode
+@c   Emacs comes with a library that can automatically uncompress
+@c compressed files when you visit them, and automatically recompress them
+@c if you alter them and save them.  To enable this feature, type the
+@c command @kbd{M-x auto-compression-mode}.
+Emacsには、
+圧縮されたファイルを訪問すると自動的に展開し、
+それを変更して保存すると自動的に再度圧縮するライブラリがあります。
+この機能を利用するには、コマンド@kbd{M-x auto-compression-mode}を打ちます。
+
+@c   When automatic compression (which implies automatic uncompression as
+@c well) is enabled, Emacs recognizes compressed files by their file names.
+@c File names ending in @samp{.gz} indicate a file compressed with
+@c @code{gzip}.  Other endings indicate other compression programs.
+（自動展開を含む）自動圧縮がオンのときには、
+Emacsはファイル名で圧縮されたファイルを認識します。
+ファイル名の語尾が@samp{.gz}のものは、
+@code{gzip}で圧縮されたファイルであることを表します。
+他の語尾の場合には、他の圧縮プログラムであることを表します。
+
+@c   Automatic uncompression and compression apply to all the operations in
+@c which Emacs uses the contents of a file.  This includes visiting it,
+@c saving it, inserting its contents into a buffer, loading it, and byte
+@c compiling it.
+自動展開と自動圧縮は、Emacsがファイルの内容を使うすべての操作に適用されます。
+ファイルを訪問する、ファイルに保存する、ファイルの内容をバッファに挿入する、
+ファイルをロードする、ファイルをバイトコンパイルすることを含みます。
+
+@node Remote Files
+@c @section Remote Files
+@section リモートファイル
+
+@cindex FTP
+@c @cindex remote file access
+@cindex リモートファイルの参照
+@c   You can refer to files on other machines using a special file name syntax:
+特別なファイル名の構文を使って、他のマシン上のファイルを参照できます。
+
+@example
+@group
+/@var{host}:@var{filename}
+/@var{user}@@@var{host}:@var{filename}
+@end group
+@end example
+
+@noindent
+@c When you do this, Emacs uses the FTP program to read and write files on
+@c the specified host.  It logs in through FTP using your user name or the
+@c name @var{user}.  It may ask you for a password from time to time; this
+@c is used for logging in on @var{host}.
+このようにすると、Emacsは、
+指定したホスト上のファイルを読み書きするためにFTPプログラムを使います。
+あなたのユーザー名か@var{user}を使ってFTPでログインします。
+毎回パスワードを聞かれることもありますが、
+これは@var{host}へのログインに使われます。
+
+@cindex ange-ftp
+@vindex ange-ftp-default-user
+@c   Normally, if you do not specify a user name in a remote file name,
+@c that means to use your own user name.  But if you set the variable
+@c @code{ange-ftp-default-user} to a string, that string is used instead.
+@c (The Emacs package that implements FTP file access is called
+@c @code{ange-ftp}.)
+普通、リモートファイル名にユーザー名を指定しないと、
+あなたのユーザー名を使うことを意味します。
+しかし、変数@code{ange-ftp-default-user}に文字列を設定しておけば、
+その文字列をかわりに使います。
+（FTPによるファイル参照を実装するEmacsのパッケージは、
+@code{ange-ftp}と呼ばれる。）
+
+@vindex file-name-handler-alist
+@c   You can entirely turn off the FTP file name feature by setting the
+@c variable @code{file-name-handler-alist} to @code{nil}.
+変数@code{file-name-handler-alist}に@code{nil}を設定すると、
+FTPファイル名機能を完全にオフにできます
+@footnote{ファイル名をクォートする@samp{/:}の機能もオフになる。}。
+
+@node Quoted File Names
+@c @section Quoted File Names
+@section クォートしたファイル名
+
+@c @cindex quoting file names
+@cindex ファイル名をクォートする
+@c   You can @dfn{quote} an absolute file name to prevent special
+@c characters and syntax in it from having their special effects.
+@c The way to do this is to add @samp{/:} at the beginning.
+特殊文字や特別な構文の特別な効果を抑えるために、
+絶対ファイル名を@dfn{クォート}できます。
+そうするには、先頭に@samp{/:}を加えます。
+
+@c   For example, you can quote a local file name which appears remote, to
+@c prevent it from being treated as a remote file name.  Thus, if you have
+@c a directory named @file{/foo:} and a file named @file{bar} in it, you
+@c can refer to that file in Emacs as @samp{/:/foo:/bar}.
+たとえば、リモートにあるように見えるローカルなファイル名をクォートして、
+リモートファイル名として扱われるのを防ぎます。
+したがって、ディレクトリが@file{/foo:}という名前であり、
+その中に@file{bar}という名前のファイルがあるとき、
+Emacsでは、そのファイルを@samp{/:/foo:/bar}で参照できます。
+
+@c   @samp{/:} can also prevent @samp{~} from being treated as a special
+@c character for a user's home directory.  For example, @file{/:/tmp/~hack}
+@c refers to a file whose name is @file{~hack} in directory @file{/tmp}.
+@samp{/:}は、@samp{~}をユーザーのホームディレクトリを表す
+特殊文字として扱わないようにもします。
+たとえば、@file{/:/tmp/~hack}は、
+ディレクトリ@file{/tmp}の中にある@file{~hack}というファイル名を指します。
+
+@c   Likewise, quoting with @samp{/:} is one way to enter in the minibuffer
+@c a file name that contains @samp{$}.  However, the @samp{/:} must be at
+@c the beginning of the buffer in order to quote @samp{$}.
+同様に、@samp{/:}は@samp{$}を含むファイル名を
+ミニバッファで入力する方法の1つです。
+しかし、@samp{$}をクォートするには、
+@samp{/:}は（ミニ）バッファの先頭に置く必要があります。
+
+@c   You can also quote wildcard characters with @samp{/:}, for visiting.
+@c For example, @file{/:/tmp/foo*bar} visits the file @file{/tmp/foo*bar}.
+@c However, in most cases you can simply type the wildcard characters for
+@c themselves.  For example, if the only file name in @file{/tmp} that
+@c starts with @samp{foo} and ends with @samp{bar} is @file{foo*bar}, then
+@c specifying @file{/tmp/foo*bar} will visit just @file{/tmp/foo*bar}.
+ワイルドカード文字を@samp{/:}でクォートすることもできます。
+たとえば、@file{/:/tmp/foo*bar}でファイル@file{/tmp/foo*bar}を訪問します。
+しかしながら、多くの場合、単にワイルドカード文字そのものを入力できます。
+たとえば、@file{/tmp}にある@samp{foo}で始まり@samp{bar}で終る名前の
+ファイルが@file{foo*bar}であるときには、
+@file{/tmp/foo*bar}と指定すると、単に@file{/tmp/foo*bar}を訪問します。
+

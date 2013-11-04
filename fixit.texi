@@ -1,0 +1,524 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Fixit, Keyboard Macros, Search, Top
+@c @chapter Commands for Fixing Typos
+@c @cindex typos, fixing
+@c @cindex mistakes, correcting
+@chapter 打ちまちがい訂正用コマンド
+@cindex タイポ（打ちまちがい）、訂正
+@cindex まちがい、訂正
+
+@c   In this chapter we describe the commands that are especially useful for
+@c the times when you catch a mistake in your text just after you have made
+@c it, or change your mind while composing text on the fly.
+本章では、入力直後にテキストのまちがいに気づいたとき、
+あるいは、テキストを作成中に気が変わったときに
+特に便利なコマンドを説明します。
+
+@c   The most fundamental command for correcting erroneous editing is the
+@c undo command, @kbd{C-x u} or @kbd{C-_}.  This command undoes a single
+@c command (usually), a part of a command (in the case of
+@c @code{query-replace}), or several consecutive self-inserting characters.
+@c Consecutive repetitions of @kbd{C-_} or @kbd{C-x u} undo earlier and
+@c earlier changes, back to the limit of the undo information available.
+@c @xref{Undo}, for for more information.
+まちがった編集を訂正するもっとも基本的なコマンドは、アンドゥコマンド、
+@kbd{C-x u}や@kbd{C-_}です。
+このコマンドは、（通常）1つのコマンド、
+コマンドの一部分（@code{query-replace}の場合）、
+いくつかの連続した自己挿入文字をアンドゥします。
+@kbd{C-_}や@kbd{C-x u}を連続して繰り返すと、
+アンドゥ情報がある限り、次々と以前の変更をアンドゥします。
+より詳しくは、@xref{Undo}。
+
+@menu
+* Kill Errors:: Commands to kill a batch of recently entered text.
+* Transpose::   Exchanging two characters, words, lines, lists...
+* Fixing Case:: Correcting case of last word entered.
+* Spelling::    Apply spelling checker to a word, or a whole file.
+@end menu
+
+@node Kill Errors
+@c @section Killing Your Mistakes
+@section 誤りの訂正
+
+@table @kbd
+@item @key{DEL}
+@c Delete last character (@code{delete-backward-char}).
+ポイントの直前の文字を削除する（@code{delete-backward-char}）。
+@item M-@key{DEL}
+@c Kill last word (@code{backward-kill-word}).
+ポイントの直前の単語をキルする（@code{backward-kill-word}）。
+@item C-x @key{DEL}
+@c Kill to beginning of sentence (@code{backward-kill-sentence}).
+ポイントから文の先頭までをキルする（@code{backward-kill-sentence}）。
+@end table
+
+@c   The @key{DEL} character (@code{delete-backward-char}) is the most
+@c important correction command.  It deletes the character before point.
+@c When @key{DEL} follows a self-inserting character command, you can think
+@c of it as canceling that command.  However, avoid the mistake of thinking
+@c of @key{DEL} as a general way to cancel a command!
+@key{DEL}文字（@code{delete-backward-char}）は
+もっとも重要な訂正コマンドです。
+ポイントの直前にある文字を削除します。
+自己挿入文字のコマンドに続けて@key{DEL}を打つと、
+そのコマンドを取り消すと考えることができます。
+しかし、コマンドを取り消す一般的な方法は@key{DEL}であるなどと
+誤解しないでください。
+
+@c   When your mistake is longer than a couple of characters, it might be
+@c more convenient to use @kbd{M-@key{DEL}} or @kbd{C-x @key{DEL}}.
+@c @kbd{M-@key{DEL}} kills back to the start of the last word, and @kbd{C-x
+@c @key{DEL}} kills back to the start of the last sentence.  @kbd{C-x
+@c @key{DEL}} is particularly useful when you change your mind about the
+@c phrasing of the text you are writing.  @kbd{M-@key{DEL}} and @kbd{C-x
+@c @key{DEL}} save the killed text for @kbd{C-y} and @kbd{M-y} to
+@c retrieve.  @xref{Yanking}.@refill
+まちがいが数文字よりも長いときには、
+@kbd{M-@key{DEL}}や@kbd{C-x @key{DEL}}を使うほうが便利でしょう。
+@kbd{M-@key{DEL}}は直前の単語の先頭までをキルし、
+@kbd{C-x @key{DEL}}は直前の文の先頭までをキルします。
+文を書いている途中で気が変わったときには、
+@kbd{C-x @key{DEL}}が特に便利です。
+@kbd{M-@key{DEL}}と@kbd{C-x @key{DEL}}は、
+キルしたテキストを@kbd{C-y}や@kbd{M-y}で戻せるように保存します。
+@xref{Yanking}。
+
+@c   @kbd{M-@key{DEL}} is often useful even when you have typed only a few
+@c characters wrong, if you know you are confused in your typing and aren't
+@c sure exactly what you typed.  At such a time, you cannot correct with
+@c @key{DEL} except by looking at the screen to see what you did.  Often it
+@c requires less thought to kill the whole word and start again.
+何を打とうとしているのか混乱したりわからなくなったりしたときには、
+打ちまちがいがたとえ数文字であっても@kbd{M-@key{DEL}}はとても便利です。
+このような場合、画面を見ながらでないと@key{DEL}では訂正できません。
+@kbd{M-@key{DEL}}ならば、ほとんど何も考えずに単語全体をキルして、
+入力を再開できます。
+
+@node Transpose
+@c @section Transposing Text
+@section テキストの入れ替え
+
+@table @kbd
+@item C-t
+@c Transpose two characters (@code{transpose-chars}).
+2つの文字を入れ替える（@code{transpose-chars}）。
+@item M-t
+@c Transpose two words (@code{transpose-words}).
+2つの単語を入れ替える（@code{transpose-words}）。
+@item C-M-t
+@c Transpose two balanced expressions (@code{transpose-sexps}).
+釣り合っている2つの式を入れ替える（@code{transpose-sexps}）。
+@item C-x C-t
+@c Transpose two lines (@code{transpose-lines}).
+2つの行を入れ替える（@code{transpose-lines}）。
+@end table
+
+@kindex C-t
+@findex transpose-chars
+@c   The common error of transposing two characters can be fixed, when they
+@c are adjacent, with the @kbd{C-t} command (@code{transpose-chars}).  Normally,
+@c @kbd{C-t} transposes the two characters on either side of point.  When
+@c given at the end of a line, rather than transposing the last character of
+@c the line with the newline, which would be useless, @kbd{C-t} transposes the
+@c last two characters on the line.  So, if you catch your transposition error
+@c right away, you can fix it with just a @kbd{C-t}.  If you don't catch it so
+@c fast, you must move the cursor back to between the two transposed
+@c characters.  If you transposed a space with the last character of the word
+@c before it, the word motion commands are a good way of getting there.
+@c Otherwise, a reverse search (@kbd{C-r}) is often the best way.
+@c @xref{Search}.
+2つの文字を入れ替えてしまうというよくあるまちがいは、
+それらが隣接しているならば、
+@kbd{C-t}コマンド（@code{transpose-chars}）で直せます。
+通常、@kbd{C-t}は、ポイントの両側にある文字を入れ替えます。
+行末では、行末の文字と改行文字を入れ替えるという役に立たない
+ことではなくて、@kbd{C-t}はその行の最後の2文字を入れ替えます。
+よって、入れ替えまちがいにすぐに気づいたなら、
+@kbd{C-t}だけで訂正できます。
+まちがいにすぐに気づかなかったときには、
+2つの入れ替わっている文字のあいだにカーソルを移動する必要があります。
+空白とそのまえの単語の最後の文字とを入れ替えてしまったときには、
+単語移動コマンドでその場所へ戻るのがよいでしょう。
+それ以外の場合には、後向き探索（@kbd{C-r}）が最良であることがままあります。
+@xref{Search}。
+
+
+@kindex C-x C-t
+@findex transpose-lines
+@kindex M-t
+@findex transpose-words
+@kindex C-M-t
+@findex transpose-sexps
+@c   @kbd{M-t} (@code{transpose-words}) transposes the word before point
+@c with the word after point.  It moves point forward over a word, dragging
+@c the word preceding or containing point forward as well.  The punctuation
+@c characters between the words do not move.  For example, @w{@samp{FOO, BAR}}
+@c transposes into @w{@samp{BAR, FOO}} rather than @samp{@w{BAR FOO,}}.
+@kbd{M-t}（@code{transpose-words}）は、
+ポイントの直前の単語とポイントの直後の単語を入れ替えます。
+ポイントは単語を1つ前向きに横断し、
+ポイントの直前の単語かポイントを含む単語を前向きに引きずっていきます。
+単語のあいだにある句読点文字は動きません。
+たとえば、@w{@samp{FOO, BAR}}は@samp{@w{BAR FOO,}}ではなくて、
+@w{@samp{BAR, FOO}}と入れ替わります。
+
+@c   @kbd{C-M-t} (@code{transpose-sexps}) is a similar command for transposing
+@c two expressions (@pxref{Lists}), and @kbd{C-x C-t} (@code{transpose-lines})
+@c exchanges lines.  They work like @kbd{M-t} except in determining the
+@c division of the text into syntactic units.
+@kbd{C-M-t}（@code{transpose-sexps}）は、2つの式（@pxref{Lists}）を
+入れ替えるコマンドです。
+また、@kbd{C-x C-t}（@code{transpose-lines}）は、行を入れ替えます。
+これらのコマンドは@kbd{M-t}に似た動作をしますが、
+テキストを構文単位に分ける点が異なります。
+
+@c   A numeric argument to a transpose command serves as a repeat count: it
+@c tells the transpose command to move the character (word, sexp, line)
+@c before or containing point across several other characters (words,
+@c sexps, lines).  For example, @kbd{C-u 3 C-t} moves the character before
+@c point forward across three other characters.  It would change
+@c @samp{f@point{}oobar} into @samp{oobf@point{}ar}.  This is equivalent to
+@c repeating @kbd{C-t} three times.  @kbd{C-u - 4 M-t} moves the word
+@c before point backward across four words.  @kbd{C-u - C-M-t} would cancel
+@c the effect of plain @kbd{C-M-t}.@refill
+入れ替えコマンドに数引数を指定すると、反復回数になります。
+ポイントの直前やポイントを含む文字（単語、S式、行）を
+いくつ先の文字（単語、S式、行）へ移動するか指定します。
+たとえば、@kbd{C-u 3 C-t}は、ポイントの直前の文字を3文字先の文字へ移動します。
+つまり、@samp{f@point{}oobar}を@samp{oobf@point{}ar}にします。
+これは @kbd{C-t}を3回繰り返したのと同じことです。
+@kbd{C-u - 4 M-t}は、ポイントの直前の単語を4つまえの単語へ移動します。
+@kbd{C-u - C-M-t}は、引数を指定しない@kbd{C-M-t}の効果を打ち消します。
+
+@c   A numeric argument of zero is assigned a special meaning (because
+@c otherwise a command with a repeat count of zero would do nothing): to
+@c transpose the character (word, sexp, line) ending after point with the
+@c one ending after the mark.
+数引数0には特別な意味があります
+（さもないと、コマンドを0回繰り返しても何もしない）。
+ポイントの直後の文字（単語、S式、行）と
+マークの直後の文字（単語、S式、行）を入れ替えます。
+
+@node Fixing Case
+@c @section Case Conversion
+@section 大文字小文字変換
+
+@table @kbd
+@item M-- M-l
+@c Convert last word to lower case.  Note @kbd{Meta--} is Meta-minus.
+ポイントの直前の単語を小文字に変換する。
+@kbd{Meta--}はメタ・マイナス。
+@item M-- M-u
+@c Convert last word to all upper case.
+ポイントの直前の単語をすべて大文字に変換する。
+@item M-- M-c
+@c Convert last word to lower case with capital initial.
+ポイントの直前の単語を最初の文字だけ大文字にして残りを小文字にする。
+@end table
+
+@kindex M-@t{-} M-l
+@kindex M-@t{-} M-u
+@kindex M-@t{-} M-c
+@c   A very common error is to type words in the wrong case.  Because of this,
+@c the word case-conversion commands @kbd{M-l}, @kbd{M-u} and @kbd{M-c} have a
+@c special feature when used with a negative argument: they do not move the
+@c cursor.  As soon as you see you have mistyped the last word, you can simply
+@c case-convert it and go on typing.  @xref{Case}.@refill
+とてもよくあるまちがいは、単語を打つときに大文字小文字をまちがうことです。
+このため、単語の大文字小文字を変換するコマンド、
+@kbd{M-l}、@kbd{M-u}、@kbd{M-c}に負の引数を指定すると、
+カーソル（ポイント）を移動しないという特別な機能があります。
+単語を打ちまちがえたとすぐに気づいたときには、
+単に大文字小文字を変換して、入力を続けられます。
+@xref{Case}。
+
+@node Spelling
+@c @section Checking and Correcting Spelling
+@c @cindex spelling, checking and correcting
+@c @cindex checking spelling
+@c @cindex correcting spelling
+@section 綴りの検査と訂正
+@cindex 綴り、検査と訂正
+@cindex 綴りの検査
+@cindex 綴りの訂正
+
+@c   This section describes the commands to check the spelling of a single
+@c word or of a portion of a buffer.  These commands work with the spelling
+@c checker program Ispell, which is not part of Emacs.
+本節では、1つの単語やバッファのある部分の綴りを検査するコマンドを説明します。
+これらのコマンドは、Emacsの一部ではない綴り検査プログラム
+（スペルチェッカ）ispellを
+使って動作します。
+@ifinfo
+@c @xref{Top, Ispell, Overview ispell, ispell.info, The Ispell Manual}.
+@xref{Top, Ispell, Overview ispell, ispell.info, The Ispell Manual}。
+@end ifinfo
+
+@table @kbd
+@item M-x flyspell-mode
+@c Enable Flyspell mode, which highlights all misspelled words.
+フライスペル（flyspell）モードをオンにする。
+綴り誤りのあるすべての単語を強調表示する。
+@item M-$
+@c Check and correct spelling of the word at point (@code{ispell-word}).
+ポイント位置にある単語の綴りを検査し訂正する
+（@code{ispell-word}）。
+@item M-@key{TAB}
+@c Complete the word before point based on the spelling dictionary
+@c (@code{ispell-complete-word}).
+綴り辞書に基づいてポイントの直前の単語を補完する
+（@code{ispell-complete-word}）。
+@item M-x ispell-buffer
+@c Check and correct spelling of each word in the buffer.
+バッファ内の各単語の綴りを検査し訂正する。
+@item M-x ispell-region
+@c Check and correct spelling of each word in the region.
+リージョン内の各単語の綴りを検査し訂正する。
+@item M-x ispell-message
+@c Check and correct spelling of each word in a draft mail message, 
+@c excluding cited material.
+引用部分を除いて、メイルメッセージの草稿の各単語の綴りを検査し訂正する。
+@item M-x ispell-change-dictionary @key{RET} @var{dict} @key{RET}
+@c Restart the Ispell process, using @var{dict} as the dictionary.
+辞書として@var{dict}を使ってispellプロセスを再起動する。
+@item M-x ispell-kill-ispell
+@c Kill the Ispell subprocess.
+ispellプロセスを終了させる。
+@end table
+
+@c @cindex Flyspell mode
+@cindex フライスペル（flyspell）モード
+@findex flyspell-mode
+@c   Flyspell mode is a fully-automatic way to check spelling as you edit
+@c in Emacs.  It operates by checking words as you change or insert them.
+@c When it finds a word that it does not recognize, it highlights that
+@c word.  This does not interfere with your editing, but when you see the
+@c highlighted word, you can move to it and fix it.  Type @kbd{M-x
+@c flyspell-mode} to enable or disable this mode in the current buffer.
+フライスペル（flyspell）モードは、
+Emacsで編集しているときに全自動で綴り検査をする方法です。
+単語を変更したり挿入したりするたびにその単語を検査します。
+認識できない単語をみつけると、その単語を強調表示します。
+これはユーザーの編集には干渉しませんが、
+ある単語が強調表示されたら、その単語へ移動して訂正できます。
+カレントバッファでこのモードをオン／オフするには、
+@kbd{M-x flyspell-mode}と打ちます。
+
+@c   When Flyspell mode highlights a word as misspelled, you can click on
+@c it with @kbd{Mouse-2} to display a menu of possible corrections and
+@c actions.  You can also correct the word by editing it manually in any
+@c way you like.
+フライスペル（flyspell）モードが
+ある単語を綴りまちがいであると強調表示したときには、
+その単語を@kbd{Mouse-2}でクリックできます。
+すると、訂正候補やどんな操作を行えるか表示されます。
+単語を手動で編集して好きなように訂正してもかまいません。
+
+@c   The other Emacs spell-checking features check or look up words when
+@c you give an explicit command to do so.  Checking all or part of the
+@c buffer is useful when you have text that was written outside of this
+@c Emacs session and might contain any number of misspellings.
+Emacsの他の綴り検査機能は、明示的にコマンドを実行したときに
+単語の検査を行います。
+バッファ全体やその一部分の綴りを検査する機能は、
+Emacsセッション以外で作成した綴り誤りを含むかもしれないテキストには有益です。
+
+@kindex M-$
+@findex ispell-word
+@c   To check the spelling of the word around or next to point, and
+@c optionally correct it as well, use the command @kbd{M-$}
+@c (@code{ispell-word}).  If the word is not correct, the command offers
+@c you various alternatives for what to do about it.
+ポイントの周りかポイントのつぎにある単語の綴りを検査し、
+場合によっては訂正するには、
+@kbd{M-$}（@code{ispell-word}）コマンドを使います。
+単語が正しくないときには、
+その単語についてどうするかのさまざまな選択肢を提示します。
+
+@findex ispell-buffer
+@findex ispell-region
+@c   To check the entire current buffer, use @kbd{M-x ispell-buffer}.  Use
+@c @kbd{M-x ispell-region} to check just the current region.  To check
+@c spelling in an email message you are writing, use @kbd{M-x
+@c ispell-message}; that checks the whole buffer, but does not check
+@c material that is indented or appears to be cited from other messages.
+カレントバッファ全体を検査するには、@kbd{M-x ispell-buffer}を使います。
+カレントリージョンだけを検査するには、@kbd{M-x ispell-region}を使います。
+書きかけの電子メイルメッセージの綴りを検査するには、
+@kbd{M-x ispell-message}を使います。
+これは、バッファ全体を検査しますが、
+字下げしてある部分や他のメッセージからの引用と思われる部分は検査しません。
+
+@c   Each time these commands encounter an incorrect word, they ask you
+@c what to do.  They display a list of alternatives, usually including
+@c several ``near-misses''---words that are close to the word being
+@c checked.  Then you must type a character.  Here are the valid responses:
+これらのコマンドは、正しくない単語に出会うたびに、どうするか聞いてきます。
+通常、検査した単語に似ている『近い』単語をいくつか含めた
+選択肢一覧を表示します。
+そうしたら、文字を打たなくてはなりません。
+以下に有効な返答をあげます。
+
+@table @kbd
+@item @key{SPC}
+@c Skip this word---continue to consider it incorrect, but don't change it
+@c here.
+この単語をスキップする。
+この単語は正しくないとしておくが、ここでは変更しない。
+
+@item r @var{new} @key{RET}
+@c Replace the word (just this time) with @var{new}.
+（今回だけは）@var{new}で置き換える。
+
+@item R @var{new} @key{RET}
+@c Replace the word with @var{new}, and do a @code{query-replace} so you
+@c can replace it elsewhere in the buffer if you wish.
+単語を@var{new}で置き換える。
+さらに、バッファの他の箇所でも置き換えられるように
+@code{query-replace}を実行する。
+
+@item @var{digit}
+@c Replace the word (just this time) with one of the displayed
+@c near-misses.  Each near-miss is listed with a digit; type that digit to
+@c select it.
+（今回だけは）この単語を『近い』単語の1つで置き換える。
+『近い』単語にはそれぞれ数字が付いているので、その数字を打つ。
+
+@item a
+@c Accept the incorrect word---treat it as correct, but only in this
+@c editing session.
+正しくない単語を容認する。
+この編集セッションに限って、正しいかのように扱う。
+
+@item A
+@c Accept the incorrect word---treat it as correct, but only in this
+@c editing session and for this buffer.
+正しくない単語を容認する。
+この編集セッションのこのバッファに限って、正しいかのように扱う。
+
+@item i
+@c Insert this word in your private dictionary file so that Ispell will
+@c consider it correct it from now on, even in future sessions.
+この単語を個人辞書ファイルに入れ、
+ispellは今後のセッションを含めてこれ以降この単語を正しいものとして扱う。
+
+@item u
+@c Insert the lower-case version of this word in your private dictionary
+@c file.
+この単語を小文字に変換して個人辞書ファイルに入れる。
+
+@item m
+@c Like @kbd{i}, but you can also specify dictionary completion
+@c information.
+@kbd{i}と同様だが、辞書の補完情報も記録できる。
+
+@item l @var{word} @key{RET}
+@c Look in the dictionary for words that match @var{word}.  These words
+@c become the new list of ``near-misses''; you can select one of them to
+@c replace with by typing a digit.  You can use @samp{*} in @var{word} as a
+@c wildcard.
+@var{word}に一致する単語を辞書から探す。
+みつかった単語は、新たな『近い』単語一覧となり、
+数字を打って置き換える単語を選べる。
+@var{word}には、ワイルドカード@samp{*}を使うこともできる。
+
+@item C-g
+@c Quit interactive spell checking.  You can restart it again afterward
+@c with @kbd{C-u M-$}.
+対話的な綴り検査を終了する。
+@kbd{C-u M-$}で、あとで再開できる。
+
+@item X
+@c Same as @kbd{C-g}.
+@kbd{C-g}と同じ。
+
+@item x
+@c Quit interactive spell checking and move point back to where it was
+@c when you started spell checking.
+対話的な綴り検査を終了し、綴り検査を始めた箇所へポイントを戻す。
+
+@item q
+@c Quit interactive spell checking and kill the Ispell subprocess.
+対話的な綴り検査を終了し、ispellプロセスを終了させる。
+
+@item C-l
+@c Refresh the screen.
+画面を再描画する。
+
+@item C-z
+@c This key has its normal command meaning (suspend Emacs or iconify this
+@c frame).
+このキーは普通のコマンドの意味
+（Emacsを休止する、あるいは、このフレームをアイコン化する）。
+@end table
+
+@findex ispell-complete-word
+@c   The command @code{ispell-complete-word}, which is bound to the key
+@c @kbd{M-@key{TAB}} in Text mode and related modes, shows a list of
+@c completions based on spelling correction.  Insert the beginning of a
+@c word, and then type @kbd{M-@key{TAB}}; the command displays a completion
+@c list window.  To choose one of the completions listed, click
+@c @kbd{Mouse-2} on it, or move the cursor there in the completions window
+@c and type @key{RET}.  @xref{Text Mode}.
+テキスト（text）モードやその関連したモードでは
+@kbd{M-@key{TAB}}キーにバインドしてあるコマンド
+@code{ispell-complete-word}は、
+綴り訂正に基づいた補完一覧を提示します。
+単語の始めの部分を挿入してから@kbd{M-@key{TAB}}と打つと、
+補完一覧ウィンドウを表示します。
+補完一覧から1つを選ぶには、
+候補のうえで@kbd{Mouse-2}をクリックするか、
+カーソルを補完ウィンドウの単語の箇所に移動してから
+@key{RET}と打ちます。
+@xref{Text Mode}。
+
+@ignore
+@findex reload-ispell
+  The first time you use any of the spell checking commands, it starts
+an Ispell subprocess.  The first thing the subprocess does is read your
+private dictionary, which defaults to the file @file{~/ispell.words}.
+Words that you ``insert'' with the @kbd{i} command are added to that
+file, but not right away---only at the end of the interactive
+replacement procedure.  Use the @kbd{M-x reload-ispell} command to
+reload your private dictionary if you edit the file outside of Ispell.
+@end ignore
+
+@c @cindex @code{ispell} program
+@cindex @code{ispell}プログラム
+@findex ispell-kill-ispell
+@c   Once started, the Ispell subprocess continues to run (waiting for
+@c something to do), so that subsequent spell checking commands complete
+@c more quickly.  If you want to get rid of the Ispell process, use
+@c @kbd{M-x ispell-kill-ispell}.  This is not usually necessary, since the
+@c process uses no time except when you do spelling correction.
+一度綴り検査を行うと、ispellプロセスは（何かすることを待って）
+動き続けます。
+ですから、つぎに綴り検査コマンドを使うと、
+より早く実行を完了します。
+ispellプロセスを取り除きたいときには、
+@kbd{M-x ispell-kill-ispell}を使います。
+ispellプロセスは綴り訂正をしているとき以外には何もしないので、
+通常はこのコマンドを使う必要はありません。
+
+@vindex ispell-dictionary
+@c   Ispell uses two dictionaries: the standard dictionary and your private
+@c dictionary.  The variable @code{ispell-dictionary} specifies the file
+@c name of the standard dictionary to use.  A value of @code{nil} says to
+@c use the default dictionary.  The command @kbd{M-x
+@c ispell-change-dictionary} sets this variable and then restarts the
+@c Ispell subprocess, so that it will use a different dictionary.
+ispellは2つの辞書を使います。
+標準辞書と個人辞書です。
+変数@code{ispell-dictionary}は、使用すべき標準辞書のファイル名を指定します。
+この値が@code{nil}ならば、デフォルトの辞書を使います。
+@kbd{M-x ispell-change-dictionary}コマンドはこの変数を設定して、
+設定した辞書を使うようにispellサブプロセスを再起動します。
+

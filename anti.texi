@@ -1,0 +1,209 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 2002 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+
+@node Antinews, Mac OS, X Resources, Top
+@appendix Emacs 21.3 Antinews @emph{(2004/01/12)}
+
+@c   For those users who live backwards in time, here is information about
+@c downgrading to Emacs version 21.3.  We hope you will enjoy the greater
+@c simplicity that results from the absence of many newer features.
+時代に逆行する皆さんへ、Emacsヴァージョン21.3へのダウングレード情報を
+お届けします。さまざまな機能が省かれたことによる単純さをお楽
+しみください。
+
+@itemize @bullet
+@item
+@c The input methods for Emacs are included in a separate distribution
+@c called ``Leim''.  To use them, you must extract the Leim tar file on
+@c top of the Emacs distribution, into the same directory, before you
+@c build Emacs.
+Emacsの入力方法は『Leim』として別配布になります．使うためには，Leimの圧縮ファイ
+ルをEmacsをコンパイルする前に同じディレクトリに解凍しておかなければなりません．
+
+@item
+@c The file position and line number information is now at the end
+@c of the mode line.
+ファイルでの位置や行数はモードラインの最後に表示されます．
+
+@item
+@c When a file is managed with version control, the command @kbd{C-x C-q}
+@c (whose general meaning is to make a buffer read-only or writable) now
+@c does so by checking the file in or out.  Checking the file out makes
+@c the buffer writable; checking it in makes the buffer read-only (at
+@c least with RCS).
+バージョン管理で管理されているファイルで @kbd{C-x C-q} (普通はバッファを読み込み
+専用か書き込み可能かを切り替える)と入力すると，check inかcheck outかを実行します．
+ファイルをcheck outすると書き込み可能になり，check in すると読み込み専用になりま
+す(すくなくともRCSでは)．
+
+@c You can still use @kbd{C-x v v} to do these operations if you wish;
+@c its meaning is unchanged.  If you want to control the buffer's
+@c read-only flag without performing any version control operation,
+@c use @kbd{M-x toggle-read-only}.
+こららの操作をしたいなら@kbd{C-x v v}を使うことができます(この関数は変化していま
+せん)．もじバッファの読み込み専用かどうかを，バージョン管理のコマンドを実行せず
+に変更したければ @kbd{M-x toggle-read-only} を利用できます．
+
+@item
+@c Filesets are not supported.
+Filesetsはサポートされていません．
+
+@item
+For simplicity, windows always have fringes.  We wouldn't want
+to in-fringe anyone's windows.  Likewise, horizontal scrolling
+always works the same automatic way.
+
+@item
+@c When you are logged in as root, all files now give you writable
+@c buffers in Emacs reflecting the fact that you can write any files.
+ルートとしてログインしていれば，すべてのファイルは書き込み可能なバッファになりま
+す．これは，ルートなのですべてのファイルは書き込み可能であるということを反映した
+ものです．
+
+@item
+@c Unicode support and unification between Latin-@var{n} character
+@c sets have been removed.  Cutting and pasting X selections does not
+@c support ``extended segments'' so there are certain coding systems
+@c it cannot handle.
+ユニコードのサポートとLatin-@var{n}の統一は削除されました．Xでのコピーアンドペー
+ストは「符号拡張」をサポートしていません．だから扱うことのできない文字があるので
+す．
+
+@item
+@c @kbd{C-w} in an incremental search always grabs an entire word
+@c into the search string.  More precisely, it grabs text through
+@c the next end of a word.
+インクリメンタル検索での@kbd{C-w}はいつも単語全体を検索語に追加します．より正確
+に言うと，これは次の単語の終わりまでを追加します．
+
+@item
+@c Yanking now preserves all text properties that were in the killed
+@c text.  The variable @code{yank-excluded-properties} has no meaning.
+ヤンクはキルされたテキストのすべてのプロパティを保存します．変数
+@code{yank-excluded-properties} は意味を持たなくなりました．
+
+@item
+@c Occur mode, Info mode, and Comint-derived modes now control
+@c fontification in their own way, and @kbd{M-x font-lock-mode}
+@c has nothing to do with it.  To control fontification in Info
+@c mode, use the variable @code{Info-fontify}.
+Occur mode, Info mode, と Comint-derived modes は色付けを独自の方法で管理してい
+ます．@kbd{M-x font-lock-mode} は何の意味もありません．Info モードで色付けを制御
+するためには，変数 @code{Info-fontify} を使います．
+
+@item
+In Dired's @kbd{!} command, @samp{*} and @samp{?} now
+cause substitution of the file names wherever they appear---not
+only when they are surrounded by whitespace.
+
+@item
+@c Minibuffer completion commands now always complete the entire
+@c minibuffer contents, just as if you had typed them at the end
+@c of the minibuffer, no matter where point is actually located.
+ミニバッファでの補完コマンドはいつもミニバッファの最後で入力したかのように，ミニ
+バッファの文字全体を補完します．たとえ，カーソルがどこにあろうが変わりはありませ
+ん．
+
+@item
+An unquoted @samp{$} in a file name is now an error, if the following
+name is not recognized as an environment variable.  Thus,
+the file name @file{foo$bar} would probably be an error.  Meanwhile,
+the @code{setenv} command does not expand @samp{$} at all.
+
+@item
+@c Commands to set the mark at a place away from point, including
+@c @kbd{M-@@}, @kbd{M-h}, etc., don't do anything special when you repeat
+@c them.  In most cases, typing these commands multiple times is
+@c equivalent to using them once.  @kbd{M-h} does not use its numeric
+@c argument.
+ポイントから離れた場所をマークするコマンド(@c @kbd{M-@@}, @kbd{M-h} など) をリピー
+トしても特別なことは何もしません．ほとんどの場合，これらのコマンドを複数回入力す
+ることは，一度使うことと同じです．@kbd{M-h} は数引数を使いません．
+
+@item
+@c @kbd{C-@key{SPC} C-@key{SPC}} has no special meaning and neither does
+@c @kbd{C-u C-x C-x}.
+@kbd{C-@key{SPC} C-@key{SPC}} は特別な意味を持たなくなりました．@kbd{C-u C-x
+C-x} も同様です．
+
+@item
+@c There is no horizontal-bar cursor.
+horizontal-bar カーソルがなくなりました
+
+@item
+@c The faces @code{minibuffer-prompt} and @code{mode-line-inactive}
+@c do not exist, and the features they control don't exist either.
+@code{minibuffer-prompt} と @code{mode-line-inactive} のフェイスは存在しません．
+それらを制御する機能もありません．
+
+@item
+@c The default value of @code{keyboard-coding-system} is always @code{nil}.
+@c Emacs does not set it based on your locale settings.
+@c If you want some other value, you must set it yourself.
+@code{keyboard-coding-system} のデフォルト値はいつも @code{nil} です．Emacs は個々
+の locale(国など)設定を参照しません．もし他の値に設定したければ，自分で設定しな
+ければなりません．
+
+@item
+@c SGML mode does not handle XML syntax, and does not have indentation support.
+SGML モードは XML を扱いしません．そして，インデントもサポートしません．
+
+@item
+The @kbd{C-h} subcommands have been rearranged--especially those that
+display specific files.  Type @kbd{C-h C-h} to see a list of these
+commands; that will show you what is different.
+
+@item
+@c Emacs does not read @file{~/.abbrev_defs} automatically; if you want
+@c to load abbrev definitions from a file, you must always do so
+@c explicitly.
+Emacsは@file{~/.abbrev_defs}を自動的に読み込みません．もしファイルから略称定義を
+読み込ませたければ，明示的に設定しなければなりません．
+
+@item
+@c The @samp{--fullwidth}, @samp{--fullheight} and @samp{--fullscreen}
+@c command line options are not supported.
+コマンド引数である @samp{--fullwidth}，@samp{--fullheight} と
+@samp{--fullscreen} はサポートされません．
+
+@item
+@c The @samp{--geometry} option now entirely applies only to the initial
+@c frame.
+@samp{--geometry} オプションは初期フレームだけに適用されます．
+
+@item
+@c Many commands have been removed from the menus or rearranged.
+メニューから多くのコマンドは削除あるいは整理されました．
+
+@item
+@c Many @code{etags} features for customizing parsing using regexps
+@c have been removed.
+@code{etags} で正規表現を使ったカスタマイズは削除されました．
+
+@item
+@c The CUA, ido, table, tramp, reveal, ruler-mode, and ibuffer packages
+@c have been removed.  So has the spreadsheet, SES, and the algebraic
+@c calculator, Calc.  (We distribute Calc separately.)
+CUA, ido, table, tramp, reveal, ruler-mode, と ibuffer は削除されました．
+spreadsheet, SES, と algebraic calculator, Calcも同様です (Calcは別に配布してい
+ます)．
+
+@item
+@c The kmacro package has been removed.  To start a keyboard macro you
+@c must use @kbd{C-x (}; to end one, @kbd{C-x )}; to execute the last
+@c one, @kbd{C-x e}.
+kmacro packageは削除されました．キーボードマクロを開始するために，@kbd{C-x (} を
+入力し，終わりには@kbd{C-x )}を入力し，最後に実行するために @kbd{C-x e} を入力し
+なければなりません．
+
+@item
+@c To keep up with decreasing computer memory capacity and disk space, many
+@c other functions and files have been eliminated in Emacs 21.3.
+コンピュータのメモリやディスクスペースの減少に合わせるために，多くの機能やファイ
+ルがEmacs 21.3で削除されました．
+@end itemize
+
+@ignore
+   arch-tag: 32932bd9-46f5-41b2-8a0e-fb0cc4caeb29
+@end ignore

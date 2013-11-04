@@ -1,0 +1,2247 @@
+\input texinfo    @c -*-texinfo-*-
+@c =============================================================
+@c = 21.3.5 付属のものを翻訳中。2004-9-16(Thu)
+@c = 下訳としてどこかで見つけた info-ja.info を用いた
+@c =============================================================
+
+@comment %**start of header
+@setfilename ../info/info-ja.info
+@settitle Info
+@syncodeindex fn cp
+@syncodeindex vr cp
+@syncodeindex ky cp
+@comment %**end of header
+@comment $Id: info.texi,v 1.37 2003/10/27 00:01:25 karl Exp $
+
+@ignore
+@copying
+This file describes how to use Info, the on-line, menu-driven GNU
+documentation system.
+
+Copyright (C) 1989, 1992, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003
+Free Software Foundation, Inc.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU
+Manual'', and with the Back-Cover Texts as in (a) below.  A copy of the
+license is included in the section entitled ``GNU Free Documentation
+License'' in the Emacs manual.
+
+(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
+this GNU Manual, like GNU software.  Copies published by the Free
+Software Foundation raise funds for GNU development.''
+
+This document is part of a collection distributed under the GNU Free
+Documentation License.  If you want to distribute this document
+separately from the collection, you can do so by adding a copy of the
+license to the document, as described in section 6 of the license.
+@end quotation
+@end copying
+@end ignore
+
+@dircategory Texinfo documentation system
+@direntry
+* Info: (info).         How to use the documentation browsing system.
+@end direntry
+
+@titlepage
+@title Info
+@c @subtitle The online, hyper-text GNU documentation system
+@subtitle オンライン GNU ドキュメントシステム
+@author Brian Fox
+@c @author and the GNU Texinfo community
+@author GNU Texinfo コミュニティ
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@c @top Info: An Introduction
+@top Info: はじめに
+
+@c The GNU Project distributes most of its on-line manuals in the
+@c @dfn{Info format}, which you read using an @dfn{Info reader}.  You are
+@c probably using an Info reader to read this now.
+GNU プロジェクトではほとんどのオンラインマニュアルを @dfn{Info 形式} で配布し
+ています。そして、これは @dfn{Info リーダー} で読むことができます。多分、今もこの
+マニュアルを Info リーダーを使って読んでいることでしょう。
+
+@ifinfo
+@c If you are new to the Info reader and want to learn how to use it,
+@c type the command @kbd{h} now.  It brings you to a programmed
+@c instruction sequence.
+あなたがInfoに馴染みがなくその使用方法を学びたい場合には，コマンド`h'を入力
+してください．学習プログラムに導いてくれます．
+
+@c To read about expert-level Info commands, type @kbd{n} twice.  This
+@c brings you to @cite{Info for Experts}, skipping over the `Getting
+@c Started' chapter.
+   高度なInfoコマンドを学ぶためには，`n'を二回入力してください．これで，
+`Getting Started'の章を飛び越えて`Info for Experts'に導いてくれます．
+
+この和文文書は既に翻訳されていたinfo-ja.infoを元に最新版にアップデート
+したものです．
+@end ifinfo
+@end ifnottex
+
+@menu
+* Getting Started::             Getting started using an Info reader.
+* Expert Info::                 Info commands for experts.
+* Creating an Info File::       How to make your own Info file.
+* Index::                       An index of topics, commands, and variables.
+@end menu
+
+@node Getting Started, Expert Info, Top, Top
+@comment  node-name,  next,  previous,  up
+@c @chapter Getting Started
+@chapter はじめ方 @emph{(2004/09/16)}
+
+@c This first part of the Info manual describes how to get around inside
+@c of Info.  The second part of the manual describes various advanced
+@c Info commands, and how to write an Info as distinct from a Texinfo
+@c file.  The third part briefly explains how to generate Info files from
+@c Texinfo files.
+このInfoマニュアルの最初の部分で，Infoの内部について述べています．このマ
+ニュアルの2番目の部分で，様々なInfoの高度なコマンドについて述べ，Texinfo
+ファイルから生成されるものとは異なるInfoの書き方を述べています．3番目の
+部分は，TexinfoファイルからInfoファイルを生成する方法の概要を説明してい
+ます．
+
+@ifnotinfo
+@c This manual is primarily designed for browsing with an Info reader
+@c program on a computer, so that you can try Info commands while reading
+@c about them.  Reading it on paper or with an HTML browser is less
+@c effective, since you must take it on faith that the commands described
+@c really do what the manual says.  By all means go through this manual
+@c now that you have it; but please try going through the on-line version
+@c as well.
+このマニュアルはコンピュータ上でInfoリーダーを使って読むように考えられています。
+そうすれば、読んでいる間にInfoコマンドを試すことができます。 コマンドがマニュア
+ルに書いてある通りに動作すると思うことしかできませんので、紙やHTMLで読むと効果が
+薄くなります。このマニュアルを読んでいる際に、オンラインバージョンも試してみてく
+ださい。
+
+@cindex Info reader, how to invoke
+@cindex entering Info
+@cindex Info の起動
+@c There are two ways of looking at the online version of this manual:
+このマニュアルのオンライン版を見るには2つの方法があります。
+
+@enumerate
+@item
+@c Type @code{info} at your shell's command line.  This approach uses a
+@c stand-alone program designed just to read Info files.
+シェルのコマンドラインで @code{info} と入力します。こうすると、Info ファイルを読
+むためだけに設計されたInfoリーダーを使うことができます。
+
+@item
+@c Type @code{emacs} at the command line; then type @kbd{C-h i}
+@c (@kbd{Control-h}, followed by @kbd{i}).  This approach uses the Info
+@c mode of the Emacs program, an editor with many other capabilities.
+コマンドラインで @code{emacs} と入力し、それから @kbd{C-h i} (@kbd{Control-h} に
+続けて @kbd{i}) を入力します。これにより、多くの機能を持つEmacsのInfoモードを使
+うことができます。
+@end enumerate
+
+@c In either case, then type @kbd{mInfo} (just the letters), followed by
+@c @key{RET}---the ``Return'' or ``Enter'' key.  At this point, you should
+@c be ready to follow the instructions in this manual as you read them on
+@c the screen.
+どちらの場合でも、@kbd{mInfo} (文字通りに) と入力し、続けて @key{RET} (Return か
+Enter キー)と入力します。これで、スクリーン上でこのマニュアルを読み指示に従い操
+作を行う準備ができました。
+@c FIXME! (pesch@cygnus.com, 14 dec 1992)
+@c Is it worth worrying about what-if the beginner goes to somebody
+@c else's Emacs session, which already has an Info running in the middle
+@c of something---in which case these simple instructions won't work?
+@end ifnotinfo
+
+@menu
+* Help-Small-Screen::   Starting Info on a Small Screen
+* Help::                How to use Info
+* Help-P::              Returning to the Previous node
+* Help-^L::             The Space, DEL, B and ^L commands.
+* Help-Inv::            Invisible text in Emacs Info.
+* Help-M::              Menus
+* Help-Xref::           Following cross-references
+* Help-Int::            Some intermediate Info commands
+* Help-Q::              Quitting Info
+@end menu
+
+@node Help-Small-Screen
+@c @section Starting Info on a Small Screen
+@section 小さなスクリーンでInfoを開始する @emph{(2004/09/16)}
+
+@ifnotinfo
+(In Info, you only see this section if your terminal has a small
+number of lines; most readers pass by it without seeing it.)
+@end ifnotinfo
+
+@cindex small screen, moving around
+@c Since your terminal has a relatively small number of lines on its
+@c screen, it is necessary to give you special advice at the beginning.
+端末の画面に比較的少数の行しか無いので，はじめに特別なアドバイスが必要で
+す．
+
+@c If you see the text @samp{--All----} near the bottom right corner
+@c of the screen, it means the entire text you are looking at fits on the
+@c screen.  If you see @samp{--Top----} instead, it means that there is
+@c more text below that does not fit.  To move forward through the text
+@c and see another screen full, press @key{SPC}, the Space bar.  To move
+@c back up, press the key labeled @samp{Backspace} or @samp{DEL} (on some
+@c keyboards, this key might be labeled @samp{Delete}).
+テキスト`--All----'が画面の右下の角近くに見えている場合，見ているテキスト全体が
+画面にフィットしているということです．代わりに`--Top----'が見えている場合，フィッ
+トしていない，より多くのテキストが下にあるということです．テキストを先に進めて他
+の画面全体を見るため，スペースバー<SPC>を押してください．前に戻るためには
+`Backspace'や`DEL'(システムによっては，このキーは`Delete'と印字されているかもし
+れません)と表示されているキーを押してください．
+
+@ifinfo
+@c Here are 40 lines of junk, so you can try @key{SPC} and @key{DEL} and
+@c see what they do.  At the end are instructions of what you should do
+@c next.
+以下に40の無駄な行があるので，<SPC>と<DEL>を試すと何を言っているのかが分かるでしょ
+う．終りに次にすることを説明しています．
+
+@format
+This is line 20
+This is line 21
+This is line 22
+This is line 23
+This is line 24
+This is line 25
+This is line 26
+This is line 27
+This is line 28
+This is line 29
+This is line 30
+This is line 31
+This is line 32
+This is line 33
+This is line 34
+This is line 35
+This is line 36
+This is line 37
+This is line 38
+This is line 39
+This is line 40
+This is line 41
+This is line 42
+This is line 43
+This is line 44
+This is line 45
+This is line 46
+This is line 47
+This is line 48
+This is line 49
+This is line 50
+This is line 51
+This is line 52
+This is line 53
+This is line 54
+This is line 55
+This is line 56
+This is line 57
+This is line 58
+This is line 59
+@end format
+
+@c If you have managed to get here, go back to the beginning with
+@c @kbd{DEL} (or @key{BACKSPACE}), and come back here again, then you
+@c understand the about the @samp{Space} and @samp{Backspace} keys.  So
+@c now type an @kbd{n} ---just one character; don't type the quotes and
+@c don't type the Return key afterward--- to get to the normal start of
+@c the course.
+ここまでたどり着いたら`DEL'(または<BACKSPACE>)で最初に戻り，もう
+一度ここまできて，やっと`Space'と`Backspace'を理解するでしょう．
+さて，`n'を入力し(1文字だけで，引用符やリターンキーを後で入力し
+ないでください) コースの通常の開始点に行きます．
+@end ifinfo
+
+@node Help, Help-P, Help-Small-Screen, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section How to use Info
+@section Infoの使い方 @emph{(2004/09/16)}
+
+@c You are talking to the program Info, for reading documentation.
+ドキュメントを読むために，プログラムInfoと会話をします．
+
+@c   There are two ways to use Info: from within Emacs or as a
+@c stand-alone reader that you can invoke from a shell using the command
+@c @command{info}.
+Infoを使うには2つの方法があります。つまり、Emacsを使う方法とシェルでコマンド 
+@command{info} を使って起動される単独のリーダーを使う方法です。
+
+@cindex node, in Info documents
+@c   Right now you are looking at one @dfn{Node} of Information.
+@c A node contains text describing a specific topic at a specific
+@c level of detail.  This node's topic is ``how to use Info''.  The mode
+@c line says that this is node @samp{Help} in the file @file{info}.
+今，1つの情報の@dfn{ノード}が見ています．ノードには，あるレベルで特定のトピック
+を説明しているテキストが含まれています．このノードのトピックは"Info の使い方(how
+to use Info)"です．モードラインでは，これが@file{info}のノード@samp{Help} だと告
+げています．
+
+@cindex header of Info node
+@c   The top line of a node is its @dfn{header}.  This node's header
+@c (look at it now) says that the @samp{Next} node after this one is the
+@c node called @samp{Help-P}.  An advanced Info command lets you go to
+@c any node whose name you know.  In the stand-alone Info reader program,
+@c the header line shows the names of this node and the info file as
+@c well.  In Emacs, the header line is duplicated in a special typeface,
+@c and the duplicate remains at the top of the window all the time even
+@c if you scroll through the node.
+ノードのトップ行は，その@dfn{ヘッダ}です．ノードのヘッダは(今，見てくだ
+さい)このノードの後にある@samp{Next}ノードが@samp{Help-P}と呼ばれるノード
+だと告げています．高度なInfoコマンドで，知っている名前ならどこのノードに
+も行けるようになります．スタンドアローンのInfoリーダプログラムでは，ヘッ
+ダ行で，このノードの名前とinfoファイルも表示しています．Emacsでは，ヘッ
+ダ行は特殊な書体で表示されていて，それは画面からスクロー
+ルされて消えることはありません．このノードと，Infoファイルの名前は，
+Emacsによってヘッダ行から削除されています．
+
+@c   Besides a @samp{Next}, a node can have a @samp{Previous} or an
+@c @samp{Up} links, or both.  As you can see, this node has all of these
+@c links.
+@samp{Next}の隣に，ノードには@samp{Previous}や@samp{Up}または両方へのリ
+ンクがあるはずです．御覧のようにこのノードには，これらすべてがあります．
+
+@kindex n @r{(Info mode)}
+@c   Now it is time to move on to the @samp{Next} node, named @samp{Help-P}.
+さて，@samp{Help-P}という名前の@samp{Next}ノードに行く時間です．
+
+
+@format
+@c >> Type @kbd{n} to move there.  Type just one character;
+@c    do not type the quotes and do not type a @key{RET} afterward.
+>> そこに移動するため，@kbd{n}を入力します．一文字だけです．引用符や入力後の
+   @key{RET} を入力しないでください．
+@end format
+
+@noindent
+@c @samp{>>} in the margin means it is really time to try a command.
+マージンの @samp{>>} は，実際にコマンドを試すときだということを意味します．
+
+@format
+@c >> If you are in Emacs and have a mouse, and if you already practiced
+@c    typing @kbd{n} to get to the next node, click now with the middle
+@c    mouse button on the @samp{Next} link to do the same ``the mouse way''.
+>> マウスがある場合で，次のノードへ行くために既に @kbd{n} の入力の練習をし
+   ている場合，同じことを``マウスで行なう''ためにマウスの右ボタンで
+   @samp{Next}リンクをクリックしてください．
+@end format
+
+@node Help-P, Help-^L, Help, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section Returning to the Previous node
+@section 前のノードに戻る
+
+@kindex p @r{(Info mode)}
+@c This node is called @samp{Help-P}.  The @samp{Previous} node, as you see,
+@c is @samp{Help}, which is the one you just came from using the @kbd{n}
+@c command.  Another @kbd{n} command now would take you to the next
+@c node, @samp{Help-^L}.
+このノードは@samp{Help-P}と呼ばれています．ご存知のように，
+@samp{Previous}ノードは@samp{Help}で，そこから@kbd{n}コマンドを使用して
+やって来ました．もう一度@kbd{n}コマンドを使用すると，次のノード
+@samp{Help-^L}に行きます．
+
+@format
+@c >> But do not type @kbd{n} yet.  First, try the @kbd{p} command,
+@c    or click the middle mouse button on the @samp{Prev} link.  That
+@c    takes you to the @samp{Previous} node.  Then use @kbd{n} to return here.
+>> しかし，まだ@kbd{n}を入力しないでください．最初に@kbd{p}コマンドを試
+   したり，@samp{Prev}のリンク上でマウスをクリックしたりして
+   @samp{Previous} ノードへ行きましょう．そこに行ったら，また@kbd{n}して，
+   ここに戻ることができます．
+@end format
+
+@c   If you read this in Emacs, you will see an @samp{Info} item in the
+@c menu bar, close to its right edge.  Clicking the mouse on the
+@c @samp{Info} menu-bar item opens a menu of commands which include
+@c @samp{Next} and @samp{Prev} (and also some others which you didn't yet
+@c learn about).
+Emacsでこれを読んでいる場合，メニューバーの右端近くに@samp{Info}の項目が
+見えるでしょう．@samp{Info}メニューバーの項目上でマウスをクリックすると，
+@samp{Next}と@samp{Prev}を含めたコマンドのメニューが開きます(そして，ま
+だ学習していないものもそれ以外にあります)．
+
+@c   This all probably seems insultingly simple so far, but @emph{please
+@c don't} start skimming.  Things will get complicated soon enough!
+@c Also, please do not try a new command until you are told it is time
+@c to.  You could make Info skip past an important warning that was
+@c coming up.
+この全てが，恐らく余りに簡単過ぎて無礼だと思いますが，読み捨て@emph{しな
+い}でください．事態はますます複雑になってきます．また，そのときが来たと
+告げられるまで新しいコマンドを試さないでください．さもないと，後から出て
+くる重要な警告をInfoが通り過ぎてしまいます．
+
+@format
+@c >> Now do an @kbd{n}, or click the middle mouse button on the @samp{Next}
+@c    link, to get to the node @samp{Help-^L} and learn more.
+>> さて，ノード@samp{Help-^L}に行くため@kbd{n}したり@samp{Next}リンクで
+   マウスをクリックしたりして，より多くのことを学んでください．
+@end format
+
+@node Help-^L, Help-Inv, Help-P, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section The Space, DEL, B and ^L commands
+@section スペース，DEL，B，そして^Lコマンド
+
+@c   This node's mode line tells you that you are now at node
+@c @samp{Help-^L}, and the header line tells you that @kbd{p} would get
+@c you back to @samp{Help-P}.  The node's title is highlighted and may be
+@c underlined as well; it says what the node is about.
+このノードのモードラインは，現在ノード@samp{Help-^L}にいることを，ヘッ
+ダラインは@kbd{p}で@samp{Help-P}に戻れることを告げています．このノード
+のタイトルは強調され、下線がついているかもしれません．それはノードが関
+連するものを告げています．
+
+@c   This is a big node and it does not all fit on your display screen.
+@c You can tell that there is more that is not visible because you
+@c can see the string @samp{--Top-----} rather than @samp{--All----} near
+@c the bottom right corner of the screen.
+これは大きなノードで，ディスプレイ画面に全てがフィットしません．画面の右
+下付近に@samp{--All----}ではなく@samp{--Top-----}という文字列が見えるの
+で，見えていないものがもっとあることが分かります．
+
+@kindex SPC @r{(Info mode)}
+@kindex DEL @r{(Info mode)}
+@kindex BACKSPACE @r{(Info mode)}
+@findex Info-scroll-up
+@findex Info-scroll-down
+@c   The @key{SPC}, @key{BACKSPACE} (or @key{DEL})@footnote{The key which
+@c we call ``Backspace or DEL'' in this manual is labeled differently on
+@c different keyboards.  Look for a key which is a little ways above the
+@c @key{ENTER} or @key{RET} key and which you normally use outside Emacs
+@c to erase the character before the cursor, i.e.@: the character you
+@c typed last.  It might be labeled @samp{Backspace} or @samp{<-} or
+@c @samp{DEL}, or sometimes @samp{Delete}.} and @kbd{b} commands exist to
+@c allow you to ``move around'' in a node that does not all fit on the
+@c screen at once.  @key{SPC} moves forward, to show what was below the
+@c bottom of the screen.  @key{DEL} or @key{BACKSPACE} moves backward, to
+@c show what was above the top of the screen (there is not anything above
+@c the top until you have typed some spaces).
+   @key{SPC}，@key{BACKSPACE}(または@key{DEL}) @footnote{このマニュアルで
+"バックスペースまたはDEL"と呼んでいるキーは，キーボードによって異なる
+ラベルが付いています．@key{ENTER}や@key{RET}キーの上の小さいもので，通常
+Emacs以外でカーソルの前の文字，すなわち直前に入力した文字を削除するもの
+からキーを探してください．それには，@samp{Backspace}または@samp{<-}，ま
+た@samp{DEL}のときには@samp{Delete}のラベルが付いています．}，そして
+@kbd{b}コマンドで，一度に全ての画面がフィットしなくても"動き回る"こと
+が可能になります．@key{SPC}で前に進み，画面の下に続くものを見ることがで
+きます．@key{DEL}や@key{BACKSPACE}で後ろへ戻り，画面のトップを見ることが
+できます(何回かスペースを入力しなければ，トップまで何もありません)．
+
+@format
+@c >> Now try typing a @key{SPC} (afterward, type a @key{BACKSPACE} to
+@c    return here).
+>> さて，@key{SPC}を入力してみてください(その後で@key{BACKSPACE}を入力し
+   ここに戻ってください)．
+@end format
+
+@c   When you type the @key{SPC}, the two lines that were at the bottom of
+@c the screen appear at the top, followed by more lines.  @key{DEL} or
+@c @key{BACKSPACE} takes the two lines from the top and moves them to the
+@c bottom, @emph{usually}, but if there are not a full screen's worth of
+@c lines above them they may not make it all the way to the bottom.
+@key{SPC}を入力すると画面の下2行がページの最初に現れ，その後の行が続きま
+す．@key{DEL}や@key{BACKSPACE}で，ページの最初の2行を下に@emph{通常は}持っ
+ていきますが，その上の行でフルスクリーンにする意味が無い場合は，全てを下
+に持っていくわけではありません．
+
+@c   If you are reading this in Emacs, note that the header line is
+@c always visible, never scrolling off the display.  That way, you can
+@c always see the @samp{Next}, @samp{Prev}, and @samp{Up} links, and you
+@c can conveniently go to one of these links at any time by
+@c clicking the middle mouse button on the link.
+これをEmacsで読んでいる場合，画面からスクロールされて消えることが無いヘッ
+ダ行が見えていることに注意してください．そのため，@samp{Next}，
+@samp{Prev}，そして@samp{Up}のリンクは常に見えていて，これらのリンクをマ
+ウスでクリックすることで，ノードのどこからでも，これらのリンク場所に行く
+ことが可能なので便利です．
+
+@cindex reading Info documents top to bottom
+@cindex Info documents as tutorials
+@c   @key{SPC} and @key{DEL} not only move forward and backward through
+@c the current node.  They also move between nodes.  @key{SPC} at the end
+@c of a node moves to the next node; @key{DEL} (or @key{BACKSPACE}) at
+@c the beginning of a node moves to the previous node.  In effect, these
+@c commands scroll through all the nodes in an Info file as a single
+@c logical sequence.  You can read an entire manual top to bottom by just
+@c typing @key{SPC}, and move backward through the entire manual from
+@c bottom to top by typing @key{DEL} (or @key{BACKSPACE}).
+@key{SPC}と@key{DEL}は，現在のノードで前後に移動するだけではありません．
+ノード間の移動も行います。現在のノードの最初で @key{SPC} を入力すると
+次のノードへ、ノードの最後で@key{DEL} (あるいは@key{BACKSPACE}) を入力
+すると前のノードへ移動します．具体的には，Infoファイルのすべてのノード
+を，単一の論理的に連結しているものとしてスクロールしていきます．これで，
+@key{SPC}を入力するだけでマニュアルの最初から最後まで完全に読むことが
+できるでしょう．そして、@key{DEL} (あるいは@key{BACKSPACE}) を入力する
+ことで、最後から最初に向かってマニュアルを完全に読むことができるでしょ
+う。
+
+@c   In this sequence, a node's subnodes appear following their parent.
+@c If a node has a menu, @key{SPC} takes you into the subnodes listed in
+@c the menu, one by one.  Once you reach the end of a node, and have seen
+@c all of its subnodes, @key{SPC} takes you to the next node or to the
+@c parent's next node.
+この順序では，ノードのサブノードは親ノードに続いて表示されます．ノード
+にメニューがある場合，@key{SPC}でメニューでリストアップされているサブ
+ノードに，一つずつ移動していきます．ノードの終りに到達すると，そのすべ
+てのサブノードを見たことになり，@key{SPC}で次のノードか次のノードの親
+に移動します．
+
+@kindex PAGEUP @r{(Info mode)}
+@kindex PAGEDOWN @r{(Info mode)}
+@c   Many keyboards nowadays have two scroll keys labeled @samp{PageUp}
+@c and @samp{PageDown} (or maybe @samp{Prior} and @samp{Next}).  If your
+@c keyboard has these keys, you can use them to move forward and backward
+@c through the text of one node, like @key{SPC} and @key{BACKSPACE} (or
+@c @key{DEL}).  However, @key{PAGEUP} and @key{PAGEDOWN} keys never
+@c scroll beyond the beginning or the end of the current node.
+この頃のキーボードには，@samp{PageUp}と@samp{PageDown}(@samp{Prior}と
+@samp{Next}かもしれませんが)というラベルの付いた二つのスクロールキーが
+あるものが多くなっています．これらのキーがあるキーボードでは，
+@key{SPC}と@key{BACKSPACE}のように，これらを使用してテキストの前後に移
+動することが可能です．しかし，@key{SPC}と@key{BACKSPACE}とは異なり，
+@key{PAGEUP}と@key{PAGEDOWN}のキーでは，現在のノードの最初と最後を越え
+てスクロールすることはありません．
+
+@kindex C-l @r{(Info mode)}
+@c   If your screen is ever garbaged, you can tell Info to display it
+@c again by typing @kbd{C-l} (@kbd{Control-L}, that is---hold down
+@c @key{CTRL} and type @kbd{L} or @kbd{l}).
+画面がおかしい場合，@kbd{C-l}(@kbd{Control-L}のことです--@key{CTRL}
+を押したまま@kbd{L}や@kbd{l}を入力することです)を入力することで，Infoに
+再表示させることが可能です．
+
+@format
+@c >> Type @kbd{C-l} now.
+>> @kbd{C-l}を，今入力してください．
+@end format
+
+@kindex b @r{(Info mode)}
+@c   To move back to the beginning of the node you are on, you can type
+@c the @key{BACKSPACE} key (or @key{DEL}) many times.  You can also type
+@c @kbd{b} just once.  @kbd{b} stands for ``beginning.''
+今見ているノードの最初に戻るため，何回も<BACKSPACE>を押すことが可能
+です．最初に戻るため，単純に@kbd{b}を入力することも可能です．
+
+@format
+@c >> Try that now.  (We have put in enough verbiage to push this past
+@c    the first screenful, but screens are so big nowadays that perhaps it
+@c    isn't enough.  You may need to shrink your Emacs or Info window.)
+@c    Then come back, by typing @key{SPC} one or more times.
+>> 今やってみてください．(我々は，ここまで来るまでに最初の画面がいっぱい
+   になるように十分に冗長なことを書いたのですが，画面が大きすぎて十分で
+   ないかもしれません．必要なら，EmacsやInfoウィンドウを小さくしてくださ
+   い．)そして，@key{SPC}で戻ってきてください．
+@end format
+
+@c   If your screen is very tall, all of this node might fit at once.  In
+@c that case, @kbd{b} won't do anything.  But you could observe the
+@c effect of the @kbd{b} key if you use a smaller window.
+画面が縦に非常に長い場合，このノード全体が一度にフィットするかもしれま
+せん．その場合，@kbd{b}では何も起こりません．だけど、もう少し小さいウィ
+ンドウを使えば@kbd{b}による効果を確認できますよ。
+
+@kindex ? @r{(Info mode)}
+@findex Info-summary
+@c   You have just learned a considerable number of commands.  If you
+@c want to use one but have trouble remembering which, you should type
+@c a @kbd{?} (in Emacs it runs the @code{Info-summary} command) which
+@c displays a brief list of commands.  When you are finished looking at
+@c the list, make it go away by typing a @key{SPC} repeatedly.
+さて，かなりの数のコマンドを学びました．どれかを使いたいのですが，それが
+どれかを忘れた場合，コマンドリストを簡潔に表示する@kbd{?}を入力してみて
+ください(Emacsでは，それで@code{Info-summary}コマンドを実行します)．リス
+トを見終えたら，@key{SPC}を何回か押して消し去ってください．
+
+@format
+@c >> Type a @key{?} now.  Press @key{SPC} to see consecutive screenfuls of
+@c    the list until finished.  Then type @key{SPC} several times.  If
+@c    you are using Emacs, the help will then go away automatically.
+>> さあ@key{?}を試してください．終りまでリストの画面全体を連続して見るた
+   め，@key{SPC}を押してください．そして消え去るまで@key{SPC}を複数回入
+   力してください．
+@end format
+
+@c   (If you are using the stand-alone Info reader, type @kbd{C-x 0} to
+@c return here, that is---press and hold @key{CTRL}, type an @kbd{x},
+@c then release @key{CTRL} and @kbd{x}, and press @kbd{0}---a zero, not
+@c the letter ``o''.)
+(スタンドアローンのIndoリーダを使用している場合，ここに戻るため@kbd{C-x
+0}を入力してください，すなわち--@key{CTRL}を押したまま@kbd{x}を入力し，
+@key{CTRL}と@kbd{x}を離し，そして@kbd{0}を押してください--これはゼロで
+文字"o"ではありません．)
+
+@c   From now on, you will encounter large nodes without warning, and
+@c will be expected to know how to use @key{SPC} and @key{BACKSPACE} to
+@c move around in them without being told.  Since not all terminals have
+@c the same size screen, it would be impossible to warn you anyway.
+今から，警告無しで大きなノードに出会っても，教えられなくても@key{SPC}と
+@key{BACKSPACE}を使用して動き回る方法を知っていることとします．全ての端
+末が同じ大きさの画面を持っているわけではないので，もう警告することはでき
+ません．
+
+@format
+@c >> Now type @kbd{n}, or click the middle mouse button on the @samp{Next} link,
+@c    to visit the next node.
+>> さて，次のノードを見るため，@kbd{n}を入力したり，@samp{Next}リンク
+   でマウスをクリックしたりしてください．
+@end format
+
+@node Help-Inv, Help-M, Help-^L, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section Invisible text in Emacs Info
+@section Emacs info で非表示なテキスト
+
+@c   Before discussing menus, we need to make some remarks that are only
+@c relevant to users reading Info using Emacs.  Users of the stand-alone
+@c version can skip this node by typing @kbd{]} now.
+メニューについて述べる前に、Emacsを使ってInfo を読んでいるユーザのみに
+関連したことを述べておく必要があります。スタンドアローンのInfoリーダを
+使って読んでいるユーザは @kbd{]} を入力してスキップできます。
+
+@cindex invisible text in Emacs
+@cindex Emacsで非表示なテキスト
+@c   In Emacs, certain text that appears in the stand-alone version is
+@c normally hidden, technically because it has the @samp{invisibility}
+@c property.  Invisible text is really a part of the text.  It becomes
+@c visible (by default) after killing and yanking, it appears in printed
+@c output, it gets saved to file just like any other text, and so on.
+@c Thus it is useful to know it is there.
+Emacsではスタンドアローン版で表示されるある種のテキストは通常表示され
+ません。技術的に言うと、それらのテキストは@samp{invisibility(非表示)}
+の属性を持つためです。非表示テキストは実際のテキストの一部になります。
+(デフォルトでは)これらのテキストはキルしてヤンクした時、印刷した時などに表
+示されます。他のテキストと同じように保存することもできます。こうして、
+そこにテキストがあることを知っておくと役立ちます。
+
+@findex visible-mode
+@c You can make invisible text visible by using the command @kbd{M-x
+@c visible-mode}.  Visible mode is a minor mode, so using the command a
+@c second time will make the text invisible again.  Watch the effects of
+@c the command on the ``menu'' below and the top line of this node.
+コマンド @kbd{M-x visible-mode} を実行することで非表示のテキストを表示
+させることができます。visible-modeはマイナーモードです。だから、2回使
+うとふたたびテキストは非表示となります。"メニュー"の下やこのノードの先
+頭行でこのコマンドの効果を見てみなさい。
+
+@c If you prefer to @emph{always} see the invisible text, you can set
+@c @code{Info-hide-note-references} to @code{nil}.  Enabling Visible mode
+@c permanently is not a real alternative, because Emacs Info also uses
+@c (although less extensively) another text property that can change the
+@c text being displayed, the @samp{display} property.  Only the
+@c invisibility property is affected by Visible mode.  When, in this
+@c tutorial, we refer to the @samp{Emacs} behavior, we mean the
+@c @emph{default} Emacs behavior.
+非表示テキストが@emph{いつも}表示されているのがよければ、
+@code{Info-hide-note-references} を @code{nil} に設定するといい。
+visivle modeを有効にしておくことは代替にはなりません。Emacs Info は表
+示されているテキストを変更するような@samp{display}属性(それほど多くは
+ありませんが)も使っているからです。visible modeは非表示のテキストのみ
+に影響します。このチュートリアルで、@samp{Emacs} の動作を説明する時に
+は、@emph{デフォルト}のEmacsにおける動作を説明します。
+
+@c Now type @kbd{]}, to learn about the @kbd{]} and @kbd{[} commands.
+さて、@kbd{]}を入力して、コマンド @kbd{]} と @kbd{[} について学ぶこと
+にしよう。
+
+@menu
+* ]:         Help-].               Node telling about ].
+* stuff:     Help-].               Same node.
+* Help-]::                         Yet again, same node.
+@end menu
+
+@node Help-], , , Help-Inv
+@c @subsection The @kbd{]} and @kbd{[} commands
+@subsection コマンド @kbd{]} と @kbd{[}
+
+@c If you type @kbd{n} now, you get an error message saying that this
+@c node has no next node.  Similarly, if you type @kbd{p}, the error
+@c message tells you that there is no previous node.  (The exact message
+@c depends on the Info reader you use.)  This is because @kbd{n} and
+@c @kbd{p} carry you to the next and previous node @emph{at the same
+@c level}.  The present node is contained in a menu (see next) of the
+@c node you came from, and hence is considered to be at a lower level.
+@c It is the only node in the previous node's menu (even though it was
+@c listed three times). Hence it has no next or previous node that
+@c @kbd{n} or @kbd{p} could move to.
+今、@kbd{n}を入力すると、このノードには次のノードが無いというエラーが
+表示されます。同様に@kbd{p} を入力すると、前のノードが無いというエラー
+メッセージが表示されます(正確なメッセージはInfoリーダに依存します)。こ
+れは、@kbd{n}や@kbd{p}が@emph{同じレベルの}次や前のノードへ移動するコ
+マンドだからです。今のノードは前のノードにあったメニューに含まれていま
+す。そのため、今のノードは下位のレベルと考えられるのです。このノードは
+前のノードメニューにある(3回書かれているけれども)唯一のノードです。そ
+れゆえ、@kbd{n} や @kbd{p} で移動できる次や前のノードを持たないのです。
+
+@c If you systematically move through a manual by typing @kbd{n}, you run
+@c the risk of skipping many nodes.  You do not run this risk if you
+@c systematically use @kbd{@key{SPC}}, because, when you scroll to the
+@c bottom of a node and type another @kbd{@key{SPC}}, then this carries
+@c you to the following node in the manual @emph{regardless of level}.
+@c If you immediately want to go to that node, without having to scroll
+@c to the bottom of the screen first, you can type @kbd{]}.
+@kbd{n} を整然と入力することでマニュアルを移動していると、多くのノード
+を読み飛ばす危険性があります。一方、@kbd{@key{SPC}}を使う場合にはその
+ような危険性はありません。なぜなら、ノードの下部までスクロールして、さ
+らに@kbd{@key{SPC}}を入力すると、@emph{レベルに関わらず}続くノードに移
+動するからです。最初に下部までスクロールさせないで、すぐに次のノードに行きた
+い場合には、@kbd{]}を入力します。
+
+@c Similarly, @kbd{@key{BACKSPACE}} carries you to the preceding node
+@c regardless of level, after you scrolled to the beginning of the
+@c present node.  If you want to go to the preceding node immediately,
+@c you can type @kbd{[}.
+同様に、@kbd{@key{BACKSPACE}}はレベルに関わらず、現在のノードの先頭ま
+でスクロールした後で、前にあるノードに移動できます。すぐに前のノードへ
+移動したい時には @kbd{[}を入力します。
+
+@c For instance, typing this sequence will come back here in three steps:
+@c @kbd{[ n [}.  To do the same backward, type @kbd{] p ]}.
+例えば、@kbd{[ n [}という3段階の操作でここに戻ってくるでしょう。逆方向
+であれば、@kbd{] p ]}とできます。
+
+@c Now type @kbd{]} to go to the next node and learn about menus.
+では、@kbd{]}を入力して、次のノードでメニューについて学びましょう。
+
+@node Help-M, Help-Xref, Help-Inv, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section Menus and the @kbd{m} command
+@section メニューと`m'コマンド
+
+@cindex menus in an Info document
+@cindex Infoのメニュー
+@cindex Info menus
+@c   With only the @kbd{n} (next), @kbd{p} (previous), @kbd{@key{SPC}},
+@c @kbd{@key{BACKSPACE}}, @kbd{]} and @kbd{[} commands for moving between
+@c nodes, nodes are restricted to a linear sequence.  Menus allow a
+@c branching structure.  A menu is a list of other nodes you can move to.
+@c It is actually just part of the text of the node formatted specially
+@c so that Info can interpret it.  The beginning of a menu is always
+@c identified by a line which starts with @w{@samp{* Menu:}}.  A node
+@c contains a menu if and only if it has a line in it which starts that
+@c way.  The only menu you can use at any moment is the one in the node
+@c you are in.  To use a menu in any other node, you must move to that
+@c node first.
+ノード間の移動に使用する`n'(次)と`p'(前)、@kbd{@key{SPC}}、
+@kbd{@key{BACKSPACE}}、@kbd{]}、@kbd{[}コマンドだけでは，ノード
+は直線的な操作に制限されます．メニューで，構造的に分岐することが可能にな
+ります．メニューは，移動可能な他のノードのリストです．それは実際に，Info
+が解釈可能な，特殊な書式のノードのテキストの一部です．メニューのはじめは，
+常に`* Menu:'で始まる行で識別されます．その方法で始まっている行の場
+合だけ，ノードにメニューが含まれます．使用可能なメニューだけが，常に移動
+可能なノードです．他のノードでメニューを使用するため，最初にノードに移動
+する必要があります．
+
+@c   After the start of the menu, each line that starts with a @samp{*}
+@c identifies one subtopic.  The line usually contains a brief name for
+@c the subtopic (followed by a @samp{:}, normally hidden in Emacs), the
+@c name of the node that talks about that subtopic (again, normally
+@c hidden in Emacs), and optionally some further description of the
+@c subtopic.  Lines in the menu that do not start with a @samp{*} have no
+@c special meaning---they are only for the human reader's benefit and do
+@c not define additional subtopics.  Here is an example:
+メニューの最初から，@samp{*}で始まるそれぞれの行はサブトピックを示します．
+行は普通，サブトピックの名前を(@samp{:}に続いて)含んでいて，ノード名はサ
+ブトピックについて説明し，追加としてサブトピックの説明があります．
+@samp{*}で始まらないメニューの行は特別な意味を持ちません -- それらは読
+み易いようになっているだけで，追加のサブトピックを宣言しているものではあ
+りません．例は以下のようになります．
+
+@example
+* Foo:  Node about FOO.      This tells about FOO.
+@end example
+
+@c The subtopic name is Foo, and the node describing it is @samp{Node
+@c about FOO}.  The rest of the line is just for the reader's
+@c Information.  [[ But this line is not a real menu item, simply because
+@c there is no line above it which starts with @w{@samp{* Menu:}}.  Also,
+@c in a real menu item, the @samp{*} would appear at the very start of
+@c the line.  This is why the ``normally hidden'' text in Emacs, namely
+@c @samp{: Node about FOO.}, is actually visible in this example, even
+@c when Visible mode is off.]]
+サブトピックの名前はFooで，ノードは@samp{Node about FOO}を説明していま
+す．行の残りは読む人への情報です．[[しかし，この行は本当のメニューアイ
+テムではなく，それは単に，上の行が@samp{* Menu:}で始まっていないからで
+す．本当のメニューアイテムで @samp{*} は行の最初にあります。これは "
+通常は隠された"テキストである@samp{: Node about FOO.}が、この例では
+Visivle modeがオフの時でさえ、見えているからです。"]]
+
+@c   When you use a menu to go to another node (in a way that will be
+@c described soon), what you specify is the subtopic name, the first
+@c thing in the menu line.  Info uses it to find the menu line, extracts
+@c the node name from it, and goes to that node.  The reason that there
+@c is both a subtopic name and a node name is that the node name must be
+@c meaningful to the computer and may therefore have to be ugly looking.
+@c The subtopic name can be chosen just to be convenient for the user to
+@c specify.  Often the node name is convenient for the user to specify
+@c and so both it and the subtopic name are the same.  There is an
+@c abbreviation for this:
+他のノードに行くためメニューを使用するとき(その方法はまもなく説明します)，
+指定するはサブトピック名で，メニュー行の最初にあるものです．Infoはメニュー
+行を探すためにそれを使用し，それからノード名に復元し，そのノードへ行きま
+す．サブトピック名とノード名の両方がある理由は，ノード名はコンピュータに
+対して意味が多すぎ，そのため汚く見えるかもしれないためです．サブトピック
+名は，ユーザの指定で便利にするためだけに選択することが可能です．ノード名
+はユーザが指定するのに便利で，サブトピックと同じ名前のときも良くあります．
+このため以下のような省略があります．
+
+@example
+* Foo::   This tells about FOO.
+@end example
+
+@noindent
+@c This means that the subtopic name and node name are the same; they are
+@c both @samp{Foo}.  (The @samp{::} is normally hidden in Emacs.)
+これはサブトピック名とノード名が同じで，`Foo'だということを意味します．
+(@samp{::} は通常Emacsでは非表示になります)
+
+@format
+@c >> Now use @key{SPC} to find the menu in this node, then come back to
+@c    the front with a @kbd{b} and some @key{SPC}s.  As you see, a menu is
+@c    actually visible in its node.  If you cannot find a menu in a node
+@c    by looking at it, then the node does not have a menu and the
+@c    @kbd{m} command is not available.
+>> 今，このノードのメニューを見つけるために@key{SPC}を使用し，bと
+   @key{SPC}で前に戻ってください．御覧のように，メニューは実際にノードに
+   現れます．ノードを見てもメニューが見つからない場合は，ノードにメニュー
+   が無く，mコマンドは利用できません．
+@end format
+
+@c If you keep typing @key{SPC} once the menu appears on the screen, it
+@c will move to another node (the first one in the menu).  If that
+@c happens, type @key{BACKSPACE} to come back.
+スクリーンにメニューが表示された状態で@key{SPC}を1回入力すると、他のノー
+ド(メニューの最初のノード)へ移動します。その場合には、@key{BACKSPACE}
+で戻ります。
+
+@kindex m @r{(Info mode)}
+@c   The command to go to one of the subnodes is @kbd{m}.  This is very
+@c different from the commands you have used: it is a command that
+@c prompts you for more input.
+サブノードの1つに行くコマンドは@kbd{m}です。このコマンドは既に使用した
+コマンドとは、さらに入力を求める点が大きく異なっています。
+
+@c   The Info commands you know do not need additional input; when you
+@c type one of them, Info processes it instantly and then is ready for
+@c another command.  The @kbd{m} command is different: it needs to know
+@c the @dfn{name of the subtopic}.  Once you have typed @kbd{m}, Info
+@c tries to read the subtopic name.
+既に知っているコマンドではそのような追加入力は必要ありませんでした。キー
+を入力すれば、Infoはすぐに処理を済ませ、他のコマンドが使用可能になりま
+す。しかし、@kbd{m}コマンドは違い、@dfn{name of the subtopic(サ
+ブトピックの名前)} が必要になります。一度、@kbd{m}を入力すると、サブト
+ピックの名前を読み取ろうとするのです。
+
+@c   Now, in the stand-alone Info, look for the line containing many
+@c dashes near the bottom of the screen.  (This is the stand-alone
+@c equivalent for the mode line in Emacs.)  There is one more line
+@c beneath that one, but usually it is blank.  (In Emacs, this is the
+@c echo area.)  When it is blank, Info is ready for a command, such as
+@c @kbd{n} or @kbd{b} or @key{SPC} or @kbd{m}.  If that line contains
+@c text ending in a colon, it means Info is reading more input for the
+@c last command.  You can't type an Info command then, because Info is
+@c trying to read input, not commands.  You must either give the input
+@c and finish the command you started, or type @kbd{Control-g} to cancel
+@c the command.  When you have done one of those things, the input entry
+@c line becomes blank again.  Then you can type Info commands again.
+スタンドアローンのInfoでは、今，画面の下近くのダッシュを多く含む行を探
+してください(スタンドアローンのInfoリーダではこれがEmacsのモードライン
+と同じものになります)．その下にもう一行ありますが，普通は空白です(この
+領域はEmacsならエコー領域になります)．空の場合，
+Infoは@kbd{n}や@kbd{b}や@key{SPC} や@kbd{m}といったコマンドに対する準備ができてい
+ます．その行がコロンで終るテキストを含んでいる場合，Infoが現在のコマン
+ドへの入力を読み込もうとしていることを意味します．そのときは，Infoが入
+力を必要としていて，その入力を使用しようとしているので，コマンドは動作
+しません．それに応答するものを入力して開始したコマンドを終了するか，コ
+マンドをキャンセルするために@kbd{Control-g}を入力する必要があります．この
+ようなことをやり終えると，行はまた空白になります．
+
+@findex Info-menu
+@c   The command to go to a subnode via a menu is @kbd{m}.  After you
+@c type the @kbd{m}, the line at the bottom of the screen says @samp{Menu
+@c item: }.  You must then type the name of the subtopic you want, and
+@c end it with a @key{RET}.  In Emacs, @kbd{m} runs the command
+@c @code{Info-menu}.
+メニューでサブノードに行くコマンドは@kbd{m}です．@kbd{m}を入力後，画面の
+下の行は@samp{Menu item: } と表示します．行きたいサブトピック名を入力し，
+終りに@key{RET}を入力する必要があります．Emacsでは，@kbd{m}はコマンド
+@code{Info-menu}を実行します．
+
+@cindex abbreviating Info subnodes
+@c   You can abbreviate the subtopic name.  If the abbreviation is not
+@c unique, the first matching subtopic is chosen.  Some menus put
+@c the shortest possible abbreviation for each subtopic name in capital
+@c letters, so you can see how much you need to type.  It does not
+@c matter whether you use upper case or lower case when you type the
+@c subtopic.  You should not put any spaces at the end, or inside of the
+@c item name, except for one space where a space appears in the item in
+@c the menu.
+サブトピック名を省略することが可能です．省略がユニークでない場合，最初に
+一致したサブトピックが選択されます．メニューには，それぞれのサブトピック
+名に対して，大文字で可能な限り短い省略を書いているものもあるので，必要な
+入力数が分かります．サブトピックを入力するとき，大文字小文字は問題ありま
+せん．アイテム名の終りや内部にスペースを入れるべきではありませんが，メ
+ニュー項目にスペースがある場合は例外です．
+
+@cindex completion of Info node names
+@c   You can also use the @dfn{completion} feature to help enter the
+@c subtopic name.  If you type the @key{TAB} key after entering part of a
+@c name, it will fill in more of the name---as much as Info can deduce
+@c from the part you have entered.
+サブトピック名の入力を助けるため，@dfn{補完}機能も使用可能です．名前の一
+部を入力後，@key{TAB}キーを入力した場合，残りの名前が手品のように埋まり
+ます -- 入力からユニークなものをできるだけ続けます．
+
+@c   If you move the cursor to one of the menu subtopic lines, then you do
+@c not need to type the argument: you just type a @key{RET}, and it
+@c stands for the subtopic of the line you are on.  You can also click
+@c the middle mouse button directly on the subtopic line to go there.
+カーソルをメニューのサブトピック行に移動した場合，引数を入力する必要はあ
+りません．@key{RET}を入力するだけで，それで行のサブトピックに行きます．
+サブトピック行でマウスの中ボタンをクリックして移動することもできます。
+
+@c Here is a menu to give you a chance to practice.  This menu gives you
+@c three ways of going to one place, Help-FOO:
+練習用に与えられたメニューが以下にあります．このメニューは1つの場所，
+Help-FOOに行く方法を3つ提供します．
+
+@menu
+* Foo:  Help-FOO.       A node you can visit for fun.
+* Bar:  Help-FOO.       We have made two ways to get to the same place.
+* Help-FOO::            And yet another!
+@end menu
+
+@c (Turn Visible mode on if you are using Emacs.)
+(Emacsを使っているのであれば、visible modeをオンにしなさい)
+
+@format
+@c >>  Now type just an @kbd{m} and see what happens:
+>>  今，mを入力し，何が起こるか見てください．
+@end format
+
+@c   Now you are ``inside'' an @kbd{m} command.  Commands cannot be used
+@c now; the next thing you will type must be the name of a subtopic.
+今，@kbd{m}コマンドの"内部"にいます．コマンドは今使用できません．次に
+することは，サブトピック名を入力することです．
+
+@c   You can change your mind about doing the @kbd{m} by typing
+@c @kbd{Control-g}.
+@kbd{Control-g}を入力することで，@kbd{m}した意図を変更することができます．
+
+@format
+@c >> Try that now;  notice the bottom line clear.
+>> 今それを試して，下の行がクリアされることを確認してください．
+@end format
+
+@format
+@c >> Then type another @kbd{m}.
+>> もう一度mを入力してください．
+@end format
+
+@format
+@c >> Now type @kbd{BAR}, the item name.  Do not type @key{RET} yet.
+>> アイテム名@kbd{BAR}を入力してください．まだ@key{RET}を入力しないでく
+   ださい．
+@end format
+
+@c   While you are typing the item name, you can use the @key{DEL} (or
+@c @key{BACKSPACE}) key to cancel one character at a time if you make a
+@c mistake.
+アイテム名を入力している間，間違えた場合に一文字キャンセルするため，
+@key{DEL}(または@key{BACKSPACE})キーを使用することが可能です．
+
+@format
+@c >> Press @key{DEL} to cancel the @samp{R}.  You could type another @kbd{R}
+@c    to replace it.  But you do not have to, since @samp{BA} is a valid
+@c    abbreviation.
+>> @samp{R}をキャンセルするために@key{DEL}を押してください．置換するため
+   もう一度@samp{R}を入力することが可能です．しかし，@samp{BA}は有効な省
+   略なので，そうする必要はありません．
+@end format
+
+@format
+@c >> Now you are ready to go.  Type a @key{RET}.
+>> 今，行く準備ができました．@key{RET}を入力してください．
+@end format
+
+@c   After visiting @samp{Help-FOO}, you should return here.
+`Help-FOO'に行った後，ここに戻るはずです．
+
+@c   Another way to move to the menu subtopic lines and between them is
+@c to type @key{TAB}.  Each time you type a @key{TAB}, you move to the
+@c next subtopic line.  To move to a previous subtopic line, type
+@c @kbd{M-@key{TAB}}---that is, press and hold the @key{META} key and then
+@c press @key{TAB}.  (On some keyboards, the @key{META} key might be labeled
+@c @samp{Alt}.)
+メニューのサブトピック行とそれらの間を移動するもう一つの方法は@key{TAB}
+を入力することです．@key{TAB}を入力するごとに，次のサブトッピック行に移
+動します．前のサブトピック行に移動する方法は，@kbd{M-@key{TAB}}を入力す
+る方法です -- すなわち，@key{META}キーを押すまたは押したままにし，それ
+から@key{TAB}を押します．(キーボードによっては，@key{META}キーは
+@samp{Alt}のラベルが付いているかもしれません．)
+
+@c   Once you move cursor to a subtopic line, press @key{RET} to go to
+@c that subtopic's node.
+サブトピック行にカーソルを移動すると，@key{RET}を押すことでそのサブトッ
+ピックのノードに行きます．
+
+@cindex mouse support in Info mode
+@cindex Infoモードのマウスサポート
+@kindex Mouse-2 @r{(Info mode)}
+@c   If your terminal supports a mouse, you have yet another way of going
+@c to a subtopic.  Move your mouse pointer to the subtopic line,
+@c somewhere between the beginning @samp{*} and the colon @samp{:} which
+@c ends the subtopic's brief name.  You will see the subtopic's name
+@c change its appearance (usually, its background color will change), and
+@c the shape of the mouse pointer will change if your platform supports
+@c that.  After a while, if you leave the mouse on that spot, a small
+@c window will pop up, saying ``Mouse-2: go to that node'', or the same
+@c message may appear at the bottom of the screen.
+端末がマウスをサポートしている場合，サブトピックに行く方法はもう一つあり
+ます．マウスポインタを，サブトピックの行の最初の@samp{*}から短いサブトピッ
+ク名の終りとなるコロン@samp{:}の間に移動してください．サブトピックの名
+前が変化するのが分かるでしょう(大抵は、背景色が変化する)。そしてプラッ
+トフォームがサポートしていればマウスポインタも変化することでしょう。マウスをその場所のま
+まにして，しばらくすると，"Mouse-2: go to that node"と告げているツール
+チップがポップアップされるか、同じメッセージがスクリーンの最下行に表示
+されます。
+
+@c   @kbd{Mouse-2} is the second button of your mouse counting from the
+@c left---the middle button on a 3-button mouse.  (On a 2-button mouse,
+@c you may have to press both buttons together to ``press the middle
+@c button''.)  The message tells you pressing @kbd{Mouse-2} with the
+@c current position of the mouse pointer (on subtopic in the menu) will
+@c go to that subtopic.
+@kbd{Mouse-2}は，左から数えてマウスの2番目のボタンです -- ボタンが2つの
+マウスでは右端になり，ボタンが3つのマウスでは真中になります．そして，マ
+ウスポインタがメニューのサブトピックにあるときに@kbd{Mouse-2}を押すと，
+ソノサブトッピックに移動します．
+
+@findex Info-mouse-follow-nearest-node
+  More generally, @kbd{Mouse-2} in an Info buffer finds the nearest
+link to another node and goes there.  For example, near a cross
+reference it acts like @kbd{f}, in a menu it acts like @kbd{m}, on the
+node's header line it acts like @kbd{n}, @kbd{p}, or @kbd{u}, etc.  At
+end of the node's text @kbd{Mouse-2} moves to the next node, or up if
+there's no next node.
+   より一般的には，Infoバッファで@kbd{Mouse-2}を押すと，他のノードの最も近
+いリンクを見つけ，そこに移動します．例えば，相互参照の近くでは@kbd{f}の
+ように動作し，メニューでは@kbd{m}のように動作し，ノードのヘッダ行では，
+@kbd{n}，@kbd{p}，または@kbd{u}のように動作します．ノードテキストの終り
+で@kbd{Mouse-2}を押すと，次のノードに移動したり，次のノードが無い場合は
+上のノードに移動します．
+
+@format
+@c >> Type @kbd{n} to see more commands.
+>> より多くのコマンドを理解するためにnを入力してください．
+@end format
+
+@node Help-FOO,  ,  , Help-M
+@c @subsection The @kbd{u} command
+@subsection @kbd{u} コマンド
+
+@c   Congratulations!  This is the node @samp{Help-FOO}.  It has an @samp{Up}
+@c pointer @samp{Help-M}, the node you just came from via the @kbd{m}
+@c command.  This is the usual convention---the nodes you reach from a menu
+@c have @samp{Up} nodes that lead back to the menu.  Menus move Down in the
+@c tree, and @samp{Up} moves Up.  @samp{Previous}, on the other hand, is
+@c usually used to ``stay on the same level but go backwards''.
+   おめでとう!これがノード@samp{Help-FOO}です．それには@samp{Help-M}へのポ
+インタ@samp{Up}があり，それは@kbd{m}コマンドでやってくる前のノードです．
+これは一般的な習慣です -- メニューからたどり着いたノードには，メニュー
+に戻るための@samp{Up}ノードがあります．メニューはツリー構造を降りていき，
+@samp{Up}は上がっていきます．一方，@samp{Previous}は普通"前に戻るのでは
+なく，同じレベルに留まる" ために使用されします．
+
+@kindex u @r{(Info mode)}
+@findex Info-up
+@c   You can go back to the node @samp{Help-M} by typing the command
+@c @kbd{u} for ``Up'' (the Emacs command run by @kbd{u} is
+@c @code{Info-up}).  That puts you at the @emph{front} of the node---to
+@c get back to where you were reading you have to type some @key{SPC}s.
+@c (Some Info readers, such as the one built into Emacs, put you at the
+@c same place where you were reading in @samp{Help-M}.)
+"Up"に対するコマンド@kbd{u}を入力して，ノード`Help-M'に戻ること可
+能です(@kbd{u}で実行されるEmacsコマンドは`Info-up'です)．それでノー
+ドの@emph{前}に行きます -- 読んでいたところに戻るため，何回か@key{SPC}
+を入力する必要があります．(Emacsに組み込まれているようなInfoリーダによっ
+ては，@samp{Help-M}で読んでいたのと同じ場所に行くものもあります．)
+
+@c   Another way to go Up is to click @kbd{Mouse-2} on the @samp{Up}
+@c pointer shown in the header line (provided that you have a mouse).
+上に行くもう一つの方法は，ヘッダ行に表示されている@samp{Up}ポインタを
+@kbd{Mouse-2}でクリックする方法です(マウスがあれば提供されています)．
+
+@format
+@c >> Now type @kbd{u} to move back up to @samp{Help-M}.
+>> 今，@samp{Help-M}に戻るため，@kbd{u}を入力してください．
+@end format
+
+@node Help-Xref, Help-Int, Help-M, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section Following Cross-References
+@section 相互参照をたどる
+
+@cindex cross references in Info documents
+@c   In Info documentation, you will see many @dfn{cross references}.
+@c Cross references look like this: @xref{Help-Cross, Cross}.  That text
+@c is a real, live cross reference, whose name is @samp{Cross} and which
+@c points to the node named @samp{Help-Cross}.  (The node name is hidden
+@c in Emacs.  Do @kbd{M-x visible-mode} to show or hide it.)
+Infoドキュメントで，@dfn{相互参照}を見ることも多いでしょう．相互参照は
+このように見えます．@xref{Help-Cross, Cross}。そのテキストは本物の利用
+可能な相互参照で，@samp{Cross}という名で，ノード名@samp{Help-Cross}を指
+しています(Emacsではノード名は隠されています。表示/非表示を切り替える
+には@kbd{M-x visible-mode}とします)．
+
+@kindex f @r{(Info mode)}
+@findex Info-follow-reference
+@c   There are two ways to follow a cross reference.  You can move the
+@c cursor to it and press @key{RET}, just as in a menu.  @key{RET}
+@c follows the cross reference that the cursor is on.  Or you can type
+@c @kbd{f} and then specify the name of the cross reference (in this
+@c case, @samp{Cross}) as an argument.  In Emacs Info, @kbd{f} runs
+@c @code{Info-follow-reference},
+相互参照をたどる方法は2つあります．カーソルをその上に移動し，メニューと
+同様に@key{RET}を押すことでできます．@key{RET}で，カーソルがある相互参照
+をたどります．また，@kbd{f}を入力し，相互参照の名前(この場合は
+@samp{Cross})を引数として指定することもできます．EmacsのInfoでは，
+@kbd{f}で@samp{Info-follow-reference}を実行します．
+
+@c   In the @kbd{f} command, you select the cross reference with its
+@c name, so it does not matter where the cursor was.  If the cursor is on
+@c or near a cross reference, @kbd{f} suggests that reference name in
+@c parentheses as the default; typing @key{RET} will follow that
+@c reference.  However, if you type a different reference name, @kbd{f}
+@c will follow the other reference which has that name.
+@kbd{f}コマンドでは，相互参照を名前で選択するので，カーソルの位置は問題
+になりません．カーソルが相互参照上やその近くにある場合，@kbd{f}はデフォ
+ルトとしてそれを参照する名前として提案します．@key{RET}を入力することで，
+その参照先をたどります．しかし，別の参照先の名を入力した場合，@kbd{f}は
+その名前を持つ別の参照先をたどります．
+
+@format
+@c >> Type @kbd{f}, followed by @kbd{Cross}, and then @key{RET}.
+>> @kbd{f}を入力し，@kbd{Cross}を続けて，@key{RET}を入力してください．
+@end format
+
+@c   As you enter the reference name, you can use the @key{DEL} (or
+@c @key{BACKSPACE}) key to edit your input.  If you change your mind
+@c about following any reference, you can use @kbd{Control-g} to cancel
+@c the command.  Completion is available in the @kbd{f} command; you can
+@c complete among all the cross reference names in the current node by
+@c typing a @key{TAB}.
+参照先の名前を入力するとき，入力したものを編集するために@key{DEL}(または
+@key{BACKSPACE})を使用することが可能です．参照先をたどるときに気が変わっ
+てしまった場合は，コマンドをキャンセルするために@kbd{Control-g}を使用す
+ることも可能です．@kbd{f}コマンドでは補完も利用可能です．現在のノードで
+@key{TAB}を入力すると，すべての相互参照を補完することが可能です．
+
+@c   To get a list of all the cross references in the current node, you
+@c can type @kbd{?} after an @kbd{f}.  The @kbd{f} continues to await a
+@c cross reference name even after displaying the list, so if you don't
+@c actually want to follow a reference, you should type a @kbd{Control-g}
+@c to cancel the @kbd{f}.
+現在のノードで全ての相互参照のリストを得るため，@kbd{f}の後で@kbd{?}を
+入力することが可能です．@kbd{f}はリストを出力した後でも相互参照名の指定
+を待っているので，実際には参照をたどるつもりが無い場合，@kbd{f}をキャン
+セルするため@kbd{Control-g}を入力すべきです．
+
+@format
+@c >> Type @kbd{f?} to get a list of the cross references in this node.  Then
+@c    type a @kbd{Control-g} and see how the @samp{f} gives up.
+>> このノードの相互参照のリストを得るため@kbd{f?}を入力してください．そ
+   して，@kbd{Control-g}を入力し，@kbd{f}を停止する方法を理解してくださ
+   い．
+@end format
+
+@c   The @key{TAB} and @kbd{M-@key{TAB}} key, which move between menu
+@c items in a menu, also move between cross references outside of menus.
+メニュー間を移動する@key{TAB}キーと@kbd{M-@key{TAB}}キーで，メニュー外部
+の相互参照へも移動します．
+
+@c   Sometimes a cross reference (or a node) can lead to another file (in
+@c other words another ``manual''), or, on occasion, even a file on a
+@c remote machine (although Info files distributed with Emacs or the
+@c stand-alone Info avoid using remote links).  Such a cross reference
+@c looks like this: @xref{Top,, Overview of Texinfo, texinfo, Texinfo:
+@c The GNU Documentation Format}.  (After following this link, type
+@c @kbd{l} to get back to this node.)  Here the name @samp{texinfo}
+@c between parentheses (shown in the stand-alone version) refers to the
+@c file name.  This file name appears in cross references and node names
+@c if it differs from the current file.  In Emacs, the file name is
+@c hidden (along with other text).  (Use @kbd{M-x visible-mode} to show
+@c or hide it.)
+時折、相互参照は別のファイル(言い換えると別の"マニュアル")や時にはリモー
+トマシンにあるファイルにさえ(InfoはEmacsと一緒に配布されているし、スタ
+ンドアローンのInfoではリモートリンクを使わないようにしているけれど)移
+動できます。そういった相互参照は次のようになります。@xref{Top,,
+Overview of Texinfo, texinfo, Texinfo: The GNU Documentation Format}。
+(このリンクを辿ったら、@kbd{l}でここへ戻る)。この括弧内にある
+@samp{texinfo} (スタンドアローン版で表示される)はファイル名を指してい
+ます。現在のファイルと違う場合には、相互参照にファイル名やノード名が表
+示されるのです。Emacsではファイル名は(他のテキストとともに)表示されて
+いません。(@kbd{M-x visible-mode}を使って表示/非表示にできます)
+
+@c   The remainder of this node applies only to the Emacs version.  If
+@c you use the stand-alone version, you can type @kbd{n} immediately.
+このノードの残りはEmacs版でのみ有効です。スタンドアローン版を使ってい
+る場合には、すぐに@kbd{n}を入力できます。
+
+@c   To some users, switching manuals is a much bigger switch than
+@c switching sections.  These users like to know that they are going to
+@c be switching to another manual (and which one) before actually doing
+@c so, especially given that, if one does not notice, Info commands like
+@c @kbd{t} (see the next node) can have confusing results.
+ユーザーによっては、章を移動することよりもマニュアルを移動することの方
+がかなり大きなことのように感じるかもしれません。こういったユーザーは、
+実際に他のマニュアルに移動する前にそのことを知りたがります。そして、与
+えられても気付かなければ、@kbd{t} (次のノードを参照のこと)のようなInfo
+コマンドはユーザを混乱させることになります。
+
+@c   If you put your mouse over the cross reference and if the cross
+@c reference leads to a different manual, then the information appearing
+@c in a separate box (tool tip) or in the echo area, will mention the
+@c file the cross reference will carry you to (between parentheses).
+@c This is also true for menu subtopic names.  If you have a mouse, just
+@c leave it over the @samp{Overview} cross reference above and watch what
+@c happens.
+マウスを相互参照の上に置き、その相互参照が別のマニュアルを指していれば、
+別のボックス(ツールチップ)やエコー領域に情報が表われ、相互参照によって
+移動するファイルを(括弧の中に)表示することでしょう。このことはメニュー
+のサブトピック名でも同じです。マウスがあって、相互参照 @samp{Overview}
+の上にマウスを置いておくと、何が起こるか分かるでしょう。
+
+@c   If you always like to have that information available without having
+@c to move your mouse over the cross reference, set
+@c @code{Info-hide-note-references} to a value other than t (@pxref{Emacs
+@c Info Variables}).  You might also want to do that if you have a lot of
+@c cross references to files on remote machines and have non-permanent or
+@c slow access, since otherwise you might not be able to distinguish
+@c between local and remote links.
+マウスを相互参照上に移動させることなく利用できる情報をいつでも得たい場
+合には、@code{Info-hide-note-references} を tから他の値に変更します
+(@pxref{Emacs Info Variables})。リモートマシンやアクセスの遅い場所への
+相互参照がたくさんあって、ローカルとリモートファイルへのリンクが区別で
+きないような場合に有効でしょう。
+
+@format
+@c >> Now type @kbd{n} to learn more commands.
+>> @kbd{n} を入力してさらに学びましょう
+@end format
+
+@node Help-Int, Help-Q, Help-Xref, Getting Started
+@comment  node-name,  next,  previous,  up
+@c @section Some intermediate Info commands
+@section 中級Infoコマンド
+
+@c   The introductory course is almost over; please continue
+@c a little longer to learn some intermediate-level commands.
+導入の講座はほとんど終りです．中級のコマンドを学ぶために，もう少し続けて
+ください．
+
+@c   Most Info files have an index, which is actually a large node that
+@c contains nothing but a menu.  The menu has one menu item for each
+@c topic listed in the index.  You can find the index node from the main
+@c menu of the file, with the @kbd{m} command; then you can use the
+@c @kbd{m} command again in the index node to go to the node that
+@c describes the topic.
+ほとんどのInfoファイルには索引があり，それは実際には，メニュー以外に何も
+ない大きなノードになっています．メニューには，索引でリストアップされてい
+るトピックごとに一つのメニューになっています．ファイルのメインメニューか
+ら，@kbd{m}コマンドで索引のノードを見つけることができます．トピックを記
+述しているノードに移動するために，索引ノードでもう一度@kbd{m}を使用する
+ことも可能です．
+
+@c   There is also a short-cut Info command, @kbd{i}, which does all of
+@c that for you.  It searches the index for a given topic (a string) and
+@c goes to the node which is listed in the index for that topic.
+@c @xref{Info Search}, for a full explanation.
+ショートカットInfoコマンド`i'もあり，それはすべてのことを行ないます．
+それは与えられたトッピック(文字列)を索引で検索し，そのトッピックに対する
+索引にリストアップされているノードに移動します．完全な説明は，@xref{Info Search}
+
+@kindex l @r{(Info mode)}
+@findex Info-last
+@cindex going back in Info mode
+@c   If you have been moving around to different nodes and wish to
+@c retrace your steps, the @kbd{l} command (@kbd{l} for @dfn{last}) will
+@c do that, one node-step at a time.  As you move from node to node, Info
+@c records the nodes where you have been in a special history list.  The
+@c @kbd{l} command revisits nodes in the history list; each successive
+@c @kbd{l} command moves one step back through the history.
+別のノードに移動していて，それまでの移動段階を再追跡したい場合，@kbd{l}
+コマンド(@kbd{l}は"last"に対応します)でそうすることができ，そのとき
+一度に一つのノードを移動します．ノードからノードに移動する間，Infoは特別
+な履歴リストに訪問したノードを記録します．@kbd{l}コマンドで，履歴リスト
+のノードにもう一度訪れることになります．@kbd{l}コマンドが成功するたび，
+履歴を一ステップ戻ります．
+
+@c   In Emacs, @kbd{l} runs the command @code{Info-last}.
+Emacsでは，@kbd{l}でコマンド@code{Info-last}を実行します．
+
+@format
+@c >> Try typing @kbd{p p n} and then three @kbd{l}'s, pausing in between
+@c to see what each @kbd{l} does.  You should wind up right back here.
+>> @kbd{p p n} と入力し、それから3度 @kbd{l} を入力しなさい。そして、それぞれの @kbd{l}
+   が行うことを理解するために停止しなさい。最後にはここに戻ってくるは
+   ずです。
+@end format
+
+@c   Note the difference between @kbd{l} and @kbd{p}: @kbd{l} moves to
+@c where @emph{you} last were, whereas @kbd{p} always moves to the node
+@c which the header says is the @samp{Previous} node (from this node, the
+@c @samp{Prev} link leads to @samp{Help-Xref}).
+@kbd{l}と@kbd{p}の違いに注意してください．@kbd{l}は前回_あなたが_い
+た場所に移動し，@kbd{p}は常にヘッダで@samp{Previous}ノードとされるノード
+(このノードでは@samp{Prev}は@samp{Help-Xref}に導くものです)に移動します．
+
+@kindex d @r{(Info mode)}
+@findex Info-directory
+@cindex go to Directory node
+@c   The @kbd{d} command (@code{Info-directory} in Emacs) gets you
+@c instantly to the Directory node.  This node, which is the first one
+@c you saw when you entered Info, has a menu which leads (directly or
+@c indirectly, through other menus), to all the nodes that exist.  The
+@c Directory node lists all the manuals and other Info documents that
+@c are, or could be, installed on your system.
+@kbd{d}コマンド(Emacsでは@code{Info-directory})で，ディレクトリノードに
+すぐに移動します．このノードは，Infoに入ったときに最初に見るもので，存在
+する全てのノードに(直接，あるいは間接的に他のメニューを通じて)導くメニュー
+があります．ディレクトリノードは，システムにインストールされている，また
+はされているはずの，すべてのマニュアルとInfoドキュメントをリストアップし
+ています．
+
+@format
+@c >> Try doing a @kbd{d}, then do an @kbd{l} to return here (yes,
+@c    @emph{do} return).
+>> @kbd{d}を試し，@kbd{l}でここに戻ってください(ええ，戻って@emph{くださ
+   い})．
+@end format
+
+@kindex t @r{(Info mode)}
+@findex Info-top-node
+@cindex go to Top node
+@c   The @kbd{t} command moves to the @samp{Top} node of the manual.
+@c This is useful if you want to browse the manual's main menu, or select
+@c some specific top-level menu item.  The Emacs command run by @kbd{t}
+@c is @code{Info-top-node}.
+@kbd{t}コマンドでマニュアルの@samp{Top}ノードに移動します．マニュアルの
+メインメニューを見たい場合や，特定のトップレベルのメニュー項目を選択した
+い場合に便利です．@kbd{t}で実行されるEmacsコマンドは@code{Info-top-node} です．
+
+@c   Clicking @kbd{Mouse-2} on or near a cross reference also follows the
+@c reference.  You can see that the cross reference is mouse-sensitive by
+@c moving the mouse pointer to the reference and watching how the
+@c underlying text and the mouse pointer change in response.
+相互参照の上やその近くで@kbd{Mouse-2}をクリックしても，その参照先をたどっ
+ていきます．マウスポインタを相互参照に移動し，それに応答してテキストに下
+線が引かれたマウスポインタが変化する状態を見ることで，相互参照がマウスに
+反応することが分かるはずです．
+
+@format
+@c >> Now type @kbd{n} to see the last node of the course.
+>> 今@kbd{n}を入力し，この講座の最後のノードを見てください．
+@end format
+
+@c   @xref{Expert Info}, for more advanced Info features.
+より高度なInfoの機能は，@xref{Expert Info}。
+
+@c If a menu appears at the end of this node, remove it.
+@c It is an accident of the menu updating command.
+
+@node Expert Info, Advanced
+@c @chapter Info for Experts
+@chapter 熟練者のための Info @emph{(2004/09/21)}
+
+@c   This chapter describes various Info commands for experts.  (If you
+@c are using a stand-alone Info reader, there are additional commands
+@c specific to it, which are documented in several chapters of @ref{Top,,
+@c GNU Info, info-stnd, GNU Info}.)
+この章では，様々な高度なInfoコマンドを記述しています．(スタンドアローン
+のInfoリーダを使用している場合，それ特有の追加コマンドがあり，それらは
+@ref{Top,,GNU Info, info-stnd, GNU Info}のいくつかの章で説明されています．)
+
+@c   This chapter also explains how to write an Info as distinct from a
+@c Texinfo file.  (However, in most cases, writing a Texinfo file is
+@c better, since you can use it to make a printed manual or produce other
+@c formats, such as HTML and DocBook, as well as for generating Info
+@c files.)  @xref{Top,, Overview of Texinfo, texinfo, Texinfo: The GNU
+@c Documentation Format}.
+この章では，Texinfoファイルとは異なるInfoの書き方を記述しています．(し
+かし，Infoファイルと印刷されたマニュアル、HTMLやDocBookのような書式な
+どで生成することが可能なので，ほとんどの状況ではTexinfoファイルを書く
+方がいいでしょう．)@xref{Top,, Overview of Texinfo, texinfo, Texinfo:
+The GNU Documentation Format}
+
+@menu
+* Advanced::             Advanced Info commands: g, e, and 1 - 9.
+* Info Search::          How to search Info documents for specific subjects.
+* Add::                  Describes how to add new nodes to the hierarchy.
+                           Also tells what nodes look like.
+* Menus::                How to add to or create menus in Info nodes.
+* Cross-refs::           How to add cross-references to Info nodes.
+* Tags::                 How to make tags tables for Info files.
+* Checking::             Checking an Info File
+* Emacs Info Variables:: Variables modifying the behavior of Emacs Info.
+@end menu
+
+@node Advanced, Info Search,  , Expert Info
+@comment  node-name,  next,  previous,  up
+@c @section Advanced Info Commands
+@section 高度なInfoコマンド
+
+@c Here are some more Info commands that make it easier to move around.
+より容易に動き回るれるようになる Info コマンドには以下のものがあります．
+
+@c @unnumberedsubsec @kbd{g} goes to a node by name
+@unnumberedsubsec @kbd{g} で指名したノードに移動する
+
+@kindex g @r{(Info mode)}
+@findex Info-goto-node
+@cindex go to a node by name
+@c   If you know a node's name, you can go there by typing @kbd{g}, the
+@c name, and @key{RET}.  Thus, @kbd{gTop@key{RET}} would go to the node
+@c called @samp{Top} in this file.  (This is equivalent to @kbd{t}, see
+@c @ref{Help-Int}.)  @kbd{gAdvanced@key{RET}} would come back here.
+@c @kbd{g} in Emacs runs the command @code{Info-goto-node}.
+ノードの名前を知っている場合，@kbd{g}，名前，@key{RET}と入力することでそ
+こに移動することが可能です．このため，@kbd{gTop@key{RET}}でこのファイル
+の@samp{Top}と呼ばれるノードへ移動します．(これは@kbd{t}と同じです．@ref{Help-Int}
+を参照してください．) @kbd{gExpert@key{RET}}でここへ戻って
+きます．Emacsでは@kbd{g}でコマンド@code{Info-goto-node}を実行します．
+
+@c   Unlike @kbd{m}, @kbd{g} does not allow the use of abbreviations.
+@c But it does allow completion, so you can type @key{TAB} to complete a
+@c partial node name.
+@kbd{m}とは異なり，@kbd{g}では省略を使用できません．しかし，補完は可能な
+ので，@key{TAB}を入力して部分的なノード名を完全なものにすることが可能で す．
+
+@cindex go to another Info file
+@c   To go to a node in another file, you can include the file name in the
+@c node name by putting it at the front, in parentheses.  Thus,
+@c @kbd{g(dir)Top@key{RET}} would go to the Info Directory node, which is
+@c the node @samp{Top} in the Info file @file{dir}.  Likewise,
+@c @kbd{g(emacs)Top@key{RET}} goes to the top node of the Emacs manual.
+他のファイルのノードへ移動するため，ノード名の前に，カッコ内にファイル名
+を含めることが可能です．このため，@kbd{g(dir)Top@key{RET}}でInfoディレク
+トリノードへ移動し，それはファイル@file{dir}の@samp{Top}ノードです．同様
+に，@kbd{g(emacs)Top@key{RET}}でEmacsのマニュアルのトップノードに移動し ます．
+
+@c   The node name @samp{*} specifies the whole file.  So you can look at
+@c all of the current file by typing @kbd{g*@key{RET}} or all of any
+@c other file with @kbd{g(@var{filename})@key{RET}}.
+ノード名@samp{*}はファイル全体を指定します．そのため，@kbd{g*@key{RET}}
+と入力することで現在のファイルの全てを見たり，@kbd{g(FILENAME)@key{RET}}
+で他のファイルの全てを見ることが可能です．
+
+@c @unnumberedsubsec @kbd{1} -- @kbd{9} choose a menu subtopic by its number
+@unnumberedsubsec @kbd{1} -- @kbd{9} でメニューのサブトピックを選択する
+
+@kindex 1 @r{through} 9 @r{(Info mode)}
+@findex Info-nth-menu-item
+@cindex select @var{n}'th menu item
+@cindex @var{n} 番目のメニューを選択
+@c   If you begrudge each character of type-in which your system requires,
+@c you might like to use the commands @kbd{1}, @kbd{2}, @kbd{3}, @kbd{4},
+@c @dots{}, @kbd{9}.  They are short for the @kbd{m} command together
+@c with a name of a menu subtopic.  @kbd{1} goes through the first item
+@c in the current node's menu; @kbd{2} goes through the second item, etc.
+@c In the stand-alone reader, @kbd{0} goes through the last menu item;
+@c this is so you need not count how many entries are there.  In Emacs,
+@c the digit keys run the command @code{Info-nth-menu-item}.
+システムが要求するそれぞれの入力文字がいやな場合，コマンド@kbd{1}，
+@kbd{2}，@kbd{3}，@kbd{4}，@dots{}，@kbd{9}の使用を好むでしょう．それらは，
+引数と供に使用されている@kbd{m}コマンドの短いものです．@kbd{1}は現在のノー
+ドメニューの最初のものに行きます．@kbd{2}は2番目の項目に行く等となってい
+ます．スタンドアローンのInfoリーダでは@kbd{0}で最後のメニュー項目まで移
+動します．これで，存在するたくさんの項目を数える必要が無くなります．
+Enacsでは数字のキーはコマンド@code{Info-nth-menu-item}を実行します．
+
+@c   If your display supports multiple fonts, and you are using Emacs'
+@c Info mode to read Info files, the @samp{*} for the fifth menu item
+@c stands out, either in color or in some other attribute, such as
+@c underline, and so is the @samp{*} for the ninth item; this makes it
+@c easy to see at a glance which number to use for an item.
+画面が複数のフォントをサポートしていて，EmacsのInfoモードをInfoファイル
+を読むために使用している場合，5番目のメニュー項目に対する@samp{*}が目立
+つように，色が付いていたり，下線が引かれていたりするような他の属性があり，
+9番目の項目も同様になっています．これで，項目に対して使用されている番号
+をひと目で見ることが容易になります．
+
+@c   Some terminals don't support colors or underlining.  If you need to
+@c actually count items, it is better to use @kbd{m} instead, and specify
+@c the name, or use @key{TAB} to quickly move between menu items.
+端末によっては，色も下線もサポートしていません．実際に項目を数える必要が
+ある場合，その代わりに@kbd{m}を使用して名前を指定したり，メニュー間を素
+早く移動するために@key{TAB}を使用した方が良いでしょう．
+
+@c @unnumberedsubsec @kbd{e} makes Info document editable
+@unnumberedsubsec @kbd{e} でInfoドキュメントを編集可能にする
+
+@kindex e @r{(Info mode)}
+@findex Info-edit
+@cindex edit Info document
+@c   The Info command @kbd{e} changes from Info mode to an ordinary
+@c Emacs editing mode, so that you can edit the text of the current node.
+@c Type @kbd{C-c C-c} to switch back to Info.  The @kbd{e} command is allowed
+@c only if the variable @code{Info-enable-edit} is non-@code{nil}.
+Infoコマンド@kbd{e}で，Infoモードから普通のEmacs編集モードに変更し，それ
+で現在のノードのテキストを編集することが可能になります．Infoに切替えるた
+め，@kbd{C-c C-c}と入力してください．@kbd{e}コマンドは，変数
+@code{Info-enable-edit}が@code{nil}でない場合のみ利用可能です．
+
+@c   The @kbd{e} command only works in Emacs, where it runs the command
+@c @code{Info-edit}.  The stand-alone Info reader doesn't allow you to
+@c edit the Info file, so typing @kbd{e} there goes to the end of the
+@c current node.
+@kbd{e}コマンドはEmacsでのみ動作し，そこではコマンド@code{Info-edit}を実
+行します．スタンドアローンのInfoリーダではInfoファイルを変数可能にするこ
+とはできないので，@kbd{e}を入力するとノードの終りに移動します．
+
+@node Info Search, Add, Advanced, Expert Info
+@comment  node-name,  next,  previous,  up
+@c @section How to search Info documents for specific subjects
+@section 指定した主題が述べてあるInfoドキュメントを探す
+
+@cindex searching Info documents
+@cindex Info document as a reference
+@c   The commands which move between and inside nodes allow you to read
+@c the entire manual or its large portions.  But what if you need to find
+@c some information in the manual as fast as you can, and you don't know
+@c or don't remember in what node to look for it?  This need arises when
+@c you use a manual as a @dfn{reference}, or when it is impractical to
+@c read the entire manual before you start using the programs it
+@c describes.
+内部のノード間を移動するコマンドで，マニュアル全体や大きな部分を読むこと
+が可能になります．しかし，マニュアルの情報をできるだけ早く見つける必要が
+あり，それを探すノードは何かを知らない場合はどうでしょう？これは，マニュ
+アルを@dfn{リファレンス}として利用していたり，プログラムの使用を開始する
+前にマニュアル全体を読むのが非現実的な場合に生じます．
+
+@c   Info has powerful searching facilities that let you find things
+@c quickly.  You can search either the manual indices or its text.
+Infoには，素早く探すための強力な検索機能があります．マニュアルの索引やそ
+のテキストを検索することが可能です．
+
+@kindex i @r{(Info mode)}
+@findex Info-index
+@c   Since most subjects related to what the manual describes should be
+@c indexed, you should try the index search first.  The @kbd{i} command
+@c prompts you for a subject and then looks up that subject in the
+@c indices.  If it finds an index entry with the subject you typed, it
+@c goes to the node to which that index entry points.  You should browse
+@c through that node to see whether the issue you are looking for is
+@c described there.  If it isn't, type @kbd{,} one or more times to go
+@c through additional index entries which match your subject.
+マニュアルで記述されているものに関連しているほとんどの主題は索引にされて
+いるので，最初に索引を検索すべきでしょう．@kbd{i}コマンドで，主題を入力
+するように促され，索引で主題を検索します．入力した主題の索引項目が見つか
+る場合，索引項目が指し示しているノードに移動します．探している問題がそこ
+に記述されているかどうかを調べるためノードを見るべきでしょう．そうでなけ
+れば，主題に一致している追加の索引項目に移動するため，@kbd{,}を一回以上
+入力してください．
+
+@c   The @kbd{i} command finds all index entries which include the string
+@c you typed @emph{as a substring}.  For each match, Info shows in the
+@c echo area the full index entry it found.  Often, the text of the full
+@c index entry already gives you enough information to decide whether it
+@c is relevant to what you are looking for, so we recommend that you read
+@c what Emacs shows in the echo area before looking at the node it
+@c displays.
+@kbd{i}コマンドでは，@emph{文字列の一部}として入力した文字列が含まれるす
+べての索引項目が見つかります．一致するたびに，Infoは見つかった索引項目の
+全体をエコーエリアに表示します．索引項目全体のテキストで探しているものに
+関連しているかどうかを決定するのに十分な情報が得られることも多いので，そ
+のノードを表示してみる前に，Emacsがエコーエリアに表示したものを読むこと
+を我々は推奨します．
+
+@c   Since @kbd{i} looks for a substring, you can search for subjects even
+@c if you are not sure how they are spelled in the index.  For example,
+@c suppose you want to find something that is pertinent to commands which
+@c complete partial input (e.g., when you type @key{TAB}).  If you want
+@c to catch index entries that refer to ``complete'', ``completion'', and
+@c ``completing'', you could type @kbd{icomplet@key{RET}}.
+@kbd{i}は文字列の一部から検索するので，索引でどのように綴られているかが
+不確かな場合でも主題を検索することが可能です．例えば，入力の一部を補完
+(complete)する(例えば，@key{TAB}を入力するとき)コマンドに適切なものを探
+したいと仮定します．"complete"，"completion"，そして"completing"に
+ついて記述している索引を得たい場合，@kbd{icomplet@key{RET}}と入力するこ
+とが可能でしょう．
+
+@c   Info documents which describe programs should index the commands,
+@c options, and key sequences that the program provides.  If you are
+@c looking for a description of a command, an option, or a key, just type
+@c their names when @kbd{i} prompts you for a topic.  For example, if you
+@c want to read the description of what the @kbd{C-f} key does, type
+@c @kbd{iC-f@key{RET}}.  Here @kbd{C-f} are 3 literal characters
+@c @samp{C}, @samp{-}, and @samp{f}, not the ``Control-f'' command key
+@c you type inside Emacs to run the command bound to @kbd{C-f}.
+プログラムを説明しているInfoドキュメントでは，プログラムが提供しているコ
+マンド，オプション，そしてキーの組み合わせが索引にあるでしょう．コマンド，
+オプション，またはキーの記述を探している場合，@kbd{i}でトピックの入力を
+促されているとき，その名前を入力してください．例えば，@kbd{C-f}キーが行
+なうことの記述を読みたい場合，@kbd{iC-f@key{RET}}を入力してください．こ
+こで，@kbd{C-f}は3つのリテラル文字@samp{C}，@samp{-}，そして@kbd{f}のこ
+とで，@kbd{C-f}に割り当てられているコマンドを実行するためにEmacs内部で入
+力する"Control-f"のコマンドキーではありません．
+
+@c   In Emacs, @kbd{i} runs the command @code{Info-index}.
+Emacsでは，@kbd{i}でコマンド@code{Info-index}を実行します．
+
+@kindex s @r{(Info mode)}
+@findex Info-search
+@c   The @kbd{s} command allows you to search a whole file for a string.
+@c It switches to the next node if and when that is necessary.  You
+@c type @kbd{s} followed by the string to search for, terminated by
+@c @key{RET}.  To search for the same string again, just @kbd{s} followed
+@c by @key{RET} will do.  The file's nodes are scanned in the order
+@c they are in in the file, which has no necessary relationship to the
+@c order that they may be in the tree structure of menus and @samp{next}
+@c pointers.  But normally the two orders are not very different.  In any
+@c case, you can always do a @kbd{b} to find out what node you have
+@c reached, if the header is not visible (this can happen, because @kbd{s}
+@c puts your cursor at the occurrence of the string, not at the beginning
+@c of the node).
+@kbd{s}コマンドで，ファイル全体から文字列を検索することが可能になります．
+それは，必要場合は次のノードに切り替えます．@kbd{s}に続き探す文字列を入
+力し，@key{RET}で終了します．同じ文字列を再度検索するため，@kbd{s}に続け
+て@key{RET}を入力します．ファイルのノードはファイルにある順番で探され，
+それは，メニューのツリー構造と@samp{next}ポインタの順番に関連している必
+要はありません．しかし通常は，2つの順番はそんなに異なりません．あらゆる
+状況で，ヘッダが見えない場合(@kbd{s}でカーソルを文字があるところに移動し
+ても，そこはノードの最初ではないので，これは生じます)，到着したノードを
+判定するため@kbd{b}を実行することが可能です．
+
+@kindex M-s @r{(Info mode)}
+@c   In Emacs, @kbd{Meta-s} is equivalent to @kbd{s}.  That is for
+@c compatibility with other GNU packages that use @kbd{M-s} for a similar
+@c kind of search command.  Both @kbd{s} and @kbd{M-s} run in Emacs the
+@c command @code{Info-search}.
+Emacsでは，@kbd{Meta-s}は@kbd{s}と同じです．これは検索コマンドとして
+@kbd{M-s}を使用している，他のGNUパッケージとの互換性のためです．@kbd{s}
+と@kbd{M-s}はどちらもEmacsでコマンド@code{Info-search}を実行します．
+
+@node Add, Menus, Info Search, Expert Info
+@comment  node-name,  next,  previous,  up
+@c @section Adding a new node to Info
+@section Infoに新しいノードを追加する @emph{(2004/09/21)}
+
+@c To add a new topic to the list in the Info directory, you must:
+新しいトピックをInfoディレクトリのリストに追加するため，以下のようにする
+必要があります．
+
+@enumerate
+@item
+@c Create some nodes, in some file, to document that topic.
+そのトピックをドキュメントにするため，いくつかのファイルで，いくつかの
+ノードを作成してください．
+@item
+@c Put that topic in the menu in the directory.  @xref{Menus, Menu}.
+ディレクトリのメニューにそのトピックを書いてください．@xref{Menus, Menu}.
+@end enumerate
+
+  Usually, the way to create the nodes is with Texinfo (@pxref{Top,,
+Overview of Texinfo, texinfo, Texinfo: The GNU Documentation Format});
+this has the advantage that you can also make a printed manual or HTML
+from them.  You would use the @samp{@@dircategory} and
+@samp{@@direntry} commands to put the manual into the Info directory.
+However, if you want to edit an Info file manually and install it
+manually, here is how.
+通常，ノードを作る方法としてTexinfoを用います (@pxref{Top,, Overview
+of Texinfo, texinfo, Texinfo: The GNU Documentation Format})．これには，
+印刷されたマニュアルや HTML を作成することもできるという利点もあります．
+マニュアルとInfoディレクトリに追加に置くために、@samp{@@dircategory}
+と @samp{@@direntry} を使うことになるだろう。しかし，
+Infoファイルを編集して、それを自分でインストールしたい場合，以下の方法があります．
+
+@cindex node delimiters
+@cindex ノード区切り
+@c   The new node can live in an existing documentation file, or in a new
+@c one.  It must have a @samp{^_} character before it (invisible to the
+@c user; this node has one but you cannot see it), and it ends with either
+@c a @samp{^_}, a @samp{^L} (``formfeed''), or the end of file.@footnote{If
+@c you put in a @samp{^L} to end a new node, be sure that there is a
+@c @samp{^_} after it to start the next one, since @samp{^L} cannot
+@c @emph{start} a node.  Also, a nicer way to make a node boundary be a
+@c page boundary as well is to put a @samp{^L} @emph{right after} the
+@c @samp{^_}.}
+新しいノードを，既存のドキュメントファイルや，新しいものに書き込むこと
+が可能です．それは，その前に@samp{^_}文字が存在し(ユーザは見えません．この
+ノードには1つありますが，あなたは見ることができません)，それは，@samp{^_}，
+@samp{^L}("フォームフィード")，またはファイルの終りのいずれかで終了する必要
+があります．@footnote{@samp{^L}を新しいノードの終りに書く場合，@samp{^L}ではノー
+ドを_開始_することが不可能なので，その後に次のものを開始する`^_'がある
+ことを確かめてください．また，ノードの境界をページの境界にする良い方法
+は，@samp{^_}の_直後に_@samp{^L}を同じように書くことです．}
+
+@c   The @samp{^_} starting a node must be followed by a newline or a
+@c @samp{^L} newline, after which comes the node's header line.  The
+@c header line must give the node's name (by which Info finds it), and
+@c state the names of the @samp{Next}, @samp{Previous}, and @samp{Up}
+@c nodes (if there are any).  As you can see, this node's @samp{Up} node
+@c is the node @samp{Expert Info}.  The @samp{Next} node is @samp{Menus}.
+ノードを開始する@samp{^_}には，改行または@samp{^L}と改行を続ける必要があ
+り，その後にノードのヘッダ行を続けます．ヘッダ行には(Infoで見つかるよう
+に)ノード名を与える必要があり，@samp{Next}，@samp{Previous}，そして
+@samp{Up}ノード(存在する場合は全て)をの名前を述べる必要があります．御覧
+のように，このノードの@samp{Up}ノードはノード@samp{Expert Info}です．
+@samp{Next}ノードは@samp{Menus}です．
+
+@cindex node header line format
+@cindex format of node headers
+@cindex ノードのヘッダ行書式
+@c   The keywords @dfn{Node}, @dfn{Next}, @dfn{Previous}, and @dfn{Up}
+@c may appear in any order, anywhere in the header line, but the
+@c recommended order is the one in this sentence.  Each keyword must be
+@c followed by a colon, spaces and tabs, and then the appropriate name.
+@c The name may be terminated with a tab, a comma, or a newline.  A space
+@c does not end it; node names may contain spaces.  The case of letters
+@c in the names is insignificant.
+キーワード@dfn{Node}，@dfn{Next}，@dfn{Previous}，そして@dfn{Up}は，あら
+ゆる順番で，ヘッダ行のどこにでも書いてもかまいませんが，推奨される順番は
+この文のものです．それぞれのキーワードには，コロン，スペース，そしてタブ
+を続け，その後に適切な名前を続ける必要があります．名前はタブ，カンマ，ま
+たは改行で終了してもかまいません．スペースでは終了しません．ノード名には
+スペースを含めてもかまいません．名前の大文字小文字の違いは重要ではありま
+せん．
+
+@cindex node name format
+@cindex Directory node
+@c   A node name has two forms.  A node in the current file is named by
+@c what appears after the @samp{Node: } in that node's first line.  For
+@c example, this node's name is @samp{Add}.  A node in another file is
+@c named by @samp{(@var{filename})@var{node-within-file}}, as in
+@c @samp{(info)Add} for this node.  If the file name starts with ``./'',
+@c then it is relative to the current directory; otherwise, it is
+@c relative starting from the standard directory for Info files of your
+@c site.  The name @samp{(@var{filename})Top} can be abbreviated to just
+@c @samp{(@var{filename})}.  By convention, the name @samp{Top} is used
+@c for the ``highest'' node in any single file---the node whose @samp{Up}
+@c points out of the file.  The @samp{Directory} node is @file{(dir)}, it
+@c points to a file @file{dir} which holds a large menu listing all the
+@c Info documents installed on your site.  The @samp{Top} node of a
+@c document file listed in the @samp{Directory} should have an @samp{Up:
+@c (dir)} in it.
+ノード名には2つの形式が有ります．現在のファイルのノードは，ノードの最初
+の行の@samp{Node: }後に現われるもので命名されています．例えば，このノー
+ドの名前は@samp{Add}です．他のファイルのノードは，このノードの
+@samp{(info)Add}の様に，@samp{(@var{filename})@var{node-within-file}}で
+命名されています．ファイル名が"./"で始まる場合，それは現在のディレクト
+リと相対的になります．それ以外の場合，それはあなたのサイトの標準的なInfo
+ディレクトリから開始して相対的なものになります．名前
+@samp{(@var{filename})Top}は，@samp{(@var{filename})}で省略することが可
+能です．慣習で，名前@samp{Top}は，単一ファイルでの"最上位の"ノードに使
+用されます -- その@samp{Up}ノードはファイルの外部を指し示します．
+@samp{Directory}ノードは@samp{(dir)}で，それはサイトにインストールされて
+いるすべてのInfoドキュメントをリストしている大きなメニューを保持している
+ファイル@file{dir}を指し示します．@samp{Directory}でリストアップされてい
+るドキュメントファイルの@samp{Top}ノードには，その中に@samp{Up: (dir)}
+が有るでしょう．
+
+@cindex unstructured documents
+@c   The node name @kbd{*} is special: it refers to the entire file.
+@c Thus, @kbd{g*} shows you the whole current file.  The use of the
+@c node @kbd{*} is to make it possible to make old-fashioned,
+@c unstructured files into nodes of the tree.
+ノード名@kbd{*}は特別です．それはファイル全体を参照します．そのため，
+@kbd{g*}は現在のファイル全体を表示します．ノード@kbd{*}を使用することで，
+ファイルをツリーのノードに組織化しない，時代遅れの形式にすることを可能に
+します．
+
+@c   The @samp{Node:} name, in which a node states its own name, must not
+@c contain a file name, since when Info searches for a node, it does not
+@c expect a file name to be there.  The @samp{Next}, @samp{Previous} and
+@c @samp{Up} names may contain them.  In this node, since the @samp{Up}
+@c node is in the same file, it was not necessary to use one.
+ノード自身の名前を述べる@samp{Node:}の名前には，Infoがノードを探すとき，
+ファイル名が存在することを予期していないので，ファイル名を含めてはいけま
+せん．@samp{Next}，@samp{Previous}，そして@samp{Up}の名前ではそれらを含
+めてもかまいません．このノードで，@samp{Up}ノードは同じファイルに有るの
+で，それを使用する必要は有りません．
+
+@c   Note that the nodes in this file have a file name in the header
+@c line.  The file names are ignored by Info, but they serve as comments
+@c to help identify the node for the user.
+このファイルのノードには，ヘッダ行にファイル名があることに注意してくださ
+い．ファイル名はInfoで無視されますが，それらは，ユーザがノードを識別する
+助けとなるコメントとして提供されています．
+
+@node Menus, Cross-refs, Add, Expert Info
+@comment  node-name,  next,  previous,  up
+@section How to Create Menus
+@section メニューの作成方法 @emph{(2004/09/21)}
+
+@c   Any node in the Info hierarchy may have a @dfn{menu}---a list of subnodes.
+@c The @kbd{m} command searches the current node's menu for the topic which it
+@c reads from the terminal.
+Info階層のすべてのノードには，@dfn{メニュー}を持たせてもかまいません --
+それはサブノードのリストです．@kbd{m}コマンドで，端末から読み込まれたト
+ピックに対して現在のノードのメニューを検索します．
+
+@cindex menu and menu entry format
+@cindex メニューの書式
+@c   A menu begins with a line starting with @w{@samp{* Menu:}}.  The
+@c rest of the line is a comment.  After the starting line, every line
+@c that begins with a @samp{* } lists a single topic.  The name of the
+@c topic--what the user must type at the @kbd{m}'s command prompt to
+@c select this topic---comes right after the star and space, and is
+@c followed by a colon, spaces and tabs, and the name of the node which
+@c discusses that topic.  The node name, like node names following
+@c @samp{Next}, @samp{Previous} and @samp{Up}, may be terminated with a
+@c tab, comma, or newline; it may also be terminated with a period.
+メニューは@w{@samp{* Menu:}}で始まる行で開始します．行の残りはコメント
+です．行の先頭から@samp{* }で始まる全ての行は，単一のトピックをリスト
+アップします．トピックの名前 -- このトピックを選択するため，ユーザが
+@kbd{m}コマンドに与える必要がある引数 -- は，星型(アスタリスク)とスペー
+スの直後にあり，コロン，スペース，そしてタブが続き，そしてそのトピック
+を述べているノード名が続きます．@samp{Next}，@samp{Previous}，そして
+@samp{Up}が続くノード名に似ているノード名は，タブ，カンマ，または改行
+で終端してもかまいません．それは，ピリオドで終端してもかまいません．
+
+@c   If the node name and topic name are the same, then rather than
+@c giving the name twice, the abbreviation @samp{* @var{name}::} may be
+@c used (and should be used, whenever possible, as it reduces the visual
+@c clutter in the menu).
+ノード名とトピック名が同じ場合，2度名前を与える代わりに，省略の@samp{*
+@var{name}::}を使用してもかまいません(そして，それがメニューが乱雑にな
+るのを抑えるので，可能なときはいつでもそれを使用すべきです)．
+
+@c   It is considerate to choose the topic names so that they differ
+@c from each other very near the beginning---this allows the user to type
+@c short abbreviations.  In a long menu, it is a good idea to capitalize
+@c the beginning of each item name which is the minimum acceptable
+@c abbreviation for it (a long menu is more than 5 or so entries).
+トピック名の先頭付近がお互いに異なるようにトピック名を選択することは思慮
+深いことです -- これで，ユーザは短い省略の入力が可能になります．長いメ
+ニューでは，最小限受容できる省略となる，それぞれの項目名の初めを大文字化
+することは良い考えです(長いメニューとは，5つ以上の項目のものです)．
+
+@c   The nodes listed in a node's menu are called its ``subnodes'', and it
+@c is their ``superior''.  They should each have an @samp{Up:} pointing at
+@c the superior.  It is often useful to arrange all or most of the subnodes
+@c in a sequence of @samp{Next} and @samp{Previous} pointers so that
+@c someone who wants to see them all need not keep revisiting the Menu.
+ノードのメニューでリストアップされているノードは，(メニューのあるノード)
+の"サブノード"と呼ばれ，(メニューのあるノード自身は)それら(サブノード)
+の"上位"になります．(サブノードは)それぞれ，上位への@samp{Up:}を示すも
+のがあるべきです．(サブメニューの)全てを見たい人が，メニューに何度も訪れ
+る必要がないように，全てまたはほとんどのサブノードが@samp{Next}と
+@samp{Previous}ポインタで並ぶように整列すると役に立つことも多いでしょう．
+
+@c   The Info Directory is simply the menu of the node @samp{(dir)Top}---that
+@c is, node @samp{Top} in file @file{.../info/dir}.  You can put new entries
+@c in that menu just like any other menu.  The Info Directory is @emph{not} the
+@c same as the file directory called @file{info}.  It happens that many of
+@c Info's files live in that file directory, but they do not have to; and
+@c files in that directory are not automatically listed in the Info
+@c Directory node.
+Infoディレクトリは，ノード@samp{(dir)Top}の単純なメニューです -- すなわ
+ち，ファイル@file{.../info/dir}のノード@samp{Top}です．その他のあらゆる
+メニューと全く同じようなメニューに，新しい項目を書くことが可能です．Info
+ディレクトリは，@file{info}と呼ばれるファイルディレクトリと同じでは
+@emph{ありません}．Infoのファイルの多くは，そのファイルディレクトリに存
+在しますが，必須ではないこともあります．そして，そのディレクトリのファイ
+ルがInfoディレクトリのノードに自動的にリストアップされないこともあります．
+
+@c   Also, although the Info node graph is claimed to be a ``hierarchy'',
+@c in fact it can be @emph{any} directed graph.  Shared structures and
+@c pointer cycles are perfectly possible, and can be used if they are
+@c appropriate to the meaning to be expressed.  There is no need for all
+@c the nodes in a file to form a connected structure.  In fact, this file
+@c has two connected components.  You are in one of them, which is under
+@c the node @samp{Top}; the other contains the node @samp{Help} which the
+@c @kbd{h} command goes to.  In fact, since there is no garbage
+@c collector, nothing terrible happens if a substructure is not pointed
+@c to, but such a substructure is rather useless since nobody can
+@c ever find out that it exists.
+また，Infoノードグラフは，"階層的"だと主張されていますが，実際それは
+@emph{任意の}方向に向いたグラフにもなり得ます．共有されている構造とポイ
+ンタサイクルは完全に利用可能になっていて，表現の意味として適切な場合はそ
+れらが使用可能です．ファイルの全てのノードが，連結されている構造となる形
+式にする必要はありません．実際このファイルには，2つの連結されているコン
+ポーネントがあります．あなたはその中の1つにいて，それはノード@samp{Top}
+の下にあります．それ以外は@kbd{h}コマンドで行くノード@samp{Help}を含んで
+います．実際，ごみ収集人がいないので，サブ構造を示さなくても困った問題は
+ありませんが，しかしこのようなサブ構造は，今まで誰もその存在を見つけるこ
+とができないので，どちらかと言うと無用です．
+
+@node Cross-refs, Tags, Menus, Expert Info
+@comment  node-name,  next,  previous,  up
+@section Creating Cross References
+@section 相互参照を作成する @emph{(2004/09/21)}
+
+@cindex cross reference format
+@cindex 相互参照の書式
+@c   A cross reference can be placed anywhere in the text, unlike a menu
+@c item which must go at the front of a line.  A cross reference looks
+@c like a menu item except that it has @samp{*note} instead of @samp{*}.
+@c It @emph{cannot} be terminated by a @samp{)}, because @samp{)}'s are
+@c so often part of node names.  If you wish to enclose a cross reference
+@c in parentheses, terminate it with a period first.  Here are two
+@c examples of cross references pointers:
+相互参照は，行の先頭に書かれている必要があるメニュー項目と異なり，テキス
+トのどこにでも書くことが可能です．相互参照は，@samp{*}の代わりに
+@samp{*note}があること以外，メニュー項目のように見えます．それは，
+@samp{)}がノード名の一部にあることも多いので，@samp{)}で終端することは
+@emph{できません}．括弧で相互参照を囲みたい場合，ピリオドを最初に用いて
+終端してください．相互参照ポインタの2つの例は以下のようになります．
+
+@example
+*Note details: commands.  (See *note 3: Full Proof.)
+@end example
+
+@noindent
+@c @emph{These are just examples.}  The places they ``lead to'' do not
+@c really exist!
+@emph{これらは単なる例です．}それが"導く"場所は実際には存在しません！
+
+@menu
+* Help-Cross::                  Target of a cross-reference.
+@end menu
+
+
+@node Help-Cross,  ,  , Cross-refs
+@subsection The node reached by the cross reference in Info
+@subsection Infoの相互参照で到着するノード @emph{(2004/09/21)}
+
+@c   This is the node reached by the cross reference named @samp{Cross}.
+これは，@samp{Cross}と命名されている相互参照で到着するノードです．
+
+@c   While this node is specifically intended to be reached by a cross
+@c reference, most cross references lead to nodes that ``belong''
+@c someplace else far away in the structure of an Info document.  So you
+@c cannot expect this node to have a @samp{Next}, @samp{Previous} or
+@c @samp{Up} links pointing back to where you came from.  In general, the
+@c @kbd{l} (el) command is the only way to get back there.
+このノードは，相互参照で到着することを目的とした特殊なもので，ほとんどの
+相互参照は，Infoドキュメントの構造のどこか遠くに"属している"場所があり
+ます．そのため，このノードに来たところへ戻るための@samp{Next}，
+@samp{Previous}，または@samp{Up} へのリンクがあることを期待することはで
+きません．一般的に，@kbd{l} (el)コマンドがそこへ戻る唯一の方法です．
+
+@format
+@c >> Type @kbd{l} to return to the node where the cross reference was.
+>> 相互参照でやってきたノードに戻るために@kbd{l}を入力してください．
+@end format
+
+@node Help-Q,  , Help-Int, Getting Started
+@comment  node-name,  next,  previous,  up
+@section Quitting Info
+@section Infoを終了する @emph{(2004/09/21)}
+
+@kindex q @r{(Info mode)}
+@findex Info-exit
+@cindex quitting Info mode
+@cindex Infoを終了する
+@c   To get out of Info, back to what you were doing before, type @kbd{q}
+@c for @dfn{Quit}.  This runs @code{Info-exit} in Emacs.
+Infoから出てこれまでしていたことに戻るため，@dfn{Quit}するために@kbd{q}
+を入力してください．これはEmacsで@code{Info-exit}を実行します．
+
+@c   This is the end of the basic course on using Info.  You have learned
+@c how to move in an Info document, and how to follow menus and cross
+@c references.  This makes you ready for reading manuals top to bottom,
+@c as new users should do when they learn a new package.
+これがInfoの使用上の基本コースの最後です．Infoドキュメントでの移動方法と，
+メニューや相互参照をたどる方法を既に学んできました．これで，新しいパッケー
+ジを学ぶときに新しいユーザが行なう，マニュアルの最初から最後まで読む準備
+ができています．
+
+@c   Another set of Info commands is useful when you need to find
+@c something quickly in a manual---that is, when you need to use a manual
+@c as a reference rather than as a tutorial.  We urge you to learn
+@c these search commands as well.  If you want to do that now, follow this
+@c cross reference to @ref{Info Search}.
+それ以外のInfoコマンドは，マニュアルで何かを素早く探すときに役に立ちま
+す-- すなわち，マニュアルをチュートリアルとしてではなくリファレンスと
+して使用する必要があるときです．検索コマンドも同じように学んで欲しいと
+いう気持ちもあります．今そうしたい場合，この相互参照 @ref{Info Search} 
+をたどってください．
+
+@c Yet another set of commands are meant for experienced users; you can
+@c find them by looking in the Directory node for documentation on Info.
+@c Finding them will be a good exercise in using Info in the usual
+@c manner.
+更にもう一つのコマンドの組は，熟練ユーザに対して意味があります．Infoのド
+キュメントのディレクトリノードを探すと見つかるはずです．それらを見つける
+ことは，通常の方法でInfoを使用するための良い練習になるでしょう．
+
+@format
+@c >> Type @kbd{d} to go to the Info directory node; then type
+@c    @kbd{mInfo} and Return, to get to the node about Info and
+@c    see what other help is available.
+>> Infoディレクトリノードに移動するために@kbd{d}を入力してください．そし
+   て，Infoのノードと利用可能なそれ以外のヘルプを見るために，@kbd{mInfo}
+   とリターンを入力してください．
+@end format
+
+
+@node Tags, Checking, Cross-refs, Expert Info
+@comment  node-name,  next,  previous,  up
+@c @section Tags Tables for Info Files
+@section Infoファイルのタグ表 @emph{(2004/09/21)}
+
+@cindex tags tables in info files
+@cindex Infoファイルのタグ表
+@c   You can speed up the access to nodes of a large Info file by giving
+@c it a tags table.  Unlike the tags table for a program, the tags table for
+@c an Info file lives inside the file itself and is used
+@c automatically whenever Info reads in the file.
+大きなInfoファイルにタグ表を与えることで，ノードへのアクセスを速くするこ
+とが可能です．プログラムのタグ表と異なり，Infoファイルのタグ表はファイル
+自身に存在し，Infoがファイルを読み込むときはいつでも自動的に使用されます．
+
+@findex Info-tagify
+@c   To make a tags table, go to a node in the file using Emacs Info mode and type
+@c @kbd{M-x Info-tagify}.  Then you must use @kbd{C-x C-s} to save the
+@c file.  Info files produced by the @code{makeinfo} command that is part
+@c of the Texinfo package always have tags tables to begin with.
+タグ表を作成するため，Emacs Infoモードを使用しているファイルのノードへ
+行 き，@kbd{M-x Info-tagify}を入力してください．ファイルを保存するため， 
+@kbd{C-x C-s}を使用する必要があります．Texinfoパッケージの一部の
+@code{makeinfo}コマンドで生成されたInfoファイルは，常に最初にタグ表が
+あります．
+
+@cindex stale tags tables
+@cindex update Info tags table
+@cindex Info のタグ表を更新
+@c   Once the Info file has a tags table, you must make certain it is up
+@c to date.  If you edit an Info file directly (as opposed to editing its
+@c Texinfo source), and, as a result of deletion of text, any node moves back
+@c more than a thousand characters in the file from the position
+@c recorded in the tags table, Info will no longer be able to find that
+@c node.  To update the tags table, use the @code{Info-tagify} command
+@c again.
+一度Infoファイルにタグ表を持たせると，それが最新であることを確かめる必要
+があります．(Texinfoソースを編集するのではなく)Infoファイルを直接編集し，
+テキストが削除される結果として，タグ表が記録している位置からノードがファ
+イルの中で千文字以上移動される場合，Infoはもはやそのノードを見つけること
+ができないでしょう．タグ表を更新するため，再び@code{Info-tagify} コマン
+ドを使用してください．
+
+@c   An Info file tags table appears at the end of the file and looks like
+@c this:
+Infoファイルのタグ表はファイルの終わりにあり，以下のようになっています．
+
+@example
+^_^L
+Tag Table:
+File: info, Node: Cross-refs^?21419
+File: info,  Node: Tags^?22145
+^_
+End Tag Table
+@end example
+
+@noindent
+@c Note that it contains one line per node, and this line contains
+@c the beginning of the node's header (ending just after the node name),
+@c a @samp{DEL} character, and the character position in the file of the
+@c beginning of the node.
+ノードごとに1行を含んでいて，この行が，(ノード名の直後で終る)ノードヘッ
+ダの初めの部分，@samp{DEL}文字，そしてファイル内でのノードを開始する文字
+の位置を含んでいることに注意してください．
+
+@node Checking, Emacs Info Variables, Tags, Expert Info
+@section Checking an Info File
+@section Infoファイルの調査 @emph{(2004/09/21)}
+
+@c When creating an Info file, it is easy to forget the name of a node when
+@c you are making a pointer to it from another node.  If you put in the
+@c wrong name for a node, this is not detected until someone tries to go
+@c through the pointer using Info.  Verification of the Info file is an
+@c automatic process which checks all pointers to nodes and reports any
+@c pointers which are invalid.  Every @samp{Next}, @samp{Previous}, and
+@c @samp{Up} is checked, as is every menu item and every cross reference.  In
+@c addition, any @samp{Next} which does not have a @samp{Previous} pointing
+@c back is reported.  Only pointers within the file are checked, because
+@c checking pointers to other files would be terribly slow.  But those are
+@c usually few.
+Infoファイルを作成するとき，他のノードからのポインタを作成しているときに
+ノード名を簡単に忘れてしまうものです．ノードに対して間違った名前を書いた
+場合，誰かがInfoを使用してポインタへの移動を試みるまで発見されません．
+Infoファイルの照合は，すべてのノードへのポインタを調査して，無効なポイン
+タを報告する自動的な処理です．すべての@samp{Next}，@samp{Previous}，そし
+て@samp{Up}は，すべてのメニュー項目とすべての相互参照として調査されます．
+更に，@samp{Previous}を示すものを持たない@samp{Next}すべてが報告されます．
+他のファイルへのポインタの調査は大変遅いので，ファイル内の中のポインタの
+み調査されます．しかし，それらは通常ほとんどありません．
+
+@findex Info-validate
+@c To check an Info file, do @kbd{M-x Info-validate} while looking at any
+@c node of the file with Emacs Info mode.
+Infoファイルを調査するため，ファイルのノードを見ている間に，Emacs
+Info モードで@code{M-x Info-validate}をしてください．
+
+@node Emacs Info Variables, , Checking, Expert Info
+@c @section Emacs Info-mode Variables
+@section EmacsのInfoモード変数 @emph{(2004/09/21)}
+
+@c The following variables may modify the behavior of Info-mode in Emacs;
+@c you may wish to set one or several of these variables interactively, or
+@c in your @file{~/.emacs} init file.  @xref{Examining, Examining and Setting
+@c Variables, Examining and Setting Variables, emacs, The GNU Emacs
+@c Manual}.  The stand-alone Info reader program has its own set of
+@c variables, described in @ref{Variables,, Manipulating Variables,
+@c info-stnd, GNU Info}.
+以下の変数で，EmacsでのInfoモードの動作を修正してもかまいません．1つま
+たは複数のこれらの値を，対話的に，または@file{~/.emacs}初期化ファイル
+で設定してもかまいません．@xref{Examining, Examining and Setting
+Variables, Examining and Setting Variables, emacs, The GNU Emacs
+Manual}．スタンド アローンのInfoリーダプログラムには，@ref{Variables,,
+Manipulating Variables, info-stnd, GNU Info} に記述されている独自の変
+数セットがありま す．
+
+@vtable @code
+@item Info-directory-list
+@c The list of directories to search for Info files.  Each element is a
+@c string (directory name) or @code{nil} (try default directory).  If not
+@c initialized Info uses the environment variable @env{INFOPATH} to
+@c initialize it, or @code{Info-default-directory-list} if there is no
+@c @env{INFOPATH} variable in the environment.
+Infoファイルを探すディレクトリリストです．それぞれの項目は文字列(ディレ
+クトリ名)または@code{nil}(デフォルトディレクトリを試します)です．初期化
+されていない場合は，それを初期化するためにInfoはユーザ変数@env{INFOPATH}
+を使用し，環境変数@env{INFOPATH}が無い場合は，
+@code{Info-default-directory-list}を使用します．
+
+@c If you wish to customize the Info directory search list for both Emacs
+@c info and stand-alone Info, it is best to set the @env{INFOPATH}
+@c environment variable, since that applies to both programs.
+EmacsのInfoモードとスタンドアローンのInfoで，Infoが検索するディレクトリ
+のリストをカスタマイズしたい場合，両方のプログラムに適用される
+@env{INFOPATH}環境変数を設定するのが最も良い方法です．
+
+@item Info-additional-directory-list
+@c A list of additional directories to search for Info documentation files.
+@c These directories are not searched for merging the @file{dir} file.
+Infoドキュメントファイルを検索する追加のディレクトリリストです．これらの
+ディレクトリは，@file{dir}ファイルにマージするために検索されません．
+
+@item Info-fontify
+@c When set to a non-@code{nil} value, enables highlighting of Info
+@c files.  The default is @code{t}.  You can change how the highlighting
+@c looks by customizing the faces @code{info-node}, @code{info-xref},
+@c @code{info-header-xref}, @code{info-header-node}, @code{info-menu-5},
+@c @code{info-menu-header}, and @code{info-title-@var{n}-face} (where
+@c @var{n} is the level of the section, a number between 1 and 4).  To
+@c customize a face, type @kbd{M-x customize-face @key{RET} @var{face}
+@c @key{RET}}, where @var{face} is one of the face names listed here.
+@code{nil}ではない値に設定されるとき，Infoファイルの強調が利用可能です．
+デフォルトは@code{t}です．@code{info-node}，@code{info-xref}，
+@code{info-header-xref}, @code{info-header-node}, @code{info-menu-5},
+@code{info-menu-header} と @code{info-title-@var{n}-face}
+(Nはセクションレベルで，1から4の間の数です)，概観をカスタマイズするため，
+@kbd{M-x customize-face @key{RET} @var{face} @key{RET}}と入力してくださ い --
+@var{face}はここでリストアップされているものの一つになります．
+
+@item Info-hide-note-references
+@c As explained in earlier nodes, the Emacs version of Info normally
+@c hides some text in menus and cross-references.  You can completely
+@c disable this feature, by setting this option to @code{nil}.  Setting
+@c it to a value that is neither @code{nil} nor @code{t} produces an
+@c intermediate behavior, hiding a limited amount of text, but showing
+@c all text that could potentially be useful.
+既に説明したように，EmacsのInfoでは通常メニューと相互参照に含まれるテ
+キストの一部を隠します．このオプションを @code{nil} に設定することで，
+この機能を完全に無効にすることができます．この変数を@code{nil} でも
+@code{t}でもない値に設定すると，中間の振舞い，役立つすべてのテキストは
+表示するが限定的な用途しかないテキストは隠すようになります．
+
+@item Info-scroll-prefer-subnodes
+@c If set to a non-@code{nil} value, @key{SPC} and @key{BACKSPACE} (or
+@c @key{DEL}) keys in a menu visit subnodes of the current node before
+@c scrolling to its end or beginning, respectively.  For example, if the
+@c node's menu appears on the screen, the next @key{SPC} moves to a
+@c subnode indicated by the following menu item.  Setting this option to
+@c @code{nil} results in behavior similar to the stand-alone Info reader
+@c program, which visits the first subnode from the menu only when you
+@c hit the end of the current node.  The default is @code{nil}.
+@code{nil} でない値に設定すると，@key{SPC} と @key{BACKSPACE} (あるい
+は @key{DEL})キーをメニューで入力すると，最後か最初までスクロールする
+前にサブノードへ移動します．例えば，ノードのメニューがスクリーンに表わ
+れると，次に入力する @key{SPC} でメニューに含まれるサブノードへ移動で
+きます．このオプションを@code{nil}に設定すると，スタンドアローンのInfo
+リーダと似た動作になります．つまり，現在のノードの最後で入力した時のみ
+最初のサブノードへ移動します．デフォルトは @code{nil}です．
+
+@item Info-enable-active-nodes
+@c When set to a non-@code{nil} value, allows Info to execute Lisp code
+@c associated with nodes.  The Lisp code is executed when the node is
+@c selected.  The Lisp code to be executed should follow the node
+@c delimiter (the @samp{DEL} character) and an @samp{execute: } tag, like
+@c this:
+@code{nil}でない値が設定されているとき，ノードに関連付けされたLispコード
+をInfoが実行すること可能にします．Lispコードはノードが選択されたとき実行
+されます．実行されるLispコードにはノードデリミタ(@samp{DEL}文字)と以下の
+ような@samp{execute: }タグを続けるべきです．
+
+@example
+^_execute: (message "This is an active node!")
+@end example
+
+@item Info-enable-edit
+@c Set to @code{nil}, disables the @samp{e} (@code{Info-edit}) command.  A
+@c non-@code{nil} value enables it.  @xref{Add, Edit}.
+@code{nil}に設定し，@samp{e}(@code{Info-edit})コマンドを利用不可にします．
+@code{nil}でない値では，それが可能です．@xref{Add, Edit}
+@end vtable
+
+@node Creating an Info File, Index, Expert Info, Top
+@c @chapter Creating an Info File from a Texinfo File
+@chapter TexinfoファイルからInfoファイルを作成する @emph{(2004/09/21)}
+
+@c @code{makeinfo} is a utility that converts a Texinfo file into an Info
+@c file; @code{texinfo-format-region} and @code{texinfo-format-buffer} are
+@c GNU Emacs functions that do the same.
+@code{makeinfo}は，TexinfoファイルをInfoファイルに変換するユーティリティ
+です．@code{texinfo-format-region}と@code{texinfo-format-buffer}は，同じ
+ことを行なうGNU Emacsの関数です．
+
+@c @xref{Top,, Overview of Texinfo, texinfo, Texinfo: The GNU
+@c Documentation Format}, to learn how to write a Texinfo file.
+Texinfoファイルの書き方を学ぶため，@xref{Top,, Overview of Texinfo,
+texinfo, Texinfo: The GNU Documentation Format}を参照ください
+
+@c @xref{Creating an Info File,,, texinfo, Texinfo: The GNU Documentation
+@c Format}, to learn how to create an Info file from a Texinfo file.
+TexinfoファイルからInfoファイルの作成する方法を学ぶため，
+@xref{Creating an Info File,,, texinfo, Texinfo: The GNU Documentation
+Format} を参照ください
+
+@c @xref{Installing an Info File,,, texinfo, Texinfo: The GNU
+@c Documentation Format}, to learn how to install an Info file after you
+@c have created one.
+Infoファイルを作成後，インストール方法を学ぶため，@xref{Installing an
+Info File,,, texinfo, Texinfo: The GNU Documentation Format} を参照く
+ださい
+
+@node Index
+@c @unnumbered Index
+@unnumbered 索引
+
+@c This is an alphabetical listing of all the commands, variables, and
+@c topics discussed in this document.
+以下は，すべてのコマンド，変数，そしてこのドキュメントで説明しているトピッ
+クのアルファベット順のリストです．
+
+@printindex cp
+
+@bye
+
+@ignore
+   arch-tag: 965c1638-01d6-4156-9227-b10418b9d8e8
+@end ignore

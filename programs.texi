@@ -1,0 +1,3896 @@
+@c =============================================================
+@c = 元 翻 訳: 赤池英夫＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Programs, Building, Text, Top
+@c @chapter Editing Programs
+@chapter プログラムの編集
+@c @cindex Lisp editing
+@c @cindex C editing
+@c @cindex program editing
+@cindex Lispの編集
+@cindex Cの編集
+@cindex プログラムの編集
+
+@c   Emacs has many commands designed to understand the syntax of programming
+@c languages such as Lisp and C.  These commands can
+Emacsには、LispやCといったプログラム言語の構文を
+理解するように設計されたコマンドが数多くあります。
+以下のことを行えます。
+
+@itemize @bullet
+@item
+@c Move over or kill balanced expressions or @dfn{sexps} (@pxref{Lists}).
+釣り合った式や@dfn{S式}（@pxref{Lists}）を横断したりそれらをキルする。
+@item
+@c Move over or mark top-level expressions---@dfn{defuns}, in Lisp;
+@c functions, in C (@pxref{Defuns}).
+トップレベルの式、つまり、Lispの@dfn{defun}やCの関数（@pxref{Defuns}）を
+横断したりそれらにマークを設定する。
+@item
+@c Show how parentheses balance (@pxref{Matching}).
+括弧の対応具合を表示する（@pxref{Matching}）。
+@item
+@c Insert, kill or align comments (@pxref{Comments}).
+コメントの挿入／キル／整列（@pxref{Comments}）。
+@item
+@c Follow the usual indentation conventions of the language
+@c (@pxref{Program Indent}).
+使用言語の慣用的な字下げを踏襲する（@pxref{Program Indent}）。
+@end itemize
+
+@c   The commands for words, sentences and paragraphs are very useful in
+@c editing code even though their canonical application is for editing
+@c human language text.  Most symbols contain words (@pxref{Words});
+@c sentences can be found in strings and comments (@pxref{Sentences}).
+@c Paragraphs per se don't exist in code, but the paragraph commands are
+@c useful anyway, because programming language major modes define
+@c paragraphs to begin and end at blank lines (@pxref{Paragraphs}).
+@c Judicious use of blank lines to make the program clearer will also
+@c provide useful chunks of text for the paragraph commands to work
+@c on.
+単語／文／段落を扱うコマンドは、
+自然言語のテキストを編集するのが本来の目的ですが、
+コードを編集する場合にもおおいに役立ちます。
+なぜなら、たいていのシンボルは単語ですし（@pxref{Words}）、
+文は文字列やコメントの中にも含まれるからです（@pxref{Sentences}）。
+段落は本質的にはコードの中には存在しませんが、
+プログラム言語向けのメジャーモードでは、
+段落は空行で始まり空行で終わると定義するので、
+段落コマンドも役立ちます（@pxref{Paragraphs}）。
+空行をうまく使ってプログラムが整然と見えるようにすると、
+段落コマンドもうまく働きます。
+
+@c   The selective display feature is useful for looking at the overall
+@c structure of a function (@pxref{Selective Display}).  This feature causes
+@c only the lines that are indented less than a specified amount to appear
+@c on the screen.
+選択的表示機能は、関数の全体構成を眺めるのに便利です
+（@pxref{Selective Display}）。
+この機能は、指定幅以内の字下げ幅の行だけを表示します。
+
+@menu
+* Program Modes::       Major modes for editing programs.
+* Lists::	        Expressions with balanced parentheses.
+* List Commands::       The commands for working with list and sexps.
+* Defuns::	        Each program is made up of separate functions.
+			  There are editing commands to operate on them.
+* Program Indent::      Adjusting indentation to show the nesting.
+* Matching::	        Insertion of a close-delimiter flashes matching open.
+* Comments::	        Inserting, killing, and aligning comments.
+* Balanced Editing::    Inserting two matching parentheses at once, etc.
+* Symbol Completion::   Completion on symbol names of your program or language.
+* Which Function::      Which Function mode shows which function you are in.
+* Documentation::       Getting documentation of functions you plan to call.
+* Change Log::	        Maintaining a change history for your program.
+* Tags::	        Go direct to any function in your program in one
+			  command.  Tags remembers which file it is in.
+* Emerge::	        A convenient way of merging two versions of a program.
+* C Modes::             Special commands of C, C++, Objective-C, 
+                          Java, and Pike modes.
+* Fortran::	        Fortran mode and its special features.
+* Asm Mode::	        Asm mode and its special features.
+@end menu
+
+@node Program Modes
+@c @section Major Modes for Programming Languages
+@section プログラム言語向けメジャーモード
+
+@c @cindex modes for programming languages
+@cindex プログラム言語向けモード
+@c @cindex Perl mode
+@c @cindex Icon mode
+@c @cindex Awk mode
+@c @cindex Makefile mode
+@c @cindex Tcl mode
+@c @cindex CPerl mode
+@cindex Perlモード
+@cindex Iconモード
+@cindex Awkモード
+@cindex Makefileモード
+@cindex Tclモード
+@cindex CPerlモード
+@c   Emacs also has major modes for the programming languages Lisp, Scheme
+@c (a variant of Lisp), Awk, C, C++, Fortran, Icon, Java, Objective-C,
+@c Pascal, Perl, Pike, CORBA IDL, and Tcl.  There is also a major mode for
+@c makefiles, called Makefile mode.  An second alternative mode for Perl is
+@c called CPerl mode.
+Emacsには、Lisp、Scheme（Lispの方言の1つ）、Awk、C、C++、Fortran、
+Icon、Java、Objective-C、Pascal、Perl、Pike、CORBA IDL、
+Tclといった各種プログラム言語向けのメジャーモードがあります。
+makefile用のメジャーモード、makefileモードもあります。
+Perl向けの別のモードとして、cperlモードもあります。
+
+@c   Ideally, a major mode should be implemented for each programming
+@c language that you might want to edit with Emacs; but often the mode for
+@c one language can serve for other syntactically similar languages.  The
+@c language modes that exist are those that someone decided to take the
+@c trouble to write.
+理想的には、Emacsで編集する可能性のあるすべてのプログラム言語に対して、
+それぞれのメジャーモードを実装すべきです。
+しかし、ある言語向けのモードが、構文的に類似した他の言語にも
+使えることがよくあります。
+既存の言語モード群は、誰かがわざわざ書こうと決心したものです。
+
+@c   There are several forms of Lisp mode, which differ in the way they
+@c interface to Lisp execution.  @xref{Executing Lisp}.
+Lispモードにはいくつか変種がありますが、
+Lispを実行する際のインターフェイス方法が異なります。
+@xref{Executing Lisp}。
+
+@c   Each of the programming language major modes defines the @key{TAB} key
+@c to run an indentation function that knows the indentation conventions of
+@c that language and updates the current line's indentation accordingly.
+@c For example, in C mode @key{TAB} is bound to @code{c-indent-line}.
+@c @kbd{C-j} is normally defined to do @key{RET} followed by @key{TAB};
+@c thus, it too indents in a mode-specific fashion.
+各プログラム言語向けメジャーモードでは、
+その言語の慣用的な字下げ方法を理解し
+現在行をそのように字下げする関数を実行するように
+@key{TAB}キーを定義します。
+たとえば、Cモードでは、@key{TAB}は@code{c-indent-line}にバインドされています。
+また、@kbd{C-j}は、@key{RET}に続けて@key{TAB}を実行するように
+定義されています。
+つまり、モードに固有の字下げも行います。
+
+@c @kindex DEL @r{(programming modes)}
+@kindex DEL @r{（プログラミングモード）}
+@findex backward-delete-char-untabify
+@c   In most programming languages, indentation is likely to vary from line to
+@c line.  So the major modes for those languages rebind @key{DEL} to treat a
+@c tab as if it were the equivalent number of spaces (using the command
+@c @code{backward-delete-char-untabify}).  This makes it possible to rub out
+@c indentation one column at a time without worrying whether it is made up of
+@c spaces or tabs.  Use @kbd{C-b C-d} to delete a tab character before point,
+@c in these modes.
+多くのプログラム言語では、行ごとに字下げ量が異なります。
+そのため、そのような言語向けのメジャーモードでは、
+（コマンド@code{backward-delete-char-untabify}を使って）
+タブ文字を等価な個数の空白と同じに扱うように@key{DEL}を再定義しています。
+その結果、字下げが空白かタブのどちらで構成されているのか気にせずに、
+1度に1桁ずつ消去することが可能となります。
+そのようなモードでは、ポイントの直前にあるタブ文字を削除するには
+@kbd{C-b C-d}を使います。
+
+@c   Programming language modes define paragraphs to be separated only by
+@c blank lines, so that the paragraph commands remain useful.  Auto Fill mode,
+@c if enabled in a programming language major mode, indents the new lines
+@c which it creates.
+プログラム言語向けモードでは、段落は空行で分割されると定義するので、
+段落コマンドも便利に使えます。
+プログラム言語向けメジャーモードで
+自動詰め込み（auto-fill）モードがオンのときには、
+新たに行を作ると自動的に字下げも行われます。
+
+@c @cindex mode hook
+@cindex モードフック
+@vindex c-mode-hook
+@vindex lisp-mode-hook
+@vindex emacs-lisp-mode-hook
+@vindex lisp-interaction-mode-hook
+@vindex scheme-mode-hook
+@vindex muddle-mode-hook
+@c   Turning on a major mode runs a normal hook called the @dfn{mode hook},
+@c which is the value of a Lisp variable.  Each major mode has a mode hook,
+@c and the hook's name is always made from the mode command's name by
+@c adding @samp{-hook}.  For example, turning on C mode runs the hook
+@c @code{c-mode-hook}, while turning on Lisp mode runs the hook
+@c @code{lisp-mode-hook}.  @xref{Hooks}.
+メジャーモードに入ると、@dfn{モードフック}（mode hook）と
+呼ばれるノーマルフックが実行されます。
+モードフックは、Lisp変数の値です。
+各メジャーモードにはモードフックがあり、
+フック名はつねにモードに入るためのコマンド名に@samp{-hook}を付加したものです。
+たとえば、Cモードに入るとフック@code{c-mode-hook}が実行され、
+Lispモードではフック@code{lisp-mode-hook}が実行されます。
+@xref{Hooks}。
+
+@node Lists
+@c @section Lists and Sexps
+@section リストとS式
+
+@c @cindex Control-Meta
+@cindex コントロール・メタ
+@c   By convention, Emacs keys for dealing with balanced expressions are
+@c usually Control-Meta characters.  They tend to be analogous in
+@c function to their Control and Meta equivalents.  These commands are
+@c usually thought of as pertaining to expressions in programming
+@c languages, but can be useful with any language in which some sort of
+@c parentheses exist (including human languages).
+慣習として、釣り合った式を扱うEmacsのキーは、普通、コントロール・メタ文字です。
+これらは、コントロールやメタだけの対応したキーの機能に似せてあります。
+これらは、プログラム言語の式だけに関係したコマンドだと考えられがちですが、
+ある種の括弧が存在する（自然言語も含めた）任意の言語に対しても有益なものです。
+
+@c @cindex list
+@c @cindex sexp
+@c @cindex expression
+@cindex リスト
+@cindex S式
+@cindex 式
+@c   These commands fall into two classes.  Some deal only with @dfn{lists}
+@c (parenthetical groupings).  They see nothing except parentheses, brackets,
+@c braces (whichever ones must balance in the language you are working with),
+@c and escape characters that might be used to quote those.
+これらのコマンドは、2つのグループに分けられます。
+一方は（括弧でまとめた）@dfn{リスト}（list）@footnote{【訳注】
+ここでは、Lispの「リスト」ではなく、
+単に括弧で括った一塊のこと。}だけを扱うもので、
+丸括弧、角括弧、中括弧（使用言語において対応が取れている必要がある括弧）と、
+それらをクォートするエスケープ文字だけに注目するコマンド群です。
+
+@c   The other commands deal with expressions or @dfn{sexps}.  The word `sexp'
+@c is derived from @dfn{s-expression}, the ancient term for an expression in
+@c Lisp.  But in Emacs, the notion of `sexp' is not limited to Lisp.  It
+@c refers to an expression in whatever language your program is written in.
+@c Each programming language has its own major mode, which customizes the
+@c syntax tables so that expressions in that language count as sexps.
+もう一方は、式あるいは@dfn{S式}（sexp）を扱うコマンド群です。
+「sexp」という用語は、
+Lispの式を意味する古くからの用語@dfn{s-expression}に由来します。
+Emacsでは「S式」の概念をLispに限定しません。
+プログラムを記述した言語が何であっても、その式をS式と呼びます。
+各プログラム言語には独自のメジャーモードがあり、
+そこでは、その言語の式をS式とみなすように構文テーブルを調整してあります。
+
+@c   Sexps typically include symbols, numbers, and string constants, as well
+@c as anything contained in parentheses, brackets or braces.
+一般にS式には、丸括弧、角括弧、中括弧に囲まれた部分だけでなく、
+シンボル、数値、文字列定数も含まれます。
+
+@c   In languages that use prefix and infix operators, such as C, it is not
+@c possible for all expressions to be sexps.  For example, C mode does not
+@c recognize @samp{foo + bar} as a sexp, even though it @emph{is} a C expression;
+@c it recognizes @samp{foo} as one sexp and @samp{bar} as another, with the
+@c @samp{+} as punctuation between them.  This is a fundamental ambiguity:
+@c both @samp{foo + bar} and @samp{foo} are legitimate choices for the sexp to
+@c move over if point is at the @samp{f}.  Note that @samp{(foo + bar)} is a
+@c single sexp in C mode.
+Cのように前置演算子と中置演算子を使う言語では、
+すべての式をS式として扱うことは不可能です。
+たとえば、Cモードでは、@samp{foo + bar}はCの式@emph{です}が、
+S式としては認識しません。
+かわりに、@samp{foo}と@samp{bar}をそれぞれ1つのS式として認識し、
+@samp{+}はあいだにある句読点として認識します。
+これは根本的に曖昧なのです。
+たとえば、ポイントが@samp{f}にあるとき、横断すべきS式としては、
+@samp{foo + bar}でも@samp{foo}でも正当な選択肢です。
+@samp{(foo + bar)}は、Cモードにおいて単一のS式であることに注意してください。
+
+@c   Some languages have obscure forms of expression syntax that nobody
+@c has bothered to make Emacs understand properly.
+式の構文が曖昧なために、
+Emacsが正しく解釈できるようにしようなどとは誰も思わない言語もあります。
+
+@node List Commands
+@c @section List And Sexp Commands
+@section リストとS式に対するコマンド
+
+@c doublewidecommands
+@table @kbd
+@item C-M-f
+@c Move forward over a sexp (@code{forward-sexp}).
+S式を横断して前向きに移動する（@code{forward-sexp}）。
+@item C-M-b
+@c Move backward over a sexp (@code{backward-sexp}).
+S式を横断して後向きに移動する（@code{backward-sexp}）。
+@item C-M-k
+@c Kill sexp forward (@code{kill-sexp}).
+前向きにS式をキルする（@code{kill-sexp}）。
+@item C-M-@key{DEL}
+@c Kill sexp backward (@code{backward-kill-sexp}).
+後向きにS式をキルする（@code{backward-kill-sexp}）。
+@item C-M-u
+@c Move up and backward in list structure (@code{backward-up-list}).
+リスト構造を1レベル上がって後向きに移動する（@code{backward-up-list}）。
+@item C-M-d
+@c Move down and forward in list structure (@code{down-list}).
+リスト構造を1レベル下がって前向きに移動する（@code{down-list}）。
+@item C-M-n
+@c Move forward over a list (@code{forward-list}).
+リストを横断して前向きに移動する（@code{forward-list}）。
+@item C-M-p
+@c Move backward over a list (@code{backward-list}).
+リストを横断して後向きに移動する（@code{backward-list}）。
+@item C-M-t
+@c Transpose expressions (@code{transpose-sexps}).
+式を入れ替える（@code{transpose-sexps}）。
+@item C-M-@@
+@c Put mark after following expression (@code{mark-sexp}).
+つぎの式の直後にマークを設定する（@code{mark-sexp}）。
+@end table
+
+@kindex C-M-f
+@kindex C-M-b
+@findex forward-sexp
+@findex backward-sexp
+@c   To move forward over a sexp, use @kbd{C-M-f} (@code{forward-sexp}).  If
+@c the first significant character after point is an opening delimiter
+@c (@samp{(} in Lisp; @samp{(}, @samp{[} or @samp{@{} in C), @kbd{C-M-f}
+@c moves past the matching closing delimiter.  If the character begins a
+@c symbol, string, or number, @kbd{C-M-f} moves over that.
+S式を横断して前向きに移動するには、
+@kbd{C-M-f}（@code{forward-sexp}）を使います。
+ポイントに続く最初の意味ある文字が開き区切り
+（Lisp では@samp{(}、Cでは@samp{(}や@samp{[}や@samp{@{}）であれば、
+対応する閉じ区切りのうしろに移動します。
+シンボル、文字列、数値を始める文字の場合には、
+それらを横断してその末尾に移動します。
+
+@c   The command @kbd{C-M-b} (@code{backward-sexp}) moves backward over a
+@c sexp.  The detailed rules are like those above for @kbd{C-M-f}, but with
+@c directions reversed.  If there are any prefix characters (single-quote,
+@c backquote and comma, in Lisp) preceding the sexp, @kbd{C-M-b} moves back
+@c over them as well.  The sexp commands move across comments as if they
+@c were whitespace in most modes.
+コマンド@kbd{C-M-b}（@code{backward-sexp}）は、
+S式を横断して後向きに移動します。
+移動の詳しい規則は上記の@kbd{C-M-f}と同様ですが、方向は逆です。
+S式のまえに接頭辞文字（Lispではシングルクォート、バッククォート、コンマ）が
+ある場合には、それらも横断します。
+ほとんどのモードでは、S式コマンドはコメントを空白であるかのように
+飛び越えます。
+
+@c   @kbd{C-M-f} or @kbd{C-M-b} with an argument repeats that operation the
+@c specified number of times; with a negative argument, it moves in the
+@c opposite direction.
+@kbd{C-M-f}や@kbd{C-M-b}に引数を指定すると、
+指定された回数だけ動作を繰り返します。
+負の引数では、逆向きに移動します。
+
+@kindex C-M-k
+@findex kill-sexp
+@kindex C-M-DEL
+@findex backward-kill-sexp
+@c   Killing a whole sexp can be done with @kbd{C-M-k} (@code{kill-sexp})
+@c or @kbd{C-M-@key{DEL}} (@code{backward-kill-sexp}).  @kbd{C-M-k} kills
+@c the characters that @kbd{C-M-f} would move over, and @kbd{C-M-@key{DEL}}
+@c kills the characters that @kbd{C-M-b} would move over.
+1つのS式全体をキルするには、@kbd{C-M-k}（@code{kill-sexp}）や
+@kbd{C-M-@key{DEL}}（@code{backward-kill-sexp}）で行います。
+@kbd{C-M-k}は@kbd{C-M-f}で横断するだけの文字をキルし、
+@kbd{C-M-@key{DEL}}は@kbd{C-M-b}で横断するだけの文字をキルします。
+
+@kindex C-M-n
+@kindex C-M-p
+@findex forward-list
+@findex backward-list
+@c   The @dfn{list commands} move over lists, as the sexp commands do, but skip
+@c blithely over any number of other kinds of sexps (symbols, strings, etc.).
+@c They are @kbd{C-M-n} (@code{forward-list}) and @kbd{C-M-p}
+@c (@code{backward-list}).  The main reason they are useful is that they
+@c usually ignore comments (since the comments usually do not contain any
+@c lists).@refill
+S式コマンドと同様に、@dfn{リストコマンド}はリストを横断しますが、
+リスト以外のS式（シンボルや文字列など）は飛び越します。
+これらのコマンドは、@kbd{C-M-n}（@code{forward-list}）と
+@kbd{C-M-p}（@code{backward-list}）です。
+これらのコマンドが便利である主な理由は、
+（コメントにはリストが何も含まれないのが普通なので）
+コメントを無視するからです。
+
+@kindex C-M-u
+@kindex C-M-d
+@findex backward-up-list
+@findex down-list
+@c   @kbd{C-M-n} and @kbd{C-M-p} stay at the same level in parentheses, when
+@c that's possible.  To move @emph{up} one (or @var{n}) levels, use @kbd{C-M-u}
+@c (@code{backward-up-list}).
+@c @kbd{C-M-u} moves backward up past one unmatched opening delimiter.  A
+@c positive argument serves as a repeat count; a negative argument reverses
+@c direction of motion and also requests repetition, so it moves forward and
+@c up one or more levels.@refill
+@kbd{C-M-n}と@kbd{C-M-p}は、可能な限り同じレベルの括弧にとどまります。
+1つ（あるいは@var{n}だけ）@emph{上の}レベルに移動するには、
+@kbd{C-M-u}（@code{backward-up-list}）を使います。
+@kbd{C-M-u}は、対応の取れていない開き区切りのまえへ後向きに移動して、
+1つレベルを上げます。
+正の引数は反復回数になります。
+負の引数は、移動を逆向きにしますが、やはり反復回数です。
+つまり、前向きに移動して、1つ以上レベルを上げます。
+
+@c   To move @emph{down} in list structure, use @kbd{C-M-d}
+@c (@code{down-list}).  In Lisp mode, where @samp{(} is the only opening
+@c delimiter, this is nearly the same as searching for a @samp{(}.  An
+@c argument specifies the number of levels of parentheses to go down.
+リスト構造中で@emph{下}のレベルに移動するには、
+@kbd{C-M-d}（@code{down-list}）を使います。
+Lispモードでは、@samp{(}が唯一の開き区切りなので、
+このコマンドは@samp{(}を探索するのとほとんど同じです。
+引数は下がるべき括弧のレベルを指定します。
+
+@c @cindex transposition
+@cindex 入れ替え
+@kindex C-M-t
+@findex transpose-sexps
+@c   A somewhat random-sounding command which is nevertheless handy is
+@c @kbd{C-M-t} (@code{transpose-sexps}), which drags the previous sexp
+@c across the next one.  An argument serves as a repeat count, and a
+@c negative argument drags backwards (thus canceling out the effect of
+@c @kbd{C-M-t} with a positive argument).  An argument of zero, rather than
+@c doing nothing, transposes the sexps ending after point and the mark.
+本当は役に立つのに、何の役に立つのだろうと思われるコマンドが
+@kbd{C-M-t}（@code{transpose-sexps}）です。
+これはポイントのまえにあるS式を、つぎにあるS式を越えて移動するコマンドです。
+引数は反復回数となり、負の引数では後向きにS式を移動します
+（つまり正の引数を指定した@kbd{C-M-t}の効果を打ち消せる）。
+引数が0の場合は、何もしないのではなくて、
+ポイントのあとにあるS式とマークのあとにあるS式を入れ替えます。
+
+@kindex C-M-@@
+@findex mark-sexp
+@c   To set the region around the next sexp in the buffer, use @kbd{C-M-@@}
+@c (@code{mark-sexp}), which sets mark at the same place that @kbd{C-M-f}
+@c would move to.  @kbd{C-M-@@} takes arguments like @kbd{C-M-f}.  In
+@c particular, a negative argument is useful for putting the mark at the
+@c beginning of the previous sexp.
+バッファ内でつぎにあるS式の周りにリージョンを設定するには、
+@kbd{C-M-@@}（@code{mark-sexp}）を使います。
+このコマンドは、@kbd{C-M-f}による移動先にマークを設定します。
+@kbd{C-M-@@}は、@kbd{C-M-f}と同様に引数を取ります。
+とりわけ、負の引数は、直前のS式の先頭にマークを設定するのに便利です。
+
+@c   The list and sexp commands' understanding of syntax is completely
+@c controlled by the syntax table.  Any character can, for example, be
+@c declared to be an opening delimiter and act like an open parenthesis.
+@c @xref{Syntax}.
+リストおよびS式コマンドが行う構文の解釈は、
+構文テーブルに完全に支配されます。
+たとえば、任意の文字を開き区切りとして宣言できて、
+そうすると開き括弧のようにふるまうようになります。
+@xref{Syntax}。
+
+@node Defuns
+@c @section Defuns
+@section 関数定義（defun）
+@c @cindex defuns
+@cindex 関数定義（defun）
+@cindex defun（関数定義）
+
+@c   In Emacs, a parenthetical grouping at the top level in the buffer is
+@c called a @dfn{defun}.  The name derives from the fact that most top-level
+@c lists in a Lisp file are instances of the special form @code{defun}, but
+@c any top-level parenthetical grouping counts as a defun in Emacs parlance
+@c regardless of what its contents are, and regardless of the programming
+@c language in use.  For example, in C, the body of a function definition is a
+@c defun.
+Emacsでは、トップレベルの括弧でグループ化したものは
+@dfn{関数定義}（defun）と呼ばれます。
+この名前は、Lispファイルではトップレベルにあるリストの大半が
+スペシャルフォーム@code{defun}であるという事実に由来します。
+しかし、その中身が何であろうとも、また、使用プログラム言語が何であろうとも、
+Emacs流には、トップレベルの括弧でグループ化されたものは
+すべて関数定義（defun）です。
+たとえば、Cの関数定義の本体は関数定義（defun）です。
+
+@c doublewidecommands
+@table @kbd
+@item C-M-a
+@c Move to beginning of current or preceding defun
+@c (@code{beginning-of-defun}).
+現在の関数定義、あるいは、直前の関数定義の先頭に移動する
+（@code{beginning-of-defun}）。
+@item C-M-e
+@c Move to end of current or following defun (@code{end-of-defun}).
+現在の関数定義、あるいは、つぎの関数定義の末尾に移動する
+（@code{end-of-defun}）。
+@item C-M-h
+@c Put region around whole current or following defun (@code{mark-defun}).
+現在の関数定義、あるいは、つぎの関数定義を囲むリージョンを設定する
+（@code{mark-defun}）。
+@end table
+
+@kindex C-M-a
+@kindex C-M-e
+@kindex C-M-h
+@findex beginning-of-defun
+@findex end-of-defun
+@findex mark-defun
+@c   The commands to move to the beginning and end of the current defun are
+@c @kbd{C-M-a} (@code{beginning-of-defun}) and @kbd{C-M-e} (@code{end-of-defun}).
+現在の関数定義の先頭や末尾に移動するコマンドは、
+@kbd{C-M-a}（@code{beginning-of-defun}）と
+@kbd{C-M-e}（@code{end-of-defun}）です。
+
+@findex c-mark-function
+@c   If you wish to operate on the current defun, use @kbd{C-M-h}
+@c (@code{mark-defun}) which puts point at the beginning and mark at the end
+@c of the current or next defun.  For example, this is the easiest way to get
+@c ready to move the defun to a different place in the text.  In C mode,
+@c @kbd{C-M-h} runs the function @code{c-mark-function}, which is almost the
+@c same as @code{mark-defun}; the difference is that it backs up over the
+@c argument declarations, function name and returned data type so that the
+@c entire C function is inside the region.  @xref{Marking Objects}.
+現在の関数定義を操作したいのであれば、
+@kbd{C-M-h}（@code{mark-defun}）を使って、
+現在の関数定義かつぎの関数定義の先頭にポイントを置き、
+その末尾にマークを設定します。
+たとえば、関数定義をテキストの別の位置に移動する準備をするには、
+このコマンドを使うのがもっとも簡単な方法です。
+Cモードでは、@kbd{C-M-h}は@code{c-mark-function}を実行しますが、
+@code{mark-defun}とほとんど同じです。
+違いは、引数宣言、関数名、戻り値の型名と遡って、
+Cの関数全体をリージョンに含めることです。
+@xref{Marking Objects}。
+
+@c   Emacs assumes that any open-parenthesis found in the leftmost column
+@c is the start of a defun.  Therefore, @strong{never put an
+@c open-parenthesis at the left margin in a Lisp file unless it is the
+@c start of a top-level list.  Never put an open-brace or other opening
+@c delimiter at the beginning of a line of C code unless it starts the body
+@c of a function.}  The most likely problem case is when you want an
+@c opening delimiter at the start of a line inside a string.  To avoid
+@c trouble, put an escape character (@samp{\}, in C and Emacs Lisp,
+@c @samp{/} in some other Lisp dialects) before the opening delimiter.  It
+@c will not affect the contents of the string.
+Emacsは、もっとも左の桁でみつけた任意の開き括弧を
+関数定義の始まりであると仮定します。
+したがって、@strong{トップレベルのリストの始まりでない限り、
+Lispファイルの中では左端に開き括弧を置いてはいけません。
+また、関数本体の始まりを表すのでない限り、
+Cのコードの行頭に開き中括弧や開き区切りを置いてはいけません。}
+もっとも起こりやすい場面は、
+文字列の途中で、行頭に開き区切りを入れたい場合です。
+トラブルを避けるために、開き区切りのまえに
+エスケープ文字（CやEmacs Lispでは @samp{\}、
+その他のLisp方言のいくつかでは@samp{/}）を入れてください。
+これで文字列の内容が影響を受けることはありません。
+
+@c   In the remotest past, the original Emacs found defuns by moving upward a
+@c level of parentheses until there were no more levels to go up.  This always
+@c required scanning all the way back to the beginning of the buffer, even for
+@c a small function.  To speed up the operation, Emacs was changed to assume
+@c that any @samp{(} (or other character assigned the syntactic class of
+@c opening-delimiter) at the left margin is the start of a defun.  This
+@c heuristic is nearly always right and avoids the costly scan; however,
+@c it mandates the convention described above.
+大昔のもともとのEmacsでは、関数定義を探すために、
+より上位レベルの括弧がなくなるまで遡っていました。
+この方法では、たとえ小さな関数であっても、
+バッファの先頭まで遡って走査することがつねに必要でした。
+これを高速化するために、左端内の任意の@samp{(}
+（あるいは、開き区切りと宣言された任意の文字）が
+関数定義の始まりであると仮定するように、Emacsを変更しました。
+この発見的手法で、ほとんど正しく処理できて、時間のかかる走査を回避できます。
+しかし、上述の約束事は必要です。
+
+@node Program Indent
+@c @section Indentation for Programs
+@section プログラムの字下げ
+@c @cindex indentation for programs
+@cindex プログラムの字下げ
+
+@c   The best way to keep a program properly indented is to use Emacs to
+@c reindent it as you change it.  Emacs has commands to indent properly
+@c either a single line, a specified number of lines, or all of the lines
+@c inside a single parenthetical grouping.
+正しく字下げされた状態にプログラムを保つ最良の方法は、
+変更したらEmacsに字下げをやり直させることです。
+Emacsには、1行の字下げ、指定された行数の字下げ、あるいは、
+括弧でグループ化した内部のすべての行の字下げを行うコマンドがあります。
+
+@menu
+* Basic Indent::	Indenting a single line.
+* Multi-line Indent::   Commands to reindent many lines at once.
+* Lisp Indent::		Specifying how each Lisp function should be indented.
+* C Indent::		Extra features for indenting C and related modes.
+* Custom C Indent::	Controlling indentation style for C and related modes.
+@end menu
+
+@c   Emacs also provides a Lisp pretty-printer in the library @code{pp}.
+@c This program reformats a Lisp object with indentation chosen to look nice.
+Emacsでは、ライブラリ@code{pp}にLispのプリティプリンタ@footnote{【訳注】
+プログラムのソースコードを美しく清書するプログラムを
+一般にプリティプリンタ（pretty-printer）と呼ぶ。}
+もあります。
+このプログラムは、美しく見えるように字下げを施してLispオブジェクトを
+清書するプログラムです。
+
+@node Basic Indent
+@c @subsection Basic Program Indentation Commands
+@subsection プログラムの字下げ基本コマンド
+
+@c WideCommands
+@table @kbd
+@item @key{TAB}
+@c Adjust indentation of current line.
+現在行の字下げを調整する。
+@item C-j
+@c Equivalent to @key{RET} followed by @key{TAB} (@code{newline-and-indent}).
+@key{RET}に続けて@key{TAB}と打鍵するのと同じ
+（@code{newline-and-indent}）。
+@end table
+
+@c @kindex TAB @r{(programming modes)}
+@kindex TAB @r{（プログラミングモード）}
+@findex c-indent-line
+@findex lisp-indent-line
+@c   The basic indentation command is @key{TAB}, which gives the current line
+@c the correct indentation as determined from the previous lines.  The
+@c function that @key{TAB} runs depends on the major mode; it is @code{lisp-indent-line}
+@c in Lisp mode, @code{c-indent-line} in C mode, etc.  These functions
+@c understand different syntaxes for different languages, but they all do
+@c about the same thing.  @key{TAB} in any programming-language major mode
+@c inserts or deletes whitespace at the beginning of the current line,
+@c independent of where point is in the line.  If point is inside the
+@c whitespace at the beginning of the line, @key{TAB} leaves it at the end of
+@c that whitespace; otherwise, @key{TAB} leaves point fixed with respect to
+@c the characters around it.
+基本的な字下げコマンドは@key{TAB}です。
+直前の数行から判断した正しい字下げを現在行に施します。
+@key{TAB}が実行する関数は、メジャーモードに依存します。
+たとえば、Lispモードでは@code{lisp-indent-line}、
+Cモードでは@code{c-indent-line}が実行されます。
+これらの関数はそれぞれの言語の構文を解釈しますが、
+どれも同じことを行うためのものです。
+プログラム言語向けメジャーモードにおいては、
+@key{TAB}は、現在行のどこにポイントがあっても、
+現在行の先頭に白文字を挿入したり削除したりします。
+ポイントが行頭の白文字の中にあったときは、
+@key{TAB}は最後の白文字のうしろにポイントを置きます。
+そうでなければ、@key{TAB}を打ったときの文字のところに留まります。
+
+@c   Use @kbd{C-q @key{TAB}} to insert a tab at point.
+ポイント位置にタブを挿入するには、@kbd{C-q @key{TAB}}を使います。
+
+@kindex C-j
+@findex newline-and-indent
+@c   When entering lines of new code, use @kbd{C-j} (@code{newline-and-indent}),
+@c which is equivalent to a @key{RET} followed by a @key{TAB}.  @kbd{C-j} creates
+@c a blank line and then gives it the appropriate indentation.
+新たにソースコード行を入力するときには、
+@kbd{C-j}（@code{newline-and-indent}）を使ってください。
+これは、@key{RET}に続けて@key{TAB}を打鍵することと等価です。
+@kbd{C-j}は、空行を作ってから、その行で適切な字下げを行います。
+
+@c   @key{TAB} indents the second and following lines of the body of a
+@c parenthetical grouping each under the preceding one; therefore, if you
+@c alter one line's indentation to be nonstandard, the lines below will
+@c tend to follow it.  This behavior is convenient in cases where you have
+@c overridden the standard result of @key{TAB} because you find it
+@c unaesthetic for a particular line.
+括弧でグループにまとめたところでは、
+@key{TAB}は、2行目以降の行をそれぞれ直前の行の真下にくるように字下げします。
+したがって、ある行を非標準的な字下げにすると、
+以降の行もその字下げに従うことになります。
+@key{TAB}による標準的な字下げが、
+特定の行では美しくないので無視したい場合には、
+字下げのこのようなふるまいが便利です。
+
+@c   Remember that an open-parenthesis, open-brace or other opening delimiter
+@c at the left margin is assumed by Emacs (including the indentation routines)
+@c to be the start of a function.  Therefore, you must never have an opening
+@c delimiter in column zero that is not the beginning of a function, not even
+@c inside a string.  This restriction is vital for making the indentation
+@c commands fast; you must simply accept it.  @xref{Defuns}, for more
+@c information on this.
+（字下げ処理を含めて）Emacsは、左端にある、開き丸括弧、開き中括弧、
+および、その他の開き区切りを関数の始まりと仮定することを
+覚えておきましょう。
+たとえ文字列の中であっても、
+関数の始まりでない開き区切りをけっして0桁目に置いてはいけません。
+この制約は字下げコマンドを高速にするためにきわめて重要です。
+無条件で受け入れてください。
+これに関してより詳しくは、@xref{Defuns}。
+
+@node Multi-line Indent
+@c @subsection Indenting Several Lines
+@subsection 複数行の字下げ
+
+@c   When you wish to reindent several lines of code which have been altered
+@c or moved to a different level in the list structure, you have several
+@c commands available.
+変更した複数行や、リスト構造中の異なるレベル箇所へ移した複数の行を
+字下げし直すには、いくつかのコマンドを利用できます。
+
+@table @kbd
+@item C-M-q
+@c Reindent all the lines within one list (@code{indent-sexp}).
+リスト内のすべての行を字下げし直す（@code{indent-sexp}）。
+@item C-u @key{TAB}
+@c Shift an entire list rigidly sideways so that its first line
+@c is properly indented.
+リストの最初の行が正しい字下げ位置にくるように、
+リストのすべての行を横にそのまま動かす。
+@item C-M-\
+@c Reindent all lines in the region (@code{indent-region}).
+リージョン内のすべての行を字下げし直す（@code{indent-region}）。
+@end table
+
+@kindex C-M-q
+@findex indent-sexp
+@c   You can reindent the contents of a single list by positioning point
+@c before the beginning of it and typing @kbd{C-M-q} (@code{indent-sexp} in
+@c Lisp mode, @code{c-indent-exp} in C mode; also bound to other suitable
+@c commands in other modes).  The indentation of the line the sexp starts on
+@c is not changed; therefore, only the relative indentation within the list,
+@c and not its position, is changed.  To correct the position as well, type a
+@c @key{TAB} before the @kbd{C-M-q}.
+1つのリストの中身を字下げし直すには、
+リストの始まり位置にポイントを置いて
+@kbd{C-M-q}（Lispモードでは@code{indent-sexp}、
+Cモードでは@code{c-indent-exp}、
+他のモードでは適切なコマンドにバインドされている）と打ちます。
+S式が始まる行の字下げは変化しません。
+つまり、リスト内の相対的な字下げが変化するだけで、
+リストの位置は変わりません。
+リストの開始位置も直すには、@kbd{C-M-q}のまえに@key{TAB}を打ってください。
+
+@kindex C-u TAB
+@c   If the relative indentation within a list is correct but the
+@c indentation of its first line is not, go to that line and type @kbd{C-u
+@c @key{TAB}}.  @key{TAB} with a numeric argument reindents the current
+@c line as usual, then reindents by the same amount all the lines in the
+@c grouping starting on the current line.  In other words, it reindents the
+@c whole grouping rigidly as a unit.  It is clever, though, and does not
+@c alter lines that start inside strings, or C preprocessor lines when in C
+@c mode.
+リスト内の相対的な字下げは正しいけれども、
+リストの開始行の字下げが正しくない場合には、
+その行に移動して@kbd{C-u @key{TAB}}と打ちます。
+@key{TAB}に数引数を指定すると、通常どおり現在行を字下げしてから、
+その行から始まるリスト内のすべての行にも同じ量の字下げを加えます。
+いいかえれば、グループ全体をひとまとめに字下げし直します。
+ただし、このコマンドは賢くて、文字列の中の行は移動しませんし、
+Cモードではプリプロセッサ行を移動しません。
+
+@c   Another way to specify the range to be reindented is with the region.
+@c The command @kbd{C-M-\} (@code{indent-region}) applies @key{TAB} to
+@c every line whose first character is between point and mark.
+字下げし直す範囲を指定するには、リージョンを使うこともできます。
+コマンド@kbd{C-M-\}（@code{indent-region}）は、
+ポイントとマークのあいだに
+行の先頭文字が含まれるすべての行について@key{TAB}を実行します。
+
+@node Lisp Indent
+@c @subsection Customizing Lisp Indentation
+@subsection Lispの字下げのカスタマイズ
+@c @cindex customizing Lisp indentation
+@cindex Lispの字下げのカスタマイズ
+
+@c   The indentation pattern for a Lisp expression can depend on the function
+@c called by the expression.  For each Lisp function, you can choose among
+@c several predefined patterns of indentation, or define an arbitrary one with
+@c a Lisp program.
+Lisp式に対する字下げの仕方を、
+その式から呼ばれる関数と関係付けることができます。
+各Lisp関数に対して、あらかじめ定義された字下げパターンの中から選んだり、
+Lispプログラムで任意のものを定義したりできます。
+
+@c   The standard pattern of indentation is as follows: the second line of the
+@c expression is indented under the first argument, if that is on the same
+@c line as the beginning of the expression; otherwise, the second line is
+@c indented underneath the function name.  Each following line is indented
+@c under the previous line whose nesting depth is the same.
+字下げの標準パターンは、つぎのとおりです。
+式の開始行に関数呼び出しの引数がある場合は、
+最初の引数の直下に2行目がくるように字下げします。
+それ以外の場合は、関数名の直下に2行目がくるように字下げします。
+続く各行は、入れ子の深さが同じである行の字下げと同じになります。
+
+@vindex lisp-indent-offset
+@c   If the variable @code{lisp-indent-offset} is non-@code{nil}, it overrides
+@c the usual indentation pattern for the second line of an expression, so that
+@c such lines are always indented @code{lisp-indent-offset} more columns than
+@c the containing list.
+変数@code{lisp-indent-offset}が@code{nil}以外ならば、
+式の2行目に対する通常の字下げパターンを無効にして、
+式の開始桁からつねに@code{lisp-indent-offset}だけ字下げします。
+
+@vindex lisp-body-indent
+@c   The standard pattern is overridden for certain functions.  Functions
+@c whose names start with @code{def} always indent the second line by
+@c @code{lisp-body-indent} extra columns beyond the open-parenthesis
+@c starting the expression.
+標準パターンが使用されない関数もいくつかあります。
+名前が@code{def}で始まる関数に対しては、
+式を開始する開き括弧の桁位置に@code{lisp-body-indent}を加えた桁位置へ
+2行目がくるように字下げします。
+
+@c   The standard pattern can be overridden in various ways for individual
+@c functions, according to the @code{lisp-indent-function} property of the
+@c function name.  There are four possibilities for this property:
+関数名の属性@code{lisp-indent-function}を変更すれば、
+各関数ごとに標準パターン以外の字下げを施せます。
+この属性が取りえる値にはつぎの4つがあります。
+
+@table @asis
+@item @code{nil}
+@c This is the same as no property; the standard indentation pattern is used.
+属性がないのと同じ。標準の字下げパターンを使用する。 
+@item @code{defun}
+@c The pattern used for function names that start with @code{def} is used for
+@c this function also.
+名前が@code{def}で始まる関数に用いる字下げパターンを使用する。
+@c @item a number, @var{number}
+@item 数値 @var{number}
+@c The first @var{number} arguments of the function are
+@c @dfn{distinguished} arguments; the rest are considered the @dfn{body}
+@c of the expression.  A line in the expression is indented according to
+@c whether the first argument on it is distinguished or not.  If the
+@c argument is part of the body, the line is indented @code{lisp-body-indent}
+@c more columns than the open-parenthesis starting the containing
+@c expression.  If the argument is distinguished and is either the first
+@c or second argument, it is indented @emph{twice} that many extra columns.
+@c If the argument is distinguished and not the first or second argument,
+@c the standard pattern is followed for that line.
+関数の最初の@var{number}個の引数を@dfn{区別された}引数と呼び、
+残りを式の@dfn{本体}と呼ぶ。
+行の最初の引数が区別された引数かどうかによって、各行の字下げが異なる。
+引数が本体の一部ならば、それを含んだ式を開始する開き括弧の桁位置に
+@code{lisp-body-indent}を加えた桁位置へ字下げする。
+引数が区別された引数で最初か2番目ならば、
+@code{lisp-body-indent}の@emph{2倍}を加えた桁位置へ字下げする。
+引数が区別された引数であっても3番目以降ならば、標準パターンを適用する。
+@c @item a symbol, @var{symbol}
+@item シンボル@var{symbol}
+@c @var{symbol} should be a function name; that function is called to
+@c calculate the indentation of a line within this expression.  The
+@c function receives two arguments:
+@var{symbol}は関数名であること。
+この関数は、当該式の字下げ幅を計算する。
+この関数はつぎの2つの引数を受け取る。
+@table @asis
+@item @var{state}
+@c The value returned by @code{parse-partial-sexp} (a Lisp primitive for
+@c indentation and nesting computation) when it parses up to the
+@c beginning of this line.
+当該行の先頭までを解析したときの@code{parse-partial-sexp}
+（字下げと入れ子の計算を行うLispの基本的な関数）の戻り値。
+@item @var{pos}
+@c The position at which the line being indented begins.
+字下げ対象の行の開始位置。
+@end table
+@noindent
+@c It should return either a number, which is the number of columns of
+@c indentation for that line, or a list whose car is such a number.  The
+@c difference between returning a number and returning a list is that a
+@c number says that all following lines at the same nesting level should
+@c be indented just like this one; a list says that following lines might
+@c call for different indentations.  This makes a difference when the
+@c indentation is being computed by @kbd{C-M-q}; if the value is a
+@c number, @kbd{C-M-q} need not recalculate indentation for the following
+@c lines until the end of the list.
+この関数は、当該行に対する字下げ幅の桁数、あるいは、
+リストのcarがそのような数値であるリストを返す必要がある。
+数値を返した場合は、括弧の入れ子レベルが同じ行に対しては
+同じ字下げ幅を意味する。
+リストを返した場合は、後続の行に対しては字下げ幅が異なる可能性を意味する。
+このような差異は、@kbd{C-M-q}で字下げを計算するときに現れる。
+数値が返された場合、@kbd{C-M-q}は、リストの末尾に達するまでは、
+字下げの再計算を行う必要がない。
+@end table
+
+@node C Indent
+@c @subsection Commands for C Indentation
+@subsection Cの字下げコマンド
+
+@c   Here are the commands for indentation in C mode and related modes:
+ここでは、Cモードとその関連モードにおける字下げコマンドを紹介します。
+
+@table @code
+@item C-c C-q
+@c @kindex C-c C-q @r{(C mode)}
+@kindex C-c C-q @r{（Cモード）}
+@findex c-indent-defun
+@c Reindent the current top-level function definition or aggregate type
+@c declaration (@code{c-indent-defun}).
+現在のトップレベルの関数定義、あるいは、型宣言の集まりを字下げし直す
+（@code{c-indent-defun}）。
+
+@item C-M-q
+@c @kindex C-M-q @r{(C mode)}
+@kindex C-M-q @r{（Cモード）}
+@findex c-indent-exp
+@c Reindent each line in the balanced expression that follows point
+@c (@code{c-indent-exp}).  A prefix argument inhibits error checking and
+@c warning messages about invalid syntax.
+ポイントのうしろにある釣り合った式の中の各行を字下げし直す
+（@code{c-indent-exp}）。
+前置引数を指定すると、
+不正な構文に対する検査をせずに、警告メッセージも発しない。
+
+@item @key{TAB}
+@findex c-indent-command
+@c Reindent the current line, and/or in some cases insert a tab character
+@c (@code{c-indent-command}).
+現在行を字下げし直すか、タブ文字を挿入する
+（@code{c-indent-command}）。
+
+@c If @code{c-tab-always-indent} is @code{t}, this command always reindents
+@c the current line and does nothing else.  This is the default.
+@code{c-tab-always-indent}が@code{t}ならば、
+現在行を字下げし直すだけで、他には何もしない。
+これがデフォルト。
+
+@c If that variable is @code{nil}, this command reindents the current line
+@c only if point is at the left margin or in the line's indentation;
+@c otherwise, it inserts a tab (or the equivalent number of spaces,
+@c if @code{indent-tabs-mode} is @code{nil}).
+この変数が@code{nil}ならば、
+ポイントが左端か字下げの余白部分にある場合に限り、字下げし直す。
+さもなければ、タブ
+（あるいは、@code{indent-tabs-mode}が@code{nil}ならば、
+等価な個数の空白）を挿入する。
+
+@c Any other value (not @code{nil} or @code{t}) means always reindent the
+@c line, and also insert a tab if within a comment, a string, or a
+@c preprocessor directive.
+上記の（@code{nil}や@code{t}）以外の値であれば、通常どおり字下げし直す。
+ただし、コメント、文字列、プリプロセッサ指令の内側では、タブを挿入する。
+
+@item C-u @key{TAB}
+@c Reindent the current line according to its syntax; also rigidly reindent
+@c any other lines of the expression that starts on the current line.
+@c @xref{Multi-line Indent}.
+現在行の構文に従って現在行を字下げし直す。
+なお、現在行から始まる式を構成する行も同じ幅だけ字下げし直す。
+@pxref{Multi-line Indent}。
+@end table
+
+@c   To reindent the whole current buffer, type @kbd{C-x h C-M-\}.  This
+@c first selects the whole buffer as the region, then reindents that
+@c region.
+カレントバッファ全体を字下げし直すには、
+@kbd{C-x h C-M-\}と打ちます。
+これは、まず、バッファ全体をリージョンとしてから、
+そのリージョンを字下げし直します。
+
+@c   To reindent the current block, use @kbd{C-M-u C-M-q}.  This moves
+@c to the front of the block and then reindents it all.
+カレントブロックを字下げし直すには、@kbd{C-M-u C-M-q}と打ちます。
+これは、まず、ブロックの先頭に移動してから、
+ブロック全体を字下げし直します。
+
+@node Custom C Indent
+@c @subsection Customizing C Indentation
+@subsection Cの字下げのカスタマイズ
+
+@c   C mode and related modes use a simple yet flexible mechanism for
+@c customizing indentation.  The mechanism works in two steps: first it
+@c classifies the line syntactically according to its contents and context;
+@c second, it associates each kind of syntactic construct with an
+@c indentation offset which you can customize.
+Cモードとその関連モードでは、字下げのカスタマイズには、
+単純ですが柔軟性のある機構を用いています。
+この機構は2段階で動作します。
+まず、行をその内容と文脈から構文的に分類します。
+つぎに、構文構成要素の各種類に、
+カスタマイズ可能な字下げのオフセットを対応させます。
+
+@menu
+* Syntactic Analysis::
+* Indentation Calculation::
+* Changing Indent Style::
+* Syntactic Symbols::
+* Variables for C Indent::
+* C Indent Styles::
+@end menu
+
+@node Syntactic Analysis
+@c @subsubsection Step 1---Syntactic Analysis
+@subsubsection 第1段階−−構文解析
+@c @cindex syntactic analysis
+@cindex 構文解析
+
+@c   In the first step, the C indentation mechanism looks at the line
+@c before the one you are currently indenting and determines the syntactic
+@c components of the construct on that line.  It builds a list of these
+@c syntactic components, each of which contains a @dfn{syntactic symbol}
+@c and sometimes also a buffer position.  Some syntactic symbols describe
+@c grammatical elements, for example @code{statement} and
+@c @code{substatement}; others describe locations amidst grammatical
+@c elements, for example @code{class-open} and @code{knr-argdecl}.
+第1段階では、Cの字下げ機構は、字下げしようとしているまえの行を調べて、
+その行を構成する構文上の構成要素を決定します。
+つまり、@dfn{構文シンボル}とバッファ内の相対位置を要素とする
+構文構成要素のリストを組み立てます。
+構文シンボルには、@code{statement}（文）や
+@code{substatement}（部分文）のように
+文法要素を記述するものと、
+@code{class-open}（クラス開始）や
+@code{knr-argdecl}（K&R版引数宣言）のように文法要素のあいだの位置を
+記述するものがあります。
+
+@c   Conceptually, a line of C code is always indented relative to the
+@c indentation of some line higher up in the buffer.  This is represented
+@c by the buffer positions in the syntactic component list.
+概念的には、Cのコード行は、バッファ中でそれよりまえに
+あるいずれかの行に対して必ず相対的に字下げされます。
+これは構文構成要素リストの中にあるバッファ内位置として表現されます。
+
+@c   Here is an example.  Suppose we have the following code in a C++ mode
+@c buffer (the line numbers don't actually appear in the buffer):
+以下に例を示します。
+つぎのコードが、C++モードのバッファに入っているとしましょう
+（実際にバッファに行番号が表示されるわけではない）。
+
+@example
+1: void swap (int& a, int& b)
+2: @{
+3:   int tmp = a;
+4:   a = b;
+5:   b = tmp;
+6: @}
+@end example
+
+@c   If you type @kbd{C-c C-s} (which runs the command
+@c @code{c-show-syntactic-information}) on line 4, it shows the result of
+@c the indentation mechanism for that line:
+4行目で（@code{c-show-syntactic-information}を実行する）
+@kbd{C-c C-s}を打つと、
+その行に対する字下げ機構の結果が表示されます。
+
+@example
+((statement . 32))
+@end example
+
+@c   This indicates that the line is a statement and it is indented
+@c relative to buffer position 32, which happens to be the @samp{i} in
+@c @code{int} on line 3.  If you move the cursor to line 3 and type
+@c @kbd{C-c C-s}, it displays this:
+これは、その行が文であり、
+バッファ内位置32に対して相対的に字下げされていることを示します。
+バッファ内位置32は、3行目の@code{int}の@samp{i}にあたります。
+カーソルを3行目に動かして@kbd{C-c C-s}と打つと、
+今度はつぎのように表示されます。
+
+@example
+((defun-block-intro . 28))
+@end example
+
+@c   This indicates that the @code{int} line is the first statement in a
+@c block, and is indented relative to buffer position 28, which is the
+@c brace just after the function header.
+この結果は、@code{int}行がブロックの最初の文であり、
+バッファ内位置28に対して相対的に字下げされていることを示しています。
+バッファ内位置28は、関数ヘッダの直後の中括弧にあたります。
+
+@noindent
+@c Here is another example:
+別の例を見てみましょう。
+
+@example
+1: int add (int val, int incr, int doit)
+2: @{
+3:   if (doit)
+4:     @{
+5:       return (val + incr);
+6:     @}
+7:   return (val);
+8: @}
+@end example
+
+@noindent
+@c Typing @kbd{C-c C-s} on line 4 displays this:
+4行目で@kbd{C-c C-s}と打つと、つぎのように表示されます。
+
+@example
+((substatement-open . 43))
+@end example
+
+@c   This says that the brace @emph{opens} a substatement block.  By the
+@c way, a @dfn{substatement} indicates the line after an @code{if},
+@c @code{else}, @code{while}, @code{do}, @code{switch}, @code{for},
+@c @code{try}, @code{catch}, @code{finally}, or @code{synchronized}
+@c statement.
+これは、中括弧が部分文のブロックを@emph{始めて}いることを示しています。
+ところで、@dfn{部分文}とは、@code{if}、@code{else}、@code{while}、
+@code{do}、@code{switch}、@code{for}、@code{try}、@code{catch}、
+@code{finally}、@code{synchronized}のあとの行を表します。
+
+@c @cindex syntactic component
+@c @cindex syntactic symbol
+@cindex 構文構成要素
+@cindex 構文シンボル
+@vindex c-syntactic-context
+@c   Within the C indentation commands, after a line has been analyzed
+@c syntactically for indentation, the variable @code{c-syntactic-context}
+@c contains a list that describes the results.  Each element in this list
+@c is a @dfn{syntactic component}: a cons cell containing a syntactic
+@c symbol and (optionally) its corresponding buffer position.  There may be
+@c several elements in a component list; typically only one element has a
+@c buffer position.
+Cの字下げコマンドにおいては、
+字下げのために行を構文解析し終えると、
+変数@code{c-syntactic-context}には解析結果を表すリストが入ります。
+このリストの各要素は@dfn{構文構成要素}であり、
+構文シンボルと（省かれるかもしれない）対応するバッファ内位置の
+コンスセルです。
+構文構成要素リストには、複数の要素が含まれることもあります。
+また、典型的には、バッファ内位置を持つ要素は1つだけです。
+
+@node Indentation Calculation
+@c @subsubsection  Step 2---Indentation Calculation
+@subsubsection  第2段階−−字下げ計算
+@c @cindex Indentation Calculation
+@cindex 字下げ計算
+
+@c   The C indentation mechanism calculates the indentation for the current
+@c line using the list of syntactic components, @code{c-syntactic-context},
+@c derived from syntactic analysis.  Each component is a cons cell that
+@c contains a syntactic symbol and may also contain a buffer position.
+Cの字下げ機構は、構文解析で得られた構文構成要素リスト
+@code{c-syntactic-context}を使って、現在行の字下げ幅を計算します。
+このリストの各要素は、構文シンボルを含むコンスセルですが、
+バッファ内位置を含んでいる場合もあります。
+
+@c   Each component contributes to the final total indentation of the line
+@c in two ways.  First, the syntactic symbol identifies an element of
+@c @code{c-offsets-alist}, which is an association list mapping syntactic
+@c symbols into indentation offsets.  Each syntactic symbol's offset adds
+@c to the total indentation.  Second, if the component includes a buffer
+@c position, the column number of that position adds to the indentation.
+@c All these offsets and column numbers, added together, give the total
+@c indentation.
+リストの各要素は、最終的な総字下げ量に2つの方法で寄与します。
+まず、各構文シンボルに字下げオフセットを対応付ける連想リスト
+@code{c-offsets-alist}から要素を探すために構文シンボルが使われます。
+各構文構成シンボルのオフセットを総字下げ量に加えます。
+つぎに、リストの要素にバッファ内位置が含まれていれば、
+その箇所の桁位置を字下げ量に加えます。
+これらのオフセットと桁数をすべて加えることで、総字下げ量が求まります。
+
+@c   The following examples demonstrate the workings of the C indentation
+@c mechanism:
+以下の例でCの字下げ機構の動作を説明しましょう。
+
+@example
+1: void swap (int& a, int& b)
+2: @{
+3:   int tmp = a;
+4:   a = b;
+5:   b = tmp;
+6: @}
+@end example
+
+@c   Suppose that point is on line 3 and you type @key{TAB} to reindent the
+@c line.  As explained above (@pxref{Syntactic Analysis}), the syntactic
+@c component list for that line is:
+3行目にポイントがあって、そこで@key{TAB}と打って字下げし直すとしましょう。
+上（@pxref{Syntactic Analysis}）でも説明しましたが、
+その行に対する構文構成要素リストはつぎのようになります。
+
+@example
+((defun-block-intro . 28))
+@end example
+
+@c   In this case, the indentation calculation first looks up
+@c @code{defun-block-intro} in the @code{c-offsets-alist} alist.  Suppose
+@c that it finds the integer 2; it adds this to the running total
+@c (initialized to zero), yielding a updated total indentation of 2 spaces.
+ここでは、まず、連想リスト@code{c-offsets-alist}から
+@code{defun-block-intro}を探すことから始めます。
+その結果が整数値2であったとしましょう。
+この値を計算中の合計（0で初期化されている）に加えて、
+総字下げ量は空白2文字と更新されます。
+
+@c   The next step is to find the column number of buffer position 28.
+@c Since the brace at buffer position 28 is in column zero, this adds 0 to
+@c the running total.  Since this line has only one syntactic component,
+@c the total indentation for the line is 2 spaces.
+つぎの段階は、バッファ内位置28の桁位置を求めることです。
+バッファ内位置28の中括弧は0桁目にあるので、
+0を計算中の合計に加えます。
+3行目には構文要素が1つしかないので、総字下げ量は空白2文字となります。
+
+@example
+1: int add (int val, int incr, int doit)
+2: @{
+3:   if (doit)
+4:     @{
+5:       return(val + incr);
+6:     @}
+7:   return(val);
+8: @}
+@end example
+
+@c   If you type @key{TAB} on line 4, the same process is performed, but
+@c with different data.  The syntactic component list for this line is:
+4行目で@key{TAB}と打つと、同じ過程を繰り返しますが、
+異なる値を使って計算されます。
+この行に対する構文構成要素リストはつぎのとおりです。
+
+@example
+((substatement-open . 43))
+@end example
+
+@c    Here, the indentation calculation's first job is to look up the
+@c symbol @code{substatement-open} in @code{c-offsets-alist}.  Let's assume
+@c that the offset for this symbol is 2.  At this point the running total
+@c is 2 (0 + 2 = 2).  Then it adds the column number of buffer position 43,
+@c which is the @samp{i} in @code{if} on line 3.  This character is in
+@c column 2 on that line.  Adding this yields a total indentation of 4
+@c spaces.
+まずは、シンボル@code{substatement-open}を連想リスト
+@code{c-offsets-alist}から探します。
+このシンボルに対するオフセットが2であったとしましょう。
+この時点で計算中の合計は2（0 + 2 = 2）です。
+つぎに、バッファ内位置43（3行目の@code{if}の@samp{i}の位置）の
+桁位置2を加えます。
+結果として、空白4文字という総字下げ量が求まります。
+
+@vindex c-strict-syntax-p
+@c    If a syntactic symbol in the analysis of a line does not appear in
+@c @code{c-offsets-alist}, it is ignored; if in addition the variable
+@c @code{c-strict-syntax-p} is non-@code{nil}, it is an error.
+行を解析した結果、@code{c-offsets-alist}に現れない構文シンボルが
+みつかった場合、そのシンボルは無視します。
+しかし、変数@code{c-strict-syntax-p}が@code{nil}以外の値であれば、
+エラーを報告します。
+
+@node Changing Indent Style
+@c @subsubsection Changing Indentation Style
+@subsubsection 字下げスタイルの変更
+
+@c    There are two ways to customize the indentation style for the C-like
+@c modes.  First, you can select one of several predefined styles, each of
+@c which specifies offsets for all the syntactic symbols.  For more
+@c flexibility, you can customize the handling of individual syntactic
+@c symbols.  @xref{Syntactic Symbols}, for a list of all defined syntactic
+@c symbols.
+C流のモードの字下げをカスタマイズする方法は2つあります。
+1つは、あらかじめ定義されているスタイルから選択する方法です。
+それぞれのスタイルでは、各構文シンボルに対するオフセットが定められています。
+もう1つはより柔軟な方法で、各構文シンボルの扱い方をカスタマイズできます。
+定義されている構文シンボルの一覧については、@xref{Syntactic Symbols}。
+
+@table @kbd
+@item M-x c-set-style @key{RET} @var{style} @key{RET}
+@c Select predefined indentation style @var{style}.  Type @kbd{?} when
+@c entering @var{style} to see a list of supported styles; to find out what
+@c a style looks like, select it and reindent some C code.
+あらかじめ定義されている字下げスタイル@var{style}を選択する。
+@var{style}を入力する際に@kbd{?}と打てば、
+定義済みのスタイル一覧を見ることができる。
+スタイルの見栄えを調べるには、
+そのスタイルを選択して、適当なCのコードを字下げし直してみる。
+
+@item C-c C-o @var{symbol} @key{RET} @var{offset} @key{RET}
+@c Set the indentation offset for syntactic symbol @var{symbol}
+@c (@code{c-set-offset}).  The second argument @var{offset} specifies the
+@c new indentation offset.
+構文シンボル@var{symbol}に対する字下げのオフセットを設定する
+（@code{c-set-offset}）。
+2番目の引数@var{offset}で、字下げのオフセットを指定する。
+@end table
+
+@c    The @code{c-offsets-alist} variable controls the amount of
+@c indentation to give to each syntactic symbol.  Its value is an
+@c association list, and each element of the list has the form
+@c @code{(@var{syntactic-symbol} . @var{offset})}.  By changing the offsets
+@c for various syntactic symbols, you can customize indentation in fine
+@c detail.  To change this alist, use @code{c-set-offset} (see below).
+変数@code{c-offsets-alist}は、各構文シンボルに与える字下げ量を制御します。
+この変数の値は連想リストであり、
+各要素は@code{(@var{syntactic-symbol} . @var{offset})}の形をしています。
+さまざまな構文シンボルに対するオフセットを変えることで、
+字下げを細かくカスタマイズできます。
+連想リストを変更するには、@code{c-set-offset}を使います（下記参照）。 
+
+@c    Each offset value in @code{c-offsets-alist} can be an integer, a
+@c function or variable name, a list, or one of the following symbols: @code{+},
+@c @code{-}, @code{++}, @code{--}, @code{*}, or @code{/}, indicating positive or negative
+@c multiples of the variable @code{c-basic-offset}.  Thus, if you want to
+@c change the levels of indentation to be 3 spaces instead of 2 spaces, set
+@c @code{c-basic-offset} to 3.
+@code{c-offsets-alist}内の各オフセットには、
+整数、関数名や変数名、あるいは、
+変数@code{c-basic-offset}の値の正負の倍数を表すシンボルである
+@code{+}、@code{-}、@code{++}、@code{--}、@code{*}、
+@code{/}のいずれかを設定できます。
+したがって、基本の字下げ幅を空白2文字から3文字に変更したければ、
+@code{c-basic-offset}に3を設定します。
+
+@c    Using a function as the offset value provides the ultimate flexibility
+@c in customizing indentation.  The function is called with a single
+@c argument containing the @code{cons} of the syntactic symbol and
+@c the buffer position, if any.  The function should return an integer
+@c offset.
+オフセットに関数を用いると、
+字下げのカスタマイズに究極の柔軟性を持たせられます。
+この関数は、構文シンボルとバッファ内位置があればそれを@code{cons}したものを
+引数として呼ばれます。
+戻り値としては、整数値のオフセットを返す必要があります。
+  
+@c    If the offset value is a list, its elements are processed according
+@c to the rules above until a non-@code{nil} value is found.  That value is
+@c then added to the total indentation in the normal manner.  The primary
+@c use for this is to combine the results of several functions.
+オフセットの値がリストの場合、
+各要素は、@code{nil}以外の値がみつかるまで上の規則にしたがって処理されます。
+その後、その値は、通常のように、字下げの総量に加えられます。
+これは、主に、複数の関数の結果を組み合わせるために使われます。
+
+@c @kindex C-c C-o @r{(C mode)}
+@kindex C-c C-o @r{（Cモード）}
+@findex c-set-offset
+@c    The command @kbd{C-c C-o} (@code{c-set-offset}) is the easiest way to
+@c set offsets, both interactively or in your @file{~/.emacs} file.  First
+@c specify the syntactic symbol, then the offset you want.  @xref{Syntactic
+@c Symbols}, for a list of valid syntactic symbols and their meanings.
+対話的に設定するにしてもファイル@file{~/.emacs}で設定するにしても、
+オフセットを設定するもっとも簡単な方法は、
+コマンド@kbd{C-c C-o}（@code{c-set-offset}）を使うことです。
+最初の引数は構文シンボル、2番目の引数は希望のオフセットです。
+有効な構文シンボル名とその意味の一覧は、@xref{Syntactic Symbols}。
+
+@node Syntactic Symbols
+@c @subsubsection Syntactic Symbols
+@subsubsection 構文シンボル
+
+@c    Here is a table of valid syntactic symbols for indentation in C and
+@c related modes, with their syntactic meanings.  Normally, most of these
+@c symbols are assigned offsets in @code{c-offsets-alist}.
+Cモードや関連するモードの字下げに対して有効な構文シンボルを、
+構文上の意味とともに、以下に示します。
+これらのほとんどのシンボルには、
+@code{c-offsets-alist}でオフセットが与えられています。
+
+@table @code
+@item string
+@c Inside a multi-line string.
+複数行におよぶ文字列の内側。
+
+@item c
+@c Inside a multi-line C style block comment.
+複数行におよぶCスタイルのブロックコメントの内側。
+
+@item defun-open
+@c On a brace that opens a function definition.
+関数定義を開始する中括弧。
+
+@item defun-close
+@c On a brace that closes a function definition.
+関数定義を終了する中括弧。
+
+@item defun-block-intro
+@c In the first line in a top-level defun.
+トップレベルの関数定義の最初の行。
+
+@item class-open
+@c On a brace that opens a class definition.
+クラス定義を開始する中括弧。
+
+@item class-close
+@c On a brace that closes a class definition.
+クラス定義を終了する中括弧。
+
+@item inline-open
+@c On a brace that opens an in-class inline method.
+クラス内のインラインメソッドを開始する中括弧。
+
+@item inline-close
+@c On a brace that closes an in-class inline method.
+クラス内のインラインメソッドを終了する中括弧。
+
+@item extern-lang-open
+@c On a brace that opens an external language block.
+外部言語ブロックを開始する中括弧。
+
+@item extern-lang-close
+@c On a brace that closes an external language block.
+外部言語ブロックを終了する中括弧。
+
+@item func-decl-cont
+@c The region between a function definition's argument list and the defun
+@c opening brace (excluding K&R function definitions).  In C, you cannot
+@c put anything but whitespace and comments between them; in C++ and Java,
+@c @code{throws} declarations and other things can appear in this context.
+関数定義の引数リストと関数定義の本体を開始する中括弧のあいだの領域。
+ただし、K&R版の関数定義を除く。
+Cでは、この部分に空文字やコメント以外は置けない。
+C++やJavaでは、@code{throws}宣言などを置ける。
+
+@item knr-argdecl-intro
+@c On the first line of a K&R C argument declaration.
+K&R版Cの引数宣言の最初の行。
+
+@item knr-argdecl
+@c In one of the subsequent lines in a K&R C argument declaration.
+K&R版Cの引数宣言の2行目以降。
+
+@item topmost-intro
+@c On the first line in a topmost construct definition.
+最上位の言語構成要素の最初の行。
+
+@item topmost-intro-cont
+@c On the topmost definition continuation lines.
+最上位の言語構成要素の2行目以降。
+
+@item member-init-intro
+@c On the first line in a member initialization list.
+（構造体の）メンバ初期化リストの最初の行。
+
+@item member-init-cont
+@c On one of the subsequent member initialization list lines.
+（構造体の）メンバ初期化リストの2行目以降。
+
+@item inher-intro
+@c On the first line of a multiple inheritance list.
+多重継承リストの最初。
+
+@item inher-cont
+@c On one of the subsequent multiple inheritance lines.
+多重継承リストの2行目以降。
+
+@item block-open
+@c On a statement block open brace.
+文ブロックを開始する中括弧。
+
+@item block-close
+@c On a statement block close brace.
+文ブロックを終了する中括弧。
+
+@item brace-list-open
+@c On the opening brace of an @code{enum} or @code{static} array list.
+@code{enum}のリストや静的配列の初期化リストを開始する中括弧。
+
+@item brace-list-close
+@c On the closing brace of an @code{enum} or @code{static} array list.
+@code{enum}のリストや静的配列の初期化リストを終了する中括弧。
+
+@item brace-list-intro
+@c On the first line in an @code{enum} or @code{static} array list.
+@code{enum}のリストや静的配列の初期化リストの最初の行。
+
+@item brace-list-entry
+@c On one of the subsequent lines in an @code{enum} or @code{static} array
+@c list.
+@code{enum}のリストや静的配列の初期化リストの2行目以降。
+
+@item brace-entry-open
+@c On one of the subsequent lines in an @code{enum} or @code{static} array
+@c list, when the line begins with an open brace.
+行が開き中括弧で始まるときの、
+@code{enum}のリストや静的配列の初期化リストの2行目以降。
+
+@item statement
+@c On an ordinary statement.
+通常の文。
+
+@item statement-cont
+@c On a continuation line of a statement.
+文の継続行。
+
+@item statement-block-intro
+@c On the first line in a new statement block.
+新規文ブロックの最初の行。
+
+@item statement-case-intro
+@c On the first line in a @code{case} ``block.''
+@code{case}ブロックの最初の行。
+
+@item statement-case-open
+@c On the first line in a @code{case} block starting with brace.
+中括弧で始まる@code{case}ブロックの最初の行。
+
+@item inexpr-statement
+@c On a statement block inside an expression.  This is used for a GNU
+@c extension to the C language, and for Pike special functions that take a
+@c statement block as an argument.
+式の内側にある文ブロック。
+これは、C言語のGNU拡張や、
+文ブロックを引数としてとるPikeの特殊関数に用いる。
+
+@item inexpr-class
+@c On a class definition inside an expression.  This is used for anonymous
+@c classes and anonymous array initializers in Java.
+式の内側にあるクラス定義。
+これは、Javaの無名クラスや無名配列の初期化式に用いる。
+
+@item substatement
+@c On the first line after an @code{if}, @code{while}, @code{for},
+@c @code{do}, or @code{else}.
+@code{if}、@code{while}、@code{for}、
+@code{do}、@code{else}の直後の最初の行
+
+@item substatement-open
+@c On the brace that opens a substatement block.
+substatementのブロックを開始する中括弧。
+
+@item case-label
+@c On a @code{case} or @code{default} label.
+@code{case}または@code{default}ラベルを表す。
+
+@item access-label
+@c On a C++ @code{private}, @code{protected}, or @code{public} access label.
+C++のアクセス指定子@code{private}、@code{protected}、@code{public}を表す。
+
+@item label
+@c On any ordinary label.
+通常のラベル。
+
+@item do-while-closure
+@c On the @code{while} that ends a @code{do}-@code{while} construct.
+@code{do}-@code{while}文の@code{while}。
+
+@item else-clause
+@c On the @code{else} of an @code{if}-@code{else} construct.
+@code{if}-@code{else}文の@code{else}。
+
+@item catch-clause
+@c On the @code{catch} and @code{finally} lines in
+@c @code{try}@dots{}@code{catch} constructs in C++ and Java.
+C++やJavaの@code{try}@dots{}@code{catch}構成の
+@code{catch}行や@code{finally}行。
+
+@item comment-intro
+@c On a line containing only a comment introduction.
+コメントの導入部分だけを含んだ行。
+
+@item arglist-intro
+@c On the first line in an argument list.
+引数リストの最初の行。
+
+@item arglist-cont
+@c On one of the subsequent argument list lines when no arguments follow on
+@c the same line as the arglist opening parenthesis.
+引数リストを開始する括弧の行に引数がない場合、
+引数リストの2行目以降。
+
+@item arglist-cont-nonempty
+@c On one of the subsequent argument list lines when at least one argument
+@c follows on the same line as the arglist opening parenthesis.
+引数リストを開始する括弧の行に少なくとも1つの引数がある場合、
+引数リストの2行目以降。
+
+@item arglist-close
+@c On the closing parenthesis of an argument list.
+引数リストを終了する括弧。
+
+@item stream-op
+@c On one of the lines continuing a stream operator construct.
+ストリーム演算子を用いた式が継続する行。
+
+@item inclass
+@c On a construct that is nested inside a class definition.  The
+@c indentation is relative to the open brace of the class definition.
+クラス定義の内側に入れ子になった言語構成要素。
+字下げは、クラス定義の開き中括弧に相対である。
+
+@item inextern-lang
+@c On a construct that is nested inside an external language block.
+外部言語ブロックの内側に入れ子になった言語構成要素。
+
+@item inexpr-statement
+@c On the first line of statement block inside an expression.  This is used
+@c for the GCC extension to C that uses the syntax @code{(@{ @dots{} @})}.
+@c It is also used for the special functions that takes a statement block
+@c as an argument in Pike.
+式の内側の文ブロックの最初の行。
+これは、構文@code{(@{ @dots{} @})}を使うCに対するGCC拡張に用いる。
+文ブロックを引数としてとるPikeの特殊関数にも用いる。
+
+@item inexpr-class
+@c On the first line of a class definition inside an expression.  This is
+@c used for anonymous classes and anonymous array initializers in Java.
+式の内側のクラス定義の最初の行。
+これは、Javaの無名クラスや無名配列の初期化式に用いる。
+
+@item cpp-macro
+@c On the start of a cpp macro.
+cppマクロの開始。
+
+@item friend
+@c On a C++ @code{friend} declaration.
+C++の@code{friend}宣言。
+
+@item objc-method-intro
+@c On the first line of an Objective-C method definition.
+Objective-Cのメソッド定義の最初の行。
+
+@item objc-method-args-cont
+@c On one of the lines continuing an Objective-C method definition.
+Objective-Cのメソッド定義を継続する行。
+
+@item objc-method-call-cont
+@c On one of the lines continuing an Objective-C method call.
+Objective-Cのメソッド呼び出しを継続する行。
+
+@item inlambda
+@c Like @code{inclass}, but used inside lambda (i.e. anonymous) functions.  Only
+@c used in Pike.
+@code{inclass}と同様だが、ラムダ（つまり、無名）関数の内側に用いる。
+Pikeのみで用いる。
+
+@item lambda-intro-cont
+@c On a line continuing the header of a lambda function, between the
+@c @code{lambda} keyword and the function body.  Only used in Pike.
+キーワード@code{lambda}と関数本体のあいだの、
+ラムダ関数のヘッダーの継続行。
+Pikeのみで用いる。
+@end table
+
+@node Variables for C Indent
+@c @subsubsection Variables for C Indentation
+@subsubsection Cの字下げのための変数
+
+@c   This section describes additional variables which control the
+@c indentation behavior of C mode and related mode.
+本節では、Cモードとその関連モードの字下げ動作を制御する、
+モードに固有な変数について説明します。
+
+@table @code
+@item c-offsets-alist
+@vindex c-offsets-alist
+@c Association list of syntactic symbols and their indentation offsets.
+@c You should not set this directly, only with @code{c-set-offset}.
+@c @xref{Changing Indent Style}, for details.
+構文シンボルとその字下げオフセットの連想リスト。
+このリストに直接に値を設定するのではなく、
+@code{c-set-offset}を使うこと。
+詳細については、@pxref{Changing Indent Style}。
+
+@item c-style-alist
+@vindex c-style-alist
+@c Variable for defining indentation styles; see below.
+字下げスタイルを定義している変数。
+下記参照。
+
+@item c-basic-offset
+@vindex c-basic-offset
+@c Amount of basic offset used by @code{+} and @code{-} symbols in
+@c @code{c-offsets-alist}.@refill 
+@code{c-offsets-alist}の中で、
+シンボル@code{+}や@code{-}が用いるオフセットの基本量。
+
+@item c-special-indent-hook
+@vindex c-special-indent-hook
+@c Hook for user-defined special indentation adjustments.  This hook is
+@c called after a line is indented by C mode and related modes.
+ユーザー定義の特別な字下げ調整用のフック。
+このフックは、Cモードやその関連モードが行の字下げを終えたあとに呼ばれる。
+@end table
+
+@c   The variable @code{c-style-alist} specifies the predefined indentation
+@c styles.  Each element has form @code{(@var{name}
+@c @var{variable-setting}@dots{})}, where @var{name} is the name of the
+@c style.  Each @var{variable-setting} has the form @code{(@var{variable}
+@c . @var{value})}; @var{variable} is one of the customization variables
+@c used by C mode, and @var{value} is the value for that variable when
+@c using the selected style.
+変数@code{c-style-alist}は、
+あらかじめ定義された字下げスタイルを保持します。
+各要素は@code{(@var{name} @var{variable-setting}@dots{})}の形をしていて、
+@var{name}はスタイル名です。
+また、各@var{variable-setting}は、
+@code{(@var{variable} . @var{value})}の形をしています。
+@var{variable}には、Cモードが使用するカスタマイズ用変数の1つを指定します。
+@var{value}は、選択されたスタイルが使われるときの@var{variable}の値です。
+
+@c   When @var{variable} is @code{c-offsets-alist}, that is a special case:
+@c @var{value} is appended to the front of the value of @code{c-offsets-alist}
+@c instead of replacing that value outright.  Therefore, it is not necessary
+@c for @var{value} to specify each and every syntactic symbol---only those
+@c for which the style differs from the default.
+@var{variable}が@code{c-offsets-alist}である場合は、特殊なケースです。
+@code{c-offsets-alist}の値を@var{value}の値で置き換えるのではなく、
+@code{c-offsets-alist}の値の先頭に@var{value}を追加します。
+したがって、@var{value}にすべての構文シンボルを設定する必要はありません。
+デフォルトと異なる構文シンボルだけを単に設定すればよいのです。
+
+@c   The indentation of lines containing only comments is also affected by
+@c the variable @code{c-comment-only-line-offset} (@pxref{Comments in C}).
+コメントだけを含んだ行の字下げも、
+変数@code{c-comment-only-line-offset}
+（@pxref{Comments in C}）に影響されます。
+
+@node C Indent Styles
+@c @subsubsection C Indentation Styles
+@subsubsection Cの字下げスタイル
+@c @cindex c indentation styles
+@cindex Cの字下げスタイル
+
+@c   A @dfn{C style} is a collection of indentation style customizations.
+@c Emacs comes with several predefined indentation styles for C and related
+@c modes, including @code{gnu}, @code{k&r}, @code{bsd}, @code{stroustrup},
+@c @code{linux}, @code{python}, @code{java}, @code{whitesmith},
+@c @code{ellemtel}, and @code{cc-mode}.  The default style is @code{gnu}.
+@dfn{Cスタイル}とは、カスタマイズされた字下げスタイルの集合です。
+Emacsには、Cモードや関連するモードのためにあらかじめ定義された、
+@code{gnu}、@code{k&r}、@code{bsd}、@code{stroustrup}、
+@code{linux}、@code{python}、@code{java}、@code{whitesmith}、
+@code{ellemtel}、@code{cc-mode}といった字下げスタイルがあります。
+デフォルトのスタイルは@code{gnu}です。
+
+@findex c-set-style
+@vindex c-default-style
+@c   To choose the style you want, use the command @kbd{M-x c-set-style}.
+@c Specify a style name as an argument (case is not significant in C style
+@c names).  The chosen style only affects newly visited buffers, not those
+@c you are already editing.  You can also set the variable
+@c @code{c-default-style} to specify the style for various major modes.
+@c Its value should be an alist, in which each element specifies one major
+@c mode and which indentation style to use for it.  For example,
+望みのスタイルを選択するには、コマンド@kbd{M-x c-set-style}を使います。
+引数としてスタイル名を指定します
+（Cスタイル名では大文字小文字は区別しない）。
+選択したスタイルは新たに訪問したバッファにだけ影響し、
+すでに編集中のバッファには影響しません。
+さまざまなメジャーモードのスタイルを指定するために
+変数@code{c-default-style}を設定することもできます。
+その値は連想リストである必要があり、
+その各要素は、1つのメジャーモードと
+そのモードで使う字下げスタイルを指定します。
+たとえば、
+
+@example
+(setq c-default-style
+      '((java-mode . "java") (other . "gnu")))
+@end example
+
+@noindent
+@c specifies an explicit choice for Java mode, and the default @samp{gnu}
+@c style for the other C-like modes.
+は、Javaモードには対しては選択を明示し、
+他のC流モードには@samp{gnu}をデフォルトとします。
+
+@findex c-add-style
+@c   To define a new C indentation style, call the function
+@c @code{c-add-style}:
+Cの字下げスタイルを新たに定義するには、関数@code{c-add-style}を呼びます。
+
+@example
+(c-add-style @var{name} @var{values} @var{use-now})
+@end example
+
+@noindent
+@c Here @var{name} is the name of the new style (a string), and
+@c @var{values} is an alist whose elements have the form
+@c @code{(@var{variable} . @var{value})}.  The variables you specify should
+@c be among those documented in @ref{Variables for C Indent}.
+ここで、@var{name}は新しいスタイルの名前（文字列）、
+@var{values}は要素が@code{(@var{variable} . @var{value})}の形をした
+連想リストです。
+@var{variable}には、@ref{Variables for C Indent}に
+書かれているものを指定してください。
+
+@c If @var{use-now} is non-@code{nil}, @code{c-add-style} switches to the
+@c new style after defining it.
+@var{use-now}が@code{nil}以外ならば、
+新しいスタイルの定義後すぐにそれに切り替えます。
+
+@node Matching
+@c @section Automatic Display Of Matching Parentheses
+@section 対応している括弧の自動表示
+@c @cindex matching parentheses
+@c @cindex parentheses
+@cindex 対応している括弧
+@cindex 括弧
+
+@c   The Emacs parenthesis-matching feature is designed to show
+@c automatically how parentheses match in the text.  Whenever you type a
+@c self-inserting character that is a closing delimiter, the cursor moves
+@c momentarily to the location of the matching opening delimiter, provided
+@c that is on the screen.  If it is not on the screen, some text near it is
+@c displayed in the echo area.  Either way, you can tell what grouping is
+@c being closed off.
+Emacsの括弧の対応付け機能は、テキスト中でどのように括弧が
+対応しているか自動的に表示するよう設計されています。
+閉じ区切りである自己挿入文字を打つと、
+それに対応する開き区切りが画面上にあれば、
+その箇所にほんのしばらくカーソルが移動します。
+画面上になければ、エコー領域にその箇所の近くにある文字列を表示します。
+いずれにしても、1つのまとまりが閉じたことが判ります。
+
+@c   In Lisp, automatic matching applies only to parentheses.  In C, it
+@c applies to braces and brackets too.  Emacs knows which characters to regard
+@c as matching delimiters based on the syntax table, which is set by the major
+@c mode.  @xref{Syntax}.
+Lispでは、括弧だけに対して自動的な対応付けを行います。
+Cでは、中括弧や角括弧も対象となります。
+Emacsは、メジャーモードが設定する構文テーブルに基づいて、
+どの文字が対応関係にある区切りであるか判定します。
+@xref{Syntax}。
+
+@c   If the opening delimiter and closing delimiter are mismatched---such as
+@c in @samp{[x)}---a warning message is displayed in the echo area.  The
+@c correct matches are specified in the syntax table.
+@samp{[x)}のように、開き区切りと閉じ区切りが対応しない場合、
+エコー領域に警告メッセージを表示します。
+正しい対応関係は構文テーブルで指定します。
+
+@vindex blink-matching-paren
+@vindex blink-matching-paren-distance
+@vindex blink-matching-delay
+@c   Three variables control parenthesis match display.
+@c @code{blink-matching-paren} turns the feature on or off; @code{nil}
+@c turns it off, but the default is @code{t} to turn match display on.
+@c @code{blink-matching-delay} says how many seconds to wait; the default
+@c is 1, but on some systems it is useful to specify a fraction of a
+@c second.  @code{blink-matching-paren-distance} specifies how many
+@c characters back to search to find the matching opening delimiter.  If
+@c the match is not found in that far, scanning stops, and nothing is
+@c displayed.  This is to prevent scanning for the matching delimiter from
+@c wasting lots of time when there is no match.  The default is 12,000.
+括弧の対応表示を制御する変数は3つあります。
+@code{blink-maching-paren}は、対応表示機能をオンまたはオフにします。
+@code{nil}を設定すると対応表示機能はオフになりますが、
+デフォルトは@code{t}であり、対応表示を行います。
+@code{blink-matching-delay}は、対応表示のために待つ秒数を指定します。
+デフォルトは1秒ですが、システムによっては何分の1秒のほうが便利かもしれません。
+@code{blink-matching-paren-distance}は、
+対応している開き区切りをみつけるために、
+何文字分まで戻って探索するか指定します。
+その範囲内で対応するものがみつからなければ、走査をやめて何も表示しません。
+これは、存在しもしない対応する区切りを探すことに
+時間を浪費するのを防ぐためです。
+デフォルトは12,000です。
+
+@c @cindex Show Paren mode
+@cindex 対応括弧表示（Show Paren）モード
+@cindex show-parenモード
+@cindex モード、Show Paren
+@findex show-paren-mode
+@c   When using X Windows, you can request a more powerful alternative kind
+@c of automatic parenthesis matching by enabling Show Paren mode.  This
+@c mode turns off the usual kind of matching parenthesis display and
+@c instead uses highlighting to show what matches.  Whenever point is after
+@c a close parenthesis, the close parenthesis and its matching open
+@c parenthesis are both highlighted; otherwise, if point is before an open
+@c parenthesis, the matching close parenthesis is highlighted.  (There is
+@c no need to highlight the open parenthesis after point because the cursor
+@c appears on top of that character.)  Use the command @kbd{M-x
+@c show-paren-mode} to enable or disable this mode.
+Xウィンドウシステムを使用している場合、
+対応括弧表示（show-paren）モードにすれば、
+より強力な括弧の対応表示を利用できます。
+このモードは、通常の対応表示をオフにするかわりに、
+対応する括弧同士を示すために強調表示を行います。
+ポイントが閉じ括弧の直後にあるときには、
+閉じ括弧とそれに対応する開き括弧の両方を強調表示します。
+ポイントが開き括弧の直前にあるときには、対応する閉じ括弧を強調表示します。
+（ポイントの直後に開き括弧があるときには、
+カーソルが開き括弧に重ねて表示されるので、
+開き括弧を強調表示する必要はない。）
+このモードをオン／オフするには、
+コマンド@kbd{M-x show-paren-mode}を使います。
+
+@node Comments
+@c @section Manipulating Comments
+@section コメントの操作
+@c @cindex comments
+@cindex コメント
+
+@c   Because comments are such an important part of programming, Emacs
+@c provides special commands for editing and inserting comments.
+コメントはプログラミングの重要な部分なので、
+Emacsにはコメントの編集や挿入を行うための特別なコマンドがあります。
+
+@menu
+* Comment Commands::
+* Multi-Line Comments::
+* Options for Comments::
+@end menu
+
+@node Comment Commands
+@c @subsection Comment Commands
+@subsection コメント用コマンド
+
+@kindex M-;
+@c @cindex indentation for comments
+@cindex コメントの字下げ
+@findex indent-for-comment
+
+@c   The comment commands insert, kill and align comments.
+コメント用コマンドはコメントの挿入、削除、および位置揃えを行います。
+
+@c WideCommands
+@table @kbd
+@item M-;
+@c Insert or align comment (@code{indent-for-comment}).
+コメントの挿入／位置揃えを行う（@code{indent-for-comment}）。
+@item C-x ;
+@c Set comment column (@code{set-comment-column}).
+コメントの桁位置を設定する（@code{set-comment-column}）。
+@item C-u - C-x ;
+@c Kill comment on current line (@code{kill-comment}).
+現在行のコメントをキルする（@code{kill-comment}）。
+@item C-M-j
+@c Like @key{RET} followed by inserting and aligning a comment
+@c (@code{indent-new-comment-line}).
+@key{RET}に続けて、コメントの挿入／位置揃えを行う
+（@code{indent-new-comment-line}）。
+@item M-x comment-region
+@c Add or remove comment delimiters on all the lines in the region.
+リージョン内の各行に対して、コメント区切りを追加／削除する。
+@end table
+
+@c   The command that creates a comment is @kbd{M-;} (@code{indent-for-comment}).
+@c If there is no comment already on the line, a new comment is created,
+@c aligned at a specific column called the @dfn{comment column}.  The comment
+@c is created by inserting the string Emacs thinks comments should start with
+@c (the value of @code{comment-start}; see below).  Point is left after that
+@c string.  If the text of the line extends past the comment column, then the
+@c indentation is done to a suitable boundary (usually, at least one space is
+@c inserted).  If the major mode has specified a string to terminate comments,
+@c that is inserted after point, to keep the syntax valid.
+コメントを挿入するコマンドは@kbd{M-;}（@code{indent-for-comment}）です。
+行にコメントがなければ、新規にコメントを作成して、
+@dfn{コメント桁位置}と呼ばれる特定の桁に置きます。
+コメントを作成する際には、Emacsが正しいと信じるコメント開始文字列
+（@code{comment-start}の値。下記参照）を挿入します。
+ポイントはその文字列の直後に置かれます。
+コードのテキストがコメント桁位置を越えているときには、
+適当な境界に字下げします（通常は少なくとも空白1文字）。
+メジャーモードでコメント終了文字列が指定されていれば、
+構文を正しく保つために、ポイントの直後にその文字列を挿入します。
+
+@c   @kbd{M-;} can also be used to align an existing comment.  If a line
+@c already contains the string that starts comments, then @kbd{M-;} just moves
+@c point after it and reindents it to the conventional place.  Exception:
+@c comments starting in column 0 are not moved.
+@kbd{M-;}は、既存のコメントを位置揃えするためにも使えます。
+行にコメント開始文字列がすでに含まれていれば、
+その文字列の直後にポイントを移動してから、適切な位置に字下げします。
+例外として、0桁目から始まるコメントは動かしません。
+
+@c   Some major modes have special rules for indenting certain kinds of
+@c comments in certain contexts.  For example, in Lisp code, comments which
+@c start with two semicolons are indented as if they were lines of code,
+@c instead of at the comment column.  Comments which start with three
+@c semicolons are supposed to start at the left margin.  Emacs understands
+@c these conventions by indenting a double-semicolon comment using @key{TAB},
+@c and by not changing the indentation of a triple-semicolon comment at all.
+特定の文脈における、ある種のコメントの字下げには特殊な規則を持つ
+メジャーモードもあります。
+たとえば、Lispのコードでは、セミコロン2つで始まるコメントは、
+コメント桁位置に揃えるのでなく、コードであるかのように字下げされます。
+また、セミコロン3つで始まるコメントは左端に置くと仮定されます。
+Emacsはこれらの慣習を理解していて、
+セミコロン2つのコメントは@key{TAB}で字下げし、
+セミコロン3つのコメントは字下げをまったく変更しません。
+
+@example
+;; This function is just an example
+;;; Here either two or three semicolons are appropriate.
+(defun foo (x)
+;;; And now, the first part of the function:
+  ;; The following line adds one.
+  (1+ x))           ; This line adds one.
+@end example
+
+@c   In C code, a comment preceded on its line by nothing but whitespace
+@c is indented like a line of code.
+Cのコードでは、コメントのまえに白文字しかない場合には、
+そのコメントをコードのように字下げします。
+
+@c   Even when an existing comment is properly aligned, @kbd{M-;} is still
+@c useful for moving directly to the start of the comment.
+既存のコメントの位置が適切に揃えられている場合でも、
+コメント開始直後の位置にすぐに移動するには@kbd{M-;}が便利です。
+
+@kindex C-u - C-x ;
+@findex kill-comment
+@c   @kbd{C-u - C-x ;} (@code{kill-comment}) kills the comment on the current line,
+@c if there is one.  The indentation before the start of the comment is killed
+@c as well.  If there does not appear to be a comment in the line, nothing is
+@c done.  To reinsert the comment on another line, move to the end of that
+@c line, do @kbd{C-y}, and then do @kbd{M-;} to realign it.  Note that
+@c @kbd{C-u - C-x ;} is not a distinct key; it is @kbd{C-x ;} (@code{set-comment-column})
+@c with a negative argument.  That command is programmed so that when it
+@c receives a negative argument it calls @code{kill-comment}.  However,
+@c @code{kill-comment} is a valid command which you could bind directly to a
+@c key if you wanted to.
+@kbd{C-u - C-x ;}（@code{kill-comment}）は、
+現在行にコメントがあれば、それをキルします。
+コメント開始文字列のまえにある字下げもキルします。
+コメントと思われるものが何もなければ、何もしません。
+他の行にコメントを再挿入するには、
+その行の末尾に移動してから@kbd{C-y}と打って、
+さらに、位置を再調整するために@kbd{M-;}と打ちます。
+@kbd{C-u - C-x ;}はひとまとまりのキーではなく、
+負の引数を指定した@kbd{C-x ;}（@code{set-comment-column}）で
+あることに注意しましょう。
+このコマンドは、負の引数を受け取ると、
+@code{kill-comment}を呼ぶようにプログラムされています。
+@code{kill-comment}は、望むならばキーに直接バインドできる通常のコマンドです。
+
+@node Multi-Line Comments
+@c @subsection Multiple Lines of Comments
+@subsection 複数行にわたるコメント
+
+@kindex C-M-j
+@c @cindex blank lines in programs
+@cindex プログラム中の空行
+@findex indent-new-comment-line
+@c   If you are typing a comment and wish to continue it on another line,
+@c you can use the command @kbd{C-M-j} (@code{indent-new-comment-line}).
+@c This terminates the comment you are typing, creates a new blank line
+@c afterward, and begins a new comment indented under the old one.  When
+@c Auto Fill mode is on, going past the fill column while typing a comment
+@c causes the comment to be continued in just this fashion.  If point is
+@c not at the end of the line when @kbd{C-M-j} is typed, the text on
+@c the rest of the line becomes part of the new comment line.
+コメントを入力していて別の行に継続したければ、
+コマンド @kbd{C-M-j}（@code{indent-new-comment-line}）を利用できます。
+このコマンドは、入力中のコメントを終了して、
+そのつぎに空行を作り、
+直前のコメントの直下にくるように字下げして新たなコメントを始めます。
+自動詰め込み（auto-fill）モードがオンならば、
+コメントを入力中に詰め込み桁を越えると、
+同様にコメントはつぎの行に継続されます。
+@kbd{C-M-j}を打ったときにポイントが行末になければ、
+ポイント位置から行末までのテキストは新たなコメントの一部になります。
+
+@findex comment-region
+@c   To turn existing lines into comment lines, use the @kbd{M-x
+@c comment-region} command.  It adds comment delimiters to the lines that start
+@c in the region, thus commenting them out.  With a negative argument, it
+@c does the opposite---it deletes comment delimiters from the lines in the
+@c region.
+既存の行をコメントにするには、
+コマンド@kbd{M-x comment-region}を使います。
+このコマンドは、リージョン内で始まる各行にコメント区切り文字列を加えて
+コメントにします。
+負の引数を指定すると逆の操作、
+つまり、コメント区切り文字列を削除します。
+
+@c   With a positive argument, @code{comment-region} duplicates the last
+@c character of the comment start sequence it adds; the argument specifies
+@c how many copies of the character to insert.  Thus, in Lisp mode,
+@c @kbd{C-u 2 M-x comment-region} adds @samp{;;} to each line.  Duplicating
+@c the comment delimiter is a way of calling attention to the comment.  It
+@c can also affect how the comment is indented.  In Lisp, for proper
+@c indentation, you should use an argument of two, if between defuns, and
+@c three, if within a defun.
+正の引数を指定すると、@code{comment-region}は、
+追加するコメント開始文字列の最後の文字を重複させます。
+つまり、引数は、その文字を何回重複させるかを示します。
+たとえば、Lispモードで@kbd{C-u 2 M-x commment-region}とすると、
+各行に@samp{;;}を付加します。
+コメント区切り文字を重複させるのは、コメントに注意を引き付けるためです。
+また、コメントの字下げにも影響します。
+Lispでは、適切な字下げになるように、
+関数定義（defun）のあいだでは引数として3を、
+関数定義の内側では引数として2を指定すべきです。
+
+@vindex comment-padding
+@c   The variable @code{comment-padding} specifies how many spaces
+@c @code{comment-region} should insert on each line between the
+@c comment delimiter and the line's original text.  The default is 1.
+変数@code{comment-padding}は、
+@code{comment-region}がコメント区切りと各行のもとのテキストとのあいだに
+挿入する空白の個数を指定します。
+デフォルトは1です。
+
+@node Options for Comments
+@c @subsection Options Controlling Comments
+@subsection コメントを制御するオプション
+
+@vindex comment-column
+@kindex C-x ;
+@findex set-comment-column
+@c   The comment column is stored in the variable @code{comment-column}.  You
+@c can set it to a number explicitly.  Alternatively, the command @kbd{C-x ;}
+@c (@code{set-comment-column}) sets the comment column to the column point is
+@c at.  @kbd{C-u C-x ;} sets the comment column to match the last comment
+@c before point in the buffer, and then does a @kbd{M-;} to align the
+@c current line's comment under the previous one.  Note that @kbd{C-u - C-x ;}
+@c runs the function @code{kill-comment} as described above.
+コメント桁位置は、変数@code{comment-column}に入っています。
+この変数には明示的に値を設定できます。
+あるいは、コマンド @kbd{C-x ;}（@code{set-comment-column}）を使って、
+ポイント位置の桁をコメント桁位置として設定できます。
+@kbd{C-u C-x ;}は、バッファ内で現在行よりまえにある最後のコメントの桁位置を
+コメント桁位置としてから、
+@kbd{M-;}を行って現在行のコメントをまえのコメントの直下にくるように
+位置を揃えます。
+@kbd{C-u - C-x ;}は、前述のように
+関数@code{kill-comment}を実行することに注意してください。
+
+@c   The variable @code{comment-column} is per-buffer: setting the variable
+@c in the normal fashion affects only the current buffer, but there is a
+@c default value which you can change with @code{setq-default}.
+@c @xref{Locals}.  Many major modes initialize this variable for the
+@c current buffer.
+変数@code{comment-column}は、バッファごとの変数です。
+つまり、通常の方法で設定すると、カレントバッファだけに影響しますが、
+@code{setq-default}でデフォルト値を変更できます。
+@xref{Locals}。
+多くのメジャーモードでは、この変数をカレントバッファ用に初期化します。
+
+@vindex comment-start-skip
+@c   The comment commands recognize comments based on the regular
+@c expression that is the value of the variable @code{comment-start-skip}.
+@c Make sure this regexp does not match the null string.  It may match more
+@c than the comment starting delimiter in the strictest sense of the word;
+@c for example, in C mode the value of the variable is @code{@t{"/\\*+
+@c *"}}, which matches extra stars and spaces after the @samp{/*} itself.
+@c (Note that @samp{\\} is needed in Lisp syntax to include a @samp{\} in
+@c the string, which is needed to deny the first star its special meaning
+@c in regexp syntax.  @xref{Regexps}.)
+コメント用コマンドは、変数@code{comment-start-skip}の正規表現に基づいて
+コメントを認識します。
+この正規表現が空文字列には一致しないようにしてください。
+厳密にはコメント開始文字列よりも長く一致するかもしれません。
+たとえば、Cモードではこの変数の値は@code{@t{"/\\*+ *"}}ですが、
+これは @samp{/*}のうしろの余分なアスタリスクと空白に一致します。
+（Lispの構文では、文字列中に@samp{\}を含めるために@samp{\\}とする必要がある。
+この@samp{\}は、最初のアスタリスクの正規表現における特別な
+意味を抑制するために必要。
+@pxref{Regexps}。）
+
+@vindex comment-start
+@vindex comment-end
+@c   When a comment command makes a new comment, it inserts the value of
+@c @code{comment-start} to begin it.  The value of @code{comment-end} is
+@c inserted after point, so that it will follow the text that you will insert
+@c into the comment.  In C mode, @code{comment-start} has the value
+@c @w{@code{"/* "}} and @code{comment-end} has the value @w{@code{" */"}}.
+コメント用コマンドで新たなコメントを作ると、
+コメントを始めるために@code{comment-start}の値を挿入します。
+また、ポイントの直後には@code{comment-end}の値が挿入されて、
+これから入力するテキストのあとに続くことになります。
+Cモードでは、@code{comment-start}の値は@w{@code{"/* "}}、
+@code{comment-end}の値は@w{@code{" */"}}です。
+
+@vindex comment-multi-line
+@c   The variable @code{comment-multi-line} controls how @kbd{C-M-j}
+@c (@code{indent-new-comment-line}) behaves when used inside a comment.  If
+@c @code{comment-multi-line} is @code{nil}, as it normally is, then the
+@c comment on the starting line is terminated and a new comment is started
+@c on the new following line.  If @code{comment-multi-line} is not
+@c @code{nil}, then the new following line is set up as part of the same
+@c comment that was found on the starting line.  This is done by not
+@c inserting a terminator on the old line, and not inserting a starter on
+@c the new line.  In languages where multi-line comments work, the choice
+@c of value for this variable is a matter of taste.
+変数@code{comment-multi-line}は、
+@kbd{C-M-j}（@code{indent-new-comment-line}）が
+コメントの内側で使われたときの動作を制御します。
+@code{comment-multi-line}が@code{nil}（通常の設定）ならば、
+現在行のコメントを終了し、新たなコメントをつぎの行から始めます。
+@code{comment-multi-line}が@code{nil}以外ならば、
+現在行と同じコメントが継続されます。
+つまり、現在行のコメントを終えず、新たな行にも開始文字列を挿入しません。
+複数行にわたるコメントを許す言語では、
+この変数に設定する値は好みの問題です。
+
+@vindex comment-indent-function
+@c   The variable @code{comment-indent-function} should contain a function
+@c that will be called to compute the indentation for a newly inserted
+@c comment or for aligning an existing comment.  It is set differently by
+@c various major modes.  The function is called with no arguments, but with
+@c point at the beginning of the comment, or at the end of a line if a new
+@c comment is to be inserted.  It should return the column in which the
+@c comment ought to start.  For example, in Lisp mode, the indent hook
+@c function bases its decision on how many semicolons begin an existing
+@c comment, and on the code in the preceding lines.
+変数@code{comment-indent-function}には、
+新たに挿入したコメントの字下げや
+既存のコメントに桁を揃えるための字下げを計算する関数を
+設定する必要があります。
+この変数には、メジャーモードごとに異なった関数が設定されます。
+この関数は引数なしで呼ばれますが、
+コメントがあるときにはその開始位置にポイントを置いて、
+新規コメントの挿入時には行末にポイントを置いて呼ばれます。
+戻り値は、コメントを始めるべき桁位置です。
+たとえば、Lispモードでは、この字下げ用フック関数は、
+既存のコメントのセミコロンの個数と
+まえの行のコードに基づいて計算を行います。
+
+@node Balanced Editing
+@c @section Editing Without Unbalanced Parentheses
+@section 括弧の対応を保った編集
+
+@table @kbd
+@item M-(
+@c Put parentheses around next sexp(s) (@code{insert-parentheses}).
+つぎの（1つ以上の）S式を括弧で囲む（@code{insert-parentheses}）。
+@item M-)
+@c Move past next close parenthesis and reindent
+@c (@code{move-past-close-and-reindent}).
+つぎの閉じ括弧のうしろへ移動してから字下げし直す
+（@code{move-past-close-and-reindent}）。
+@end table
+
+@kindex M-(
+@kindex M-)
+@findex insert-parentheses
+@findex move-past-close-and-reindent
+@c   The commands @kbd{M-(} (@code{insert-parentheses}) and @kbd{M-)}
+@c (@code{move-past-close-and-reindent}) are designed to facilitate a style
+@c of editing which keeps parentheses balanced at all times.  @kbd{M-(}
+@c inserts a pair of parentheses, either together as in @samp{()}, or, if
+@c given an argument, around the next several sexps.  It leaves point after
+@c the open parenthesis.  The command @kbd{M-)} moves past the close
+@c parenthesis, deleting any indentation preceding it, and indenting with
+@c @kbd{C-j} after it.
+コマンド@kbd{M-(}（@code{insert-parenthesis}）と
+@kbd{M-)}（@code{move-past-close-and-reindent}）は、
+括弧の対応をつねに保ったまま編集するために設計されました。
+@kbd{M-(}は一対の括弧を挿入します。
+引数がなければ@samp{()}を挿入しますが、
+引数を指定すると、つぎのその個数分のS式を括弧で囲みます。
+ポイントは開き括弧の直後に置かれます。
+コマンド@kbd{M-)}は、閉じ括弧のまえにある字下げを削除しながら
+閉じ括弧のうしろにポイントを移動し、
+そのあと、@kbd{C-j}で字下げします。
+
+@c   For example, instead of typing @kbd{( F O O )}, you can type @kbd{M-(
+@c F O O}, which has the same effect except for leaving the cursor before
+@c the close parenthesis.
+たとえば、@kbd{( F O O )}と打つかわりに@kbd{M-( F O O}と打てば、
+カーソルが閉じ括弧のまえにくることを除けば同じ効果を得られます。
+
+@vindex parens-require-spaces
+@c   @kbd{M-(} may insert a space before the open parenthesis, depending on
+@c the syntax class of the preceding character.  Set
+@c @code{parens-require-spaces} to @code{nil} value if you wish to inhibit
+@c this.
+@kbd{M-(}は、直前の文字の構文クラスによっては、
+開き括弧のまえに空白を1個挿入することがあります。
+これを禁止したければ、
+@code{parens-require-spaces}に@code{nil}を設定してください。
+
+@node Symbol Completion
+@c @section Completion for Symbol Names
+@section シンボル名の補完
+@c @cindex completion (symbol names)
+@cindex 補完（シンボル名）
+
+@c   Usually completion happens in the minibuffer.  But one kind of completion
+@c is available in all buffers: completion for symbol names.
+通常、補完はミニバッファで行われます。
+しかし、ある種の補完は任意のバッファで利用できます。
+それはシンボル名に対する補完です。
+
+@kindex M-TAB
+@c   The character @kbd{M-@key{TAB}} runs a command to complete the partial
+@c symbol before point against the set of meaningful symbol names.  Any
+@c additional characters determined by the partial name are inserted at
+@c point.
+@kbd{M-@key{TAB}}は、ポイント直前の部分的なシンボルを、
+意味のあるシンボル名の集合から補完するコマンドを実行します。
+部分的な名前から補完された追加文字はポイント位置に挿入されます。
+
+@c   If the partial name in the buffer has more than one possible completion
+@c and they have no additional characters in common, a list of all possible
+@c completions is displayed in another window.
+バッファ内の部分的な名前に対して、
+複数個の補完候補があり、しかも、追加できる共通部分がない場合には、
+補完候補一覧を別のウィンドウに表示します。
+
+@c @cindex completion using tags
+@c @cindex tags completion
+@c @cindex Info index completion
+@cindex タグを用いた補完
+@cindex タグ補完
+@cindex info索引補完
+@findex complete-symbol
+@c   In most programming language major modes, @kbd{M-@key{TAB}} runs the
+@c command @code{complete-symbol}, which provides two kinds of completion.
+@c Normally it does completion based on a tags table (@pxref{Tags}); with a
+@c numeric argument (regardless of the value), it does completion based on
+@c the names listed in the Info file indexes for your language.  Thus, to
+@c complete the name of a symbol defined in your own program, use
+@c @kbd{M-@key{TAB}} with no argument; to complete the name of a standard
+@c library function, use @kbd{C-u M-@key{TAB}}.  Of course, Info-based
+@c completion works only if there is an Info file for the standard library
+@c functions of your language, and only if it is installed at your site.
+ほとんどのプログラム言語向けメジャーモードでは、
+@kbd{M-@key{TAB}}はコマンド@code{complete-symbol}を実行します。
+この関数には、2種類の補完機能があります。
+通常、このコマンドはタグテーブル（@pxref{Tags}）に基づいて補完を行います。 
+数引数（値は無関係）を指定すると、当該言語のinfoファイルの索引に
+並べられた名前を対象として補完を行います。
+すなわち、プログラム中で定義されたシンボル名を補完するには
+引数なしで@kbd{M-@key{TAB}}を使い、
+標準ライブラリ関数の名前を補完するには@kbd{C-u M-@key{TAB}}を使います。
+もちろん、infoに基づいた補完は、使用言語の標準ライブラリ関数に対する
+infoファイルがあり、かつ、それがインストールされている場合にだけ動作します。
+
+@c @cindex Lisp symbol completion
+@c @cindex completion in Lisp
+@cindex Lispシンボルの補完
+@cindex Lisp中の補完
+@findex lisp-complete-symbol
+@c   In Emacs-Lisp mode, the name space for completion normally consists of
+@c nontrivial symbols present in Emacs---those that have function
+@c definitions, values or properties.  However, if there is an
+@c open-parenthesis immediately before the beginning of the partial symbol,
+@c only symbols with function definitions are considered as completions.
+@c The command which implements this is @code{lisp-complete-symbol}.
+Emacs Lispモードでは、補完対象の名前空間は、
+関数定義、値や属性を持つEmacs中の特殊なシンボルから成ります。
+しかし、部分的なシンボルの直前に開き括弧があれば、
+関数定義を持つシンボルだけを補完対象とします。
+これを実現するコマンドは@code{lisp-complete-symbol}です。
+
+@c   In Text mode and related modes, @kbd{M-@key{TAB}} completes words
+@c based on the spell-checker's dictionary.  @xref{Spelling}.
+テキスト（text）モードとその関連モードでは、
+@kbd{M-@key{TAB}}はスペルチェッカの辞書に基づいた補完を行います。
+@xref{Spelling}。
+
+@node Which Function
+@c @section Which Function Mode
+@section 関数名表示モード（which-functionモード）
+
+@c   Which Function mode is a minor mode that displays the current function
+@c name in the mode line, as you move around in a buffer.
+関数名表示（which-function）モードは、
+バッファ内を動き廻るに従って現在の関数名をモード行に表示する
+マイナモードです。
+
+@findex which-function-mode
+@vindex which-func-modes
+@c   To enable (or disable) Which Function mode, use the command @kbd{M-x
+@c which-function-mode}.  This command is global; it applies to all
+@c buffers, both existing ones and those yet to be created.  However, this
+@c only affects certain major modes, those listed in the value of
+@c @code{which-func-modes}.  (If the value is @code{t}, then Which Function
+@c mode applies to all major modes that know how to support it---which are
+@c the major modes that support Imenu.)
+関数名表示（which-function）モードをオン（あるいはオフ）にするには、
+コマンド@kbd{M-x which-function-mode}を使います。
+このコマンドはグローバルです。
+つまり、既存のバッファでもこれから作るバッファでも、
+すべてのバッファに通用します。
+しかし、@code{which-func-modes}の値で指定された
+特定のメジャーモードでのみ効果があります。
+（@code{which-func-modes}のデフォルト値は@code{t}であり、
+関数名表示（which-function）モードの支援方法を知っている
+すべてのメジャーモードに適用されることを意味する。
+具体的には、imenuを使えるメジャーモード。）
+
+@node Documentation
+@c @section Documentation Commands
+@section 説明文書用コマンド
+
+@c   As you edit Lisp code to be run in Emacs, the commands @kbd{C-h f}
+@c (@code{describe-function}) and @kbd{C-h v} (@code{describe-variable}) can
+@c be used to print documentation of functions and variables that you want to
+@c call.  These commands use the minibuffer to read the name of a function or
+@c variable to document, and display the documentation in a window.
+Emacsで実行するLispコードを編集するときには、
+関数や変数の説明文字列を表示するコマンド、
+@kbd{C-h f}（@code{describe-function}）や
+@kbd{C-h v}（@code{describe-variable}）を利用できます。
+これらのコマンドは、説明文字列を表示したい関数や変数の名前を
+ミニバッファから読み取り、ウィンドウに説明文字列を表示します。
+
+@c   For extra convenience, these commands provide default arguments based on
+@c the code in the neighborhood of point.  @kbd{C-h f} sets the default to the
+@c function called in the innermost list containing point.  @kbd{C-h v} uses
+@c the symbol name around or adjacent to point as its default.
+たいへん便利なことに、これらのコマンドはポイント近傍のコードから、
+デフォルトの引数を選択します。
+@kbd{C-h f}は、ポイントを含むもっとも内側のリストで呼ばれる関数をデフォルト
+とします。
+@kbd{C-h v}は、ポイントの周辺にあるか隣接するシンボル名を
+デフォルトとします。
+
+@c @cindex Eldoc mode
+@cindex eldocモード
+@cindex モード、Eldoc
+@findex eldoc-mode
+@c   For Emacs Lisp code, you can also use Eldoc mode.  This minor mode
+@c constantly displays in the echo area the argument list for the function
+@c being called at point.  (In other words, it finds the function call that
+@c point is contained in, and displays the argument list of that function.)
+@c Eldoc mode applies in Emacs Lisp and Lisp Interaction modes only.  Use
+@c the command @kbd{M-x eldoc-mode} to enable or disable this feature.
+Emacs Lispコードに対しては、eldocモードも使えます。
+このマイナモードは、ポイント位置で呼び出されている関数の引数リストを、
+たえずエコー領域に表示します。
+（いいかえれば、ポイントを含む関数呼び出しを探し、
+その関数の引数リストを表示する。）
+eldocマイナモードは、Emacs Lispモードと
+Lisp対話（lisp-interaction）モードだけに適用できます。
+この機能をオン／オフするには、コマンド@kbd{M-x eldoc-mode}を使います。
+
+@findex info-lookup-symbol
+@findex info-lookup-file
+@kindex C-h C-i
+@c   For C, Lisp, and other languages, you can use @kbd{C-h C-i}
+@c (@code{info-lookup-symbol}) to view the Info documentation for a symbol.
+@c You specify the symbol with the minibuffer; by default, it uses the
+@c symbol that appears in the buffer at point.  The major mode determines
+@c where to look for documentation for the symbol---which Info files and
+@c which indices.  You can also use @kbd{M-x info-lookup-file} to look for
+@c documentation for a file name.
+C、Lisp、その他言語のシンボルのinfo文書を見るには
+@kbd{C-h C-i}（@code{info-lookup-symbol}）を使います。
+ミニバッファでシンボルを指定します。
+デフォルトは、バッファ中のポイント位置にあるシンボルです。
+シンボルに対する説明文書を探す場所、つまり、
+どのinfoファイルのどの索引を探せばよいかは、
+メジャーモードが決定します。
+また、ファイル名に対する説明文書を探すには
+@kbd{M-x info-lookup-file}を使います。
+
+@findex manual-entry
+@c   You can read the ``man page'' for an operating system command, library
+@c function, or system call, with the @kbd{M-x manual-entry} command.  It
+@c runs the @code{man} program to format the man page, and runs it
+@c asynchronously if your system permits, so that you can keep on editing
+@c while the page is being formatted.  (MS-DOS and MS-Windows 3 do not
+@c permit asynchronous subprocesses, so on these systems you cannot edit
+@c while Emacs waits for @code{man} to exit.)  The result goes in a buffer
+@c named @samp{*Man @var{topic}*}.  These buffers use a special major mode,
+@c Man mode, that facilitates scrolling and examining other manual pages.
+@c For details, type @kbd{C-h m} while in a man page buffer.
+@kbd{M-x manual-entry}コマンドを使って、
+オペレーティングシステムのコマンド、ライブラリ関数、システムコールの
+『マニュアルページ』を読むことができます。
+このコマンドは、マニュアルページを清書するために
+@code{man}プログラムを実行します。
+システムが許せば非同期に実行するので、
+マニュアルページが清書されるまで、編集を継続できます
+（MS-DOSやMS-Windows 3.xでは、非同期的なサブプロセスを実行できない。
+このため、これらのシステムでは@code{man}の終了をEmacsが待つあいだは
+編集できない）。
+結果は、@samp{*Man @var{topic}*}という名前のバッファに入ります。
+これらのバッファではマン（man）モードと呼ばれる特別な
+メジャーモードが使われ、
+スクロールや他のマニュアルページの調査を容易に行えます。
+より詳しくは、マニュアルページ用のバッファで、
+@kbd{C-h m}と打ってください。
+
+@vindex Man-fontify-manpage-flag
+@c   For a long man page, setting the faces properly can take substantial
+@c time.  By default, Emacs uses faces in man pages if Emacs can display
+@c different fonts or colors.  You can turn off use of faces in man pages
+@c by setting the variable @code{Man-fontify-manpage-flag} to @code{nil}.
+長いマニュアルページでは、適切なフェイスを設定するにはとても時間がかかります。
+さまざまなフォントや表示色を表示できる環境であれば、
+デフォルトでマニュアルページにフェイスを用いるようになっています。
+変数@code{Man-fontify-manpage-flag}に@code{nil}を設定すれば、
+マニュアルページにおけるフェイスの使用をオフにできます。
+
+@findex Man-fontify-manpage
+@c   If you insert the text of a man page into an Emacs buffer in some
+@c other fashion, you can use the command @kbd{M-x Man-fontify-manpage} to
+@c perform the same conversions that @kbd{M-x manual-entry} does.
+他の方法でマニュアルページのテキストをEmacsバッファに挿入した場合、
+@kbd{M-x manual-entry}と同じ変換を施すには、
+そこで@kbd{M-x Man-fontify-manpage}コマンドを実行します。
+
+@c   Eventually the GNU project hopes to replace most man pages with
+@c better-organized manuals that you can browse with Info.  @xref{Misc
+@c Help}.  Since this process is only partially completed, it is still
+@c useful to read manual pages.
+GNUプロジェクトでは最終的に、ほとんどのマニュアルページを
+infoで閲覧可能なよりよく構成されたマニュアルに置き換えることを望んでいます。
+@xref{Misc Help}。
+この作業は、ほんの一部が完了しただけなので、
+まだマニュアルページを読めることは有益です。
+
+@node C Modes
+@c @section C and Related Modes
+@section Cモードと関連するモード
+@c @cindex C mode
+@c @cindex Java mode
+@c @cindex Pike mode
+@c @cindex IDL mode
+@c @cindex CORBA IDL mode
+@c @cindex Objective C mode
+@c @cindex C++ mode
+@c @cindex mode, Java
+@c @cindex mode, C
+@c @cindex mode, Objective C
+@c @cindex mode, CORBA IDL
+@c @cindex mode, Pike
+@cindex Cモード
+@cindex Javaモード
+@cindex Pikeモード
+@cindex IDLモード
+@cindex CORBA IDLモード
+@cindex Objective Cモード
+@cindex C++モード
+@cindex モード、Java
+@cindex モード、C
+@cindex モード、Objective C
+@cindex モード、CORBA IDL
+@cindex モード、Pike
+
+@c   This section describes special features available in C, C++,
+@c Objective-C, Java, CORBA IDL, and Pike modes.  When we say ``C mode and
+@c related modes,'' those are the modes we mean.
+本節では、C、C++、Objective-C、Java、CORBA IDL、
+Pike用の各モードで利用可能な特別な機能について述べます。
+『Cモードと関連するモード』と書いたときには、
+これらのモードを意味します。
+
+@menu
+* Motion in C::
+* Electric C::
+* Hungry Delete::
+* Other C Commands::
+* Comments in C::
+@end menu
+
+@node Motion in C
+@c @subsection C Mode Motion Commands
+@subsection Cモードの移動コマンド
+
+@c   This section describes commands for moving point, in C mode and
+@c related modes.
+本節では、Cモードとその関連モードでポイントを移動する
+コマンドについて述べます。
+
+@table @code
+@item C-c C-u
+@c @kindex C-c C-u @r{(C mode)}
+@kindex C-c C-u @r{（Cモード）}
+@findex c-up-conditional
+@c Move point back to the containing preprocessor conditional, leaving the
+@c mark behind.  A prefix argument acts as a repeat count.  With a negative
+@c argument, move point forward to the end of the containing
+@c preprocessor conditional.  When going backwards, @code{#elif} is treated
+@c like @code{#else} followed by @code{#if}.  When going forwards,
+@c @code{#elif} is ignored.@refill
+マークをポイント位置に設定し、
+ポイントを含むプリプロセッサの条件節の先頭に後向きにポイントを戻す。
+数引数は反復回数として働く。
+負の引数を指定すると、条件節の末尾に前向きにポイントを移動する。
+後向きに戻る場合、
+@code{#elif}は、@code{#if}が続く@code{#else}のように扱われる。
+前向きに進む場合、@code{#elif}は無視される
+@footnote{【訳注】@code{#elif}のところで止まってしまう。}。
+
+@item C-c C-p
+@c @kindex C-c C-p @r{(C mode)}
+@kindex C-c C-p @r{（Cモード）}
+@findex c-backward-conditional
+@c Move point back over a preprocessor conditional, leaving the mark
+@c behind.  A prefix argument acts as a repeat count.  With a negative
+@c argument, move forward.
+マークをポイント位置に設定し、
+プリプロセッサの条件節を横断して後向きにポイントを移動する。
+数引数は反復回数として働く。
+負の引数を指定すると、前向きに移動する。
+
+@item C-c C-n
+@c @kindex C-c C-n @r{(C mode)}
+@kindex C-c C-n @r{（Cモード）}
+@findex c-forward-conditional
+@c Move point forward across a preprocessor conditional, leaving the mark
+@c behind.  A prefix argument acts as a repeat count.  With a negative
+@c argument, move backward.
+マークをポイント位置に設定し、
+プリプロセッサの条件節を横断して前向きにポイントを移動する。
+数引数は反復回数として働く。
+負の引数を指定すると、後向きに移動する。
+
+@item M-a
+@kindex ESC a
+@findex c-beginning-of-statement
+@c Move point to the beginning of the innermost C statement
+@c (@code{c-beginning-of-statement}).  If point is already at the beginning
+@c of a statement, move to the beginning of the preceding statement.  With
+@c prefix argument @var{n}, move back @var{n} @minus{} 1 statements.
+もっとも内側のCの文の先頭にポイントを移動する
+（@code{c-beginning-of-statement}）。
+すでに文の先頭にポイントがある場合、直前の文の先頭に移動する。
+数引数@var{n}を指定すると、@var{n}@minus{}1だけまえの文に移動する。
+
+@c If point is within a string or comment, or next to a comment (only
+@c whitespace between them), this command moves by sentences instead of
+@c statements.
+ポイントが、文字列やコメントの内側、あるいは、
+コメントのうしろ（コメントのあいだに白文字がある場合のみ）にある場合、
+Cの文ではなく自然言語の文単位で移動する。
+
+@c When called from a program, this function takes three optional
+@c arguments: the numeric prefix argument, a buffer position limit
+@c (don't move back before that place), and a flag that controls whether
+@c to do sentence motion when inside of a comment.
+プログラムから呼ばれるときには、この関数は、3つの引数、つまり、
+反復回数、（これよりも後向きには戻らない）移動限界、
+ポイントがコメントの内側にある場合に自然言語の文単位の移動をするかどうか、
+を取るが、これらは省略できる。
+
+@item M-e
+@kindex ESC e
+@findex c-end-of-statement
+@c Move point to the end of the innermost C statement; like @kbd{M-a}
+@c except that it moves in the other direction (@code{c-end-of-statement}).
+もっとも内側のCの文の末尾にポイントを移動する。
+@kbd{M-a}と同じだが、移動方向が逆（@code{c-end-of-statement}）。
+
+@item M-x c-backward-into-nomenclature
+@findex c-backward-into-nomenclature
+@c Move point backward to beginning of a C++ nomenclature section or word.
+@c With prefix argument @var{n}, move @var{n} times.  If @var{n} is
+@c negative, move forward.  C++ nomenclature means a symbol name in the
+@c style of NamingSymbolsWithMixedCaseAndNoUnderlines; each capital letter
+@c begins a section or word.
+C++の命名語法の部分や単語の先頭に後向きにポイントを移動する。
+数引数@var{n}を指定すると、@var{n}回移動する。
+@var{n}が負ならば、前向きに移動する。
+C++の命名語法とは、
+NamingSymbolsWithMixedCaseAndNoUnderlinesのような形のシンボル名のこと
+（つまり、大文字で始めた単語を連結したもの）。
+各大文字が部分や単語の先頭となる。
+
+@c In the GNU project, we recommend using underscores to separate words
+@c within an identifier in C or C++, rather than using case distinctions.
+GNUプロジェクトでは、
+CやC++の識別子は、大文字小文字で区別するのではなく、
+単語を下線で区切ることを推奨する。
+
+@item M-x c-forward-into-nomenclature
+@findex c-forward-into-nomenclature
+@c Move point forward to end of a C++ nomenclature section or word.
+@c With prefix argument @var{n}, move @var{n} times.
+C++の命名語法の部分や単語の末尾に前向きにポイントを移動する。
+数引数@var{n}を指定すると、@var{n}回移動する。
+@end table
+
+@node Electric C
+@c @subsection Electric C Characters
+@subsection エレクトリックC文字
+
+@c   In C mode and related modes, certain printing characters are
+@c ``electric''---in addition to inserting themselves, they also reindent
+@c the current line and may insert newlines.  This feature is controlled by
+@c the variable @code{c-auto-newline}.  The ``electric'' characters are
+@c @kbd{@{}, @kbd{@}}, @kbd{:}, @kbd{#}, @kbd{;}, @kbd{,}, @kbd{<},
+@c @kbd{>}, @kbd{/}, @kbd{*}, @kbd{(}, and @kbd{)}.
+Cモードとその関連モードでは、ある種の印字文字は『エレクトリック』です。
+つまり、その文字自身を挿入することに加えて、
+現在行を字下げし直したり、改行も挿入することさえあります。
+この機能は、変数@code{c-auto-newline}で制御されます。
+『エレクトリック』文字は、@kbd{@{}、@kbd{@}}、@kbd{:}、@kbd{#}、
+@kbd{;}、@kbd{,}、@kbd{<}、@kbd{>}、@kbd{/}、@kbd{*}、@kbd{(}、@kbd{)}です。
+
+@c   Electric characters insert newlines only when the @dfn{auto-newline}
+@c feature is enabled (indicated by @samp{/a} in the mode line after the
+@c mode name).  This feature is controlled by the variable
+@c @code{c-auto-newline}.  You can turn this feature on or off with the
+@c command @kbd{C-c C-a}:
+@dfn{自動改行}（auto-newline）機能がオン
+（モード行のモード名のあとに@samp{/a}と表示される）の場合に限り、
+エレクトリック文字は改行を挿入します。
+この機能は、変数@code{c-auto-newline}で制御されます。
+コマンド@kbd{C-c C-a}でこの機能をオン／オフできます。
+
+@table @kbd
+@item C-c C-a
+@c @kindex C-c C-a @r{(C mode)}
+@kindex C-c C-a @r{（Cモード）}
+@findex c-toggle-auto-state
+@c Toggle the auto-newline feature (@code{c-toggle-auto-state}).  With a
+@c prefix argument, this command turns the auto-newline feature on if the
+@c argument is positive, and off if it is negative.
+自動改行機能をオン／オフする（@code{c-toggle-auto-state}）。
+数引数を指定した場合、正ならば自動改行機能をオンにし、
+負ならばオフにする。
+@end table
+
+@c   The colon character is electric because that is appropriate for a
+@c single colon.  But when you want to insert a double colon in C++, the
+@c electric behavior of colon is inconvenient.  You can insert a double
+@c colon with no reindentation or newlines by typing @kbd{C-c :}:
+コロン@kbd{:}はエレクトリックです。
+なぜなら、単独のコロンの入力の解釈としてはそれが適切だからです。
+しかし、C++で2つの連続するコロンを挿入する場合、
+コロンのエレクトリックな動作は不便です。
+@kbd{C-c :}と打てば、字下げも改行の挿入も行わずにコロンを2つ挿入できます。
+
+@table @kbd
+@item C-c :
+@c @kindex C-c : @r{(C mode)}
+@kindex C-c : @r{（Cモード）}
+@findex c-scope-operator
+@c Insert a double colon scope operator at point, without reindenting the
+@c line or adding any newlines (@code{c-scope-operator}).
+行の字下げも改行の挿入もせずに、
+スコープ演算子を表すコロン2つをポイント位置に挿入する
+（@code{c-scope-operator}）。
+@end table
+
+@c   The electric @kbd{#} key reindents the line if it appears to be the
+@c beginning of a preprocessor directive.  This happens when the value of
+@c @code{c-electric-pound-behavior} is @code{(alignleft)}.  You can turn
+@c this feature off by setting @code{c-electric-pound-behavior} to
+@c @code{nil}.
+エレクトリックキー@kbd{#}は、
+プリプロセッサ指令の始まりと思われる位置では、行を字下げし直します。
+変数@code{c-electric-pound-behavior}の値が@code{(alignleft)}のときには、
+このようになります。
+この機能をオフにするには、
+@code{c-electric-pound-behavior}に@code{nil}を設定します。
+
+@c    The variable @code{c-hanging-braces-alist} controls the insertion of
+@c newlines before and after inserted braces.  It is an association list
+@c with elements of the following form: @code{(@var{syntactic-symbol}
+@c . @var{nl-list})}.  Most of the syntactic symbols that appear in
+@c @code{c-offsets-alist} are meaningful here as well.
+変数@code{c-hanging-braces-alist}は、
+挿入された中括弧の前／後への改行の挿入を制御します。
+これは、@code{(@var{syntactic-symbol} . @var{nl-list})}の形の要素
+から成る連想リストです。
+@code{c-offsets-alist}に現れるほとんどの構文シンボルは、
+ここでも意味を持ちます。
+
+@c    The list @var{nl-list} may contain either of the symbols
+@c @code{before} or @code{after}, or both; or it may be @code{nil}.  When a
+@c brace is inserted, the syntactic context it defines is looked up in
+@c @code{c-hanging-braces-alist}; if it is found, the @var{nl-list} is used
+@c to determine where newlines are inserted: either before the brace,
+@c after, or both.  If not found, the default is to insert a newline both
+@c before and after braces.
+リスト@var{nl-list}は、シンボル@code{before}か@code{after}のいずれか、
+あるいはその両方、もしくは@code{nil}を含みます。
+中括弧が挿入されるときには、その中括弧が定義する構文上の文脈を
+@code{c-hanging-braces-alist}から探します。
+みつかれば、@var{nl-list}を使って
+中括弧の前／後／前後のどこに改行を挿入するか決定します。
+みつからなければ、デフォルトとして中括弧の前後に改行を挿入します。
+
+@c    The variable @code{c-hanging-colons-alist} controls the insertion of
+@c newlines before and after inserted colons.  It is an association list
+@c with elements of the following form: @code{(@var{syntactic-symbol}
+@c . @var{nl-list})}.  The list @var{nl-list} may contain either of the
+@c symbols @code{before} or @code{after}, or both; or it may be @code{nil}.
+変数@code{c-hanging-colons-alist}は、
+挿入されたコロンの前／後への改行の挿入を制御します。
+これは、@code{(@var{syntactic-symbol} . @var{nl-list})}の形の要素
+から成る連想リストです。
+リスト@var{nl-list}は、シンボル@code{before}か@code{after}のいずれか、
+あるいはその両方、もしくは@code{nil}を含みます。
+
+@c    When a colon is inserted, the syntactic symbol it defines is looked
+@c up in this list, and if found, the @var{nl-list} is used to determine
+@c where newlines are inserted: either before the brace, after, or both.
+@c If the syntactic symbol is not found in this list, no newlines are
+@c inserted.
+コロンが挿入されるときには、そのコロンが定義する構文シンボルを
+この連想リストから探します。
+みつかれば、@var{nl-list}を使って
+コロンの前／後のどこに改行を挿入するか決定します。
+みつからなければ、改行を挿入しません。
+
+@c    Electric characters can also delete newlines automatically when the
+@c auto-newline feature is enabled.  This feature makes auto-newline more
+@c acceptable, by deleting the newlines in the most common cases where you
+@c do not want them.  Emacs can recognize several cases in which deleting a
+@c newline might be desirable; by setting the variable
+@c @code{c-cleanup-list}, you can specify @emph{which} of these cases that
+@c should happen.  The variable's value is a list of symbols, each
+@c describing one case for possible deletion of a newline.  Here are the
+@c meaningful symbols, and their meanings:
+自動改行機能がオンのときには、エレクトリック文字は自動的に改行を削除します。
+この機能により、
+改行が不要だと思われるもっとも一般的な場面で改行を削除するので、
+自動改行機能をユーザーにより受け入れやすくしています。
+Emacsは改行を削除することが望ましいいくつかの場面を認識できますが、
+変数@code{c-cleanup-list}を設定すれば、@emph{どの}場面で行うか指定できます。
+この変数の値はシンボルのリストです。
+各要素は、改行を削除してよい場面を1つ指定します。
+以下に指定できるシンボルとその意味を示します。
+
+@table @code
+@item brace-catch-brace
+@c Clean up @samp{@} catch (@var{condition}) @{} constructs by placing the
+@c entire construct on a single line.  The clean-up occurs when you type
+@c the @samp{@{}, if there is nothing between the braces aside from
+@c @code{catch} and @var{condition}.
+@samp{@} catch (@var{condition}) @{}の構造全体を1行に再配置する。
+@code{catch}や@var{condition}以外に中括弧のあいだになにもないときに
+@samp{@{}を打つと再配置する。
+
+@item brace-else-brace
+@c Clean up @samp{@} else @{} constructs by placing the entire construct on
+@c a single line.  The clean-up occurs when you type the @samp{@{} after
+@c the @code{else}, but only if there is nothing but white space between
+@c the braces and the @code{else}.
+@samp{@} else @{}の構造全体を1行に再配置する。
+@code{else}に続けて@samp{@{}を打ったときに再配置するが、
+中括弧と@code{else}のあいだに空白以外の文字がない場合に限る。
+
+@item brace-elseif-brace
+@c Clean up @samp{@} else if (@dots{}) @{} constructs by placing the entire
+@c construct on a single line.  The clean-up occurs when you type the
+@c @samp{@{}, if there is nothing but white space between the @samp{@}} and
+@c @samp{@{} aside from the keywords and the @code{if}-condition.
+@samp{@} else if (@dots{}) @{}の構造全体を1行に配置する。
+@samp{@{}を打ったときに再配置するが、
+キーワードと@code{if}の条件式を除いて、
+@samp{@}}と@samp{@{}のあいだに空白以外の文字がない場合に限る。
+
+@item empty-defun-braces
+@c Clean up empty defun braces by placing the braces on the same
+@c line.  Clean-up occurs when you type the closing brace.
+空の関数定義の中括弧、@samp{@{}と@samp{@}}を同じ行に再配置する。
+閉じ中括弧@samp{@}}を打ったときに再配置する。
+
+@item defun-close-semi
+@c Clean up the semicolon after a @code{struct} or similar type
+@c declaration, by placing the semicolon on the same line as the closing
+@c brace.  Clean-up occurs when you type the semicolon.
+@code{struct}や同様の型宣言のあとのセミコロンを閉じ中括弧と同じ行に再配置する。
+セミコロンを打ったときに再配置する。
+
+@item list-close-comma
+@c Clean up commas following braces in array and aggregate
+@c initializers.  Clean-up occurs when you type the comma.
+配列／合成体の初期化式の中の閉じ中括弧とそれに続くコンマを同じ行に再配置する。
+コンマを打ったときに再配置する。
+
+@item scope-operator
+@c Clean up double colons which may designate a C++ scope operator, by
+@c placing the colons together.  Clean-up occurs when you type the second
+@c colon, but only when the two colons are separated by nothing but
+@c whitespace.
+C++のスコープ演算子を表している可能性がある2つのコロンを一緒にする。
+2つめのコロンを打ったときに一緒にするが、
+コロンのあいだに白文字以外の文字がない場合に限る。
+@end table
+
+@node Hungry Delete
+@c @subsection Hungry Delete Feature in C
+@subsection Cの欲張りな削除機能
+
+@c   When the @dfn{hungry-delete} feature is enabled (indicated by
+@c @samp{/h} or @samp{/ah} in the mode line after the mode name), a single
+@c @key{DEL} command deletes all preceding whitespace, not just one space.
+@c To turn this feature on or off, use @kbd{C-c C-d}:
+@dfn{欲張りな削除}機能をオン
+（モード行のモード名のあとに@samp{/h}か@samp{/ah}で表示される）にすると、
+1つの@key{DEL}コマンドで、直前の空白1つだけでなく、白文字すべてを削除します。
+この機能をオン／オフにするには、@kbd{C-c C-d}を使います。
+
+@table @kbd
+@item C-c C-d
+@c @kindex C-c C-d @r{(C mode)}
+@kindex C-c C-d @r{（Cモード）}
+@findex c-toggle-hungry-state
+@c Toggle the hungry-delete feature (@code{c-toggle-hungry-state}).  With a
+@c prefix argument, this command turns the hungry-delete feature on if the
+@c argument is positive, and off if it is negative.
+欲張り削除機能（@code{c-toggle-hungry-state}）をオン／オフする。
+数引数を指定した場合、正ならば欲張り削除機能をオンにし、
+負ならばオフにする。
+
+@item C-c C-t
+@c @kindex C-c C-t @r{(C mode)}
+@kindex C-c C-t @r{（Cモード）}
+@findex c-toggle-auto-hungry-state
+@c Toggle the auto-newline and hungry-delete features, both at once
+@c (@code{c-toggle-auto-hungry-state}).
+自動改行機能と欲張り削除機能を同時にオン／オフする 
+（@code{c-toggle-auto-hungry-state}）。
+@end table
+
+@vindex c-hungry-delete-key
+@c    The variable @code{c-hungry-delete-key} controls whether the
+@c hungry-delete feature is enabled.
+変数@code{c-hungry-delete-key}は、
+欲張り削除機能がオンかオフかを制御します。
+
+@node Other C Commands
+@c @subsection Other Commands for C Mode
+@subsection Cモードのその他のコマンド
+
+@table @kbd
+@item C-M-h
+@findex c-mark-function
+@c @kindex C-M-h @r{(C mode)}
+@kindex C-M-h @r{（Cモード）}
+@c Put mark at the end of a function definition, and put point at the
+@c beginning (@code{c-mark-function}).
+関数定義の末尾にマークを設定し、先頭にポイントを置く
+（@code{c-mark-function}）。
+
+@item M-q
+@c @kindex M-q @r{(C mode)}
+@kindex M-q @r{（Cモード）}
+@findex c-fill-paragraph
+@c Fill a paragraph, handling C and C++ comments (@code{c-fill-paragraph}).
+@c If any part of the current line is a comment or within a comment, this
+@c command fills the comment or the paragraph of it that point is in,
+@c preserving the comment indentation and comment delimiters.
+CやC++のコメントを考慮して、段落を詰め込む
+（@code{c-fill-paragraph}）。
+現在行にコメントがあったり、現在行がコメントの内側なら、
+コメントの字下げとコメント区切りを保存したまま、
+ポイント位置のコメントや段落を詰め込む。
+
+@item C-c C-e
+@c @cindex macro expansion in C
+@c @cindex expansion of C macros
+@cindex Cのマクロ展開
+@cindex 展開、Cのマクロ
+@findex c-macro-expand
+@c @kindex C-c C-e @r{(C mode)}
+@kindex C-c C-e @r{（Cモード）}
+@c Run the C preprocessor on the text in the region, and show the result,
+@c which includes the expansion of all the macro calls
+@c (@code{c-macro-expand}).  The buffer text before the region is also
+@c included in preprocessing, for the sake of macros defined there, but the
+@c output from this part isn't shown.
+リージョン内のテキストに対してCプリプロセッサを実行し、
+マクロ呼び出しを展開した結果を表示する（@code{c-macro-expand}）。
+リージョンのまえにあるテキストにマクロ定義があることもあるので、
+それらもプリプロセッサに渡されるが、その部分の出力は表示しない。
+
+@c When you are debugging C code that uses macros, sometimes it is hard to
+@c figure out precisely how the macros expand.  With this command, you
+@c don't have to figure it out; you can see the expansions.
+マクロを用いたCのコードをデバッグするとき、
+どのようにマクロが展開されるか正確に理解するのが難しいことがある。
+このコマンドを使えば、マクロ展開のことを考える必要はない。
+展開結果を目にすることができる。
+
+@item C-c C-\
+@findex c-backslash-region
+@c @kindex C-c C-\ @r{(C mode)}
+@kindex C-c C-\ @r{（Cモード）}
+@c Insert or align @samp{\} characters at the ends of the lines of the
+@c region (@code{c-backslash-region}).  This is useful after writing or
+@c editing a C macro definition.
+リージョン内の行末に@samp{\}文字を挿入したり、
+行末の@samp{\}の位置揃えを行う（@code{c-backslash-region}）。
+Cのマクロ定義を書いたり編集したあとに便利なコマンド。
+
+@c If a line already ends in @samp{\}, this command adjusts the amount of
+@c whitespace before it.  Otherwise, it inserts a new @samp{\}.  However,
+@c the last line in the region is treated specially; no @samp{\} is
+@c inserted on that line, and any @samp{\} there is deleted.
+行末がすでに@samp{\}で終っているなら、そのまえに置く白文字の個数を調整する。
+そうでなければ、新たに@samp{\}を挿入する。
+ただし、リージョン内の最後の行は特別扱いする。
+その行に@samp{\}を挿入することはなく、また、@samp{\}がある場合には削除する。
+
+@item M-x cpp-highlight-buffer
+@c @cindex preprocessor highlighting
+@cindex プリプロセッサ強調表示
+@findex cpp-highlight-buffer
+@c Highlight parts of the text according to its preprocessor conditionals.
+@c This command displays another buffer named @samp{*CPP Edit*}, which
+@c serves as a graphic menu for selecting how to display particular kinds
+@c of conditionals and their contents.  After changing various settings,
+@c click on @samp{[A]pply these settings} (or go to that buffer and type
+@c @kbd{a}) to rehighlight the C mode buffer accordingly.
+プリプロセッサ指令の条件節に従って、テキストの一部を強調表示する。
+このコマンドは@samp{*CPP Edit*}という名前のバッファを表示する。
+このバッファは、特定のプリプロセッサ条件とその内容をどのように表示するかを
+選択するグラフィックメニュー。
+さまざま設定を変更したあとで、@samp{[A]pply these settings}をクリックする
+（あるいは、そのバッファへ移動して@kbd{a}と打つ）と、
+設定に応じてCモードのバッファを強調表示し直す。
+
+@item C-c C-s
+@findex c-show-syntactic-information
+@c @kindex C-c C-s @r{(C mode)}
+@kindex C-c C-s @r{（Cモード）}
+@c Display the syntactic information about the current source line
+@c (@code{c-show-syntactic-information}).  This is the information that
+@c directs how the line is indented.
+現在のソース行に関する構文上の情報を表示する
+（@code{c-show-syntactic-information}）。
+この情報は行の字下げを指示する。
+@end table
+
+@node Comments in C
+@c @subsection Comments in C Modes
+@subsection Cモードのコメント
+
+@c    C mode and related modes use a number of variables for controlling
+@c comment format.
+Cモードとその関連モードでは、
+コメントの整形にいくつかの変数を使います。
+
+@table @code
+@item c-comment-only-line-offset
+@vindex c-comment-only-line-offset
+@c Extra offset for line which contains only the start of a comment.  It
+@c can be either an integer or a cons cell of the form
+@c @code{(@var{non-anchored-offset} . @var{anchored-offset})}, where
+@c @var{non-anchored-offset} is the amount of offset given to
+@c non-column-zero anchored comment-only lines, and @var{anchored-offset}
+@c is the amount of offset to give column-zero anchored comment-only lines.
+@c Just an integer as value is equivalent to @code{(@var{val} . 0)}.
+コメント開始部分だけを含んだ行に与える余分のオフセット。
+この変数の値は整数、あるいは
+@code{(@var{non-anchored-offset} . @var{anchored-offset})}の形の
+コンスセルのどちらでもかまわない。
+ここで、@var{non-anchored-offset}は、
+1桁目以降から始まるコメントに与えるオフセット。
+@var{anchored-offset}は、0桁目から始まるコメントに与えるオフセット。
+整数値だけの場合は、@code{(@var{val} . 0)}と等価。
+
+@item c-comment-start-regexp
+@vindex c-comment-start-regexp
+@c This buffer-local variable specifies how to recognize the start of a comment.
+コメント開始の識別方法を指定するバッファにローカルな変数。
+
+@item c-hanging-comment-ender-p
+@vindex c-hanging-comment-ender-p
+@c If this variable is @code{nil}, @code{c-fill-paragraph} leaves the
+@c comment terminator of a block comment on a line by itself.  The default
+@c value is @code{t}, which puts the comment-end delimiter @samp{*/} at the
+@c end of the last line of the comment text.
+この変数が@code{nil}であると、@code{c-fill-paragraph}は、
+ブロックコメントのコメント終了区切りだけの行を作る。
+デフォルト値は@code{t}で、
+コメント終了区切り@samp{*/}をコメントの最後の行の末尾に置く。
+
+@item c-hanging-comment-starter-p
+@vindex c-hanging-comment-starter-p
+@c If this variable is @code{nil}, @code{c-fill-paragraph} leaves the
+@c starting delimiter of a block comment on a line by itself.  The default
+@c value is @code{t}, which puts the comment-start delimiter @samp{/*} at
+@c the beginning of the first line of the comment text.
+この変数が@code{nil}であると、@code{c-fill-paragraph}は、
+ブロックコメントのコメント開始区切りだけの行を作る。
+デフォルト値は@code{t}で、
+コメント開始区切り@samp{/*}をコメントの最初の行の先頭に置く。
+@end table
+
+@node Fortran
+@c @section Fortran Mode
+@section Fortranモード
+@c @cindex Fortran mode
+@c @cindex mode, Fortran
+@cindex Fortranモード
+@cindex モード、Fortran
+
+@c   Fortran mode provides special motion commands for Fortran statements and
+@c subprograms, and indentation commands that understand Fortran conventions
+@c of nesting, line numbers and continuation statements.  Fortran mode has
+@c its own Auto Fill mode that breaks long lines into proper Fortran
+@c continuation lines.
+Fortranモードには、Fortranの文と副プログラム向けの特別な移動コマンド、
+Fortranの入れ子、行番号と継続文の約束事に従う字下げコマンドがあります。
+Fortranモードには、長い行を適切なFortranの継続行に分ける
+専用の自動詰め込み（fortran-auto-fill）モードがあります。
+
+@c   Special commands for comments are provided because Fortran comments
+@c are unlike those of other languages.  Built-in abbrevs optionally save
+@c typing when you insert Fortran keywords.
+Fortranのコメントは他の言語のコメントとは異なっているので、
+コメントに対する特別なコマンドもあります。
+Fortranのキーワードを入力するときの打鍵量を減らせる、
+組み込みの略語もあります。
+
+@findex fortran-mode
+@c   Use @kbd{M-x fortran-mode} to switch to this major mode.  This command
+@c runs the hook @code{fortran-mode-hook} (@pxref{Hooks}).
+Fortran用のメジャーモードに切り替えるには、@kbd{M-x fortran-mode}を使います。
+このコマンドは、フック@code{fortran-mode-hook}を実行します（@pxref{Hooks}）。
+
+@menu
+* Motion: Fortran Motion.	 Moving point by statements or subprograms.
+* Indent: Fortran Indent.	 Indentation commands for Fortran.
+* Comments: Fortran Comments.	 Inserting and aligning comments.
+* Autofill: Fortran Autofill.	 Auto fill minor mode for Fortran.
+* Columns: Fortran Columns.	 Measuring columns for valid Fortran.
+* Abbrev: Fortran Abbrev.	 Built-in abbrevs for Fortran keywords.
+* Misc: Fortran Misc.            Other Fortran mode features.
+@end menu
+
+@node Fortran Motion
+@c @subsection Motion Commands
+@subsection 移動コマンド
+
+@c   Fortran mode provides special commands to move by subprograms (functions
+@c and subroutines) and by statements.  There is also a command to put the
+@c region around one subprogram, convenient for killing it or moving it.
+Fortran モードには、副プログラム（関数やサブルーチン）や文を単位とて
+移動するための特別なコマンドがあります。
+また、副プログラムを囲むリージョンを設定するコマンドもあり、
+副プログラムをキルしたり移動したりするのに便利です。
+
+@c @kindex C-M-a @r{(Fortran mode)}
+@c @kindex C-M-e @r{(Fortran mode)}
+@c @kindex C-M-h @r{(Fortran mode)}
+@c @kindex C-c C-p @r{(Fortran mode)}
+@c @kindex C-c C-n @r{(Fortran mode)}
+@kindex C-M-a @r{（Fortranモード）}
+@kindex C-M-e @r{（Fortranモード）}
+@kindex C-M-h @r{（Fortranモード）}
+@kindex C-c C-p @r{（Fortranモード）}
+@kindex C-c C-n @r{（Fortranモード）}
+@findex beginning-of-fortran-subprogram
+@findex end-of-fortran-subprogram
+@findex mark-fortran-subprogram
+@findex fortran-previous-statement
+@findex fortran-next-statement
+
+@table @kbd
+@item C-M-a
+@c Move to beginning of subprogram
+@c (@code{beginning-of-fortran-subprogram}).
+副プログラムの先頭に移動する（@code{beginning-of-fortran-subprogram}）。
+@item C-M-e
+@c Move to end of subprogram (@code{end-of-fortran-subprogram}).
+副プログラムの末尾に移動する（@code{end-of-fortran-subprogram}）。
+@item C-M-h
+@c Put point at beginning of subprogram and mark at end
+@c (@code{mark-fortran-subprogram}).
+副プログラムの先頭にポイントを置き、末尾にマークを設定する
+（@code{mark-fortran-subprogram}）。
+@item C-c C-n
+@c Move to beginning of current or next statement
+@c (@code{fortran-next-statement}).
+現在の文かつぎの文の先頭に移動する（@code{fortran-next-statement}）。
+@item C-c C-p
+@c Move to beginning of current or previous statement
+@c (@code{fortran-previous-statement}).
+現在の文かまえの文の先頭に移動する
+（@code{fortran-previous-statement}）。
+@end table
+
+@node Fortran Indent
+@c @subsection Fortran Indentation
+@subsection Fortranの字下げ
+
+@c   Special commands and features are needed for indenting Fortran code in
+@c order to make sure various syntactic entities (line numbers, comment line
+@c indicators and continuation line flags) appear in the columns that are
+@c required for standard Fortran.
+Fortranのコードでは、構文上の各種要素（行番号、コメント行指示子、
+継続マーク）は標準Fortranが要求する桁に現れるようにしなくてはいけないので、
+字下げに関する特別なコマンドと機能が必要です。
+
+@menu
+* Commands: ForIndent Commands.  Commands for indenting Fortran.
+* Contline: ForIndent Cont.      How continuation lines indent.
+* Numbers:  ForIndent Num.       How line numbers auto-indent.
+* Conv:     ForIndent Conv.      Conventions you must obey to avoid trouble.
+* Vars:     ForIndent Vars.      Variables controlling Fortran indent style.
+@end menu
+
+@node ForIndent Commands
+@c @subsubsection Fortran Indentation Commands
+@subsubsection Fortranの字下げコマンド
+
+@table @kbd
+@item @key{TAB}
+@c Indent the current line (@code{fortran-indent-line}).
+現在行を字下げする（@code{fortran-indent-line}）。
+@item C-j
+@c Indent the current and start a new indented line
+@c (@code{fortran-indent-new-line}).
+現在行を字下げしてから、字下げした新たな行を始める
+（@code{fortran-indent-new-line}）。
+@item C-M-j
+@c Break the current line and set up a continuation line.
+ポイント位置で現在行を分割し、継続行を設定する。
+@item M-^
+@c Join this line to the previous line.
+現在行と直前の行を繋げる。
+@item C-M-q
+@c Indent all the lines of the subprogram point is in
+@c (@code{fortran-indent-subprogram}).
+ポイントを含む副プログラムの行をすべて字下げする
+（@code{fortran-indent-subprogram}）。
+@end table
+
+@findex fortran-indent-line
+@c   Fortran mode redefines @key{TAB} to reindent the current line for
+@c Fortran (@code{fortran-indent-line}).  This command indents line numbers
+@c and continuation markers to their required columns, and independently
+@c indents the body of the statement based on its nesting in the program.
+Fortranモードでは、Fortranの行を字下げするように@key{TAB}を再定義します
+（@code{fortran-indent-line}）。
+このコマンドは、行番号と継続マークを要求される桁位置に字下げしたうえ、
+それとは独立にプログラム中の入れ子に基づいて文本体を字下げします。
+
+@c @kindex C-j @r{(Fortran mode)}
+@kindex C-j @r{（Fortranモード）}
+@findex fortran-indent-new-line
+@c   The key @kbd{C-j} runs the command @code{fortran-indent-new-line},
+@c which reindents the current line then makes and indents a new line.
+@c This command is useful to reindent the closing statement of @samp{do}
+@c loops and other blocks before starting a new line.
+キー@kbd{C-j}は@code{fortran-indent-new-line}を実行します。
+これは、現在行を字下げしてから、新たな行を作成して字下げします。
+新たな行を始めるまえに、@samp{do}ループやその他のブロックを
+閉じる文を字下げし直すのに便利です。
+
+@c @kindex C-M-q @r{(Fortran mode)}
+@kindex C-M-q @r{（Fortranモード）}
+@findex fortran-indent-subprogram
+@c   The key @kbd{C-M-q} runs @code{fortran-indent-subprogram}, a command
+@c to reindent all the lines of the Fortran subprogram (function or
+@c subroutine) containing point.
+キー@kbd{C-M-q}は、ポイントを含むFortranの副プログラム
+（関数やサブルーチン）の行すべてを字下げする
+コマンド@code{fortran-indent-subprogram}を実行します。
+
+@c @kindex C-M-j @r{(Fortran mode)}
+@kindex C-M-j @r{（Fortranモード）}
+@findex fortran-split-line
+@c   The key @kbd{C-M-j} runs @code{fortran-split-line}, which splits
+@c a line in the appropriate fashion for Fortran.  In a non-comment line,
+@c the second half becomes a continuation line and is indented
+@c accordingly.  In a comment line, both halves become separate comment
+@c lines.
+キー@kbd{C-M-j}は、適切な方法でFortranの行を分割するコマンド
+@code{fortran-split-line}を実行します。
+コメント行でなければ、後半部を継続行にし、それに応じて字下げします。
+コメント行ならば、前後半部分とも独立したコメント行になります。
+
+@c @kindex M-^ @r{(Fortran mode)}
+@kindex M-^ @r{（Fortranモード）}
+@findex fortran-join-line
+@c   @kbd{M-^} runs the command @code{fortran-join-line}, which is more or
+@c less the inverse of @code{fortran-split-line}.  It joins the current
+@c line to the previous line in a suitable way for Fortran code.
+@kbd{M-^}は、@code{fortran-split-line}の逆操作を行う
+コマンド@code{fortran-join-line}を実行します。
+現在行と直前の行を、Fortranコードとして適切に繋げます。
+
+@node ForIndent Cont
+@c @subsubsection Continuation Lines
+@subsubsection 継続行
+@c @cindex Fortran continuation lines
+@cindex Fortranの継続行
+
+@vindex fortran-continuation-string
+@c   Most modern Fortran compilers allow two ways of writing continuation
+@c lines.  If the first non-space character on a line is in column 5, then
+@c that line is a continuation of the previous line.  We call this
+@c @dfn{fixed format}.  (In GNU Emacs we always count columns from 0.)  The
+@c variable @code{fortran-continuation-string} specifies what character to
+@c put on column 5.  A line that starts with a tab character followed by
+@c any digit except @samp{0} is also a continuation line.  We call this
+@c style of continuation @dfn{tab format}.
+近代的なほとんどのFortranコンパイラには、
+継続行の記述方法が2つ用意されています。
+ある行の空白でない最初の文字が5桁目にあれば、先行する行の継続行です。
+このスタイルを@dfn{固定フォーマット}と呼びます。
+（GNU Emacsでは、桁位置はつねに0から数える。）
+変数@code{fortran-continuation-string}は、5桁目に置く文字を指定します。
+タブ文字で始まり@samp{0}以外の数字が続く行も継続行です。
+このスタイルを@dfn{タブフォーマット}と呼びます。
+
+@c @vindex indent-tabs-mode @r{(Fortran mode)}
+@vindex indent-tabs-mode @r{（Fortranモード）}
+@c   Fortran mode can make either style of continuation line, but you
+@c must specify which one you prefer.  The value of the variable
+@c @code{indent-tabs-mode} controls the choice: @code{nil} for fixed
+@c format, and non-@code{nil} for tab format.  You can tell which style
+@c is presently in effect by the presence or absence of the string
+@c @samp{Tab} in the mode line.
+Fortranモードではどちらのスタイルの継続行も利用できますが、
+希望するほうを指定する必要があります。
+変数@code{indent-tabs-mode}の値で希望を指定します。
+@code{nil}ならば固定フォーマット、
+@code{nil}以外ならばタブフォーマットになります。
+モード行に文字列@samp{Tab}があるかどうかで、
+現在使用しているスタイルがわかります。
+
+@c   If the text on a line starts with the conventional Fortran
+@c continuation marker @samp{$}, or if it begins with any non-whitespace
+@c character in column 5, Fortran mode treats it as a continuation line.
+@c When you indent a continuation line with @key{TAB}, it converts the line
+@c to the current continuation style.  When you split a Fortran statement
+@c with @kbd{C-M-j}, the continuation marker on the newline is created
+@c according to the continuation style.
+Fortranモードでは、テキストが慣用的なFortranの継続マーク@samp{$}で始まる、
+あるいは、
+5桁目から白文字以外の文字で始まる場合には、その行を継続行として扱います。
+@key{TAB}で継続行を字下げすると、
+選択されている継続行のスタイルに変換します。
+@kbd{C-M-j}でFortranの文を分割すると、
+継続行のスタイルに応じて新たな行には継続マークを付けます。
+
+@c   The setting of continuation style affects several other aspects of
+@c editing in Fortran mode.  In fixed format mode, the minimum column
+@c number for the body of a statement is 6.  Lines inside of Fortran
+@c blocks that are indented to larger column numbers always use only the
+@c space character for whitespace.  In tab format mode, the minimum
+@c column number for the statement body is 8, and the whitespace before
+@c column 8 must always consist of one tab character.
+継続行のスタイルは、Fortranモードでの編集に関わる
+その他の側面にも影響します。
+固定フォーマットでは、文本体を置く最小桁位置は6になります。
+Fortranのブロックの内側にある行を7桁目以降に字下げするときには、
+白文字には空白文字を使います。
+一方、タブフォーマットでは、文本体を置く最小桁位置は8で、
+8桁目よりまえの白文字はつねにタブ文字です。
+
+@vindex fortran-tab-mode-default
+@vindex fortran-analyze-depth
+@c   When you enter Fortran mode for an existing file, it tries to deduce the
+@c proper continuation style automatically from the file contents.  The first
+@c line that begins with either a tab character or six spaces determines the
+@c choice.  The variable @code{fortran-analyze-depth} specifies how many lines
+@c to consider (at the beginning of the file); if none of those lines
+@c indicates a style, then the variable @code{fortran-tab-mode-default}
+@c specifies the style.  If it is @code{nil}, that specifies fixed format, and
+@c non-@code{nil} specifies tab format.
+既存のファイルに対してFortranモードに入ると、
+その内容から自動的に適切な継続行のスタイルを推測しようとします。
+タブ文字か空白6個で始まる最初の行でスタイルを判断します。
+変数@code{fortran-analyze-depth}で、
+（ファイルの先頭から）何行分をスタイル判断に使用するか指定します。
+この範囲内にスタイルを示すような行がみつからなければ、
+変数@code{fortran-tab-mode-default}がスタイルを指定します。
+@code{nil}なら固定フォーマット、@code{nil}以外ならタブフォーマットです。
+
+@node ForIndent Num
+@c @subsubsection Line Numbers
+@subsubsection 行番号
+
+@c   If a number is the first non-whitespace in the line, Fortran
+@c indentation assumes it is a line number and moves it to columns 0
+@c through 4.  (Columns always count from 0 in GNU Emacs.)
+ある行の白文字以外の最初の文字が数字であれば、
+Fortranの字下げではそれを行番号とみなして0桁目から4桁目のあいだに移動します。
+（GNU Emacsでは、桁位置はつねに0から始まる。）
+
+@vindex fortran-line-number-indent
+@c   Line numbers of four digits or less are normally indented one space.
+@c The variable @code{fortran-line-number-indent} controls this; it
+@c specifies the maximum indentation a line number can have.  Line numbers
+@c are indented to right-justify them to end in column 4 unless that would
+@c require more than this maximum indentation.  The default value of the
+@c variable is 1.
+通常、4桁以下の行番号は空白1個で字下げします。
+変数@code{fortran-line-number-indent}でこの字下げ幅を制御します。
+この変数の値は、行番号の最大字下げ幅を表します。
+最大字下げ幅まで字下げできなくなると、
+行番号の最後の桁が4桁目になるように右揃えで字下げします。
+この変数のデフォルト値は1です。
+
+@vindex fortran-electric-line-number
+@c   Simply inserting a line number is enough to indent it according to
+@c these rules.  As each digit is inserted, the indentation is recomputed.
+@c To turn off this feature, set the variable
+@c @code{fortran-electric-line-number} to @code{nil}.  Then inserting line
+@c numbers is like inserting anything else.
+これらの規則に従って行番号を字下げするには、
+行番号を挿入するだけで十分です。
+行番号の各桁が挿入されるたびに、字下げ幅を再計算します。
+この機能をオフにするには、
+変数@code{fortran-electric-line-number}に@code{nil}を設定します。
+こうすると、行番号の挿入はその他の文字の挿入と同様に行われます。
+
+@node ForIndent Conv
+@c @subsubsection Syntactic Conventions
+@subsubsection 構文上の規約
+
+@c   Fortran mode assumes that you follow certain conventions that simplify
+@c the task of understanding a Fortran program well enough to indent it
+@c properly:
+Fortranモードでは、適切な字下げをするためのFortranプログラムの解釈を
+簡単にするために、以下の規約に従っているものと仮定します。
+
+@itemize @bullet
+@item
+@c Two nested @samp{do} loops never share a @samp{continue} statement.
+2つの入れ子になった@samp{do}ループは、
+けっして@samp{continue}文を共有しない。
+
+@item
+@c Fortran keywords such as @samp{if}, @samp{else}, @samp{then}, @samp{do}
+@c and others are written without embedded whitespace or line breaks.
+@samp{if}、@samp{else}、@samp{then}、@samp{do}といった
+Fortranのキーワードは、あいだに空白があったり、途中で行分けされない。
+
+@c Fortran compilers generally ignore whitespace outside of string
+@c constants, but Fortran mode does not recognize these keywords if they
+@c are not contiguous.  Constructs such as @samp{else if} or @samp{end do}
+@c are acceptable, but the second word should be on the same line as the
+@c first and not on a continuation line.
+一般にFortranコンパイラは文字列定数の外側にある空白を無視するが、
+Fortranモードは途中に空白が入っているキーワードを認識しない。
+@samp{else if}や@samp{end do}のような書き方は許されるが、
+2つの単語を同じ行に置いた場合に限る。
+継続行に分かれていると認識しない。
+@end itemize
+
+@noindent
+@c If you fail to follow these conventions, the indentation commands may
+@c indent some lines unaesthetically.  However, a correct Fortran program
+@c retains its meaning when reindented even if the conventions are not
+@c followed.
+以上の規約に従っていない場合には、行を美しく字下げできないこともあります。
+しかしながら、たとえ規約に従っていなくても、
+正しいFortranプログラムであれば字下げによって意味が変わることはありません。
+
+@node ForIndent Vars
+@c @subsubsection Variables for Fortran Indentation
+@subsubsection Fortranの字下げのための変数
+
+@vindex fortran-do-indent
+@vindex fortran-if-indent
+@vindex fortran-structure-indent
+@vindex fortran-continuation-indent
+@vindex fortran-check-all-num@dots{}
+@vindex fortran-minimum-statement-indent@dots{}
+@c   Several additional variables control how Fortran indentation works:
+Fortranの字下げ動作に影響する変数がいくつかあります。
+
+@table @code
+@item fortran-do-indent
+@c Extra indentation within each level of @samp{do} statement (default 3).
+@samp{do}文の各レベルごとに追加する字下げ幅（デフォルトは3）。
+
+@item fortran-if-indent
+@c Extra indentation within each level of @samp{if} statement (default 3).
+@c This value is also used for extra indentation within each level of the
+@c Fortran 90 @samp{where} statement.
+@samp{if}文の各レベルごとに追加する字下げ幅（デフォルトは3）。
+この値は、Fortran 90の@samp{where}文の字下げにも使われる。
+
+@item fortran-structure-indent
+@c Extra indentation within each level of @samp{structure}, @samp{union}, or
+@c @samp{map} statements (default 3).
+@samp{structure}、@samp{union}、@samp{map}の各文の各レベルごとに
+追加する字下げ幅（デフォルトは3）。
+
+@item fortran-continuation-indent
+@c Extra indentation for bodies of continuation lines (default 5).
+継続行の文本体に追加する字下げ幅（デフォルトは5）。
+
+@item fortran-check-all-num-for-matching-do
+@c If this is @code{nil}, indentation assumes that each @samp{do} statement
+@c ends on a @samp{continue} statement.  Therefore, when computing
+@c indentation for a statement other than @samp{continue}, it can save time
+@c by not checking for a @samp{do} statement ending there.  If this is
+@c non-@code{nil}, indenting any numbered statement must check for a
+@c @samp{do} that ends there.  The default is @code{nil}.
+この変数が@code{nil}なら、字下げ処理では、
+@samp{do}文は@samp{continue}文で終っていると仮定する。
+こうすると、@samp{continue}以外の文の字下げを計算するときに、
+当該文が@samp{do}文を終えるかどうか検査しなくてよいので、
+時間を節約できる。
+この変数が@code{nil}以外であれば、
+行番号が付いた文の字下げを計算するときには、
+当該文が@samp{do}文を終えるかどうか検査する必要がある。
+デフォルト値は@code{nil}。
+
+@item fortran-blink-matching-if
+@c If this is @code{t}, indenting an @samp{endif} statement moves the
+@c cursor momentarily to the matching @samp{if} statement to show where it
+@c is.  The default is @code{nil}.
+この変数が@code{t}なら、@samp{endif}文の字下げを行うときに、
+対応する@samp{if}文を示すために一時的にカーソルを移動する。
+デフォルト値は@code{nil}。
+
+@item fortran-minimum-statement-indent-fixed
+@c Minimum indentation for fortran statements when using fixed format
+@c continuation line style.  Statement bodies are never indented less than
+@c this much.  The default is 6.
+固定フォーマットの継続行スタイルを採用したときの、文に対する最小字下げ幅。
+文本体の字下げ幅がこの値より小さくなることはない。
+デフォルト値は6。
+
+@item fortran-minimum-statement-indent-tab
+@c Minimum indentation for fortran statements for tab format continuation line
+@c style.  Statement bodies are never indented less than this much.  The
+@c default is 8.
+タブフォーマットの継続行スタイルを採用したときの、文に対する最小字下げ幅。
+文本体の字下げ幅がこの値より小さくなることはない。
+デフォルト値は8。
+@end table
+
+@node Fortran Comments
+@c @subsection Fortran Comments
+@subsection Fortranのコメント
+
+@c   The usual Emacs comment commands assume that a comment can follow a line
+@c of code.  In Fortran, the standard comment syntax requires an entire line
+@c to be just a comment.  Therefore, Fortran mode replaces the standard Emacs
+@c comment commands and defines some new variables.
+Emacsの通常のコメント用コマンドは、コメントをコードのあとにも置けると仮定します。
+Fortranでは、標準的なコメントの構文は、1つの行全体を必要とします。
+そのため、Fortranモードでは、
+Emacsの通常のコメント用コマンドを置き換え、新たな変数をいくつか定義しています。
+
+@c   Fortran mode can also handle a nonstandard comment syntax where comments
+@c start with @samp{!} and can follow other text.  Because only some Fortran
+@c compilers accept this syntax, Fortran mode will not insert such comments
+@c unless you have said in advance to do so.  To do this, set the variable
+@c @code{comment-start} to @samp{"!"} (@pxref{Variables}).
+Fortranモードでは、文字@samp{!}で始まり他のテキストのあとにも置ける
+非標準的なコメントの構文も扱えます。
+しかし、この構文を受け付けるFortranコンパイラは限られるため、
+まえもって指定しておかない限り、
+Fortranモードは非標準のコメントを使いません。
+このスタイルのコメントを使うには、
+変数@code{comment-start}に@samp{"!"}を設定します（@pxref{Variables}）。
+
+@table @kbd
+@item M-;
+@c Align comment or insert new comment (@code{fortran-comment-indent}).
+コメントの位置を揃えたり、新たなコメントを挿入する
+（@code{fortran-indent-comment}）。
+
+@item C-x ;
+@c Applies to nonstandard @samp{!} comments only.
+非標準の@samp{!}コメントだけに作用する。
+
+@item C-c ;
+@c Turn all lines of the region into comments, or (with argument) turn them back
+@c into real code (@code{fortran-comment-region}).
+リージョン内のすべての行をコメントにする。
+あるいは、（引数を指定すると）コメントをコードに戻す
+（@code{fortran-comment-region}）。
+@end table
+
+@c   @kbd{M-;} in Fortran mode is redefined as the command
+@c @code{fortran-comment-indent}.  Like the usual @kbd{M-;} command, this
+@c recognizes any kind of existing comment and aligns its text appropriately;
+@c if there is no existing comment, a comment is inserted and aligned.  But
+@c inserting and aligning comments are not the same in Fortran mode as in
+@c other modes.
+Fortranモードの@kbd{M-;}は、
+コマンド@code{fortran-indent-comment}に再定義されています。
+通常の@kbd{M-;}と同じく、既存のコメントを認識して、
+そのテキストの桁位置を揃えます。
+コメントがなければ、コメントを挿入して桁位置を揃えます。
+しかし、Fortranモードのコメントの挿入と揃え方は、
+他のモードと同じではありません。
+
+@c   When a new comment must be inserted, if the current line is blank, a
+@c full-line comment is inserted.  On a non-blank line, a nonstandard @samp{!}
+@c comment is inserted if you have said you want to use them.  Otherwise a
+@c full-line comment is inserted on a new line before the current line.
+新たにコメントを挿入する場合、
+現在行が空行のときは（1行全体を占める）行コメントを挿入します。
+空行でないとき、非標準のコメントを使うように指定してあれば
+非標準の@samp{!}コメントを挿入します。
+いずれでもないときには、現在行のまえに行コメントを挿入します。
+
+@c   Nonstandard @samp{!} comments are aligned like comments in other
+@c languages, but full-line comments are different.  In a standard full-line
+@c comment, the comment delimiter itself must always appear in column zero.
+@c What can be aligned is the text within the comment.  You can choose from
+@c three styles of alignment by setting the variable
+@c @code{fortran-comment-indent-style} to one of these values:
+非標準の@samp{!}コメントは他の言語のコメントと同じように揃えられますが、
+行コメントの場合はようすが異なります。
+標準の行コメントでは、コメント区切りはつねに0桁目にある必要があります。
+コメント内部のテキストだけを揃えます。
+@code{fortran-comment-indent-style}を設定して、
+3種類の揃え方を選べます。
+
+@vindex fortran-comment-indent-style
+@vindex fortran-comment-line-extra-indent
+@table @code
+@item fixed
+@c Align the text at a fixed column, which is the sum of
+@c @code{fortran-comment-line-extra-indent} and the minimum statement
+@c indentation.  This is the default.
+@code{fortran-comment-line-extra-indent}と文に対する最小字下げ幅を合計し
+た桁位置にテキストを揃える。
+デフォルトはこれ。
+
+@c The minimum statement indentation is
+@c @code{fortran-minimum-statement-indent-fixed} for fixed format
+@c continuation line style and @code{fortran-minimum-statement-indent-tab}
+@c for tab format style.
+文の最小字下げ幅は、
+固定フォーマットの継続行スタイルの場合には
+@code{fortran-minimum-statement-indent-fixed}の値、
+タブフォーマットの場合には@code{fortran-minimum-statement-indent-tab}の値。
+
+@item relative
+@c Align the text as if it were a line of code, but with an additional
+@c @code{fortran-comment-line-extra-indent} columns of indentation.
+コード行であるかのように揃えるが、
+@code{fortran-comment-line-extra-indent}だけ余計に桁をずらす。
+
+@item nil
+@c Don't move text in full-line comments automatically at all.
+行コメントのテキストを勝手に動かさない。
+@end table
+
+@vindex fortran-comment-indent-char
+@c   In addition, you can specify the character to be used to indent within
+@c full-line comments by setting the variable
+@c @code{fortran-comment-indent-char} to the single-character string you want
+@c to use.
+また、行コメントの字下げ文字を変更したければ、
+変数@code{fortran-comment-indent-char}に好みの1文字を設定してください。
+
+@vindex comment-line-start
+@vindex comment-line-start-skip
+@c   Fortran mode introduces two variables @code{comment-line-start} and
+@c @code{comment-line-start-skip}, which play for full-line comments the same
+@c roles played by @code{comment-start} and @code{comment-start-skip} for
+@c ordinary text-following comments.  Normally these are set properly by
+@c Fortran mode, so you do not need to change them.
+Fortranモードには、@code{comment-line-start}と
+@code{comment-line-start-skip}の2つの変数が新たに導入されています。
+これらは、コードのあとに置く通常のコメントに対する@code{comment-start}と
+@code{comment-start-skip}と同様の役割を、行コメントに対して果たします。
+どちらもFortranモードが適切に設定するので、
+変更する必要はありません。
+
+@c   The normal Emacs comment command @kbd{C-x ;} has not been redefined.  If
+@c you use @samp{!} comments, this command can be used with them.  Otherwise
+@c it is useless in Fortran mode.
+Emacsの通常のコメント用コマンド@kbd{C-x ;}は、再定義されていません。
+このコマンドは@samp{!}コメントを扱えます。
+@samp{!}コメントを使っていない場合には、
+このコマンドはFortranモードでは役に立ちません。
+
+@c @kindex C-c ; @r{(Fortran mode)}
+@kindex C-c ; @r{（Fortranモード）}
+@findex fortran-comment-region
+@vindex fortran-comment-region
+@c   The command @kbd{C-c ;} (@code{fortran-comment-region}) turns all the
+@c lines of the region into comments by inserting the string @samp{C$$$} at
+@c the front of each one.  With a numeric argument, it turns the region
+@c back into live code by deleting @samp{C$$$} from the front of each line
+@c in it.  The string used for these comments can be controlled by setting
+@c the variable @code{fortran-comment-region}.  Note that here we have an
+@c example of a command and a variable with the same name; these two uses
+@c of the name never conflict because in Lisp and in Emacs it is always
+@c clear from the context which one is meant.
+コマンド@kbd{C-c ;}（@code{fortran-comment-region}）は、
+リージョン内のすべての行の先頭に@samp{C$$$}を挿入して
+コメントに変えます。
+数引数を指定すると、行の先頭から@samp{C$$$}を削除して、
+リージョンを生きたコードに戻します。
+これらのコメントに使う文字列は、
+変数@code{fortran-comment-region}の設定で制御できます。
+ところで、ここではコマンドと変数に同じ名前が使われています。
+LispやEmacsにおいては、使用される文脈から
+コマンドと変数をつねに区別できるので、
+このような名前の使い方が問題を起こすことはありません。
+
+@node Fortran Autofill
+@c @subsection Fortran Auto Fill Mode
+@subsection Fortran専用自動詰め込み（fortran-auto-fill）モード
+
+@c   Fortran Auto Fill mode is a minor mode which automatically splits
+@c Fortran statements as you insert them when they become too wide.
+@c Splitting a statement involves making continuation lines using
+@c @code{fortran-continuation-string} (@pxref{ForIndent Cont}).  This
+@c splitting happens when you type @key{SPC}, @key{RET}, or @key{TAB}, and
+@c also in the Fortran indentation commands.
+Fortran専用自動詰め込み（fortran-auto-fill）モードは、
+挿入したFortranの文が長くなりすぎると自動的に文を分割するマイナモードです。
+文を分割するには、
+@code{fortran-continuation-string}（@pxref{ForIndent Cont}）を用いて
+継続行を作ります。
+@key{SPC}、@key{RET}、@key{TAB}を打ったときや、
+字下げコマンドを使ったときに分割されます。
+
+@findex fortran-auto-fill-mode
+@c   @kbd{M-x fortran-auto-fill-mode} turns Fortran Auto Fill mode on if it
+@c was off, or off if it was on.  This command works the same as @kbd{M-x
+@c auto-fill-mode} does for normal Auto Fill mode (@pxref{Filling}).  A
+@c positive numeric argument turns Fortran Auto Fill mode on, and a
+@c negative argument turns it off.  You can see when Fortran Auto Fill mode
+@c is in effect by the presence of the word @samp{Fill} in the mode line,
+@c inside the parentheses.  Fortran Auto Fill mode is a minor mode, turned
+@c on or off for each buffer individually.  @xref{Minor Modes}.
+@kbd{M-x fortran-auto-fill-mode}は、
+Fortran専用自動詰め込み（fortran-auto-fill）モードがオンならばオフにし、
+オフならばオンにします。
+このコマンドは、通常の自動詰め込み（auto-fill）モード
+（@pxref{Filling}）である@kbd{M-x auto-fill-mode}が行うのと
+同じように働きます。
+正の数引数を指定すると、
+Fortran専用自動詰め込み（fortran-auto-fill）モードをオンにし、
+負であればオフにします。
+このモードのオン／オフは、モード行の括弧の中に@samp{Fill}が
+あるかどうかで判断できます。
+Fortran専用自動詰め込み（fortran-auto-fill）モードはマイナモードなので、
+各バッファごとに独立にオン／オフにできます。
+@xref{Minor Modes}。
+
+@vindex fortran-break-before-delimiters
+@c    Fortran Auto Fill mode breaks lines at spaces or delimiters when the
+@c lines get longer than the desired width (the value of @code{fill-column}).
+@c The delimiters that Fortran Auto Fill mode may break at are @samp{,},
+@c @samp{'}, @samp{+}, @samp{-}, @samp{/}, @samp{*}, @samp{=}, and @samp{)}.
+@c The line break comes after the delimiter if the variable
+@c @code{fortran-break-before-delimiters} is @code{nil}.  Otherwise (and by
+@c default), the break comes before the delimiter.
+Fortran専用自動詰め込み（fortran-auto-fill）モードは、
+行の長さが規定の幅（@code{fill-column}の値）を越えると、
+空白や区切りの位置で行を分割します。
+Fortran専用自動詰め込み（fortran-auto-fill）が分割する区切りは、
+@samp{,}、@samp{'}、@samp{+}、@samp{-}、@samp{/}、@samp{*}、
+@samp{=}、@samp{)}です。
+変数@code{fortran-break-before-delimiters}が@code{nil}の場合には、
+区切りのうしろで分割します。
+それ以外（デフォルトでもある）では、区切りのまえで分割します。
+
+@c   By default, Fortran Auto Fill mode is not enabled.  If you want this
+@c feature turned on permanently, add a hook function to
+@c @code{fortran-mode-hook} to execute @code{(fortran-auto-fill-mode 1)}.
+@c @xref{Hooks}.
+デフォルトではFortran専用自動詰め込み（fortran-auto-fill）モードはオフです。
+この機能を恒常的に使いたければ、
+@code{(fortran-auto-fill-mode 1)}を実行するフック関数を
+@code{fortran-mode-hook}に追加してください。
+@xref{Hooks}。
+
+@node Fortran Columns
+@c @subsection Checking Columns in Fortran
+@subsection 桁位置の確認
+
+@table @kbd
+@item C-c C-r
+@c Display a ``column ruler'' momentarily above the current line
+@c (@code{fortran-column-ruler}).
+現在行の上にしばらくのあいだ『桁定規』を表示する
+（@code{fortran-column-ruler}）。
+@item C-c C-w
+@c Split the current window horizontally temporarily so that it is 72
+@c columns wide.  This may help you avoid making lines longer than the
+@c 72-character limit that some Fortran compilers impose
+@c (@code{fortran-window-create-momentarily}).
+現在のウィンドウを一時的に分割して幅を72桁にする。
+一部のFortranコンパイラは1行を72文字以内に制限しているので、
+このコマンドを使用すれば1行が長くなりすぎることを防げる
+（@code{fortran-window-create-momentarily}）。
+@end table
+
+@c @kindex C-c C-r @r{(Fortran mode)}
+@kindex C-c C-r @r{（Fortranモード）}
+@findex fortran-column-ruler
+@vindex fortran-column-ruler
+@c   The command @kbd{C-c C-r} (@code{fortran-column-ruler}) shows a column
+@c ruler momentarily above the current line.  The comment ruler is two lines
+@c of text that show you the locations of columns with special significance in
+@c Fortran programs.  Square brackets show the limits of the columns for line
+@c numbers, and curly brackets show the limits of the columns for the
+@c statement body.  Column numbers appear above them.
+コマンド@kbd{C-c C-r}（@code{fortran-column-ruler}）は、
+桁定規をしばらくのあいだ、現在行の上に表示します。
+桁定規は、Fortranプログラムにおいて特別な意味をもつ桁位置を表す
+2行のテキストです。
+2行目の角括弧と中括弧で、それぞれ、行番号と文の本体の範囲を表します。
+桁番号は（それらの上の）1行目に表示されます。
+
+@c   Note that the column numbers count from zero, as always in GNU Emacs.
+@c As a result, the numbers may be one less than those you are familiar
+@c with; but the positions they indicate in the line are standard for
+@c Fortran.
+GNU Emacsでは桁番号をつねに0から数えることに注意してください。
+その結果、桁定規に示される桁番号は、
+慣れ親しんだものより1だけ小さくなります。
+しかし、それらが表す位置はFortranの標準に従ったものです。
+
+@c   The text used to display the column ruler depends on the value of 
+@c the variable @code{indent-tabs-mode}.  If @code{indent-tabs-mode} is
+@c @code{nil}, then the value of the variable
+@c @code{fortran-column-ruler-fixed} is used as the column ruler.
+@c Otherwise, the variable @code{fortran-column-ruler-tab} is displayed.
+@c By changing these variables, you can change the column ruler display.
+桁定規の表示に用いるテキストは、
+変数@code{indent-tabs-mode}の値に依存します。
+この変数の値が@code{nil}ならば、
+変数@code{fortran-column-ruler-fixed}の値を桁定規の表示に使います。
+@code{nil}以外であれば、変数
+@code{fortran-column-ruler-tab}の内容を表示に使います。
+これらの変数の内容を変更すれば、桁定規の表示を変更できます。
+
+@c @kindex C-c C-w @r{(Fortran mode)}
+@kindex C-c C-w @r{（Fortranモード）}
+@findex fortran-window-create
+@c   For even more help, use @kbd{C-c C-w} (@code{fortran-window-create}), a
+@c command which splits the current window horizontally, making a window 72
+@c columns wide.  By editing in this window you can immediately see when you
+@c make a line too wide to be correct Fortran.
+さらに桁合わせを支援するために、
+@kbd{C-c C-w}（@code{fortran-window-create}）は、
+現在のウィンドウを幅が72桁になるように横位置で分割します。
+このウィンドウで編集すれば、
+正しいFortranのプログラムとしては長すぎる行を即座に発見できます。
+
+@node Fortran Abbrev
+@c @subsection Fortran Keyword Abbrevs
+@subsection Fortranのキーワードの略語
+
+@c   Fortran mode provides many built-in abbrevs for common keywords and
+@c declarations.  These are the same sort of abbrev that you can define
+@c yourself.  To use them, you must turn on Abbrev mode.  @xref{Abbrevs}.
+Fortranモードには、一般的なキーワードや宣言に対する
+数多くの組み込み略語があります。
+これらは、ユーザー自身が定義できる略語と同じ種類のものです。
+それらを使うには、略語（abbrev）モードをオンにします。
+@xref{Abbrevs}。
+
+@c   The built-in abbrevs are unusual in one way: they all start with a
+@c semicolon.  You cannot normally use semicolon in an abbrev, but Fortran
+@c mode makes this possible by changing the syntax of semicolon to ``word
+@c constituent.''
+組み込み略語は他の略語と1つの点で変わっています。
+すべてセミコロンで始まります。
+通常は略語にはセミコロンを使えませんが、
+Fortranモードでは、セミコロンの構文上の意味を『単語を構成する文字』に
+変更することで、これを可能にしています。
+
+@c   For example, one built-in Fortran abbrev is @samp{;c} for
+@c @samp{continue}.  If you insert @samp{;c} and then insert a punctuation
+@c character such as a space or a newline, the @samp{;c} expands automatically
+@c to @samp{continue}, provided Abbrev mode is enabled.@refill
+たとえば、@samp{continue}に対する組み込みFortran略語は@samp{;c}です。
+略語（abbrev）モードがオンのときに、
+@samp{;c}を挿入してから空白や改行といった句読点文字を挿入すると、
+@samp{;c}は自動的に@samp{continue}と展開されます。
+
+@c   Type @samp{;?} or @samp{;C-h} to display a list of all the built-in
+@c Fortran abbrevs and what they stand for.
+組み込みFortran略語とその展開形の一覧を表示するには、
+@samp{;?}あるいは@samp{;C-h}と打ちます。
+
+@node Fortran Misc
+@c @subsection Other Fortran Mode Commands
+@subsection Fortranモードのその他のコマンド
+
+@table @kbd
+@item C-x n d
+@c Narrow to the current Fortran subprogram.
+現在のFortranの副プログラムにナロイングする。
+@end table
+
+@c @kindex C-x n d @r{(Fortran mode)}
+@kindex C-x n d @r{（Fortranモード）}
+@findex fortran-narrow-to-subprogram
+@c   Fortran mode redefines the key @kbd{C-x n d} to run the command
+@c @code{fortran-narrow-to-subprogram}, which is the Fortran analogue
+@c of the key's usual definition.  It narrows the buffer to the subprogram
+@c containing point.
+Fortranモードでは、
+キー@kbd{C-x n d}はコマンド@code{fortran-narrow-to-subprogram}を実行するように
+再定義しています。
+このコマンドは、キーの通常の定義をFrotran風にしたものです。
+バッファをポイントを含む副プログラムにナロイングします。
+
+@node Asm Mode
+@c @section Asm Mode
+@section asmモード
+
+@c @cindex Asm mode
+@cindex asmモード
+@cindex モード、Asm
+@c Asm mode is a major mode for editing files of assembler code.  It
+@c defines these commands:
+asmモードは、アセンブリコードのファイルを編集するためのメジャーモードです。
+つぎのコマンドが定義されています。
+
+@table @kbd
+@item @key{TAB}
+@c @code{tab-to-tab-stop}.
+@code{tab-to-tab-stop}。
+@item C-j
+@c Insert a newline and then indent using @code{tab-to-tab-stop}.
+改行を挿入し、@code{tab-to-tab-stop}で字下げする。
+@item :
+@c Insert a colon and then remove the indentation from before the label
+@c preceding colon.  Then do @code{tab-to-tab-stop}.
+コロンを挿入し、コロンに先行するラベルのまえの字下げを取り除く。
+そして、@code{tab-to-tab-stop}を行う。
+@item ;
+@c Insert or align a comment.
+コメントの挿入／位置揃えを行う。
+@end table
+
+@c   The variable @code{asm-comment-char} specifies which character
+@c starts comments in assembler syntax.
+変数@code{asm-comment-char}は、
+アセンブラ構文でコメントを開始する文字を指定します。

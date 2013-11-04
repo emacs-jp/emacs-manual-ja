@@ -1,0 +1,1596 @@
+@c =============================================================
+@c = 元 翻 訳: 粕川正充＠お茶の水女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Dired, Calendar/Diary, Rmail, Top
+@c @chapter Dired, the Directory Editor
+@chapter ディレクトリエディタdired
+@c @cindex Dired
+@cindex dired
+
+@c   Dired makes an Emacs buffer containing a listing of a directory, and
+@c optionally some of its subdirectories as well.  You can use the normal
+@c Emacs commands to move around in this buffer, and special Dired commands
+@c to operate on the files listed.
+diredはディレクトリ一覧をバッファに作成します。
+場合によっては、サブディレクトリの一覧も含まれます。
+普通のEmacsコマンドでこのバッファの中を動き廻ったり、
+特別なdiredコマンドで一覧中にあるファイルを操作できます。
+
+@menu
+* Enter: Dired Enter.         How to invoke Dired.
+* Commands: Dired Commands.   Commands in the Dired buffer.
+* Deletion: Dired Deletion.   Deleting files with Dired.
+* Flagging Many Files::       Flagging files based on their names.
+* Visit: Dired Visiting.      Other file operations through Dired.
+* Marks vs Flags::	      Flagging for deletion vs marking.
+* Operating on Files::	      How to copy, rename, print, compress, etc.
+			        either one file or several files.
+* Shell Commands in Dired::   Running a shell command on the marked files.
+* Transforming File Names::   Using patterns to rename multiple files.
+* Comparison in Dired::	      Running `diff' by way of Dired.
+* Subdirectories in Dired::   Adding subdirectories to the Dired buffer.
+* Subdirectory Motion::	      Moving across subdirectories, and up and down.
+* Hiding Subdirectories::     Making subdirectories visible or invisible.
+* Updating: Dired Updating.   Discarding lines for files of no interest.
+* Find: Dired and Find.	      Using `find' to choose the files for Dired.
+@end menu
+
+@node Dired Enter
+@c @section Entering Dired
+@section diredの起動
+
+@findex dired
+@kindex C-x d
+@vindex dired-listing-switches
+@c   To invoke Dired, do @kbd{C-x d} or @kbd{M-x dired}.  The command reads
+@c a directory name or wildcard file name pattern as a minibuffer argument
+@c to specify which files to list.  Where @code{dired} differs from
+@c @code{list-directory} is in putting the buffer into Dired mode so that
+@c the special commands of Dired are available.
+diredを起動するには、@kbd{C-x d}か@kbd{M-x dired}を使います。
+このコマンドは、一覧表示するファイルを指定するための
+ディレクトリ名やファイルのワイルドカードパターンをミニバッファで読み取ります。
+@code{dired}が@code{list-directory}と違うのは、
+バッファがdiredモードになっていて
+特別なdiredコマンドを使えるようになることです。
+
+@c   The variable @code{dired-listing-switches} specifies the options to
+@c give to @code{ls} for listing directory; this string @emph{must} contain
+@c @samp{-l}.  If you use a numeric prefix argument with the @code{dired}
+@c command, you can specify the @code{ls} switches with the minibuffer
+@c before you enter the directory specification.
+変数@code{dired-listing-switches}には、
+ディレクトリ一覧を作成する@code{ls}プログラムに与えるオプションを指定します。
+オプション中には@samp{-l}が必ず含まれている@emph{必要}があります。
+@code{dired}コマンドに数引数を指定すると、
+ミニバッファでディレクトリを指定するまえに
+@code{ls}のオプションを指定できます。
+
+@findex dired-other-window
+@kindex C-x 4 d
+@findex dired-other-frame
+@kindex C-x 5 d
+@c   To display the Dired buffer in another window rather than in the
+@c selected window, use @kbd{C-x 4 d} (@code{dired-other-window}) instead
+@c of @kbd{C-x d}.  @kbd{C-x 5 d} (@code{dired-other-frame}) uses a
+@c separate frame to display the Dired buffer.
+diredバッファを現在選択しているウィンドウではなく
+別のウィンドウに表示したい場合には、
+@kbd{C-x d}のかわりに@kbd{C-x 4 d}（@code{dired-other-window}）を使います。
+@kbd{C-x 5 d}（@code{dired-other-frame}）は
+別のフレームにdiredバッファを表示します。
+
+@node Dired Commands
+@c @section Commands in the Dired Buffer
+@section diredバッファ内のコマンド
+
+@c     The Dired buffer is ``read-only,'' and inserting text in it is not
+@c useful, so ordinary printing characters such as @kbd{d} and @kbd{x} are
+@c used for special Dired commands.  Some Dired commands @dfn{mark} or
+@c @dfn{flag} the @dfn{current file} (that is, the file on the current
+@c line); other commands operate on the marked files or on the flagged
+@c files.
+diredバッファは『読み出し専用』であり、
+このバッファに文字を挿入しても意味がないので、
+@kbd{d}や@kbd{x}のような通常の印字文字は特別なdiredコマンドに使われます。
+diredコマンドのいくつかは、diredバッファの
+@dfn{カレントファイル}（current file、つまり、現在行のファイル）に
+@dfn{印}（mark）や@dfn{フラグ}（flag）を付けます。
+他のコマンドは、印やフラグが付いたファイル群に作用します。
+
+@c @kindex C-n @r{(Dired)}
+@c @kindex C-p @r{(Dired)}
+@kindex C-n @r{（dired）}
+@kindex C-p @r{（dired）}
+@c   All the usual Emacs cursor motion commands are available in Dired
+@c buffers.  Some special-purpose cursor motion commands are also
+@c provided.  The keys @kbd{C-n} and @kbd{C-p} are redefined to put the
+@c cursor at the beginning of the file name on the line, rather than at the
+@c beginning of the line.
+Emacsの普通のカーソル移動コマンドはdiredバッファでも使えます。
+特殊用途のカーソル移動コマンドもあります。
+@kbd{C-n}と@kbd{C-p}は、カーソルを行の先頭ではなく
+ファイル名の先頭に位置合わせするように再定義されています。
+
+@c @kindex SPC @r{(Dired)}
+@kindex SPC @r{（dired）}
+@c   For extra convenience, @key{SPC} and @kbd{n} in Dired are equivalent
+@c to @kbd{C-n}.  @kbd{p} is equivalent to @kbd{C-p}.  (Moving by lines is
+@c so common in Dired that it deserves to be easy to type.)  @key{DEL}
+@c (move up and unflag) is often useful simply for moving up.
+さらに便利なように、
+diredモードでは@key{SPC}と@kbd{n}は@kbd{C-n}に等価です。
+@kbd{p}は@kbd{C-p}に等価です。
+（diredでは行単位の移動をよく行うため、打鍵しやすくしてある。）
+@key{DEL}（上に移動してフラグを消す）は、単に上へ移動する場合には便利です。
+
+@node Dired Deletion
+@c @section Deleting Files with Dired
+@section diredでのファイル削除
+@c @cindex flagging files (in Dired)
+@c @cindex deleting files (in Dired)
+@cindex ファイルにフラグを付ける（dired）
+@cindex ファイルの削除（dired）
+
+@c   The primary use of Dired is to @dfn{flag} files for deletion and then
+@c delete the files previously flagged.
+diredの主な利用法は、ファイルに削除のフラグを付けてから、
+フラグの付いているファイルを（本当に）削除することです。
+
+@table @kbd
+@item d
+@c Flag this file for deletion.
+このファイルに削除フラグを付ける。
+@item u
+@c Remove deletion flag on this line.
+この行の削除フラグを消す。
+@item @key{DEL}
+@c Move point to previous line and remove the deletion flag on that line.
+ポイントをまえの行に移し、その行の削除フラグを消す。
+@item x
+@c Delete the files that are flagged for deletion.
+削除フラグが付いたファイルを（本当に）削除する。
+@end table
+
+@c @kindex d @r{(Dired)}
+@kindex d @r{（dired）}
+@findex dired-flag-file-deletion
+@c   You can flag a file for deletion by moving to the line describing the
+@c file and typing @kbd{d} (@code{dired-flag-file-deletion}).  The deletion flag is visible as a @samp{D} at
+@c the beginning of the line.  This command moves point to the next line,
+@c so that repeated @kbd{d} commands flag successive files.  A numeric
+@c argument serves as a repeat count.
+ファイルに削除フラグを付けるには、
+そのファイルを表示している行に移動して@kbd{d}と打ちます。
+削除フラグは、行頭に表示される@samp{D}という文字でわかります。
+このコマンドはポイントをつぎの行に進めますから、
+@kbd{d}コマンドを繰り返し実行すれば後続のファイルにもフラグを
+付けることができます。
+数引数は反復回数になります。
+
+@c @kindex u @r{(Dired deletion)}
+@c @kindex DEL @r{(Dired)}
+@kindex u @r{（diredの削除）}
+@kindex DEL @r{（dired）}
+@c   The files are flagged for deletion rather than deleted immediately to
+@c reduce the danger of deleting a file accidentally.  Until you direct
+@c Dired to expunge the flagged files, you can remove deletion flags using
+@c the commands @kbd{u} and @key{DEL}.  @kbd{u} (@code{dired-unmark}) works
+@c just like @kbd{d}, but removes flags rather than making flags.
+@c @key{DEL} (@code{dired-unmark-backward}) moves upward, removing flags;
+@c it is like @kbd{u} with argument @minus{}1.
+即座にファイルを削除するかわりに削除フラグを付けるので、
+誤ってファイルを消してしまう危険性は低くなります。
+フラグを付けたファイルを抹消するようにdiredに指示するまでは、
+@kbd{u}や@key{DEL}を使って削除フラグを消せます。
+@kbd{u}（@code{dired-unmark}）は、@kbd{d}と同じように動作しますが、
+フラグを付けるのではなくフラグを消します。
+@kbd{DEL}（@code{dired-unmark-backward}）は上に移動してフラグを消します。
+これは、数引数@minus{}1を指定した@kbd{u}と同じです。
+
+@c @kindex x @r{(Dired)}
+@kindex x @r{（dired）}
+@findex dired-expunge
+@c @cindex expunging (Dired)
+@cindex 抹消（dired）
+@c   To delete the flagged files, type @kbd{x} (@code{dired-expunge}).
+@c This command first displays a list of all the file names flagged for
+@c deletion, and requests confirmation with @kbd{yes}.  If you confirm,
+@c Dired deletes the flagged files, then deletes their lines from the text
+@c of the Dired buffer.  The shortened Dired buffer remains selected.
+削除フラグが付いたファイルを（本当に）削除するには、
+@kbd{x}（@code{dired-expunge}）と打ちます。
+このコマンドは、削除フラグが付いたファイルの一覧を表示し、
+@kbd{yes}での確認応答を求めます。
+確認するとdiredはフラグが付いたファイルを削除し、
+diredバッファからそれらに対応する行を削除します。
+小さくなったdiredバッファは選択されたままです。
+
+@c   If you answer @kbd{no} or quit with @kbd{C-g} when asked to confirm, you
+@c return immediately to Dired, with the deletion flags still present in
+@c the buffer, and no files actually deleted.
+確認に@kbd{no}と答えたり、@kbd{C-g}で中断すると、
+ただちにdiredに戻りますが、削除フラグは付いたままで、
+ファイルを実際に削除しません。
+
+@node Flagging Many Files
+@c @section Flagging Many Files at Once
+@section 一度に多数のファイルにフラグを付ける
+
+@table @kbd
+@item #
+@c Flag all auto-save files (files whose names start and end with @samp{#})
+@c for deletion (@pxref{Auto Save}).
+（名前が@samp{#}で始まり@samp{#}で終る）
+すべての自動保存ファイルに削除フラグを付ける。
+（@pxref{Auto Save}）。
+
+@item ~
+@c Flag all backup files (files whose names end with @samp{~}) for deletion
+@c (@pxref{Backup}).
+（名前が@samp{~}で終る）すべてのバックアップファイルに削除フラグを付ける。
+（@pxref{Backup}）。
+
+@item &
+@c Flag for deletion all files with certain kinds of names, names that
+@c suggest you could easily create the files again.
+簡単に作成し直せるような名前のすべてのファイルに削除フラグを付ける。
+
+@c @item .@: @r{(Period)}
+@item .@: @r{（ピリオド）}
+@c Flag excess numeric backup files for deletion.  The oldest and newest
+@c few backup files of any one file are exempt; the middle ones are
+@c flagged.
+余分な番号付きバックアップファイルに削除フラグを付ける。
+新しいバックアップファイル数個と古いのもの数個を除いて、
+そのあいだのものにフラグを付ける。
+
+@item % d @var{regexp} @key{RET}
+@c Flag for deletion all files whose names match the regular expression
+@c @var{regexp}.
+名前が正規表現@var{regexp}に一致するすべてのファイルに削除フラグを付ける。
+@end table
+
+@c   The @kbd{#}, @kbd{~}, @kbd{&}, and @kbd{.} commands flag many files for
+@c deletion, based on their file names.  These commands are useful
+@c precisely because they do not themselves delete any files; you can
+@c remove the deletion flags from any flagged files that you really wish to
+@c keep.@refill
+@kbd{#}、@kbd{~}、@kbd{&}、@kbd{.}のコマンドは、
+ファイル名に基づいて数多くのファイルに削除フラグを付けます。
+これらのコマンドは本当に便利です。
+というのは、ファイルを実際には削除しないからです。
+残しておきたいファイルの削除フラグは消せばいいのです。
+
+@c @kindex & @r{(Dired)}
+@kindex & @r{（dired）}
+@findex dired-flag-garbage-files
+@vindex dired-garbage-files-regexp
+@c   @kbd{&} (@code{dired-flag-garbage-files}) flags files whose names
+@c match the regular expression specified by the variable
+@c @code{dired-garbage-files-regexp}.  By default, this matches certain
+@c files produced by @TeX{}, and the @samp{.orig} and @samp{.rej} files
+@c produced by @code{patch}.
+@kbd{&}（@code{dired-flag-garbage-files}）は、
+変数@code{dired-garbage-files-regexp}で指定される
+正規表現に一致する名前のファイルに削除フラグを付けます。
+デフォルトは、@TeX{}が生成するある種のファイルと
+@code{patch}プログラム
+@footnote{【訳注】数種類の形式の@code{diff}の出力を解釈して、
+テキストファイルを更新するためのプログラム}
+が生成する@samp{.orig}と
+@samp{.rej}のファイルです。
+
+@c @kindex # @r{(Dired)}
+@c @kindex ~ @r{(Dired)}
+@kindex # @r{（dired）}
+@kindex ~ @r{（dired）}
+@findex dired-flag-auto-save-files
+@findex dired-flag-backup-files
+@c   @kbd{#} (@code{dired-flag-auto-save-files}) flags for deletion all
+@c files whose names look like auto-save files (@pxref{Auto Save})---that
+@c is, files whose names begin and end with @samp{#}.  @kbd{~}
+@c (@code{dired-flag-backup-files}) flags for deletion all files whose
+@c names say they are backup files (@pxref{Backup})---that is, whose names
+@c end in @samp{~}.
+@kbd{#}（@code{dired-flag-auto-save-files}）は、
+自動保存ファイルと思われる名前のファイル、
+すなわち、名前が@samp{#}で始まり@samp{#}で終るもの
+すべてに削除フラグを付けます。
+@kbd{~}（@code{dired-flag-backup-files}）は、
+バックアップファイルと思われる名前のファイル、
+すなわち、名前が@samp{~}で終るものすべてに削除フラグを付けます。
+
+@c @kindex . @r{(Dired)}
+@kindex . @r{（dired）}
+@vindex dired-kept-versions
+@findex dired-clean-directory
+@c   @kbd{.} (period, @code{dired-clean-directory}) flags just some of the
+@c backup files for deletion: all but the oldest few and newest few backups
+@c of any one file.  Normally @code{dired-kept-versions} (@strong{not}
+@c @code{kept-new-versions}; that applies only when saving) specifies the
+@c number of newest versions of each file to keep, and
+@c @code{kept-old-versions} specifies the number of oldest versions to
+@c keep.
+@kbd{.}（ピリオド、@code{dired-clean-directory}）は、
+バックアップファイルのいくつか、つまり、
+古いもの数個と新しいもの数個を除くすべてに削除フラグを付けます。
+通常、変数@code{dired-kept-versions}
+（保存するときに適用される変数@code{kept-new-versions}では@strong{ない}）
+には新しい版を何個残すかを指定し、
+変数@code{kept-old-versions}には古い版を何個残すかを指定します。
+
+@c   Period with a positive numeric argument, as in @kbd{C-u 3 .},
+@c specifies the number of newest versions to keep, overriding
+@c @code{dired-kept-versions}.  A negative numeric argument overrides
+@c @code{kept-old-versions}, using minus the value of the argument to
+@c specify the number of oldest versions of each file to keep.
+@kbd{C-u 3 .}のように正の数引数をピリオドに指定すると、
+変数@code{dired-kept-versions}を無視して新しい版を何個残すか指定します。
+負の数引数は変数@code{kept-old-versions}を無視して
+数引数の絶対値で古い版を何個残すか指定します。
+
+@findex dired-flag-files-regexp
+@c @kindex % d @r{(Dired)}
+@kindex % d @r{（dired）}
+@c   The @kbd{% d} command flags all files whose names match a specified
+@c regular expression (@code{dired-flag-files-regexp}).  Only the
+@c non-directory part of the file name is used in matching.  You can use
+@c @samp{^} and @samp{$} to anchor matches.  You can exclude subdirectories
+@c by hiding them (@pxref{Hiding Subdirectories}).
+@kbd{% d}コマンドは、指定した正規表現（@code{dired-flag-files-regexp}）に
+一致する名前のファイルに削除フラグを付けます。
+ファイル名のうちディレクトリに無関係な部分についてだけ一致を調べます。
+@samp{^}（先頭）や@samp{$}（末尾）で、一致箇所を固定できます。
+サブディレクトリを隠蔽すれば、サブディレクトリを一致検査から除外できます
+（@pxref{Hiding Subdirectories}）。
+
+@node Dired Visiting
+@c @section Visiting Files in Dired
+@section diredでのファイルの訪問
+
+@c   There are several Dired commands for visiting or examining the files
+@c listed in the Dired buffer.  All of them apply to the current line's
+@c file; if that file is really a directory, these commands invoke Dired on
+@c that subdirectory (making a separate Dired buffer).
+diredには、diredバッファに表示したファイルを訪問したり調べたりするための
+コマンドがあります。
+これらは現在行のファイルに作用します。
+そのファイルが実際にはディレクトリであると、
+これらのコマンドはそのサブディレクトリに対して
+（別のdiredバッファを作って）diredを起動します。
+
+@table @kbd
+@item f
+@c @kindex f @r{(Dired)}
+@kindex f @r{（dired）}
+@findex dired-find-file
+@c Visit the file described on the current line, like typing @kbd{C-x C-f}
+@c and supplying that file name (@code{dired-find-file}).  @xref{Visiting}.
+@kbd{C-x C-f}と打鍵したのと同様に、
+現在行が表すファイルを訪問する（@code{dired-find-file}）
+@pxref{Visiting}。
+
+@item @key{RET}
+@c @kindex RET @r{(Dired)}
+@kindex RET @r{（dired）}
+@c Equivalent to @kbd{f}.
+@kbd{f}と等価。
+
+@item o
+@c @kindex o @r{(Dired)}
+@kindex o @r{（dired）}
+@findex dired-find-file-other-window
+@c Like @kbd{f}, but uses another window to display the file's buffer
+@c (@code{dired-find-file-other-window}).  The Dired buffer remains visible
+@c in the first window.  This is like using @kbd{C-x 4 C-f} to visit the
+@c file.  @xref{Windows}.
+@kbd{f}と同様だが、ファイルのバッファを別のウィンドウに表示する
+（@code{dired-find-file-other-window}）。
+diredバッファは最初のウィンドウに表示されたまま残る。
+これは@kbd{C-x 4 C-f}でファイルを訪問するのに似ている。
+@pxref{Windows}。
+
+@item C-o
+@c @kindex C-o @r{(Dired)}
+@kindex C-o @r{（dired）}
+@findex dired-display-file
+@c Visit the file described on the current line, and display the buffer in
+@c another window, but do not select that window (@code{dired-display-file}).
+現在行が表すファイルを訪問して別のウィンドウに表示するが、
+そのウィンドウを選択しない（@code{dired-display-file}）。
+
+@item Mouse-2
+@findex dired-mouse-find-file-other-window
+@c Visit the file named by the line you click on
+@c (@code{dired-mouse-find-file-other-window}).  This uses another window
+@c to display the file, like the @kbd{o} command.
+クリックした行が表すファイルを訪問する
+（@code{dired-mouse-find-file-other-window}）。
+@kbd{o}コマンドのように、
+ファイルの表示には別のウィンドウを使う。
+
+@item v
+@c @kindex v @r{(Dired)}
+@kindex v @r{（dired）}
+@findex dired-view-file
+@c View the file described on the current line, using @kbd{M-x view-file}
+@c (@code{dired-view-file}).
+@kbd{M-x view-file}を用いて現在行が表すファイルを閲覧する
+（@code{dired-view-file}）。
+
+@c Viewing a file is like visiting it, but is slanted toward moving around
+@c in the file conveniently and does not allow changing the file.
+@c @xref{Misc File Ops,View File}.
+ファイルを閲覧することはファイルを訪問することに似ているが、
+ファイルの中で移動できることに重きを置き、
+ファイルの変更は許されない。
+@pxref{Misc File Ops, View File}。
+@end table
+
+@node Marks vs Flags
+@c @section Dired Marks vs. Flags
+@section diredの印とフラグ
+
+@c @cindex marking in Dired
+@cindex diredの印
+@cindex 印（dired）
+@c   Instead of flagging a file with @samp{D}, you can @dfn{mark} the file
+@c with some other character (usually @samp{*}).  Most Dired commands to
+@c operate on files, aside from ``expunge'' (@kbd{x}), look for files
+@c marked with @samp{*}.
+ファイルに@samp{D}で示される削除フラグを付けるかわりに
+他の文字（通常@samp{*}）で示される@dfn{印}を付けることもできます。
+『抹消』（@kbd{x}）以外のほとんどのdiredコマンドは、
+@samp{*}で印付けしたファイルを扱えます。
+
+@c   Here are some commands for marking with @samp{*}, or for unmarking or
+@c operating on marks.  (@xref{Dired Deletion}, for commands to flag and
+@c unflag files.)
+以下のコマンドは、@samp{*}で印付けするコマンド、
+印を消すコマンド、印に作用するコマンドです。
+（フラグを付けたり消したりするコマンドについては@pxref{Dired Deletion}。）
+
+@table @kbd
+@item m
+@itemx * m
+@c @kindex m @r{(Dired)}
+@c @kindex * m @r{(Dired)}
+@kindex m @r{（dired）}
+@kindex * m @r{（dired）}
+@findex dired-mark
+@c Mark the current file with @samp{*} (@code{dired-mark}).  With a numeric
+@c argument @var{n}, mark the next @var{n} files starting with the current
+@c file.  (If @var{n} is negative, mark the previous @minus{}@var{n}
+@c files.)
+カレントファイルに@samp{*}で印を付ける（@code{dired-makr}）。
+数引数@var{n}を指定すると、カレントファイルから始めて後続の
+@var{n}個のファイルに印を付ける。
+（@var{n}が負の場合は、上の@minus{}@var{n}個のファイルに印を付ける。）
+
+@item * *
+@c @kindex * * @r{(Dired)}
+@kindex * * @r{（dired）}
+@findex dired-mark-executables
+@c Mark all executable files with @samp{*}
+@c (@code{dired-mark-executables}).  With a numeric argument, unmark all
+@c those files.
+実行ファイルすべてに@samp{*}で印を付ける
+（@code{dired-mark-executables}）。
+数引数を指定すると、これらのファイルすべての印を消す。
+
+@item * @@
+@c @kindex * @@ @r{(Dired)}
+@kindex * @@ @r{（dired）}
+@findex dired-mark-symlinks
+@c Mark all symbolic links with @samp{*} (@code{dired-mark-symlinks}).
+@c With a numeric argument, unmark all those files.
+シンボリックリンクすべてに@samp{*}で印を付ける
+（@code{dired-mark-symlinks}）。
+数引数を指定すると、これらのファイルすべての印を消す。
+
+@item * /
+@c @kindex * / @r{(Dired)}
+@kindex * / @r{（dired）}
+@findex dired-mark-directories
+@c Mark with @samp{*} all files which are actually directories, except for
+@c @file{.} and @file{..} (@code{dired-mark-directories}).  With a numeric
+@c argument, unmark all those files.
+@file{.}と@file{..}を除くすべてのディレクトリに@samp{*}で印を付ける
+（@code{dired-mark-directories}）。
+数引数を指定すると、これらのディレクトリすべての印を消す。
+
+@item * s
+@c @kindex * s @r{(Dired)}
+@kindex * s @r{（dired）}
+@findex dired-mark-subdir-files
+@c Mark all the files in the current subdirectory, aside from @file{.}
+@c and @file{..} (@code{dired-mark-subdir-files}).
+現在のサブディレクトリ内の@file{.}と@file{..}を除くすべてのファイルに
+印を付ける（@code{dired-mark-subdir-files}）。
+
+@item u
+@itemx * u
+@c @kindex u @r{(Dired)}
+@c @kindex * u @r{(Dired)}
+@kindex u @r{（dired）}
+@kindex * u @r{（dired）}
+@findex dired-unmark
+@c Remove any mark on this line (@code{dired-unmark}).
+この行の印を消す（@code{dired-unmark}）。
+
+@item @key{DEL}
+@itemx * @key{DEL}
+@c @kindex * DEL @r{(Dired)}
+@kindex * DEL @r{（dired）}
+@findex dired-unmark-backward
+@c Move point to previous line and remove any mark on that line
+@c (@code{dired-unmark-backward}).
+ポイントをまえの行へ動かし、その行の印を消す
+（@code{dired-unmark-backward}）。
+
+@item * !
+@c @kindex * ! @r{(Dired)}
+@kindex * ! @r{（dired）}
+@findex dired-unmark-all-files-no-query
+@c Remove all marks from all the files in this Dired buffer
+@c (@code{dired-unmark-all-files-no-query}).
+diredバッファのすべてのファイルの印を消す
+（@code{dired-unmark-all-files-no-query}）。
+
+@item * ? @var{markchar}
+@c @kindex * ? @r{(Dired)}
+@kindex * ? @r{（dired）}
+@findex dired-unmark-all-files
+@c Remove all marks that use the character @var{markchar}
+@c (@code{dired-unmark-all-files}).  The argument is a single
+@c character---do not use @key{RET} to terminate it.
+指定した文字@var{markchar}の印すべてを消す
+（@code{dired-unmark-all-files}）。
+引数は1文字。
+@key{RET}で入力を終えてはならない。
+
+@c With a numeric argument, this command queries about each marked file,
+@c asking whether to remove its mark.  You can answer @kbd{y} meaning yes,
+@c @kbd{n} meaning no, or @kbd{!} to remove the marks from the remaining
+@c files without asking about them.
+数引数を指定すると、このコマンドは印の付いたファイルごとに
+印を消すかどうか聞いてくる。
+@kbd{y}は消すの意味、@kbd{n}は消さないの意味。
+@kbd{!}で答えると残りのファイルすべてについて問い合わせずに印を消す。
+
+@item * C-n
+@findex dired-next-marked-file
+@c @kindex * C-n @r{(Dired)}
+@kindex * C-n @r{（dired）}
+@c Move down to the next marked file (@code{dired-next-marked-file})
+@c A file is ``marked'' if it has any kind of mark.
+印が付いているつぎのファイルへ進む
+（@code{dired-next-marked-file}）。
+ファイルに『印』が付いているとは、なんらかの印があること。
+
+@item * C-p
+@findex dired-prev-marked-file
+@c @kindex * C-p @r{(Dired)}
+@kindex * C-p @r{（dired）}
+@c Move up to the previous marked file (@code{dired-prev-marked-file})
+印が付いているまえのファイルへ戻る
+（@code{dired-prev-marked-file}）
+
+@item * t
+@c @kindex * t @r{(Dired)}
+@kindex * t @r{（dired）}
+@findex dired-do-toggle
+@c Toggle all marks (@code{dired-do-toggle}): files marked with @samp{*}
+@c become unmarked, and unmarked files are marked with @samp{*}.  Files
+@c marked in any other way are not affected.
+すべての印を切り替える（@code{dired-do-toggle}）。
+つまり、@samp{*}で印が付いているファイルの印を消し、
+印が付いていなかったファイルすべてに@samp{*}で印を付ける。
+@samp{*}以外で印が付いたファイル群は影響されない。
+
+@item * c @var{old} @var{new}
+@c @kindex * c @r{(Dired)}
+@kindex * c @r{（dired）}
+@findex dired-change-marks
+@c Replace all marks that use the character @var{old} with marks that use
+@c the character @var{new} (@code{dired-change-marks}).  This command is
+@c the primary way to create or use marks other than @samp{*} or @samp{D}.
+@c The arguments are single characters---do not use @key{RET} to terminate
+@c them.
+文字@var{old}の印を文字@var{new}の印に置き換える
+（@code{dired-change-marks}）。
+このコマンドは、@samp{*}や@samp{D}以外の文字で印を付けるための主要な手段。
+引数はそれぞれ1文字。
+@key{RET}で入力を終えてはならない。
+
+@c You can use almost any character as a mark character by means of this
+@c command, to distinguish various classes of files.  If @var{old} is a
+@c space (@samp{ }), then the command operates on all unmarked files; if
+@c @var{new} is a space, then the command unmarks the files it acts on.
+このコマンドではほとんどどんな文字でも印として使えるため、
+ファイルをいろいろに分類できる。
+@var{old}が空白（@samp{ }）であると、
+コマンドは印が付いていないすべてのファイルに作用する。
+@var{new}が空白であると、コマンドは作用するファイルの印を消す。
+
+@c To illustrate the power of this command, here is how to put @samp{D}
+@c flags on all the files that have no marks, while unflagging all those
+@c that already have @samp{D} flags:
+下の例はこのコマンドの能力を例示するものであり、
+印のないファイルすべてに@samp{D}フラグを付け、
+@samp{D}フラグが付いているものすべてからはフラグを消します。
+
+@example
+* c D t  * c SPC D  * c t SPC
+@end example
+
+@c This assumes that no files are marked with @samp{t}.
+ここでは、@samp{t}で印を付けたファイルはないものと仮定します。
+
+@item % m @var{regexp} @key{RET}
+@itemx * % @var{regexp} @key{RET}
+@findex dired-mark-files-regexp
+@c @kindex % m @r{(Dired)}
+@c @kindex * % @r{(Dired)}
+@kindex % m @r{（dired）}
+@kindex * % @r{（dired）}
+@c Mark (with @samp{*}) all files whose names match the regular expression
+@c @var{regexp} (@code{dired-mark-files-regexp}).  This command is like
+@c @kbd{% d}, except that it marks files with @samp{*} instead of flagging
+@c with @samp{D}.  @xref{Flagging Many Files}.
+正規表現@var{regexp}に一致する名前のファイルすべてに
+（@samp{*}で）印を付ける（@code{dired-mark-files-regexp}）。
+このコマンドは@kbd{% d}に似ているが、
+削除フラグ@samp{D}のかわりに@samp{*}でファイルに印を付ける。
+@pxref{Flagging Many Files}。
+
+@c Only the non-directory part of the file name is used in matching.  Use
+@c @samp{^} and @samp{$} to anchor matches.  Exclude subdirectories by
+@c hiding them (@pxref{Hiding Subdirectories}).
+ファイル名のうちディレクトリに無関係な部分だけで一致を検査する。
+@samp{^}（先頭）や@samp{$}（末尾）で、一致箇所を固定できる。
+サブディレクトリを一致検査から除外するには、
+サブディレクトリを隠蔽する。
+
+@item % g @var{regexp} @key{RET}
+@findex dired-mark-files-containing-regexp
+@c @kindex % m @r{(Dired)}
+@kindex % m @r{（dired）}
+@c Mark (with @samp{*}) all files whose @emph{contents} contain a match for
+@c the regular expression @var{regexp}
+@c (@code{dired-mark-files-containing-regexp}).  This command is like
+@c @kbd{% m}, except that it searches the file contents instead of the file
+@c name.
+ファイルの@emph{内容}が正規表現@var{regexp}に一致するすべてのファイルに
+（@samp{*}で）印を付ける（@code{dired-mark-files-containing-regexp}）。
+このコマンドは@kbd{% m}に似ているが、
+ファイル名ではなくその内容で探す。
+
+@item C-_
+@c @kindex C-_ @r{(Dired)}
+@kindex C-_ @r{（dired）}
+@findex dired-undo
+@c Undo changes in the Dired buffer, such as adding or removing
+@c marks (@code{dired-undo}).
+印の追加や削除などのdiredバッファに対する変更をアンドゥする
+（@code{dired-undo}）
+@end table
+
+@node Operating on Files
+@c @section Operating on Files
+@section ファイルの操作
+@c @cindex operating on files in Dired
+@cindex diredでのファイルの操作
+@cindex ファイルの操作（dired）
+
+@c   This section describes the basic Dired commands to operate on one file
+@c or several files.  All of these commands are capital letters; all of
+@c them use the minibuffer, either to read an argument or to ask for
+@c confirmation, before they act.  All of them give you several ways to
+@c specify which files to manipulate:
+本節では、ファイルを操作する基本的なdiredコマンドについて説明します。
+コマンドはすべて大文字であり、実行前に、引数を読み取ったり確認を求めるために
+ミニバッファを使います。
+これらすべてのコマンドには、
+操作対象となるファイルを指定する方法がいくつかあります。
+
+@itemize @bullet
+@item
+@c If you give the command a numeric prefix argument @var{n}, it operates
+@c on the next @var{n} files, starting with the current file.  (If @var{n}
+@c is negative, the command operates on the @minus{}@var{n} files preceding
+@c the current line.)
+コマンドに数引数@var{n}を与えると、
+カレントファイルから始めて後続の@var{n}個のファイルを操作する。
+（@var{n}が負の場合には、現在行から上の@minus{}@var{n}個の
+ファイルを操作する。）
+
+@item
+@c Otherwise, if some files are marked with @samp{*}, the command operates
+@c on all those files.
+さもなければ、ファイルに@samp{*}で印が付いていれば、
+コマンドは印が付いているすべてのファイルを操作する。
+
+@item
+@c Otherwise, the command operates on the current file only.
+さもなければ、コマンドはカレントファイルのみを操作する。
+@end itemize
+
+@c   Here are the file-manipulating commands that operate on files in this
+@c way.  (Some other Dired commands, such as @kbd{!} and the @samp{%}
+@c commands, also use these conventions to decide which files to work on.)
+以下は、上のように操作対象を選ぶファイル操作コマンドの一覧です。
+（@kbd{!}や@kbd{%}などの他のdiredコマンドも、
+操作対象とするファイルを決定するのに上の方法を用いる。）
+
+@table @kbd
+@findex dired-do-copy
+@c @kindex C @r{(Dired)}
+@kindex C @r{（dired）}
+@item C @var{new} @key{RET}
+@c Copy the specified files (@code{dired-do-copy}).  The argument @var{new}
+@c is the directory to copy into, or (if copying a single file) the new
+@c name.
+指定したファイルをコピーする（@code{dired-do-copy}）。
+引数@var{new}はコピー先のディレクトリか、
+（1つのファイルをコピーする場合は）新しい名前。
+
+@vindex dired-copy-preserve-time
+@c If @code{dired-copy-preserve-time} is non-@code{nil}, then copying with
+@c this command sets the modification time of the new file to be the same
+@c as that of the old file.
+変数@code{dired-copy-preserve-time}が@code{nil}以外の場合には、
+このコマンドでコピーしたファイルの更新時間はもとのファイルと同じになる。
+
+@item D
+@findex dired-do-delete
+@c @kindex D @r{(Dired)}
+@kindex D @r{（dired）}
+@c Delete the specified files (@code{dired-do-delete}).  Like the other
+@c commands in this section, this command operates on the @emph{marked}
+@c files, or the next @var{n} files.  By contrast, @kbd{x}
+@c (@code{dired-expunge}) deletes all @dfn{flagged} files.
+指定したファイルを削除する（@code{dired-do-delete}）。
+本節の他のコマンドと同様に、このコマンドは@emph{印付け}されたファイル、
+あるいは、後続の@var{n}個のファイルに作用する。
+対照的に、@kbd{x}（@code{dired-expunge}）は、
+@dfn{フラグ}が付いたファイルを削除する。
+
+@findex dired-do-rename
+@c @kindex R @r{(Dired)}
+@kindex R @r{（dired）}
+@item R @var{new} @key{RET}
+@c Rename the specified files (@code{dired-do-rename}).  The argument
+@c @var{new} is the directory to rename into, or (if renaming a single
+@c file) the new name.
+指定したファイルの名前を変更する（@code{dired-do-rename}）。
+引数@var{new}は移動先のディレクトリか、
+（1つのファイルの名前を変える場合には）新しい名前。
+
+@c Dired automatically changes the visited file name of buffers associated
+@c with renamed files so that they refer to the new names.
+diredは、名前を変更したファイルに対応するバッファの訪問先の
+ファイル名を自動的に変更するので、新しい名前が反映される。
+
+@findex dired-do-hardlink
+@c @kindex H @r{(Dired)}
+@kindex H @r{（dired）}
+@item H @var{new} @key{RET}
+@c Make hard links to the specified files (@code{dired-do-hardlink}).  The
+@c argument @var{new} is the directory to make the links in, or (if making
+@c just one link) the name to give the link.
+指定したファイルにハードリンクを張る（@code{dired-do-hardlink}）。
+引数@var{new}はリンクを置くディレクトリか、
+（1つのリンクを張る場合には）リンクに与える名前。
+
+@findex dired-do-symlink
+@c @kindex S @r{(Dired)}
+@kindex S @r{（dired）}
+@item S @var{new} @key{RET}
+@c Make symbolic links to the specified files (@code{dired-do-symlink}).
+@c The argument @var{new} is the directory to make the links in, or (if
+@c making just one link) the name to give the link.
+指定したファイルにシンボリックリンクを張る（@code{dired-do-symlink}）。
+引数@var{new}はリンクを置くディレクトリか、
+（1つのリンクを張る場合には）リンクに与える名前。
+
+@findex dired-do-chmod
+@c @kindex M @r{(Dired)}
+@kindex M @r{（dired）}
+@item M @var{modespec} @key{RET}
+@c Change the mode (also called ``permission bits'') of the specified files
+@c (@code{dired-do-chmod}).  This uses the @code{chmod} program, so
+@c @var{modespec} can be any argument that @code{chmod} can handle.
+指定したファイルのモード（いわゆるパーミッションビット）を変更する
+（@code{dired-do-chmod}）。
+このコマンドは@code{chmod}プログラムを使うので、
+@var{modspec}には@code{chmod}が扱える任意の引数を指定できる。
+
+@findex dired-do-chgrp
+@c @kindex G @r{(Dired)}
+@kindex G @r{（dired）}
+@item G @var{newgroup} @key{RET}
+@c Change the group of the specified files to @var{newgroup}
+@c (@code{dired-do-chgrp}).
+指定したファイルのグループを@var{newgroup}に変更する
+（@code{dired-do-chgrp}）。
+
+@findex dired-do-chown
+@c @kindex O @r{(Dired)}
+@kindex O @r{（dired）}
+@item O @var{newowner} @key{RET}
+@c Change the owner of the specified files to @var{newowner}
+@c (@code{dired-do-chown}).  (On most systems, only the superuser can do
+@c this.)
+指定したファイルの所有者を@var{newowner}に変更する
+（@code{dired-do-chown}）。
+（ほとんどのシステムでは、スーパーユーザーだけがこれを実行できる。）
+
+@vindex dired-chown-program
+@c The variable @code{dired-chown-program} specifies the name of the
+@c program to use to do the work (different systems put @code{chown} in
+@c different places).
+変数@code{dired-chown-program}で、
+実際の操作を行うために使用するプログラムの名前を指定する。
+（システムによっては、@code{chown}を置く場所が異なる。）
+
+@findex dired-do-print
+@c @kindex P @r{(Dired)}
+@kindex P @r{（dired）}
+@item P @var{command} @key{RET}
+@c Print the specified files (@code{dired-do-print}).  You must specify the
+@c command to print them with, but the minibuffer starts out with a
+@c suitable guess made using the variables @code{lpr-command} and
+@c @code{lpr-switches} (the same variables that @code{lpr-buffer} uses;
+@c @pxref{Hardcopy}).
+指定したファイルを印刷する（@code{dired-do-print}）。
+ファイルを印刷するコマンドを指定する必要があるが、
+（@code{lpr-buffer}が使うのと同じ）
+変数@code{lpr-command}と@code{lpr-switches}とから推定した
+適切なものがミニバッファに示される。
+
+@findex dired-do-compress
+@c @kindex Z @r{(Dired)}
+@kindex Z @r{（dired）}
+@item Z
+@c Compress the specified files (@code{dired-do-compress}).  If the file
+@c appears to be a compressed file already, it is uncompressed instead.
+指定したファイルを圧縮する（@code{dired-do-compress}）。
+ファイルがすでに圧縮済みと思われるときは展開する。
+
+@findex dired-do-load
+@c @kindex L @r{(Dired)}
+@kindex L @r{（dired）}
+@item L
+@c Load the specified Emacs Lisp files (@code{dired-do-load}).
+@c @xref{Lisp Libraries}.
+指定したEmacs Lispのファイルをロードする（@code{dired-do-load}）。
+@pxref{Lisp Libraries}。
+
+@findex dired-do-byte-compile
+@c @kindex B @r{(Dired)}
+@kindex B @r{（dired）}
+@item B
+@c Byte compile the specified Emacs Lisp files
+@c (@code{dired-do-byte-compile}).  @xref{Byte Compilation,, Byte
+@c Compilation, elisp, The Emacs Lisp Reference Manual}.
+指定したEmacs Lispのファイルをバイトコンパイルする
+（@code{dired-do-byte-compile}）。
+@pxref{Byte Compilation,, バイトコンパイル, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@c @kindex A @r{(Dired)}
+@kindex A @r{（dired）}
+@findex dired-do-search
+@item A @var{regexp} @key{RET}
+@c Search all the specified files for the regular expression @var{regexp}
+@c (@code{dired-do-search}).
+指定したファイル群に対して正規表現@var{regexp}に一致するものを探す
+（@code{dired-do-search}）。
+
+@c This command is a variant of @code{tags-search}.  The search stops at
+@c the first match it finds; use @kbd{M-,} to resume the search and find
+@c the next match.  @xref{Tags Search}.
+このコマンドは@code{tags-search}の変形。
+最初にみつかったところで探索は終る。
+探索を再開してつぎに一致するものを探すには、@kbd{M-,}を使う。
+@pxref{Tags Search}。
+
+@c @kindex Q @r{(Dired)}
+@kindex Q @r{（dired）}
+@findex dired-do-query-replace
+@item Q @var{from} @key{RET} @var{to} @key{RET}
+@c Perform @code{query-replace-regexp} on each of the specified files,
+@c replacing matches for @var{from} (a regular expression) with the string
+@c @var{to} (@code{dired-do-query-replace}).
+指定したファイル群のそれぞれについて、
+@code{query-replace-regexp}（問い合わせながら正規表現を置換する）を実行し、
+@var{from}（正規表現）に一致する部分を@var{to}に置換する
+（@code{dired-do-query-replace}）。
+
+@c This command is a variant of @code{tags-query-replace}.  If you exit the
+@c query replace loop, you can use @kbd{M-,} to resume the scan and replace
+@c more matches.  @xref{Tags Search}.
+このコマンドは@code{tags-search}の変形。
+置換のループを抜けたあとに、
+探索を再開してさらに置換を行うには、@kbd{M-,}を使う。
+@pxref{Tags Search}。
+@end table
+
+@c @kindex + @r{(Dired)}
+@kindex + @r{（dired）}
+@findex dired-create-directory
+@c   One special file-operation command is @kbd{+}
+@c (@code{dired-create-directory}).  This command reads a directory name and
+@c creates the directory if it does not already exist.
+@kbd{+}は特別なファイル操作コマンドです（@code{dired-create-directory}）。
+このコマンドは、ディレクトリ名を読み取り、
+それが既存でなければ新たに作成します。
+
+@node Shell Commands in Dired
+@c @section Shell Commands in Dired
+@section diredでのシェルコマンド
+@c @cindex shell commands, Dired
+@cindex シェルコマンド（dired）
+
+@findex dired-do-shell-command
+@c @kindex ! @r{(Dired)}
+@kindex ! @r{（dired）}
+@c The dired command @kbd{!} (@code{dired-do-shell-command}) reads a shell
+@c command string in the minibuffer and runs that shell command on all the
+@c specified files.  You can specify the files to operate on in the usual
+@c ways for Dired commands (@pxref{Operating on Files}).  There are two
+@c ways of applying a shell command to multiple files:
+diredコマンドの@kbd{!}（@code{dired-do-shell-command}）は、
+ミニバッファからシェルコマンドを読み取り、
+指定したファイルすべてについてそのシェルコマンドを実行します。
+diredコマンドの普通の方法で操作対象のファイルを指定できます
+（@pxref{Operating on Files}）。
+複数ファイルにシェルコマンドを適用する方法は2通りあります。
+
+@itemize @bullet
+@item
+@c If you use @samp{*} in the shell command, then it runs just once, with
+@c the list of file names substituted for the @samp{*}.  The order of file
+@c names is the order of appearance in the Dired buffer.
+シェルコマンド中に@samp{*}を使うと、
+指定したファイル名のリストで@samp{*}を置き換えてコマンドを一度だけ実行する。
+リスト内でファイルが現れる順番はdiredバッファに表示されている順。
+
+@c Thus, @kbd{! tar cf foo.tar * @key{RET}} runs @code{tar} on the entire
+@c list of file names, putting them into one tar file @file{foo.tar}.
+したがって、@kbd{! tar cf foo.tar * @key{RET}}は@code{tar}を実行し、
+指定した一連のファイルを@file{foo.tar}というtarファイルにまとめる。
+
+@item
+@c If the command string doesn't contain @samp{*}, then it runs once
+@c @emph{for each file}, with the file name added at the end.
+コマンド文字列に@samp{*}が含まれていない場合には、
+コマンド文字列の最後にそれぞれのファイル名を付け加えて
+@emph{各ファイルごと}にコマンドを1回ずつ実行する。
+
+@c For example, @kbd{! uudecode @key{RET}} runs @code{uudecode} on each
+@c file.
+たとえば、@kbd{! uudecode @key{RET}}は、
+各ファイルに対して@code{uudecode}コマンドを実行する。
+@end itemize
+
+@c What if you want to run the shell command once for each file but with
+@c the file name inserted in the middle?  Or if you want to use the file
+@c names in a more complicated fashion?  Use a shell loop.  For example,
+@c this shell command would run @code{uuencode} on each of the specified
+@c files, writing the output into a corresponding @file{.uu} file:
+各ファイルごとにコマンドを1回実行したいが、
+コマンドの最後ではなく途中にファイル名を指定したい場合にはどうするのでしょう？@code{ }
+あるいは、もっと複雑にファイル名を指定したい場合にはどうするのでしょう？@code{ }
+それにはシェルのループを使います。
+下の例では、指定した各ファイルに対して@code{uuencode}を実行しますが、
+その出力は対応する@file{.uu}というファイルに格納します。
+
+@example
+for file in *; do uuencode $file $file >$file.uu; done
+@end example
+
+@c The working directory for the shell command is the top-level directory
+@c of the Dired buffer.
+シェルコマンドの作業ディレクトリは、
+diredバッファのトップディレクトリです。
+
+@c The @kbd{!} command does not attempt to update the Dired buffer to show
+@c new or modified files, because it doesn't really understand shell
+@c commands, and does not know what files the shell command changed.  Use
+@c the @kbd{g} command to update the Dired buffer (@pxref{Dired
+@c Updating}).
+@kbd{!}コマンドは、実行後に新たにできたファイルや変更された
+ファイルを表示するためにdiredバッファを更新することはしません。
+これはシェルコマンドを実際には理解しておらず、
+シェルコマンドがどのファイルを変更するのかわからないからです。
+diredバッファを更新するには@kbd{g}コマンドを使います
+（@pxref{Dired Updating}）。
+
+@node Transforming File Names
+@c @section Transforming File Names in Dired
+@section diredでのファイル名の変換
+
+@c   Here are commands that alter file names in a systematic way:
+ここにあげるコマンドはファイル名を組織的に変更します。
+
+@table @kbd
+@findex dired-upcase
+@c @kindex % u @r{(Dired)}
+@kindex % u @r{（dired）}
+@item % u
+@c Rename each of the selected files to an upper-case name
+@c (@code{dired-upcase}).  If the old file names are @file{Foo}
+@c and @file{bar}, the new names are @file{FOO} and @file{BAR}.
+選択したファイルの名前を大文字に変える
+（@code{dired-upcase}）。
+古いファイル名が@file{Foo}と@file{bar}だった場合、
+新しいファイル名は@file{FOO}と@file{BAR}になる。
+
+@item % l
+@findex dired-downcase
+@c @kindex % l @r{(Dired)}
+@kindex % l @r{（dired）}
+@c Rename each of the selected files to a lower-case name
+@c (@code{dired-downcase}).  If the old file names are @file{Foo} and
+@c @file{bar}, the new names are @file{foo} and @file{bar}.
+選択したファイルの名前を小文字に変える
+（@code{dired-downcase}）。
+古いファイル名が@file{Foo}と@file{bar}だった場合、
+新しいファイル名は@file{foo}と@file{bar}になる。
+
+@item % R @var{from} @key{RET} @var{to} @key{RET}
+@c @kindex % R @r{(Dired)}
+@kindex % R @r{（dired）}
+@findex dired-do-rename-regexp
+@itemx % C @var{from} @key{RET} @var{to} @key{RET}
+@c @kindex % C @r{(Dired)}
+@kindex % C @r{（dired）}
+@findex dired-do-copy-regexp
+@itemx % H @var{from} @key{RET} @var{to} @key{RET}
+@c @kindex % H @r{(Dired)}
+@kindex % H @r{（dired）}
+@findex dired-do-hardlink-regexp
+@itemx % S @var{from} @key{RET} @var{to} @key{RET}
+@c @kindex % S @r{(Dired)}
+@kindex % S @r{（dired）}
+@findex dired-do-symlink-regexp
+@c These four commands rename, copy, make hard links and make soft links,
+@c in each case computing the new name by regular-expression substitution
+@c from the name of the old file.
+これらの4つのコマンドは、それぞれ、
+ファイル名を変更する、コピーする、ハードリンクを張る、
+シンボリックリンクを張る。
+これらのコマンドは、いずれも、
+古いファイル名から正規表現の置換で新しいファイル名を決定する。
+@end table
+
+@c   The four regular-expression substitution commands effectively perform
+@c a search-and-replace on the selected file names in the Dired buffer.
+@c They read two arguments: a regular expression @var{from}, and a
+@c substitution pattern @var{to}.
+正規表現の置換を用いる4つのコマンドは、実質的には、
+diredバッファにおいて一連の選択したファイルの名前を
+探索して置換を行います。
+これらは引数を2つ読み取ります。
+正規表現@var{from}と置換パターン@var{to}です。
+
+@c   The commands match each ``old'' file name against the regular
+@c expression @var{from}, and then replace the matching part with @var{to}.
+@c You can use @samp{\&} and @samp{\@var{digit}} in @var{to} to refer to
+@c all or part of what the pattern matched in the old file name, as in
+@c @code{replace-regexp} (@pxref{Regexp Replace}).  If the regular expression
+@c matches more than once in a file name, only the first match is replaced.
+これらのコマンドは、正規表現@var{from}に一致する各『古い』ファイル名の
+一致した部分を@var{to}で置換します。
+@code{replace-regexp}（@pxref{Regexp Replace}）のように、
+@var{to}の中では@samp{\&}や@samp{\@var{digit}}を用いて
+古いファイル名に一致したパターン全体やその一部を参照できます。
+ファイル名の2箇所以上の部分に正規表現が一致する場合には、
+最初の一致部分が置換されます。
+
+@c   For example, @kbd{% R ^.*$ @key{RET} x-\& @key{RET}} renames each
+@c selected file by prepending @samp{x-} to its name.  The inverse of this,
+@c removing @samp{x-} from the front of each file name, is also possible:
+@c one method is @kbd{% R ^x-\(.*\)$ @key{RET} \1 @key{RET}}; another is
+@c @kbd{% R ^x- @key{RET} @key{RET}}.  (Use @samp{^} and @samp{$} to anchor
+@c matches that should span the whole filename.)
+たとえば、@kbd{% R ^.*$ @key{RET} x-\& @key{RET}}は、
+選択されたファイルの名前の先頭にx-を付け加える形で
+名前を変えます。
+逆に、各ファイルの名前の先頭の@samp{x-}を取り去ることもできて、
+1つの方法は、@kbd{% R ^x-\(.*\)$ @key{RET} \1 @key{RET}}です。
+あるいは、@kbd{% R ^x- @key{RET} @key{RET}}でもできます。
+（ファイル名全体に一致するようにするには@samp{^}と@samp{$}を使う。）
+
+@c   Normally, the replacement process does not consider the files'
+@c directory names; it operates on the file name within the directory.  If
+@c you specify a numeric argument of zero, then replacement affects the
+@c entire absolute file name including directory name.
+通常、置換処理ではファイル名のディレクトリ部分は考慮しません。
+ディレクトリ内のファイルの名前だけを操作します。
+数引数0を指定すると、置換はディレクトリ名を含んだ絶対ファイル名に作用します。
+
+@c   Often you will want to select the set of files to operate on using the
+@c same @var{regexp} that you will use to operate on them.  To do this,
+@c mark those files with @kbd{% m @var{regexp} @key{RET}}, then use the
+@c same regular expression in the command to operate on the files.  To make
+@c this easier, the @kbd{%} commands to operate on files use the last
+@c regular expression specified in any @kbd{%} command as a default.
+一連のファイルを操作対象に選ぶときに、
+それらを操作するときに使うのと同じ@var{regexp}（正規表現）を使いたい場合が
+あるでしょう。
+これを行うには、@kbd{% m @var{regexp} @key{RET}}でまず一連のファイルに
+印を付けてから、それらを操作するコマンドにも同じ正規表現を使います。
+これを簡単に行えるように、
+@kbd{%}の付いたコマンドは、@kbd{%}付きコマンドいずれかに最近指定した
+正規表現をデフォルトで使います。
+
+@node Comparison in Dired
+@c @section File Comparison with Dired
+@section diredでのファイルの比較
+
+@c   Here are two Dired commands that compare specified files using
+@c @code{diff}.
+diredには、指定したファイルを@code{diff}で比較するコマンドが2つあります。
+
+@table @kbd
+@item =
+@findex dired-diff
+@c @kindex = @r{(Dired)}
+@kindex = @r{（dired）}
+@c Compare the current file (the file at point) with another file (the file
+@c at the mark) using the @code{diff} program (@code{dired-diff}).  The
+@c file at the mark is the first argument of @code{diff}, and the file at
+@c point is the second argument.
+@code{diff}プログラム（@code{dired-diff}）を用いて、
+（ポイントがある箇所の）カレントファイルを
+（マークがある箇所の）他のファイルと比較する。
+マークがある箇所のファイルが@code{diff}の第1引数で、
+ポイントがある箇所のファイルが第2引数になる。
+
+@findex dired-backup-diff
+@c @kindex M-= @r{(Dired)}
+@kindex M-= @r{（dired）}
+@item M-=
+@c Compare the current file with its latest backup file
+@c (@code{dired-backup-diff}).  If the current file is itself a backup,
+@c compare it with the file it is a backup of; this way, you can compare
+@c a file with any backup version of your choice.
+カレントファイルとその最新のバックアップファイルとを比較する
+（@code{dired-backup-diff}）。
+カレントファイルがバックアップファイルそのものであるときは、
+バックアップファイルのバックアップファイルとの比較を行う。
+このようにして、任意の版のバックアップファイルとの比較を行える。
+
+@c The backup file is the first file given to @code{diff}.
+バックアップファイルは@code{diff}の第1引数になる。
+@end table
+
+@node Subdirectories in Dired
+@c @section Subdirectories in Dired
+@section diredのサブディレクトリ
+@c @cindex subdirectories in Dired
+@c @cindex expanding subdirectories in Dired
+@cindex diredでのサブディレクトリ
+@cindex サブディレクトリ（dired）
+@cindex diredでのサブディレクトリの展開
+
+@c   A Dired buffer displays just one directory in the normal case;
+@c but you can optionally include its subdirectories as well.
+通常、diredバッファは1つのディレクトリだけを表示します。
+しかし、そのサブディレクトリ群を一緒に表示させることもできます。
+
+@c   The simplest way to include multiple directories in one Dired buffer is
+@c to specify the options @samp{-lR} for running @code{ls}.  (If you give a
+@c numeric argument when you run Dired, then you can specify these options
+@c in the minibuffer.)  That produces a recursive directory listing showing
+@c all subdirectories at all levels.
+1つのdiredバッファ内に複数のディレクトリを表示させるもっとも簡単な方法は、
+@code{ls}を実行するときにオプション@samp{-lR}を指定することです。
+（diredを実行するときに数引数を指定すると、
+これらのオプションをミニバッファで指定できる。）
+これにより、すべてのレベルのすべてのサブディレクトリを表示した
+再帰的なディレクトリ一覧を作れます。
+
+@c   But usually all the subdirectories are too many; usually you will
+@c prefer to include specific subdirectories only.  You can do this with
+@c the @kbd{i} command:
+しかし、一般には、すべてのサブディレクトリでは多すぎます。
+普通は、特定のサブディレクトリだけを含めたいでしょう。
+それには、@kbd{i}コマンドを使います。
+
+@table @kbd
+@findex dired-maybe-insert-subdir
+@c @kindex i @r{(Dired)}
+@kindex i @r{（dired）}
+@item i
+@c @cindex inserted subdirectory (Dired)
+@c @cindex in-situ subdirectory (Dired)
+@cindex サブディレクトリの挿入（dired）
+@cindex 埋め込んだサブディレクトリ（dired）
+@c Insert the contents of a subdirectory later in the buffer.
+指定したサブディレクトリの内容をバッファの終りに追加する。
+@end table
+
+@c Use the @kbd{i} (@code{dired-maybe-insert-subdir}) command on a line
+@c that describes a file which is a directory.  It inserts the contents of
+@c that directory into the same Dired buffer, and moves there.  Inserted
+@c subdirectory contents follow the top-level directory of the Dired
+@c buffer, just as they do in @samp{ls -lR} output.
+ディレクトリであるファイルを表す行で、
+@kbd{i}（@code{dired-maybe-insert-subdir}）コマンドを使います。
+指定したサブディレクトリの内容を同じdiredバッファに挿入し、
+その箇所へ移動します。
+挿入されたサブディレクトリの内容は、
+@samp{ls -lR}の出力と同様に、
+diredバッファのトップレベルのディレクトリのあとに続きます。
+
+@c If the subdirectory's contents are already present in the buffer, the
+@c @kbd{i} command just moves to it.
+すでにサブディレクトリの内容がバッファにある場合には、
+@kbd{i}コマンドはその表示箇所に移動するだけです。
+
+@c In either case, @kbd{i} sets the Emacs mark before moving, so @kbd{C-u
+@c C-@key{SPC}} takes you back to the old position in the buffer (the line
+@c describing that subdirectory).
+どちらの場合においても、@kbd{i}は移動するまえにEmacsのマークを設定するので、
+@kbd{C-u C-@key{SPC}}でバッファ内のもとの箇所
+（そのサブディレクトリを表す行）へ戻れます。
+
+@c Use the @kbd{l} command (@code{dired-do-redisplay}) to update the
+@c subdirectory's contents.  Use @kbd{k} to delete the subdirectory.
+@c @xref{Dired Updating}.
+サブディレクトリの内容を更新するには、
+@kbd{l}（@code{dired-do-redisplay}）コマンドを使います。
+サブディレクトリを削除するには@kbd{k}を使います。
+@xref{Dired Updating}。
+
+@node Subdirectory Motion
+@c @section Moving Over Subdirectories
+@section サブディレクトリへの移動
+
+@c   When a Dired buffer lists subdirectories, you can use the page motion
+@c commands @kbd{C-x [} and @kbd{C-x ]} to move by entire directories.
+diredバッファにサブディレクトリが表示されている場合、
+コマンド@kbd{C-x [}と@kbd{C-x ]}でディレクトリ単位に移動できます。
+
+@c @cindex header line (Dired)
+@c @cindex directory header lines
+@cindex ヘッダ行（dired）
+@cindex ディレクトリのヘッダ行
+@c   The following commands move across, up and down in the tree of
+@c directories within one Dired buffer.  They move to @dfn{directory header
+@c lines}, which are the lines that give a directory's name, at the
+@c beginning of the directory's contents.
+以下のコマンドは、1つのdiredバッファ内で
+ディレクトリ木構造を上下に移動するコマンドです。
+これらはすべて@dfn{ディレクトリのヘッダ行}
+（directory header lines）、
+つまり、ディレクトリの内容を表示する部分の先頭にある
+ディレクトリ名を示す行に移動します。
+
+@table @kbd
+@findex dired-next-subdir
+@c @kindex C-M-n @r{(Dired)}
+@kindex C-M-n @r{（dired）}
+@item C-M-n
+@c Go to next subdirectory header line, regardless of level
+@c (@code{dired-next-subdir}).
+レベルに関係なくつぎのサブディレクトリのヘッダ行へ進む
+（@code{dired-next-subdir}）。
+
+@findex dired-prev-subdir
+@c @kindex C-M-p @r{(Dired)}
+@kindex C-M-p @r{（dired）}
+@item C-M-p
+@c Go to previous subdirectory header line, regardless of level
+@c (@code{dired-prev-subdir}).
+レベルに関係なくまえのサブディレクトリのヘッダ行へ戻る
+（@code{dired-prev-subdir}）。
+
+@findex dired-tree-up
+@c @kindex C-M-u @r{(Dired)}
+@kindex C-M-u @r{（dired）}
+@item C-M-u
+@c Go up to the parent directory's header line (@code{dired-tree-up}).
+親ディレクトリのディレクトリヘッダ行へ移動する（@code{dired-tree-up}）。
+
+@findex dired-tree-down
+@c @kindex C-M-d @r{(Dired)}
+@kindex C-M-d @r{（dired）}
+@item C-M-d
+@c Go down in the directory tree, to the first subdirectory's header line
+@c (@code{dired-tree-down}).
+ディレクトリ木構造を1つ降りて最初のサブディレクトリのヘッダ行へ移動する
+（@code{dired-tree-down}）。
+
+@findex dired-prev-dirline
+@c @kindex < @r{(Dired)}
+@kindex < @r{（dired）}
+@item <
+@c Move up to the previous directory-file line (@code{dired-prev-dirline}).
+@c These lines are the ones that describe a directory as a file in its
+@c parent directory.
+まえのディレクトリファイルの表示行へ戻る（@code{dired-prev-dirline}）。
+これらの行は、親ディレクトリにおいてファイルとしてディレクトリを表す行。
+
+@findex dired-next-dirline
+@c @kindex > @r{(Dired)}
+@kindex > @r{（dired）}
+@item >
+@c Move down to the next directory-file line (@code{dired-prev-dirline}).
+つぎのディレクトリファイルの表示行へ進む（@code{dired-next-dirline}）。
+@end table
+
+@node Hiding Subdirectories
+@c @section Hiding Subdirectories
+@section サブディレクトリの隠蔽
+
+@c @cindex hiding in Dired (Dired)
+@cindex 隠蔽（dired）
+@c   @dfn{Hiding} a subdirectory means to make it invisible, except for its
+@c header line, via selective display (@pxref{Selective Display}).
+サブディレクトリの@dfn{隠蔽}（hide）とは、
+選択的表示（@pxref{Selective Display}）を用いて
+ヘッダ行以外を見えなくすることです。
+
+@table @kbd
+@item $
+@findex dired-hide-subdir
+@c @kindex $ @r{(Dired)}
+@kindex $ @r{（dired）}
+@c Hide or reveal the subdirectory that point is in, and move point to the
+@c next subdirectory (@code{dired-hide-subdir}).  A numeric argument serves
+@c as a repeat count.
+ポイント位置にあるサブディレクトリを隠蔽、あるいは、再表示して、
+ポイントをつぎのサブディレクトリへ移動する
+（@code{dired-hide-subdir}）。
+数引数は反復回数。
+
+@item M-$
+@findex dired-hide-all
+@c @kindex M-$ @r{(Dired)}
+@kindex M-$ @r{（dired）}
+@c Hide all subdirectories in this Dired buffer, leaving only their header
+@c lines (@code{dired-hide-all}).  Or, if any subdirectory is currently
+@c hidden, make all subdirectories visible again.  You can use this command
+@c to get an overview in very deep directory trees or to move quickly to
+@c subdirectories far away.
+diredバッファ中のすべてのサブディレクトリを隠蔽し、
+サブディレクトリのヘッダ行だけを残す（@code{dired-hide-all}）。
+あるいは、隠蔽されているサブディレクトリがある場合には、
+すべてのサブディレクトリを再表示する。
+このコマンドを使うと、
+深いディレクトリ木構造の概形を調べたり、
+遠く離れたサブディレクトリへ素早く移動できる。
+@end table
+
+@c   Ordinary Dired commands never consider files inside a hidden
+@c subdirectory.  For example, the commands to operate on marked files
+@c ignore files in hidden directories even if they are marked.  Thus you
+@c can use hiding to temporarily exclude subdirectories from operations
+@c without having to remove the markers.
+通常のdiredコマンドは、
+隠蔽されたサブディレクトリ内のファイルについてまったく考慮しません。
+たとえば、印を付けたファイルに作用するコマンドは、
+隠蔽されたディレクトリ内に印を付けたファイルが
+あったとしてもそれらを無視します。
+したがって、サブディレクトリを一時的に隠蔽すれば、
+印を消さなくてもサブディレクトリを操作対象から外せます。
+
+@c   The subdirectory hiding commands toggle; that is, they hide what was
+@c visible, and show what was hidden.
+サブディレクトリを隠蔽するコマンドはトグルとして働きます。
+つまり、表示されていれば隠蔽し、隠蔽されていれば表示します。
+
+@node Dired Updating
+@c @section Updating the Dired Buffer
+@section diredバッファの更新
+
+@c   This section describes commands to update the Dired buffer to reflect
+@c outside (non-Dired) changes in the directories and files, and to delete
+@c part of the Dired buffer.
+本節では、（diredとは無関係に）外部でのディレクトリやファイルの変更を
+diredバッファに反映させるコマンド、および、
+diredバッファの一部を削除するコマンドを説明します。
+
+@table @kbd
+@item g
+@c Update the entire contents of the Dired buffer (@code{revert-buffer}).
+diredバッファの全内容を更新する（@code{revert-buffer}）。
+
+@item l
+@c Update the specified files (@code{dired-do-redisplay}).
+指定したファイルを更新する（@code{dired-do-redisplay}）。
+
+@item k
+@c Delete the specified @emph{file lines}---not the files, just the lines
+@c (@code{dired-do-kill-lines}).
+指定したファイルの@emph{表示行}を削除する。
+ファイルではなく、単に表示行だけを消す（@code{dired-do-kill-lines}）。
+
+@item s
+@c Toggle between alphabetical order and date/time order
+@c (@code{dired-sort-toggle-or-edit}).
+アルファベット順の表示と日付／時間順の表示を切り替える
+（@code{dired-sort-toggle-or-edit}）。
+
+@item C-u s @var{switches} @key{RET}
+@c Refresh the Dired buffer using @var{switches} as
+@c @code{dired-listing-switches}.
+オプション@var{switches}を@code{dired-listing-switches}として用いて
+diredバッファを更新する。
+@end table
+
+@c @kindex g @r{(Dired)}
+@kindex g @r{（dired）}
+@c @findex revert-buffer @r{(Dired)}
+@findex revert-buffer @r{（dired）}
+@c   Type @kbd{g} (@code{revert-buffer}) to update the contents of the
+@c Dired buffer, based on changes in the files and directories listed.
+@c This preserves all marks except for those on files that have vanished.
+@c Hidden subdirectories are updated but remain hidden.
+@kbd{g}（@code{revert-buffer}）コマンドを実行すると、
+表示されているファイルやディレクトリの変更に基づいてdiredバッファを
+更新します。
+このコマンドは消されたファイルに対するものを除いて
+すべての印やフラグを保存します。
+隠蔽されたサブディレクトリも更新されますが、隠蔽されたままです。
+
+@c @kindex l @r{(Dired)}
+@kindex l @r{（dired）}
+@findex dired-do-redisplay
+@c   To update only some of the files, type @kbd{l}
+@c (@code{dired-do-redisplay}).  This command applies to the next @var{n}
+@c files, or to the marked files if any, or to the current file.  Updating
+@c them means reading their current status from the file system and
+@c changing the buffer to reflect it properly.
+いくつかのファイルだけを更新する場合には、
+@kbd{l}（@code{dired-do-redisplay}）と打ちます。
+このコマンドは、後続の@var{n}個のファイル、
+印を付けたファイルがあればそれらのファイル、
+カレントファイルのいずれかに作用します。
+それらを更新するとは、それらのファイルの現状をファイルシステムから取得し、
+それを正しく反映するようにバッファを更新します。
+
+@c   If you use @kbd{l} on a subdirectory header line, it updates the
+@c contents of the corresponding subdirectory.
+@kbd{l}をサブディレクトリのヘッダ行で実行すると、
+対応するサブディレクトリの内容を更新します。
+
+@c @kindex k @r{(Dired)}
+@kindex k @r{（dired）}
+@findex dired-do-kill-lines
+@c   To delete the specified @emph{file lines}---not the files, just the
+@c lines---type @kbd{k} (@code{dired-do-kill-lines}).  With a numeric
+@c argument @var{n}, this command applies to the next @var{n} files;
+@c otherwise, it applies to the marked files.
+指定した@emph{ファイルの表示行}を削除する、
+つまり、ファイルそのものではなく行だけを削除するには
+@kbd{k}（@code{dired-do-kill-lines}）と打ちます。
+数引数@var{n}を指定すると、
+このコマンドは、後続の@var{n}個のファイルに作用します。
+さもなければ、印を付けたファイルに作用します。
+
+@c   If you kill the line for a file that is a directory, the directory's
+@c contents are also deleted from the buffer.  Typing @kbd{C-u k} on the
+@c header line for a subdirectory is another way to delete a subdirectory
+@c from the Dired buffer.
+削除するファイルの表示行がディレクトリだった場合には、
+そのディレクトリの内容もバッファから削除されます。
+サブディレクトリのヘッダ行で@kbd{C-u k}と打っても、
+diredバッファからサブディレクトリの内容を削除できます。
+
+@c   The @kbd{g} command brings back any individual lines that you have
+@c killed in this way, but not subdirectories---you must use @kbd{i} to
+@c reinsert each subdirectory.
+@kbd{g}コマンドは、このようにして削除した表示行を画面に呼び戻すことが
+できますが、サブディレクトリに関してはできません。
+各サブディレクトリを再度挿入するには@kbd{i}を使う必要があります。
+
+@c @cindex Dired sorting
+@c @cindex sorting Dired buffer
+@cindex diredでのソート
+@cindex diredバッファのソート
+@cindex ソート（diredバッファ）
+@c @kindex s @r{(Dired)}
+@kindex s @r{（dired）}
+@findex dired-sort-toggle-or-edit
+@c   The files in a Dired buffers are normally listed in alphabetical order
+@c by file names.  Alternatively Dired can sort them by date/time.  The
+@c Dired command @kbd{s} (@code{dired-sort-toggle-or-edit}) switches
+@c between these two sorting modes.  The mode line in a Dired buffer
+@c indicates which way it is currently sorted---by name, or by date.
+diredバッファ内のファイルは、通常、
+ファイル名のアルファベット順に並んでいます。
+diredは日付／時間順に並べ替えることもできます。
+diredコマンド@kbd{s}（@code{dired-sort-toggle-or-edit}）は、
+これら2つのソート方法を切り替えます。
+diredバッファのモード行には、アルファベット順と日付／時間順の
+どちらで現在表示しているかが示されます。
+
+@c   @kbd{C-u s @var{switches} @key{RET}} lets you specify a new value for
+@c @code{dired-listing-switches}.
+@kbd{C-u s @var{switches} @key{RET}}で、
+変数@code{dired-listing-switches}に新しい値を設定できます。
+
+@node Dired and Find
+@c @section Dired and @code{find}
+@section diredと@code{find}プログラム
+@c @cindex @code{find} and Dired
+@cindex @code{find}とdired
+
+@c   You can select a set of files for display in a Dired buffer more
+@c flexibly by using the @code{find} utility to choose the files.
+@code{find}プログラムを使ってファイルを選べば、
+diredバッファ上に表示する一連のファイルをもっと柔軟に選択できます。
+
+@findex find-name-dired
+@c   To search for files with names matching a wildcard pattern use
+@c @kbd{M-x find-name-dired}.  It reads arguments @var{directory} and
+@c @var{pattern}, and chooses all the files in @var{directory} or its
+@c subdirectories whose individual names match @var{pattern}.
+ワイルドカードに一致する名前のファイルを探索するには
+@kbd{M-x find-name-dired}を使います。
+このコマンドは、2つの引数@var{directory}と@var{pattern}を読み取り、
+@var{directory}にあるすべてのファイル、
+あるいは、そのサブディレクトリ下にある@var{pattern}に一致する名前のファイルを
+選択します。
+
+@c   The files thus chosen are displayed in a Dired buffer in which the
+@c ordinary Dired commands are available.
+このようにして選択されたファイルはdiredバッファに表示され、
+このバッファではもとのdiredコマンドを使えます。
+
+@findex find-grep-dired
+@c   If you want to test the contents of files, rather than their names,
+@c use @kbd{M-x find-grep-dired}.  This command reads two minibuffer
+@c arguments, @var{directory} and @var{regexp}; it chooses all the files in
+@c @var{directory} or its subdirectories that contain a match for
+@c @var{regexp}.  It works by running the programs @code{find} and
+@c @code{grep}.  See also @kbd{M-x grep-find}, in @ref{Compilation}.
+@c Remember to write the regular expression for @code{grep}, not for Emacs.
+ファイル名ではなくファイルの内容で調べたい場合には、
+@kbd{M-x find-grep-dired}を使います。
+このコマンドはミニバッファから2つの引数@var{directory}と@var{regexp}を
+読み取ります。
+@var{directory}にあるすべてのファイル、
+あるいは、@var{regexp}に一致するものを含む一連のサブディレクトリを選択します。
+このコマンドは、プログラム@code{find}と@code{grep}を実行して動作します。
+@ref{Compilation}の@kbd{M-x grep-find}も参照してください。
+Emacsの正規表現ではなく@code{grep}の正規表現を書くことを忘れないでください。
+
+@findex find-dired
+@c   The most general command in this series is @kbd{M-x find-dired}, which
+@c lets you specify any condition that @code{find} can test.  It takes two
+@c minibuffer arguments, @var{directory} and @var{find-args}; it runs
+@c @code{find} in @var{directory}, passing @var{find-args} to tell
+@c @code{find} what condition to test.  To use this command, you need to
+@c know how to use @code{find}.
+このような一連のコマンドの中でもっとも一般的なコマンドは@kbd{M-x find-dired}で、
+@code{find}が検査に用いる任意の条件を指定できます。
+このコマンドはミニバッファから2つの引数@var{directory}と@var{find-args}を
+読み取ります。
+検査すべき条件を指示する@var{find-args}を渡して、
+@var{directory}において@code{find}を実行します。
+このコマンドを使うには、@code{find}の使い方を知っている必要があります。
+
+@vindex find-ls-option
+@c   The format of listing produced by these commands is controlled by the
+@c variable @code{find-ls-option}, whose default value specifies using
+@c options @samp{-ld} for @code{ls}.  If your listings are corrupted, you
+@c may need to change the value of this variable.
+これらのコマンドが出力する表示形式は変数@code{find-ls-option}で
+制御されます。
+デフォルトは、@code{ls}に使うオプションとして@samp{-ld}を指定します。
+出力形式が壊れて見える場合には、
+この変数の値を変更する必要があるかもしれません。

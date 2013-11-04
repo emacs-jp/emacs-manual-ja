@@ -1,0 +1,1725 @@
+@c =============================================================
+@c = 元 翻 訳: 粕川正充＠お茶の水女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,97,2000,2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Building, Maintaining, Programs, Top
+@c @chapter Compiling and Testing Programs
+@chapter プログラムのコンパイルとテスト @emph{(2004/09/07)}
+@c @cindex building programs
+@cindex プログラムのコンパイル
+@c @cindex program building
+@c @cindex running Lisp functions
+@cindex Lisp関数の実行
+
+@c   The previous chapter discusses the Emacs commands that are useful for
+@c making changes in programs.  This chapter deals with commands that assist
+@c in the larger process of developing and maintaining programs.
+前章ではプログラムの変更に便利なEmacsコマンドを説明しました．
+本章ではプログラムの大規模な開発や保守を助けるコマンドを説明します．
+
+@menu
+* Compilation::         Compiling programs in languages other
+                          than Lisp (C, Pascal, etc.).
+* Grep Searching::      Running grep as if it were a compiler.
+* Compilation Mode::    The mode for visiting compiler errors.
+* Compilation Shell::   Customizing your shell properly
+                          for use in the compilation buffer.
+* Debuggers::	        Running symbolic debuggers for non-Lisp programs.
+* Executing Lisp::      Various modes for editing Lisp programs,
+                          with different facilities for running
+                          the Lisp programs.
+* Libraries: Lisp Libraries.      Creating Lisp programs to run in Emacs.
+* Interaction: Lisp Interaction.  Executing Lisp in an Emacs buffer.
+* Eval: Lisp Eval.      Executing a single Lisp expression in Emacs.
+* External Lisp::         Communicating through Emacs with a separate Lisp.
+@end menu
+
+@node Compilation
+@c @section Running Compilations under Emacs
+@section Emacs下でのコンパイラの実行 @emph{(2004/08/16)}
+@c @cindex inferior process
+@cindex 下位プロセス
+@cindex make
+@c @cindex compilation errors
+@cindex コンパイルエラー
+@c @cindex error log
+@cindex エラーログ
+
+@c   Emacs can run compilers for noninteractive languages such as C and
+@c Fortran as inferior processes, feeding the error log into an Emacs buffer.
+@c It can also parse the error messages and show you the source lines where
+@c compilation errors occurred.
+EmacsはCやFortranのような非対話的な言語のコンパイラを
+下位プロセスとして実行でき，
+そのエラーログをEmacsバッファに取り込めます．
+また，エラーメッセージを解析して，
+コンパイルエラーを起こしたソース行を提示することもできます．
+
+@table @kbd
+@item M-x compile
+@c Run a compiler asynchronously under Emacs, with error messages going to
+@c the @samp{*compilation*} buffer.
+Emacs下でコンパイラを非同期に実行し，
+エラーメッセージを@samp{*compilation*}バッファに取り込む．
+@item M-x recompile
+@c Invoke a compiler with the same command as in the last invocation of
+@c @kbd{M-x compile}.
+@kbd{M-x compile} で最後に実行したものと同じコマンドでコンパイラを実行します．
+@item M-x grep
+@c Run @code{grep} asynchronously under Emacs, with matching lines
+@c listed in the buffer named @samp{*grep*}.
+Emacs下で@code{grep}を非同期に実行し，
+一致した行を@samp{*grep*}バッファに取り込む．
+@item M-x grep-find
+@c Run @code{grep} via @code{find}, with user-specified arguments, and
+@c collect output in the buffer named @samp{*grep*}.
+指定した引数で@code{find}と@code{grep}を実行し，
+出力を@samp{*grep*}バッファに取り込む．
+@item M-x kill-compilation
+@itemx M-x kill-grep
+@c Kill the running compilation or @code{grep} subprocess.
+実行中のコンパイラや@code{grep}のサブプロセスを停止させる．
+@end table
+
+@findex compile
+@c   To run @code{make} or another compilation command, do @kbd{M-x
+@c compile}.  This command reads a shell command line using the minibuffer,
+@c and then executes the command in an inferior shell, putting output in
+@c the buffer named @samp{*compilation*}.  The current buffer's default
+@c directory is used as the working directory for the execution of the
+@c command; normally, therefore, the compilation happens in this
+@c directory.
+@code{make}や他のコンパイルコマンドを実行するには，
+@kbd{M-x compile}と打ちます．
+このコマンドは，ミニバッファでシェルコマンドを読み取り，
+そのコマンドを下位シェルで実行し，
+出力結果を@samp{*compilation*}という名のバッファに取り込みます．
+カレントバッファのデフォルトディレクトリを
+シェルコマンド実行時の作業ディレクトリとして用います．
+そのため，通常はこのディレクトリにあるものをコンパイルします．
+
+@vindex compile-command
+@c   When the shell command line is read, the minibuffer appears
+@c containing a default command line, which is the command you used the
+@c last time you did @kbd{M-x compile}.  If you type just @key{RET}, the
+@c same command line is used again.  For the first @kbd{M-x compile}, the
+@c default is @samp{make -k}, which is correct most of the time for
+@c nontrivial programs.  (@xref{Top,, Make, make, GNU Make Manual}.)
+@c The default compilation command comes from the variable
+@c @code{compile-command}; if the appropriate compilation command for a
+@c file is something other than @samp{make -k}, it can be useful for the
+@c file to specify a local value for @code{compile-command} (@pxref{File
+@c Variables}).
+シェルコマンド行を読み取るとき，
+ミニバッファにはデフォルトのシェルコマンド行が表示されますが，
+これは前回@kbd{M-x compile}を使ったときのコマンドです．
+単に@key{RET}だけを打鍵すると，同じシェルコマンド行を再使用します．
+最初の@kbd{M-x compile}では，デフォルトは@samp{make -k}です．それは，ほとんどの
+場合，正しいものです．(@xref{Top,, Make, make, GNU Make Manual})．
+デフォルトのコンパイルコマンドは変数@code{compile-command}から取ります．
+適切なコンパイルコマンドが他にある場合には，
+ファイルでこの変数のローカルな値を指定すると便利でしょう
+（@pxref{File Variables}）．
+
+@c   Starting a compilation displays the buffer @samp{*compilation*} in
+@c another window but does not select it.  The buffer's mode line tells you
+@c whether compilation is finished, with the word @samp{run} or @samp{exit}
+@c inside the parentheses.  You do not have to keep this buffer visible;
+@c compilation continues in any case.  While a compilation is going on, the
+@c string @samp{Compiling} appears in the mode lines of all windows.  When
+@c this string disappears, the compilation is finished.
+コンパイルが始まると，バッファ@samp{*compilation*}は別のウィンドウに
+表示されますが，選択されるわけではありません．
+このバッファのモード行では，
+括弧の中に単語@samp{run}か@samp{exit}を表示して
+コンパイルが終了したかどうか示します．
+このバッファを見えるようにしておく必要はありません．
+いずれにしても，コンパイルは継続されます．
+コンパイル中は，すべてのウィンドウのモード行に
+文字列@samp{Compiling}が表示されます．
+この文字列が消えれば，コンパイルは終了しています．
+
+@c   If you want to watch the compilation transcript as it appears, switch
+@c to the @samp{*compilation*} buffer and move point to the end of the
+@c buffer.  When point is at the end, new compilation output is inserted
+@c above point, which remains at the end.  If point is not at the end of
+@c the buffer, it remains fixed while more compilation output is added at
+@c the end of the buffer.
+コンパイルの進行状況を見たい場合には，
+@samp{*compilation*}バッファに切り替えてポイントをバッファの末尾に移動します．
+ポイントがバッファの末尾にあると，
+新らたなコンパイル出力はポイントのまえに挿入されポイントは末尾に留まります．
+ポイントがバッファの末尾にないと，
+コンパイル出力はバッファの末尾に追加されますが
+ポイントは途中の場所に留まったままです．
+
+@cindex compilation buffer, keeping current position at the end
+@vindex compilation-scroll-output
+@c   If you set the variable @code{compilation-scroll-output} to a
+@c non-@code{nil} value, then the compilation buffer always scrolls to
+@c follow output as it comes in.
+変数@code{compilation-scroll-output}に@code{nil}以外の値を設定すると，
+出力が到着するたびに出力に追従するように
+コンパイルバッファをつねにスクロールします．
+
+@findex kill-compilation
+@c   When the compiler process terminates, for whatever reason, the mode
+@c line of the @samp{*compilation*} buffer changes to say @samp{signal}
+@c instead of @samp{run}.  Starting a new compilation also kills any
+@c running compilation, as only one can exist at any time.  However,
+@c @kbd{M-x compile} asks for confirmation before actually killing a
+@c compilation that is running.  You can also kill the compilation
+@c process with @kbd{M-x kill-compilation}.
+理由は何であれ，コンパイルプロセスが終了すると，@samp{*compilation*}バッファの
+モード行の表示が@samp{run}から@samp{signal}に変わります．
+一度に実行可能なコンパイルは1つだけなので，
+新しくコンパイルを始めると実行中のコンパイルは停止させられます．
+しかし，@kbd{M-x compile}は，
+実行中のコンパイルを実際に停止させるかどうか聞いてきます．コンパイルプロセスは
+@kbd{M-x kill-compilation} でも停止できます．
+
+@findex recompile
+@c   To rerun the last compilation with the same command, type @kbd{M-x
+@c recompile}.  This automatically reuses the compilation command from the
+@c last invocation of @kbd{M-x compile}.
+同じコマンドで最後のコンパイルを実行するためには，@kbd{M-x recompile} とします．
+これで，自動的に最後に実行した @kbd{M-x compile} のコンパイルコマンドを再利用し
+てくれます．
+
+@c   Emacs does not expect a compiler process to launch asynchronous
+@c subprocesses; if it does, and they keep running after the main
+@c compiler process has terminated, Emacs may kill them or their output
+@c may not arrive in Emacs.  To avoid this problem, make the main process
+@c wait for its subprocesses to finish.  In a shell script, you can do this
+@c using @samp{$!} and @samp{wait}, like this:
+Emacs はコンパイルプロセスが非同期のサブプロセスを開始させることを想定していません．
+もし非同期のサブプロセスを開始して，メインプロセスが終了した後にサブプロセスが走って
+いると，Emacs はサブプロセスを終了させ，出力が得られないかもしれません．これを避
+けるために，メインプロセスはサブプロセスが終了するまで待つようにする必要がありま
+す．shell スクリプトでは以下のように @samp{$!} と @samp{wait} を使うことで回避で
+きます．
+
+@example
+@c (sleep 10; echo 2nd)& pid=$!  # @r{Record pid of subprocess}
+(sleep 10; echo 2nd)& pid=$!  # @r{サブプロセスの pid を記録}
+echo first message
+@c wait $pid                     # @r{Wait for subprocess}
+wait $pid                     # @r{サブプロセスの終了を待つ}
+@end example
+
+@node Grep Searching
+@c @section Searching with Grep under Emacs
+@section Emacs下でのgrepによる探索 @emph{(2004/08/16)}
+
+@findex grep
+@c   Just as you can run a compiler from Emacs and then visit the lines
+@c where there were compilation errors, you can also run @code{grep} and
+@c then visit the lines on which matches were found.  This works by
+@c treating the matches reported by @code{grep} as if they were ``errors.''
+Emacsからコンパイラを実行し，コンパイルエラーを起こした行を
+訪れることができるように，@code{grep}を実行して
+一致した行を訪れることができます．
+これは，@code{grep}が報告した一致を『エラー』として扱うことで行います．
+
+@c   To do this, type @kbd{M-x grep}, then enter a command line that
+@c specifies how to run @code{grep}.  Use the same arguments you would give
+@c @code{grep} when running it normally: a @code{grep}-style regexp
+@c (usually in single-quotes to quote the shell's special characters)
+@c followed by file names, which may use wildcards.  The output from
+@c @code{grep} goes in the @samp{*grep*} buffer.  You can find the
+@c corresponding lines in the original files using @kbd{C-x `} and
+@c @key{RET}, as with compilation errors.
+それには，@kbd{M-x grep}と打鍵してから，
+@code{grep}をどのように実行するかを指定するコマンド行を入力します．
+普通に@code{grep}を実行するときに指定する引数と同じものを使います．
+つまり，@code{grep}流の
+（普通，シェルの特殊文字をクォートするためにシングルクォートで囲んだ）
+正規表現に続けて，ワイルドカードなどを用いたファイル名を指定します．
+@code{grep}の出力は@samp{*grep*}バッファに入ります．
+ファイル内の対応する行を探すには，コンパイルエラーの場合と同様に，
+@kbd{C-x `}と@key{RET}を使います．
+
+@c   If you specify a prefix argument for @kbd{M-x grep}, it figures out
+@c the tag (@pxref{Tags}) around point, and puts that into the default
+@c @code{grep} command.
+@kbd{M-x grep}に前置引数を指定すると，
+ポイントの周りから（探すべき）タグを推測して
+デフォルトの@code{grep}コマンドにそれを含めます．
+
+@findex grep-find
+@c   The command @kbd{M-x grep-find} is similar to @kbd{M-x grep}, but it
+@c supplies a different initial default for the command---one that runs
+@c both @code{find} and @code{grep}, so as to search every file in a
+@c directory tree.  See also the @code{find-grep-dired} command,
+@c in @ref{Dired and Find}.
+@kbd{M-x grep-find}は@kbd{M-x grep}コマンドと同様ですが，
+シェルコマンドに与える最初のデフォルトが違います．
+@code{find}と@code{grep}の両方を実行して，
+ディレクトリ木構造下の各ファイルを探索します．
+@ref{Dired and Find}の@code{find-grep-dired}コマンドも参照してください．
+
+@node Compilation Mode
+@c @section Compilation Mode
+@section コンパイルモード @emph{(2004/08/16)}
+
+@findex compile-goto-error
+@c @cindex Compilation mode
+@cindex コンパイルモード
+@c @cindex mode, Compilation
+@cindex モード，Compilation
+@c   The @samp{*compilation*} buffer uses a special major mode, Compilation
+@c mode, whose main feature is to provide a convenient way to look at the
+@c source line where the error happened.
+@samp{*compilation*}バッファは，
+コンパイル（compilation）モードと呼ばれる特別なメジャーモードになります．
+このモードの主な機能は，エラーが起きたソース行を簡単に参照できることです． 
+
+@c   If you set the variable @code{compilation-scroll-output} to a
+@c non-@code{nil} value, then the compilation buffer always scrolls to
+@c follow output as it comes in.
+もし 変数  @code{compilation-scroll-output} を非 @code{nil} にすると，
+@samp{*compilation*} バッファはいつも出力を追い掛けるようにスクロールします．
+
+@table @kbd
+@item C-x `
+@c Visit the locus of the next compiler error message or @code{grep} match.
+つぎのコンパイルエラーや@code{grep}のつぎの一致に
+対応する箇所を訪れる．
+@item @key{RET}
+@c Visit the locus of the error message that point is on.
+@c This command is used in the compilation buffer.
+ポイントが位置するエラーメッセージに対応する箇所を訪れる．
+このコマンドは，コンパイルバッファで使う．
+@item Mouse-2
+@c Visit the locus of the error message that you click on.
+マウスでクリックしたエラーメッセージに対応する箇所を訪れる．
+@end table
+
+@kindex C-x `
+@findex next-error
+@c   You can visit the source for any particular error message by moving
+@c point in the @samp{*compilation*} buffer to that error message and
+@c typing @key{RET} (@code{compile-goto-error}).  Alternatively, you can
+@c click @kbd{Mouse-2} on the error message; you need not switch to the
+@c @samp{*compilation*} buffer first.
+@samp{*compilation*} バッファでエラーメッセージにポイントを持っていって
+@key{RET}（@code{compile-goto-error}）を打鍵すれば，
+そのエラーの原因となったソースを訪問できます．
+代わりに，エラーメッセージを@kbd{Mouse-2}でクリックできます．
+このときは，あらかじめ@samp{*compilation*}バッファに
+切り替えておく必要はありません．
+
+@c   To parse the compiler error messages sequentially, type @kbd{C-x `}
+@c (@code{next-error}).  The character following the @kbd{C-x} is the
+@c backquote or ``grave accent,'' not the single-quote.  This command is
+@c available in all buffers, not just in @samp{*compilation*}; it displays
+@c the next error message at the top of one window and source location of
+@c the error in another window.
+コンパイラのエラーメッセージを順番に解析するには，
+@kbd{C-x `}（@code{next-error}）と打鍵します．
+@kbd{C-x}に続く文字は，シングルクォートではなく
+バッククォート，すなわち，『アクサングレーブ』です．
+このコマンドは@samp{*compilation*}だけでなく，
+すべてのバッファで使用可能です．
+このコマンドは，一方のウィンドウの先頭にエラーメッセージを表示し，
+別のウィンドウにエラーとなったソースコードを表示します．
+
+@c   The first time @kbd{C-x `} is used after the start of a compilation,
+@c it moves to the first error's location.  Subsequent uses of @kbd{C-x `}
+@c advance down to subsequent errors.  If you visit a specific error
+@c message with @key{RET} or @kbd{Mouse-2}, subsequent @kbd{C-x `}
+@c commands advance from there.  When @kbd{C-x `} gets to the end of the
+@c buffer and finds no more error messages to visit, it fails and signals
+@c an Emacs error.
+コンパイル開始後に最初に@kbd{C-x `}を使うと，
+最初のエラー箇所に移動します．
+続けて@kbd{C-x `}を実行すると，次々にエラー箇所に移動していきます．
+@key{RET}や@kbd{Mouse-2}で特定のエラー箇所に移動したあとに
+@kbd{C-x `}コマンドを実行すると，その場所のつぎのエラー箇所に移動します．
+バッファの末尾に到達してもうエラーメッセージがないと，
+@kbd{C-x `}コマンドは失敗し，エラーを通知します．
+
+@c   @kbd{C-u C-x `} starts scanning from the beginning of the compilation
+@c buffer.  This is one way to process the same set of errors again.
+@kbd{C-u C-x `}は，コンパイルバッファの先頭から解析を始めます．
+コンパイルをやり直さずに一連のエラーの解析をもう一度行う方法の1つです．
+
+@vindex compilation-error-regexp-alist
+@vindex grep-regexp-alist
+@c   To parse messages from the compiler, Compilation mode uses the
+@c variable @code{compilation-error-regexp-alist} which lists various
+@c formats of error messages and tells Emacs how to extract the source file
+@c and the line number from the text of a message.  If your compiler isn't
+@c supported, you can tailor Compilation mode to it by adding elements to
+@c that list.  A similar variable @code{grep-regexp-alist} tells Emacs how
+@c to parse output of a @code{grep} command.
+コンパイラからの出力を解析するために，コンパイルモードでは変数
+@code{compilation-error-regexp-alist} を使います．この変数はエラーメッセージや
+出力からソースファイルと行数を得るといったさまざまな書式のリストになっています．
+もしコンパイラがサポートされていなければ，要素をリストに追加することでコンパイル
+モードをそのコンパイラのために仕立てることができます．よく似た変数である
+@code{grep-regexp-alist} は Emacs が @code{grep} の結果を解析するために使います．
+
+@c   Compilation mode also redefines the keys @key{SPC} and @key{DEL} to
+@c scroll by screenfuls, and @kbd{M-n} and @kbd{M-p} to move to the next or
+@c previous error message.  You can also use @kbd{M-@{} and @kbd{M-@}} to
+@c move up or down to an error message for a different source file.
+コンパイル（compilation）モードでは，
+@key{SPC}キーと@key{DEL}キーを1画面分のスクロールに，
+@kbd{M-n}と@kbd{M-p}を1つつぎ／まえのエラーメッセージへの移動に再定義します．
+また，別のソースファイルのエラーメッセージへの移動には，
+@kbd{M-@{}と@kbd{M-@}}コマンドを使えます．
+
+@c   The features of Compilation mode are also available in a minor mode
+@c called Compilation Minor mode.  This lets you parse error messages in
+@c any buffer, not just a normal compilation output buffer.  Type @kbd{M-x
+@c compilation-minor-mode} to enable the minor mode.  This defines the keys
+@c @key{RET} and @kbd{Mouse-2}, as in the Compilation major mode.
+コンパイル（compilation）モードの機能は，
+コンパイルマイナ（compilation-minor）モードと呼ばれるマイナモードでも
+使えます．
+これにより，普通のコンパイルバッファだけでなく任意のバッファ内の
+エラーメッセージを解析できます．
+このマイナモードをオンにするには，
+ @kbd{M-x compilation-minor-mode}と打鍵します．
+すると，メジャーモードのコンパイル（compilation）モードと同様に
+@key{RET}キーと@kbd{Mouse-2}を定義します．
+
+@c   Compilation minor mode works in any buffer, as long as the contents
+@c are in a format that it understands.  In an Rlogin buffer (@pxref{Remote
+@c Host}), Compilation minor mode automatically accesses remote source
+@c files by FTP (@pxref{File Names}).
+バッファの内容が認識できる形式である限り，
+コンパイルマイナ（compilation-minor）モードは任意のバッファで動作します．
+rloginバッファ（@pxref{Remote Host}）では，
+コンパイルマイナ（compilation-minor）モードは
+リモートのソースファイルをFTPで自動的に取ってきます（@pxref{File Names}）．
+
+@node Compilation Shell
+@c @section Subshells for Compilation
+@section コンパイルのためのサブシェル @emph{(2004/08/16)}
+
+@c   Emacs uses a shell to run the compilation command, but specifies
+@c the option for a noninteractive shell.  This means, in particular, that
+@c the shell should start with no prompt.  If you find your usual shell
+@c prompt making an unsightly appearance in the @samp{*compilation*}
+@c buffer, it means you have made a mistake in your shell's init file by
+@c setting the prompt unconditionally.  (This init file's name may be
+@c @file{.bashrc}, @file{.profile}, @file{.cshrc}, @file{.shrc}, or various
+@c other things, depending on the shell you use.)  The shell init file
+@c should set the prompt only if there already is a prompt.  In csh, here
+@c is how to do it:
+Emacsはシェルを使ってコンパイルコマンドを実行しますが，
+非対話的なシェルになるようなオプションを指定します．
+つまり，シェルはプロンプトを出さずに実行を開始するはずです．
+@samp{*compilation*}バッファに通常のシェルプロンプトがぶざまに現れる場合は，
+個人のシェル初期化ファイルでプロンプトを無条件に設定していることを
+意味します．
+（シェル初期化ファイルの名前は，@file{.bashrc}，@file{.profile}，
+@file{.cshrc}，@file{.shrc}などだが，
+使っているシェルによってさまざまな場合がある．）
+シェル初期化ファイルでは，プロンプトがすでに設定されているときだけ
+プロンプトを再設定するべきです．
+たとえば，@samp{csh}では以下のようにします．
+
+@example
+if ($?prompt) set prompt = @dots{}
+@end example
+
+@noindent
+@c And here's how to do it in bash:
+bashでは以下のようにします．
+
+@example
+if [ "$@{PS1+set@}" = set ]
+then PS1=@dots{}
+fi
+@end example
+
+@c   There may well be other things that your shell's init file
+@c ought to do only for an interactive shell.  You can use the same
+@c method to conditionalize them.
+読者のシェル初期化ファイルには，対話的なシェルに対してだけ
+本来は設定するべきことがまだあるかもしれません．
+同じ方法を用いて，それらを状況に応じて設定するようにできます．
+
+@c   The MS-DOS ``operating system'' does not support asynchronous
+@c subprocesses; to work around this lack, @kbd{M-x compile} runs the
+@c compilation command synchronously on MS-DOS.  As a consequence, you must
+@c wait until the command finishes before you can do anything else in
+@c Emacs.  @xref{MS-DOS}.
+MS-DOS『オペレーティングシステム』では，
+非同期のサブプロセスを使えません．
+対応策として，MS-DOSでは@kbd{M-x compile}は
+コンパイルコマンドを同期的に実行します．
+その結果，Emacs上で他の作業を行うには，
+コンパイルコマンドの終了を待つ必要があります．
+@xref{MS-DOS}．
+
+@node Debuggers
+@c @section Running Debuggers Under Emacs
+@section Emacs下でのデバッガの実行 @emph{(2004/09/07)}
+@c @cindex debuggers
+@cindex デバッガ
+@c @cindex GUD library
+@cindex GUDライブラリ
+@cindex GDB
+@cindex DBX
+@cindex SDB
+@cindex XDB
+@cindex Perldb
+@cindex JDB
+@cindex PDB
+
+@c @c Do you believe in GUD?
+@c The GUD (Grand Unified Debugger) library provides an interface to
+@c various symbolic debuggers from within Emacs.  We recommend the debugger
+@c GDB, which is free software, but you can also run DBX, SDB or XDB if you
+@c have them.  GUD can also serve as an interface to the Perl's debugging
+@c mode, the Python debugger PDB, and to JDB, the Java Debugger.
+@c @xref{Debugging,, The Lisp Debugger, elisp, the Emacs Lisp Reference Manual},
+@c for information on debugging Emacs Lisp programs.
+GUD（Grand Unified Debugger，大統一デバッガ）ライブラリは，
+Emacsからさまざまなデバッガへのインターフェイスを提供します．
+フリーソフトウェアであるGDBをお勧めしますが，
+DBX，SDB，XDBを持っているならばそれらを使うこともできます．
+GUDは，Perlのデバッグモード，
+PythonのデバッガPDB，JavaデバッガJDBに対するインターフェイスにもなります．
+Emacs Lisp のデバッグに関する詳細は @xref{Debugging,, The Lisp Debugger, elisp,
+the Emacs Lisp Reference Manual} を参照のこと．
+
+@menu
+* Starting GUD::	How to start a debugger subprocess.
+* Debugger Operation::	Connection between the debugger and source buffers.
+* Commands of GUD::	Key bindings for common commands.
+* GUD Customization::	Defining your own commands for GUD.
+* GUD Tooltips::        Showing variable values by pointing with the mouse.
+* GDB Graphical Interface::  An enhanced mode that uses GDB features to
+                        implement a graphical debugging environment through
+                        Emacs.
+@end menu
+
+@node Starting GUD
+@c @subsection Starting GUD
+@subsection GUDの起動 @emph{(2004/08/16)}
+
+@c   There are several commands for starting a debugger, each corresponding
+@c to a particular debugger program.
+デバッガを開始するコマンドはいくつかあり，
+それぞれ，特定のデバッガに対応しています．
+
+@table @kbd
+@item M-x gdb @key{RET} @var{file} @key{RET}
+@findex gdb
+@c Run GDB as a subprocess of Emacs.  This command creates a buffer for
+@c input and output to GDB, and switches to it.  If a GDB buffer already
+@c exists, it just switches to that buffer.
+EmacsのサブプロセスとしてGDBを実行する．
+このコマンドは，GDBへの入出力用のバッファを新たに作り，
+そのバッファへ切り替える．
+GDBバッファが既存の場合は，そのバッファへ切り替えるだけ．
+
+@item M-x gdba @key{RET} @var{file} @key{RET}
+@c Run GDB as a subprocess of Emacs, providing a graphical interface
+@c to GDB features through Emacs.  @xref{GDB Graphical Interface}.
+EmacsのサブプロセスとしてGDBを実行する．このコマンドはGDBの機能に対して Emacs か
+らグラフィカルなインターフェイスで操作できるようにします．@xref{GDB Graphical
+Interface}．
+
+@item M-x dbx @key{RET} @var{file} @key{RET}
+@findex dbx
+@c Similar, but run DBX instead of GDB.
+同様に，GDBのかわりにDBXを実行する．
+
+@item M-x xdb @key{RET} @var{file} @key{RET}
+@findex xdb
+@vindex gud-xdb-directories
+@c Similar, but run XDB instead of GDB.  Use the variable
+@c @code{gud-xdb-directories} to specify directories to search for source
+@c files.
+同様に，GDBのかわりにXDBを実行する．
+ソースファイルを探索するディレクトリ群を指定するには，
+変数@code{gud-xdb-directories}を使う．
+
+@item M-x sdb @key{RET} @var{file} @key{RET}
+@findex sdb
+@c Similar, but run SDB instead of GDB.
+同様に，GDBのかわりにSDBを実行する．
+
+@c   Some versions of SDB do not mention source file names in their
+@c messages.  When you use them, you need to have a valid tags table
+@c (@pxref{Tags}) in order for GUD to find functions in the source code.
+@c If you have not visited a tags table or the tags table doesn't list one
+@c of the functions, you get a message saying @samp{The sdb support
+@c requires a valid tags table to work}.  If this happens, generate a valid
+@c tags table in the working directory and try again.
+SDBのバージョンによっては，メッセージにソースファイル名を
+含めないものがある．
+そのようなSDBを使う場合には，GUDがソースコードから関数を探せるように
+正しいタグテーブル（@pxref{Tags}）が必要である．
+タグテーブルを訪問していなかったり，
+タグテーブルに当該関数がなかったりすると，
+@samp{The sdb support requires a valid tag table to work}という
+メッセージが表示される．
+このような場合には，作業ディレクトリに正しいタグファイルを生成してから
+やり直す．
+
+@item M-x perldb @key{RET} @var{file} @key{RET}
+@findex perldb
+@c Run the Perl interpreter in debug mode to debug @var{file}, a Perl program.
+Perlプログラム@var{file}をデバッグするために
+Perlインタープリタをデバッグモードで実行する．
+
+@item M-x jdb @key{RET} @var{file} @key{RET}
+@findex jdb
+@c Run the Java debugger to debug @var{file}.
+@var{file}をデバッグするためにJavaデバッガを実行する．
+
+@item M-x pdb @key{RET} @var{file} @key{RET}
+@findex pdb
+@c Run the Python debugger to debug @var{file}.
+@var{file}をデバッグするためにPythonデバッガを実行する．
+@end table
+
+@c   Each of these commands takes one argument: a command line to invoke
+@c the debugger.  In the simplest case, specify just the name of the
+@c executable file you want to debug.  You may also use options that the
+@c debugger supports.  However, shell wildcards and variables are not
+@c allowed.  GUD assumes that the first argument not starting with a
+@c @samp{-} is the executable file name.
+これらのコマンドは引数を1つ，
+つまり，デバッガを起動するコマンド行を取ります．
+もっとも単純な場合は，デバッグしたい実行ファイルの名前を指定します．
+デバッガに指定できるオプションを使うこともできます．
+しかし，シェルのワイルドカードや変数名は使えません．
+GUDは，@samp{-}で始まらない最初の引数をデバッグする実行ファイル名であると
+仮定します．
+
+@c   Emacs can only run one debugger process at a time.
+Emacsはデバッガプロセスを一度に1つだけ実行できます．
+
+@node Debugger Operation
+@c @subsection Debugger Operation
+@subsection デバッガの操作 @emph{(2004/08/16)}
+
+@cindex fringes, and current execution line in GUD
+@c   When you run a debugger with GUD, the debugger uses an Emacs buffer
+@c for its ordinary input and output.  This is called the GUD buffer.  The
+@c debugger displays the source files of the program by visiting them in
+@c Emacs buffers.  An arrow (@samp{=>}) in one of these buffers indicates
+@c the current execution line.@footnote{Under a window system, the arrow
+@c appears in the left fringe of the Emacs window.}  Moving point in this
+@c buffer does not move the arrow.
+GUDの下でデバッガを実行すると，
+デバッガは通常の入出力にEmacsバッファを使います．
+このバッファをGUDバッファと呼びます．
+デバッガはEmacsバッファでファイルを訪問して，
+プログラムのソースファイルを表示します．
+このようなバッファの1つに矢印（@samp{=>}）が表示され，
+現在実行している行を表示します@footnote{ウィンドウシステム下では，Emacs ウィン
+ドウの左フリンジに矢印を表示します}．
+このバッファでポイントを動かしても矢印は動きません．
+
+@c   You can start editing these source files at any time in the buffers
+@c that display them.  The arrow is not part of the file's
+@c text; it appears only on the screen.  If you do modify a source file,
+@c keep in mind that inserting or deleting lines will throw off the arrow's
+@c positioning; GUD has no way of figuring out which line corresponded
+@c before your changes to the line number in a debugger message.  Also,
+@c you'll typically have to recompile and restart the program for your
+@c changes to be reflected in the debugger's tables.
+ソースファイルを表示したバッファでは，いつでもソースファイルを編集できます．
+矢印はファイルのテキストの一部ではなく，画面上に表示されているだけです．
+ソースファイルを変更するとき，
+行を挿入／削除すると矢印の表示位置情報が失われることに注意してください．
+GUDには，変更前のデバッガメッセージから変更後の対応する行番号を知る術は
+ありません．
+また，デバッガにソースの変更を反映するには，
+プログラムを再コンパイルしてから再実行する必要があります．
+
+@c   If you wish, you can control your debugger process entirely through the
+@c debugger buffer, which uses a variant of Shell mode.  All the usual
+@c commands for your debugger are available, and you can use the Shell mode
+@c history commands to repeat them.  @xref{Shell Mode}.
+お好みならば，シェル（shell）モードの変形を用いた
+デバッガバッファを介して，デバッガプロセスを完全に制御することもできます．
+こうすれば，デバッガのすべてのコマンドを利用でき，
+シェル（shell）モードの履歴機能を用いて
+コマンドを繰り返し実行できます．
+@xref{Shell Mode}．
+
+@node Commands of GUD
+@c @subsection Commands of GUD
+@subsection GUDのコマンド @emph{(2004/08/16)}
+
+@c   The GUD interaction buffer uses a variant of Shell mode, so the
+@c commands of Shell mode are available (@pxref{Shell Mode}).  GUD mode
+@c also provides commands for setting and clearing breakpoints, for
+@c selecting stack frames, and for stepping through the program.  These
+@c commands are available both in the GUD buffer and globally, but with
+@c different key bindings.  It also has its own toolbar from which you
+@c can invoke the more common commands by clicking on the appropriate
+@c icon.  This is particularly useful for repetitive commands like
+@c gud-next and gud-step and allows the user to hide the GUD buffer.
+GUD対話バッファはシェル（shell）モードの変形を使うので，
+シェル（shell）モードのコマンドを使えます（@pxref{Shell Mode}）．
+GUDモードでは，ブレークポイントの設定と解除，スタックフレームの選択，
+プログラムのステップ実行などのコマンドもあります．
+これらのコマンドはGUDバッファでもそれ以外でも使えますが，
+キーバインドは異なります．また，適切なアイコンをクリックすることで一般
+的なコマンドを実行できるツールバーも利用できます．この機能は，gud-next
+や gud-step，GUDバッファを隠すといったように繰り返し実行するようなコマ
+ンドで特に便利でしょう．
+
+@c   The breakpoint commands are normally used in source file buffers,
+@c because that is the easiest way to specify where to set or clear the
+@c breakpoint.  Here's the global command to set a breakpoint:
+ブレークポイントコマンドは，普通，ソースファイルのバッファで使います．
+というのは，ソース上でブレークポイントを設定／解除するのが最も簡単な方
+法だからです．
+以下はブレークポイントを設定するグローバルコマンドです．
+
+@table @kbd
+@item C-x @key{SPC}
+@kindex C-x SPC
+@c Set a breakpoint on the source line that point is on.
+ポイントがあるソース行にブレークポイントを設定する．   
+@end table
+
+@c @kindex C-x C-a @r{(GUD)}
+@kindex C-x C-a @r{（GUD）}
+@c   Here are the other special commands provided by GUD.  The keys
+@c starting with @kbd{C-c} are available only in the GUD interaction
+@c buffer.  The key bindings that start with @kbd{C-x C-a} are available in
+@c the GUD interaction buffer and also in source files.
+以下はその他のGUDモード特有のコマンドです．
+@kbd{C-c}で始まるキー列は，GUD対話バッファだけで使えます．
+@kbd{C-x C-a}で始まるキー列は，
+GUD対話バッファとソースファイル（のバッファ）の両方で使えます．
+
+@table @kbd
+@item C-c C-l
+@c @kindex C-c C-l @r{(GUD)}
+@kindex C-c C-l @r{（GUD）}
+@itemx C-x C-a C-l
+@findex gud-refresh
+@c Display in another window the last line referred to in the GUD
+@c buffer (that is, the line indicated in the last location message).
+@c This runs the command @code{gud-refresh}.
+GUDバッファで参照した最後の行を別のウィンドウに表示する
+（つまり，最新の実行位置メッセージが指す行を表示する）．
+これは，コマンド@code{gud-refresh}を実行する．
+
+@item C-c C-s
+@c @kindex C-c C-s @r{(GUD)}
+@kindex C-c C-s @r{（GUD）}
+@itemx C-x C-a C-s
+@findex gud-step
+@c Execute a single line of code (@code{gud-step}).  If the line contains
+@c a function call, execution stops after entering the called function.
+ソースコード1行分を実行する（@code{gud-step}）．
+その行に関数呼び出しが含まれる場合は，呼び出された関数に入ってから停止する．
+
+@item C-c C-n
+@c @kindex C-c C-n @r{(GUD)}
+@kindex C-c C-n @r{（GUD）}
+@itemx C-x C-a C-n
+@findex gud-next
+@c Execute a single line of code, stepping across entire function calls
+@c at full speed (@code{gud-next}).
+ソースコード1行分を実行し，関数呼び出しでも
+停止せずにフルスピードで実行する（@code{gud-next}）．
+
+@item C-c C-i
+@c @kindex C-c C-i @r{(GUD)}
+@kindex C-c C-i @r{（GUD）}
+@itemx C-x C-a C-i
+@findex gud-stepi
+@c Execute a single machine instruction (@code{gud-stepi}).
+機械語1命令を実行する（@code{gud-stepi}）．
+
+@need 3000
+@item C-c C-r
+@c @kindex C-c C-r @r{(GUD)}
+@kindex C-c C-r @r{（GUD）}
+@itemx C-x C-a C-r
+@findex gud-cont
+@c Continue execution without specifying any stopping point.  The program
+@c will run until it hits a breakpoint, terminates, or gets a signal that
+@c the debugger is checking for (@code{gud-cont}).
+停止位置を指定せずに実行を継続する．
+プログラムの実行は，ブレークポイントに出会う，
+プログラムが終了する，
+デバッガが監視しているシグナルを受け取るまで実行を継続する．
+
+@need 1000
+@item C-c C-d
+@c @kindex C-c C-d @r{(GUD)}
+@kindex C-c C-d @r{（GUD）}
+@itemx C-x C-a C-d
+@findex gud-remove
+@c Delete the breakpoint(s) on the current source line, if any
+@c (@code{gud-remove}).  If you use this command in the GUD interaction
+@c buffer, it applies to the line where the program last stopped.
+現在のソース行にブレークポイントがあるならばそれを削除する
+（@code{gud-remove}）．
+GUD対話バッファでこのコマンドを使うと，
+プログラムが最後に停止した行に適用される．
+
+@item C-c C-t
+@c @kindex C-c C-t @r{(GUD)}
+@kindex C-c C-t @r{（GUD）}
+@itemx C-x C-a C-t
+@findex gud-tbreak
+@c Set a temporary breakpoint on the current source line, if any.
+@c If you use this command in the GUD interaction buffer,
+@c it applies to the line where the program last stopped.
+現在のソース行に一時的なブレークポイントを設定する．
+GUD対話バッファでこのコマンドを使うと，
+プログラムが最後に停止した行に適用される．
+@end table
+
+@c   The above commands are common to all supported debuggers.  If you are
+@c using GDB or (some versions of) DBX, these additional commands are available:
+上にあげたコマンドは，（GUDから使える）すべてのデバッガに共通です．
+GDBやDBX（のあるバージョン）では，さらに以下のコマンドも使えます．
+
+@table @kbd
+@item C-c <
+@c @kindex C-c < @r{(GUD)}
+@kindex C-c < @r{（GUD）}
+@itemx C-x C-a <
+@findex gud-up
+@c Select the next enclosing stack frame (@code{gud-up}).  This is
+@c equivalent to the @samp{up} command.
+1つ外側のスタックフレームを選択する（@code{gud-up}）．
+これは@samp{up}コマンドと等価．
+
+@item C-c >
+@c @kindex C-c > @r{(GUD)}
+@kindex C-c > @r{（GUD）}
+@itemx C-x C-a >
+@findex gud-down
+@c Select the next inner stack frame (@code{gud-down}).  This is
+@c equivalent to the @samp{down} command.
+1つ内側のスタックフレームを選択する（@code{gud-down}）．
+これは@samp{down}コマンドと等価．
+@end table
+
+@c   If you are using GDB, these additional key bindings are available:
+GDBを使う場合には以下のコマンドも使用できます．
+
+@table @kbd
+@item C-c C-r
+@kindex C-c C-r @r{(GUD)}
+@itemx C-x C-a C-r
+@findex gud-run
+@c Start execution of the program (@code{gud-run}).
+プログラムの実行を開始する (@code{gud-run})．
+
+@item C-c C-u
+@kindex C-c C-u @r{(GUD)}
+@itemx C-x C-a C-u
+@findex gud-until
+@c Continue execution to the current line. The program will run until
+@c it hits a breakpoint, terminates, gets a signal that the debugger is
+@c checking for, or reaches the line on which the cursor currently sits
+@c (@code{gud-until}).
+現在行まで実行を継続する．プログラムの実行は，ブレークポイントに出会う，
+プログラムが終了する，
+デバッガが監視しているシグナルを受け取るか，カーソルが現在ある行まで到
+達するまで実行を継続する．
+
+@item @key{TAB}
+@c @kindex TAB @r{(GUD)}
+@kindex TAB @r{（GUD）}
+@findex gud-gdb-complete-command
+@c With GDB, complete a symbol name (@code{gud-gdb-complete-command}).
+@c This key is available only in the GUD interaction buffer, and requires
+@c GDB versions 4.13 and later.
+GDBでは，シンボル名を補完する（@code{gud-gdb-complete-command}）．
+このキーはGUDの対話バッファでだけ使える．
+また，GDBのバージョンは4.13以降であること．
+
+@item C-c C-f
+@c @kindex C-c C-f @r{(GUD)}
+@kindex C-c C-f @r{（GUD）}
+@itemx C-x C-a C-f
+@findex gud-finish
+@c Run the program until the selected stack frame returns (or until it
+@c stops for some other reason).
+あらかじめ選択したスタックフレームから戻る
+（あるいは，他の理由で停止する）までプログラムを実行する．
+
+@item C-x C-a C-j
+@kindex C-x C-a C-j @r{(GUD)}
+@findex gud-jump
+@c Only useful in a source buffer, (@code{gud-jump}) transfers the
+@c program's execution point to the current line.  In other words, the
+@c next line that the program executes will be the one where you gave the
+@c command.  If the new execution line is in a different function from
+@c the previously one, GDB prompts for confirmation since the results may
+@c be bizarre.  See the GDB manual entry regarding @code{jump} for
+@c details.
+ソースバッファにいる時に便利なこのコマンド (@code{gud-jump}) は，プ
+ログラムの実行箇所を現在行に変更する．言い換えると，プログラムが次に実行す
+る行が，このコマンドで指定した行になる．もし新しく実行する行が前に実行
+していたものとは別の関数であるなら，GDB は結果がおかしくなる可能性があ
+るので，確認メッセージを表示する．詳細については，GDBマニュアルの
+@code{jump} を参照してください．
+@end table
+
+@c If you started GDB with the command @code{gdba}, you can click
+@c @kbd{Mouse-1} on a line of the source buffer, in the fringe or display
+@c margin, to set a breakpoint there.  If a breakpoint already exists on
+@c that line, this action will remove it.
+@c (@code{gdb-mouse-toggle-breakpoint}).
+コマンド @code{gdba} で GDB を開始すると，ソースバッファのある行で
+クリック @kbd{Mouse-1} でき，その行にブレークポイントが設定され，フリ
+ンジに表示される．その行にブレークポイントがすでに設定されていれば，削
+除される (@code{gdb-mouse-toggle-breakpoint})．
+
+@c   These commands interpret a numeric argument as a repeat count, when
+@c that makes sense.
+これらのコマンドは，意味がある場合には数引数を反復回数として解釈します．
+
+@c   Because @key{TAB} serves as a completion command, you can't use it to
+@c enter a tab as input to the program you are debugging with GDB.
+@c Instead, type @kbd{C-q @key{TAB}} to enter a tab.
+@key{TAB}は，補完コマンドとして働くため，
+GDBでデバッグしているプログラムへのタブの入力には使えません．
+タブを入力するには@kbd{C-q @key{TAB}}と打鍵します．
+
+@node GUD Customization
+@c @subsection GUD Customization
+@subsection GUDのカスタマイズ @emph{(2004/08/16)}
+
+@vindex gdb-mode-hook
+@vindex dbx-mode-hook
+@vindex sdb-mode-hook
+@vindex xdb-mode-hook
+@vindex perldb-mode-hook
+@vindex pdb-mode-hook
+@vindex jdb-mode-hook
+@c   On startup, GUD runs one of the following hooks: @code{gdb-mode-hook},
+@c if you are using GDB; @code{dbx-mode-hook}, if you are using DBX;
+@c @code{sdb-mode-hook}, if you are using SDB; @code{xdb-mode-hook}, if you
+@c are using XDB; @code{perldb-mode-hook}, for Perl debugging mode;
+@c @code{pdb-mode-hook}, for PDB; @code{jdb-mode-hook}, for JDB.  You can
+@c use these hooks to define custom key bindings for the debugger
+@c interaction buffer.  @xref{Hooks}.
+GUDが実行を開始すると，
+GDBの場合は@code{gdb-mode-hook}，
+DBXの場合は@code{dbx-mode-hook}，
+SDBの場合は@code{sdb-mode-hook}，
+XDBの場合は@code{xdb-mode-hook}，
+Perlのデバッグモードの場合は@code{perldb-mode-hook}，
+PDBの場合は@code{pdb-mode-hook}，
+JDBの場合は@code{jdb-mode-hook}のフックを実行します．
+これらのフックを使って，デバッガの対話バッファ用に
+自前のキーバインドを定義できます．
+@xref{Hooks}．
+
+@c   Here is a convenient way to define a command that sends a particular
+@c command string to the debugger, and set up a key binding for it in the
+@c debugger interaction buffer:
+以下は，特定のコマンド文字列をデバッガに送るコマンドを定義し，かつ，
+そのコマンドに対するキーバインドをデバッガの対話バッファに設定する
+便利な方法です．
+
+@findex gud-def
+@example
+(gud-def @var{function} @var{cmdstring} @var{binding} @var{docstring})
+@end example
+
+@c   This defines a command named @var{function} which sends
+@c @var{cmdstring} to the debugger process, and gives it the documentation
+@c string @var{docstring}.  You can then use the command @var{function} in any
+@c buffer.  If @var{binding} is non-@code{nil}, @code{gud-def} also binds
+@c the command to @kbd{C-c @var{binding}} in the GUD buffer's mode and to
+@c @kbd{C-x C-a @var{binding}} generally.
+これは，デバッガプロセスに@var{cmdstring}を送る
+@var{function}という名前のコマンドを定義し，
+そのコマンドの説明文字列を@var{docstring}とします．
+そうして，このコマンド @var{function} は，どのバッファでも使えます．
+@var{binding}が@code{nil}以外の場合，
+@code{gud-def}はGUDバッファのモードに対しては
+このコマンドを@kbd{C-c @var{binding}}にバインドし，
+それ以外に対しては@kbd{C-x C-a @var{binding}}にバインドします．
+
+@c   The command string @var{cmdstring} may contain certain
+@c @samp{%}-sequences that stand for data to be filled in at the time
+@c @var{function} is called:
+コマンド文字列@var{cmdstring}には，
+@var{function}が呼び出されたときにデータが埋め込まれる
+@samp{%}系列を含めることもできます．
+
+@table @samp
+@item %f
+@c The name of the current source file.  If the current buffer is the GUD
+@c buffer, then the ``current source file'' is the file that the program
+@c stopped in.
+@c @c This said, ``the name of the file the program counter was in at the last breakpoint.''
+@c @c But I suspect it is really the last stop file.
+現在のソースファイルの名前．
+カレントバッファがGUDバッファだった場合には，
+『現在のソースファイル』とは
+プログラムが停止した箇所に対応するソースファイル．
+
+@item %l
+@c The number of the current source line.  If the current buffer is the GUD
+@c buffer, then the ``current source line'' is the line that the program
+@c stopped in.
+現在のソース行番号．
+カレントバッファがGUDバッファだった場合には，
+『現在のソース行番号』とは
+プログラムが停止した箇所に対応するソースファイルの行番号．
+
+@item %e
+@c The text of the C lvalue or function-call expression at or adjacent to point.
+ポイント位置あるいはポイントに隣接する
+Cの左辺値か関数呼び出し式．
+
+@item %a
+@c The text of the hexadecimal address at or adjacent to point.
+ポイント位置あるいはポイントに隣接する
+箇所の16進数表記アドレス．
+
+@item %p
+@c The numeric argument of the called function, as a decimal number.  If
+@c the command is used without a numeric argument, @samp{%p} stands for the
+@c empty string.
+@var{function}を呼ぶときに指定された数引数を10進値表記したもの．
+数引数なしで呼ばれた場合，@samp{%p}は空文字列．
+
+@c If you don't use @samp{%p} in the command string, the command you define
+@c ignores any numeric argument.
+@var{cmdstring}で@samp{%p}を使用しなければ，
+定義しようとしている@var{function}は数引数を無視する．
+@end table
+
+@node GUD Tooltips
+@c @subsection GUD Tooltips
+@subsection GUD ツールチップ @emph{(2004/08/16)}
+
+@cindex tooltips with GUD
+@c The Tooltip facility (@pxref{Tooltips}) provides support for GUD@.  If
+@c GUD support is activated by customizing the @code{tooltip} group,
+@c variable values can be displayed in tooltips by pointing at them with
+@c the mouse in the GUD buffer or in source buffers with major modes in the
+@c customizable list @code{tooltip-gud-modes}.
+ツールチップ機能 (@pxref{Tooltips}) は GUD の補助する．@code{tooltip}
+グループをカスタマイズすることでGUD の補助機能を有効にしていれば，GUD
+バッファか @code{tooltip-gud-modes} で指定したメジャーモードのソースバッ
+ファにおいて，マウスにより指定した変数の値をツールチップで表示できる．
+
+@node GDB Graphical Interface
+@c @subsection GDB Graphical Interface
+@subsection GDB グラフィカルインターフェイス @emph{(2004/09/07)}
+
+@findex gdba
+@c The command @code{gdba} starts GDB using a graphical interface where
+@c you view and control the program's data using Emacs windows.  You can
+@c still interact with GDB through the GUD buffer, but the point of this
+@c mode is that you can do it through menus and clicks, without needing
+@c to know GDB commands.
+コマンド @code{gdba} は GDB をグラフィカルインターフェイスで起動する．
+このインターフェイスでは，Emacsのウィンドウを使ってプログラムのデータ
+を見たり，制御したりすることができる．この状態でも，GUD バッファを介して GUD
+とやりとりすることができるが，このモードの利点は GDB コマンドを知らな
+くてもメニューやクリックで様々な操作を行うことができることだ．
+
+@menu
+* Breakpoints Buffer::   A breakpoint control panel.
+* Stack Buffer::         Select a frame from the call stack. 
+* Watch Expressions::    Monitor variable values in the speedbar.
+* Other Buffers::        Input/output, locals, registers and assembler buffers.
+* Layout::               Control the number of displayed buffers.
+@end menu
+
+@node Breakpoints Buffer
+@c @subsubsection Breakpoints Buffer
+@subsubsection ブレークポイントバッファ @emph{(2004/08/16)}
+
+@c The breakpoints buffer shows the existing breakpoints and watchpoints 
+@c (@pxref{Breakpoints,,, gdb, The GNU debugger}).  It has three special
+@c commands:
+ブレークポイントバッファは既に存在しているブレークポイントやウォッチポ
+イント (@pxref{Breakpoints,,, gdb, The GNU debugger}) を表示する．この
+バッファは3つの特別な機能を持つ．
+
+@table @kbd
+@item @key{SPC} 
+@kindex SPC @r{(GDB breakpoints buffer)}
+@findex gdb-toggle-breakpoint
+@c Enable/disable the breakpoint at the current line
+@c (@code{gdb-toggle-breakpoint}).  On a graphical display, this changes
+@c the color of a bullet in the margin of the source buffer at the
+@c relevant line.  This is red when the breakpoint is enabled and grey
+@c when it is disabled.  Text-only terminals correspondingly display
+@c a @samp{B} or @samp{b}.
+現在行のブレークポイントを有効化/無効化する
+(@code{gdb-toggle-breakpoint})．グラフィカルインターフェイスでは，ソー
+スバッファで関連行のマージン部分にある弾丸の色を変える．ブレークポイン
+トが有効であれば赤で，無効なら灰色になる．テキストのみの端末では
+@samp{B} か @samp{b} を表示する．
+
+@item @kbd{d}
+@kindex d @r{(GDB breakpoints buffer)}
+@findex gdb-delete-breakpoint
+@c Delete the breakpoint at the current line (@code{gdb-delete-breakpoint}).
+現在行のブレークポイントを削除する(@code{gdb-delete-breakpoint})．
+
+@item @key{RET}
+@kindex RET @r{(GDB breakpoints buffer)}
+@findex gdb-goto-breakpoint
+@c Display the file in the source buffer at the breakpoint specified at
+@c the current line (@code{gdb-goto-breakpoint}).  Alternatively, click @kbd{Mouse-2} on the breakpoint that you wish to visit.
+現在行のブレークポイントのあるソースバッファを表示する
+(@code{gdb-goto-breakpoint})．代わりに，ブレークポイントでクリック
+@kbd{Mouse-2} することでも表示できる．
+@end table
+
+@node Stack Buffer
+@c @subsubsection Stack Buffer
+@subsubsection スタックバッファ @emph{(2004/08/16)}
+
+@c The stack buffer displays a @dfn{call stack}, with one line for each
+@c of the nested subroutine calls (@dfn{stack frames}) now active in the
+@c program.  @xref{Backtrace,,info stack, gdb, The GNU debugger}.
+スタックバッファは，プログラムでアクティブになっている箇所のサブルーチ
+ンの呼び出し履歴 (@dfn{stack frames}) を一覧できる @dfn{call stack} を
+表示する．@xref{Backtrace,,info stack, gdb, The GNU debugger}を参照のこと．
+
+@c Move point to any frame in the stack and type @key{RET} to make it
+@c become the current frame (@code{gdb-frames-select}) and display the
+@c associated source in the source buffer.  Alternatively, click
+@c @kbd{Mouse-2} to make the selected frame become the current one.  If the
+@c locals buffer is displayed then its contents update to display the
+@c variables that are local to the new frame.
+カーソルをスタックのあるフレームに移動させ，@key{RET}を入力すると，現
+在のフレームを選択して (@code{gdb-frames-select})，ソースバッファの関
+連するソースを表示できる．代わりに，クリック @kbd{Mouse-2} することで，
+フレームを選択できる．もし，ローカルバッファが表示されると，新しいフレー
+ムでローカルとなる変数を表示できるように内容を更新する．
+
+@node Watch Expressions
+@c @subsubsection Watch Expressions
+@subsubsection 式を見る @emph{(2004/09/07)}
+@cindex Watching expressions in GDB
+
+@c If you want to see how a variable changes each time your program stops
+@c then place the cursor over the variable name and click on the watch
+@c icon in the toolbar (@code{gud-watch}).
+もしプログラムが停止するたびに変数がどのように変化しているか見たい時に
+は，カーソルを変数上に置き，ツールバー上のウォッチアイコンをクリックす
+る (@code{gud-watch})．
+
+@c Each watch expression is displayed in the speedbar.  Complex data
+@c types, such as arrays, structures and unions are represented in a tree
+@c format.  To expand or contract a complex data type, click @kbd{Mouse-2}
+@c on the tag to the left of the expression.
+スピードバーに見ている各式が表示される．配列や構造体，集合のように複雑
+なデータはトリーで表示される．そのようなデータタイプを展開/折り畳む場
+合には，式の左にあるタグ上で@kbd{Mouse-2}をクリックする．
+
+@kindex RET @r{(GDB speedbar)}
+@findex gdb-var-delete
+@c With the cursor over the root expression of a complex data type, type
+@c @key{RET} or click @kbd{Mouse-2} to delete it from the speedbar
+@c (@code{gdb-var-delete}).
+複雑なデータタイプのルート部分にカーソルがある状態で，@key{RET} を入力
+するか @kbd{Mouse-2}をクリックすると，そのデータをスピードバーから削除
+する (@code{gdb-var-delete})．
+
+@findex gdb-edit-value
+@c With the cursor over a simple data type or an element of a complex
+@c data type which holds a value, type @key{RET} or click @kbd{Mouse-2} to edit
+@c its value.  A prompt for a new value appears in the mini-buffer
+@c (@code{gdb-edit-value}).
+ある値を持つ単純なデータや複雑なデータの要素上にカーソルがある時に，@key{RET} を入力
+するか @kbd{Mouse-2} をクリックすると，その値を編集する．新しい値の入
+力を求めるプロンプトがミニバッファに表示される (@code{gdb-edit-value})．
+
+If you set the variable @code{gdb-show-changed-values} to a
+non-@code{nil} value, then Emacs will use font-lock-warning-face to
+display values that have recently changed in the speedbar.
+
+If you set the variable @code{gdb-use-colon-colon-notation} to a
+non-@code{nil} value, then, in C, Emacs will use the
+FUNCTION::VARIABLE format to display variables in the speedbar.
+
+@node Other Buffers
+@subsubsection Other Buffers
+
+@table @asis
+@item Input/Output Buffer
+The executable program that is being debugged takes its input and
+displays its output here.  Some of the commands from shell mode are
+available here.  @xref{Shell Mode}.
+
+@item Locals Buffer
+The locals buffer displays the values of local variables of the
+current frame for simple data types (@pxref{Frame Info,,, gdb, The GNU
+debugger}).
+
+Arrays and structures display their type only.  You must display them
+separately to examine their values.  @ref{Watch Expressions}.
+
+@item Registers Buffer
+The registers buffer displays the values held by the registers
+(@pxref{Registers,,, gdb, The GNU debugger}).
+
+@item Assembler Buffer
+The assembler buffer displays the current frame as machine code.  An
+overlay arrow points to the current instruction and you can set and
+remove breakpoints as with the source buffer.  Breakpoints also
+appear in the margin.
+
+@item Threads Buffer
+
+The threads buffer displays a summary of all threads currently in your
+program.(@pxref{Threads,,, gdb, The GNU debugger}).  Move point to
+any thread in the list and type @key{RET} to make it become the
+current thread (@code{gdb-threads-select}) and display the associated
+source in the source buffer.  Alternatively, click @kbd{Mouse-2} to
+make the selected thread become the current one.
+
+@end table
+
+@node Layout
+@subsubsection Layout
+@cindex GDB User Interface layout
+
+@findex gdb-many-windows
+@vindex gdb-many-windows
+If @code{gdb-many-windows} is @code{nil} (the default value), then GDB starts
+with just two windows: the GUD and the source buffer.  If it is @code{t}, then
+six windows with the following layout will appear:
+
+@multitable @columnfractions .5 .5
+@item GUD buffer (I/O of GDB)
+@tab Locals buffer
+@item
+@tab
+@item Source buffer
+@tab Input/Output (of debuggee) buffer
+@item
+@tab
+@item Stack buffer
+@tab Breakpoints buffer
+@end multitable
+
+To toggle this layout, do @kbd{M-x gdb-many-windows}.
+
+@findex gdb-restore-windows
+If you change the window layout, for example, while editing and
+re-compiling your program, then you can restore it with
+@code{gdb-restore-windows}.
+
+You may also choose which additional buffers you want to display,
+either in the same frame or a different one.  Select GDB-windows or
+GDB-Frames from the menu-bar under the heading GUD.  If the menu-bar
+is unavailable, type @code{M-x
+gdb-display-@var{buffertype}-buffer} or @code{M-x
+gdb-frame-@var{buffertype}-buffer} respectively, where @var{buffertype}
+is the relevant buffer type e.g breakpoints.
+
+@node Executing Lisp
+@c @section Executing Lisp Expressions
+@section Lisp式の実行 @emph{(2004/08/16)}
+
+@c   Emacs has several different major modes for Lisp and Scheme.  They are
+@c the same in terms of editing commands, but differ in the commands for
+@c executing Lisp expressions.  Each mode has its own purpose.
+Emacsには，LispやSchemeのための異なったメジャーモードがいくつかあります．
+これらは編集コマンドという意味では同じですが，
+Lisp式を実行するコマンドが異なります．
+各モードには固有の目的があります．
+
+@table @asis
+@c @item Emacs-Lisp mode
+@item emacs-lispモード
+@c The mode for editing source files of programs to run in Emacs Lisp.
+@c This mode defines @kbd{C-M-x} to evaluate the current defun.
+@c @xref{Lisp Libraries}.
+このモードはEmacs Lispで実行するプログラムのソースファイル編集用．
+このモードでは，現在の関数定義を評価する@kbd{C-M-x}を定義する．
+@pxref{Lisp Libraries}．
+@c @item Lisp Interaction mode
+@item lisp対話モード（Lisp Interaction mode）
+@c The mode for an interactive session with Emacs Lisp.  It defines
+@c @kbd{C-j} to evaluate the sexp before point and insert its value in the
+@c buffer.  @xref{Lisp Interaction}.
+このモードはEmacs Lispの対話セッション用．
+ポイントの直前のS式を評価し，その値をバッファに挿入する@kbd{C-j}を定義する．
+@pxref{Lisp Interaction}．
+@c @item Lisp mode
+@item lispモード
+@c The mode for editing source files of programs that run in Lisps other
+@c than Emacs Lisp.  This mode defines @kbd{C-M-x} to send the current defun
+@c to an inferior Lisp process.  @xref{External Lisp}.
+このモードはEmacs Lisp以外のLispで実行するプログラムのソースコード編集用．
+このモードでは，
+現在の関数定義を下位のLispプロセスに送る@kbd{C-M-x}を定義する．
+@pxref{External Lisp}．
+@c @item Inferior Lisp mode
+@item 下位lispモード（Inferior Lisp mode）
+@c The mode for an interactive session with an inferior Lisp process.
+@c This mode combines the special features of Lisp mode and Shell mode
+@c (@pxref{Shell Mode}).
+このモードは下位Lispプロセスとの対話セッション用．
+このモードは，lispモードとシェル（shell）モード（@pxref{Shell Mode}）
+の特別な機能の組み合わせ．
+@c @item Scheme mode
+@item schemeモード
+@c Like Lisp mode but for Scheme programs.
+lispモードと同様だが，Schemeプログラム編集用．
+@c @item Inferior Scheme mode
+@item 下位Schemeモード（Inferior Scheme mode）
+@c The mode for an interactive session with an inferior Scheme process.
+このモードは下位のSchemeプロセスとの対話セッション用．
+@end table
+
+@c   Most editing commands for working with Lisp programs are in fact
+@c available globally.  @xref{Programs}.
+Lispプログラム用の編集コマンドの大部分は事実上どこでも使えます．
+@xref{Programs}．
+
+@node Lisp Libraries
+@c @section Libraries of Lisp Code for Emacs
+@section Emacs用のLispコードのライブラリ @emph{(2004/08/16)}
+@c @cindex libraries
+@cindex ライブラリ
+@c @cindex loading Lisp code
+@cindex Lispコードのロード
+@cindex ロード（Lispコード）
+
+@c   Lisp code for Emacs editing commands is stored in files whose names
+@c conventionally end in @file{.el}.  This ending tells Emacs to edit them in
+@c Emacs-Lisp mode (@pxref{Executing Lisp}).
+Emacs編集コマンドのLispコードは，習慣的に@file{.el}で終る名前の
+ファイルに格納されています．
+これらの拡張子は，
+emacs-lispモードで編集するようにEmacsに指示します
+（@pxref{Executing Lisp}）．
+
+@findex load-file
+@c   To execute a file of Emacs Lisp code, use @kbd{M-x load-file}.  This
+@c command reads a file name using the minibuffer and then executes the
+@c contents of that file as Lisp code.  It is not necessary to visit the
+@c file first; in any case, this command reads the file as found on disk,
+@c not text in an Emacs buffer.
+Emacs Lispコードのファイルを実行するには，
+@kbd{M-x load-file}を使います．
+このコマンドは，ミニバッファでファイル名を読み取り，
+そのファイルの内容をLispコードとして実行します．
+あらかじめファイルを訪問しておく必要はありません．
+いずれにしても，このコマンドはディスク上のファイルを読むのであって，
+Emacsバッファのテキストを読むのではありません．
+
+@findex load
+@findex load-library
+@c   Once a file of Lisp code is installed in the Emacs Lisp library
+@c directories, users can load it using @kbd{M-x load-library}.  Programs can
+@c load it by calling @code{load-library}, or with @code{load}, a more primitive
+@c function that is similar but accepts some additional arguments.
+LispコードのファイルをEmacs Lispライブラリのディレクトリに置いておけば，
+そのファイルは@kbd{M-x load-library}でロードできます．
+プログラムからは，@code{load-library}を呼んでロードするか，あるいは，
+より基本的な類似の関数で余分な引数も指定できる@code{load}でロードします．
+
+@c   @kbd{M-x load-library} differs from @kbd{M-x load-file} in that it
+@c searches a sequence of directories and tries three file names in each
+@c directory.  Suppose your argument is @var{lib}; the three names are
+@c @file{@var{lib}.elc}, @file{@var{lib}.el}, and lastly just
+@c @file{@var{lib}}.  If @file{@var{lib}.elc} exists, it is by convention
+@c the result of compiling @file{@var{lib}.el}; it is better to load the
+@c compiled file, since it will load and run faster.
+@kbd{M-x load-library}が@kbd{M-x load-file}と異なる点は，
+一連のディレクトリについて3つのファイル名を順に調べるということです．
+引数が@var{lib}だとすると，3つのファイル名とは，
+@file{@var{lib}.elc}，@file{@var{lib}.el}，そして最後に@file{@var{lib}}です．
+@file{@var{lib}.elc}というファイルが存在すれば，
+これは習慣として@file{@var{lib}.el}をコンパイルしたものです．
+コンパイル済みのファイルはロードと実行が速いので，
+こちらをロードするほうが有利です．
+
+@c   If @code{load-library} finds that @file{@var{lib}.el} is newer than
+@c @file{@var{lib}.elc} file, it prints a warning, because it's likely that
+@c somebody made changes to the @file{.el} file and forgot to recompile
+@c it.
+@code{load-library}が@file{@var{lib}.elc}よりも新しい
+@file{@var{lib}.el}をみつけると，警告を出力します．
+というのは，@file{.el}ファイルを変更後に再コンパイルし忘れている
+可能性があるからです．
+
+@c   Because the argument to @code{load-library} is usually not in itself
+@c a valid file name, file name completion is not available.  Indeed, when
+@c using this command, you usually do not know exactly what file name
+@c will be used.
+@code{load-library}の引数は，通常，それ自体では
+正しいファイル名でないことが多いため，ファイル名の補完はできません．
+もちろん，このコマンドを使うとき，
+指定すべき正確なファイル名を普通は知らないでしょうが．
+
+@vindex load-path
+@c   The sequence of directories searched by @kbd{M-x load-library} is
+@c specified by the variable @code{load-path}, a list of strings that are
+@c directory names.  The default value of the list contains the directory where
+@c the Lisp code for Emacs itself is stored.  If you have libraries of
+@c your own, put them in a single directory and add that directory
+@c to @code{load-path}.  @code{nil} in this list stands for the current default
+@c directory, but it is probably not a good idea to put @code{nil} in the
+@c list.  If you find yourself wishing that @code{nil} were in the list,
+@c most likely what you really want to do is use @kbd{M-x load-file}
+@c this once.
+@kbd{M-x load-library}が探索するディレクトリの順番は，
+変数@code{load-path}で指定します．
+その値は，ディレクトリ名の文字列から成るリストです．
+リストのデフォルト値には，Emacs自身のLispコードを収めたディレクトリが
+含まれます．
+個人用のLispライブラリがあるならば，それらを1つのディレクトリにまとめ，
+そのディレクトリ名を@code{load-path}に追加してください．
+リスト内の@code{nil}はカレントデフォルトディレクトリを表しますが，
+リストに@code{nil}を加えることはあまり勧められません．
+リストに@code{nil}が本当に必要だと感じたときには，
+それについては@kbd{M-x load-file}を実行するのでは
+いけないだろうかと考えてみてください．
+
+@c @cindex autoload
+@cindex 自動ロード
+@c   Often you do not have to give any command to load a library, because
+@c the commands defined in the library are set up to @dfn{autoload} that
+@c library.  Trying to run any of those commands calls @code{load} to load
+@c the library; this replaces the autoload definitions with the real ones
+@c from the library.
+ライブラリの中で定義されているコマンドに対しては，
+そのライブラリを@dfn{自動的にロード}（autoload）するように
+設定されているので，ほとんどの場合，ライブラリをロードするコマンドを
+指定する必要はないでしょう．
+ライブラリをロードするために@code{load}を呼び出すようなコマンドを1つ
+試してみてください．
+こうすると，「自動的にロードする」という定義が
+ライブラリ内の実際の定義で置き換わります．
+
+@c @cindex byte code
+@cindex バイトコード
+@c   Emacs Lisp code can be compiled into byte-code which loads faster,
+@c takes up less space when loaded, and executes faster.  @xref{Byte
+@c Compilation,, Byte Compilation, elisp, the Emacs Lisp Reference Manual}.
+@c By convention, the compiled code for a library goes in a separate file
+@c whose name consists of the library source file with @samp{c} appended.
+@c Thus, the compiled code for @file{foo.el} goes in @file{foo.elc}.
+@c That's why @code{load-library} searches for @samp{.elc} files first.
+Emacs Lispコードはバイトコードにコンパイルできます．
+コンパイルすると，ロードが速くなり，ロードしても必要な記憶容量が少なくなり，
+実行も速くなります．
+@xref{Byte Compilation,, バイトコンパイル, elisp,
+Emacs Lisp リファレンスマニュアル}．
+習慣として，ライブラリのコンパイル済みのコードは，
+ライブラリのソースファイル名に@samp{c}を付けた名前の
+別のファイルに入ります．
+したがって，@file{foo.el}のコンパイル済みのコードは，@file{foo.elc}に入ります．
+これが，@code{load-library}はまず@samp{.elc}というファイルを探す理由です．
+
+@node Lisp Eval
+@c @section Evaluating Emacs-Lisp Expressions
+@section Emacs Lisp式の評価
+@c @cindex Emacs-Lisp mode
+@cindex emacs-lispモード
+@c @cindex mode, Emacs-Lisp
+@cindex モード，Emacs-Lisp
+
+@findex emacs-lisp-mode
+@c   Lisp programs intended to be run in Emacs should be edited in
+@c Emacs-Lisp mode; this happens automatically for file names ending in
+@c @file{.el}.  By contrast, Lisp mode itself is used for editing Lisp
+@c programs intended for other Lisp systems.  To switch to Emacs-Lisp mode
+@c explicitly, use the command @kbd{M-x emacs-lisp-mode}.
+Emacs内で動かすつもりのLispプログラムは，emacs-lispモードで編集しましょう．
+ファイル名が@file{.el}で終っているファイルを編集すると，
+自動的にこのモードになります．
+一方，lispモードは，他のLispシステム向けのLispプログラムを編集する
+ためのモードです．
+陽にemacs-lispモードに移るには，コマンド@kbd{M-x emacs-lisp-mode}を使います．
+
+@c   For testing of Lisp programs to run in Emacs, it is often useful to
+@c evaluate part of the program as it is found in the Emacs buffer.  For
+@c example, after changing the text of a Lisp function definition,
+@c evaluating the definition installs the change for future calls to the
+@c function.  Evaluation of Lisp expressions is also useful in any kind of
+@c editing, for invoking noninteractive functions (functions that are
+@c not commands).
+Emacs内で動くプログラムのテストには，
+Emacsバッファにあるプログラムの一部を評価すると便利です．
+たとえば，Lispの関数定義のテキストを変更してからその定義を評価すると，
+それ以降にその関数を呼び出すと使われるようにインストールされます．
+Lisp式を評価すると非対話的な（コマンドではない）関数を起動できるので，
+どんな種類の編集作業にも便利です．
+
+@table @kbd
+@item M-:
+@c Read a single Lisp expression in the minibuffer, evaluate it, and print
+@c the value in the echo area (@code{eval-expression}).
+ミニバッファで1つのLisp式を読み取り，それを評価し，
+その値をエコー領域に表示する
+（@code{eval-expression}）．
+@item C-x C-e
+@c Evaluate the Lisp expression before point, and print the value in the
+@c echo area (@code{eval-last-sexp}).
+ポイントの直前のLisp式を評価し，その値をエコー領域に表示する
+（@code{eval-last-sexp}）．
+@item C-M-x
+@c Evaluate the defun containing or after point, and print the value in
+@c the echo area (@code{eval-defun}).
+ポイントを含むか直後にある関数定義（defun）を評価し，
+その値をエコー領域に表示する（@code{eval-defun}）．
+@item M-x eval-region
+@c Evaluate all the Lisp expressions in the region.
+リージョン内のすべてのLisp式を評価する．
+@item M-x eval-current-buffer
+@c Evaluate all the Lisp expressions in the buffer.
+バッファ内のすべてのLisp式を評価する．
+@end table
+
+@kindex M-:
+@findex eval-expression
+@c   @kbd{M-:} (@code{eval-expression}) is the most basic command for evaluating
+@c a Lisp expression interactively.  It reads the expression using the
+@c minibuffer, so you can execute any expression on a buffer regardless of
+@c what the buffer contains.  When the expression is evaluated, the current
+@c buffer is once again the buffer that was current when @kbd{M-:} was
+@c typed.
+@kbd{M-:}（@code{eval-expression}）は，Lisp式を対話的に評価する
+もっとも基本的なコマンドです．
+これは，ミニバッファで式を1つ読み取りますから，
+バッファの内容に関係なくバッファ内でどんな式でも実行できます．
+式が評価されたあとは，
+@kbd{M-:}を打鍵したときのカレントバッファが，ふたたびカレントバッファになります．
+
+@c @kindex C-M-x @r{(Emacs-Lisp mode)}
+@kindex C-M-x @r{（emacs-lispモード）}
+@findex eval-defun
+@c   In Emacs-Lisp mode, the key @kbd{C-M-x} is bound to the command
+@c @code{eval-defun}, which parses the defun containing or following point
+@c as a Lisp expression and evaluates it.  The value is printed in the echo
+@c area.  This command is convenient for installing in the Lisp environment
+@c changes that you have just made in the text of a function definition.
+emacs-lispモードでは，キー@kbd{C-M-x}はコマンド@code{eval-defun}にバインド
+されています．
+このコマンドはポイントを含むか直後にある関数定義を
+Lisp式として解析し評価します．
+その値はエコー領域に表示されます．
+このコマンドは，関数定義のテキストの変更を
+Lisp環境に反映するのに便利です．
+
+@c   @kbd{C-M-x} treats @code{defvar} expressions specially.  Normally,
+@c evaluating a @code{defvar} expression does nothing if the variable it
+@c defines already has a value.  But @kbd{C-M-x} unconditionally resets the
+@c variable to the initial value specified in the @code{defvar} expression.
+@c This special feature is convenient for debugging Lisp programs.
+@kbd{C-M-x}は@code{defvar}式を特別扱いします．
+通常，変数にすでに値が定義されている場合には，
+@code{defvar}式を評価しても何もしません．
+しかし，@kbd{C-M-x}は，@code{defvar}式で指定されている
+初期値に変数の値を戻します．
+この特別な機能は，Lispプログラムをデバッグするときに便利です．
+
+@kindex C-x C-e
+@findex eval-last-sexp
+@c   The command @kbd{C-x C-e} (@code{eval-last-sexp}) evaluates the Lisp
+@c expression preceding point in the buffer, and displays the value in the
+@c echo area.  It is available in all major modes, not just Emacs-Lisp
+@c mode.  It does not treat @code{defvar} specially.
+コマンド@kbd{C-x C-e}（@code{eval-last-sexp}）は，
+ポイントのまえにあるLisp式を評価し
+その値をエコー領域に表示します．
+このコマンドはemacs-lispモードだけでなく，
+すべてのメジャーモードで使えます．
+このコマンドは，@code{defvar}を特別扱いしません．
+
+@c   If @kbd{C-M-x}, @kbd{C-x C-e}, or @kbd{M-:} is given a numeric
+@c argument, it inserts the value into the current buffer at point, rather
+@c than displaying it in the echo area.  The argument's value does not
+@c matter.
+@kbd{C-M-x}，@kbd{C-x C-e}，@kbd{M-:}に数引数を指定すると，
+値をエコー領域に表示するかわりにカレントバッファのポイント位置に挿入します．
+引数の値は関係ありません．
+
+@findex eval-region
+@findex eval-current-buffer
+@c   The most general command for evaluating Lisp expressions from a buffer
+@c is @code{eval-region}.  @kbd{M-x eval-region} parses the text of the
+@c region as one or more Lisp expressions, evaluating them one by one.
+@c @kbd{M-x eval-current-buffer} is similar but evaluates the entire
+@c buffer.  This is a reasonable way to install the contents of a file of
+@c Lisp code that you are just ready to test.  Later, as you find bugs and
+@c change individual functions, use @kbd{C-M-x} on each function that you
+@c change.  This keeps the Lisp world in step with the source file.
+バッファでLisp式を評価するもっとも一般的なコマンドは@code{eval-region}です．
+@kbd{M-x eval-region}は，リージョン内の1つ以上のLisp式を解析して，
+それらを1つずつ順に評価します．
+@kbd{M-x eval-current-buffer}も同様ですが，バッファ全体を評価します．
+これは，
+テスト準備が整ったLispコードのファイルの内容を取り込むうまい方法です．
+個々の関数のバグを発見して修正したら，
+変更した関数それぞれに@kbd{C-M-x}を使います．
+これによって，Lispの環境とソースファイルが一致します．
+
+@node Lisp Interaction
+@c @section Lisp Interaction Buffers
+@section lisp対話バッファ @emph{(2004/08/16)}
+
+@c   The buffer @samp{*scratch*} which is selected when Emacs starts up is
+@c provided for evaluating Lisp expressions interactively inside Emacs.
+Emacsが動き始めたときに選択されるバッファ@samp{*scratch*}は，
+Emacs内でLisp式を対話的に評価するためのものです．
+
+@c   The simplest way to use the @samp{*scratch*} buffer is to insert Lisp
+@c expressions and type @kbd{C-j} after each expression.  This command
+@c reads the Lisp expression before point, evaluates it, and inserts the
+@c value in printed representation before point.  The result is a complete
+@c typescript of the expressions you have evaluated and their values.
+@samp{*scratch*}バッファを使うもっとも簡単な方法は，
+Lisp式を挿入してから各式の末尾で@kbd{C-j}と打つことです．
+このコマンドは，ポイントの直前のLisp式を読み取り，
+それを評価し，その値を表示形式でポイントのまえに挿入します．
+この結果は，評価した式とその値の完全なtypescript
+@footnote{【訳注】
+入力と出力をすべて記録した対話記録}です．
+
+@c   The @samp{*scratch*} buffer's major mode is Lisp Interaction mode, which
+@c is the same as Emacs-Lisp mode except for the binding of @kbd{C-j}.
+@samp{*scratch*}バッファのメジャーモードは
+lisp対話（lisp interaction）モードであり，
+@kbd{C-j}のバインディングを除けば
+emacs-lispモードと同じです．
+
+@findex lisp-interaction-mode
+@c   The rationale for this feature is that Emacs must have a buffer when
+@c it starts up, but that buffer is not useful for editing files since a
+@c new buffer is made for every file that you visit.  The Lisp interpreter
+@c typescript is the most useful thing I can think of for the initial
+@c buffer to do.  Type @kbd{M-x lisp-interaction-mode} to put the current
+@c buffer in Lisp Interaction mode.
+この機能が存在する理由を説明しましょう．
+Emacsが実行を開始すると何かしらバッファが必要です．
+しかし，ファイルを訪問するたびに新たにバッファが作られるので，
+このバッファはファイルを編集するのには適しません．
+最初のバッファをLispインタープリタのtypescriptにするというのが
+作者が考えついたもっともよい方法でした．
+@kbd{M-x lisp-interaction-mode}と打つと，
+カレントバッファはlisp対話（lisp interaction）モードになります．
+
+@findex ielm
+@c   An alternative way of evaluating Emacs Lisp expressions interactively
+@c is to use Inferior Emacs-Lisp mode, which provides an interface rather
+@c like Shell mode (@pxref{Shell Mode}) for evaluating Emacs Lisp
+@c expressions.  Type @kbd{M-x ielm} to create an @samp{*ielm*} buffer
+@c which uses this mode.
+Emacs Lisp式を対話的に評価する別の方法は，
+下位emacs-lispモードを使うことです．
+このモードは，シェル（shell）モード（@pxref{Shell Mode}）に似た
+インターフェイスでEmacs Lisp式を評価できます．
+@kbd{M-x ielm}と打てば，
+下位emacs-lispモードを使う@samp{*ielm*}バッファが作られます．
+
+@node External Lisp
+@c @section Running an External Lisp
+@section 外部Lispの実行 @emph{(2004/08/16)}
+
+@c   Emacs has facilities for running programs in other Lisp systems.  You can
+@c run a Lisp process as an inferior of Emacs, and pass expressions to it to
+@c be evaluated.  You can also pass changed function definitions directly from
+@c the Emacs buffers in which you edit the Lisp programs to the inferior Lisp
+@c process.
+Emacsには他のLispシステム上でプログラムを実行する機能があります．
+LispプロセスをEmacsの下位プロセスとして実行し，
+それに式を渡して評価させることができます．
+また，Lispプログラムを編集するEmacsバッファの中で変更した
+関数定義をそのまま下位のLispプロセスに渡すこともできます．
+
+@findex run-lisp
+@vindex inferior-lisp-program
+@kindex C-x C-z
+@c   To run an inferior Lisp process, type @kbd{M-x run-lisp}.  This runs
+@c the program named @code{lisp}, the same program you would run by typing
+@c @code{lisp} as a shell command, with both input and output going through
+@c an Emacs buffer named @samp{*lisp*}.  That is to say, any ``terminal
+@c output'' from Lisp will go into the buffer, advancing point, and any
+@c ``terminal input'' for Lisp comes from text in the buffer.  (You can
+@c change the name of the Lisp executable file by setting the variable
+@c @code{inferior-lisp-program}.)
+下位のLispプロセスを実行するには，@kbd{M-x run-lisp}と打ちます．
+このコマンドは，シェルコマンドとして@code{lisp}と入力するのと同じ
+@code{lisp}という名前のプログラムを実行し，
+プログラムの入出力は@samp{*lisp*}という名前のEmacsバッファを
+介してやりとりされます．
+つまり，Lispからの『端末出力』はバッファに入りポイントを進め，
+Lispへの『端末入力』はバッファのテキストから取られます．
+（実行したいLisp実行ファイルの名前を変えるには，
+変数@code{inferior-lisp-program}を設定する．）
+
+@c   To give input to Lisp, go to the end of the buffer and type the input,
+@c terminated by @key{RET}.  The @samp{*lisp*} buffer is in Inferior Lisp
+@c mode, which combines the special characteristics of Lisp mode with most
+@c of the features of Shell mode (@pxref{Shell Mode}).  The definition of
+@c @key{RET} to send a line to a subprocess is one of the features of Shell
+@c mode.
+Lispに入力を与えるには，バッファの末尾に移動してから入力を打鍵し，
+最後に@key{RET}を打ちます．
+@samp{*lisp*}バッファは下位lisp（inferior lisp）モードになっていて，
+シェル（shell）モード（@pxref{Shell Mode}）
+のほとんどの機能にlispモードの特別な特性を組み合わせています．
+サブプロセスに1行を送るという@key{RET}の定義は，
+シェル（shell）モードの機能の1つです．
+
+@findex lisp-mode
+@c   For the source files of programs to run in external Lisps, use Lisp
+@c mode.  This mode can be selected with @kbd{M-x lisp-mode}, and is used
+@c automatically for files whose names end in @file{.l}, @file{.lsp}, or
+@c @file{.lisp}, as most Lisp systems usually expect.
+外部Lispで実行するプログラムのソースファイルにはlispモードを使います．
+このモードは@kbd{M-x lisp-mode}で選択できます．
+また，ほとんどのLispシステムで使われる
+@file{.l}@footnote{【訳注】
+この拡張子はlexやflexのソースファイルにも使われる．}
+や@file{.lsp}や@file{.lisp}で終る名前のファイルには
+このモードが自動的に使われます．
+
+@c @kindex C-M-x @r{(Lisp mode)}
+@kindex C-M-x @r{（lispモード）}
+@findex lisp-eval-defun
+@c   When you edit a function in a Lisp program you are running, the easiest
+@c way to send the changed definition to the inferior Lisp process is the key
+@c @kbd{C-M-x}.  In Lisp mode, this runs the function @code{lisp-eval-defun},
+@c which finds the defun around or following point and sends it as input to
+@c the Lisp process.  (Emacs can send input to any inferior process regardless
+@c of what buffer is current.)
+実行中のLispプログラムの関数を編集しているとき，
+変更した定義を下位のLispプロセスに送るもっとも簡単な方法は
+キー@kbd{C-M-x}です．
+lispモードでは，このキーは関数@code{lisp-eval-defun}を実行します．
+この関数は，ポイントの周りや直後の関数定義を探し，
+それをLispプロセスの入力へ送ります．
+（Emacsはカレントバッファが何であるかに関わりなく，
+どんな下位プロセスにも入力を送ることができる．）
+
+@c   Contrast the meanings of @kbd{C-M-x} in Lisp mode (for editing programs
+@c to be run in another Lisp system) and Emacs-Lisp mode (for editing Lisp
+@c programs to be run in Emacs): in both modes it has the effect of installing
+@c the function definition that point is in, but the way of doing so is
+@c different according to where the relevant Lisp environment is found.
+@c @xref{Executing Lisp}.
+@kbd{C-M-x}コマンドの
+（任意のLispシステムで実行するプログラムの編集用）lispモードでの意味と
+（Emacsで実行するLispプログラムの編集用）emacs-lispモードでの意味を
+比較してみましょう．
+どちらのモードでもポイントを含む関数定義をインストールしますが，
+関連するLisp環境がどこにあるかに応じて，その方法は異なります．
+@xref{Executing Lisp}．

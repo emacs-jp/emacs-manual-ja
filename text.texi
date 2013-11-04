@@ -1,0 +1,3407 @@
+@c =============================================================
+@c = 元 翻 訳: 赤池英夫＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Text, Programs, Indentation, Top
+@c @chapter Commands for Human Languages
+@chapter 自然言語用のコマンド
+@c @cindex text
+@cindex テキスト
+@c @cindex manipulating text
+@cindex テキストの操作
+
+@c   The term @dfn{text} has two widespread meanings in our area of the
+@c computer field.  One is data that is a sequence of characters.  Any file
+@c that you edit with Emacs is text, in this sense of the word.  The other
+@c meaning is more restrictive: a sequence of characters in a human language
+@c for humans to read (possibly after processing by a text formatter), as
+@c opposed to a program or commands for a program.
+コンピュータの分野では、@dfn{テキスト}（text）という用語には
+2つの大きな意味があります。
+1つは、文字の列から成るデータのことです。
+この意味からすれば、Emacsで編集するどんなファイルもテキストです。
+もう1つの意味はより限定されていて、人間が読む自然言語の
+（テキスト整形処理後の場合もあるが）文字の列のことで、
+プログラムやプログラムに与えるコマンドと対比されます。
+
+@c   Human languages have syntactic/stylistic conventions that can be
+@c supported or used to advantage by editor commands: conventions involving
+@c words, sentences, paragraphs, and capital letters.  This chapter
+@c describes Emacs commands for all of these things.  There are also
+@c commands for @dfn{filling}, which means rearranging the lines of a
+@c paragraph to be approximately equal in length.  The commands for moving
+@c over and killing words, sentences and paragraphs, while intended
+@c primarily for editing text, are also often useful for editing programs.
+自然言語には、エディタコマンドで支援したり利用したりできる構文的／様式的な
+約束事があります。
+たとえば、単語、文、段落、大文字といったものです。
+本章では、これらを扱うEmacsコマンドについて述べます。
+また、@dfn{詰め込み}（filling）、つまり、
+段落の各行がほぼ同じ長さになるように再配置し直すコマンドについてもふれます。
+単語、文、段落を横断してポイントを移動したり、
+それらをキルするコマンドは、
+自然言語テキストの編集を意図したものですが、プログラムの編集にも役立ちます。
+
+@c   Emacs has several major modes for editing human-language text.  If the
+@c file contains text pure and simple, use Text mode, which customizes
+@c Emacs in small ways for the syntactic conventions of text.  Outline mode
+@c provides special commands for operating on text with an outline
+@c structure.
+Emacsには、自然言語テキストの編集用のメジャーモードがいくつかあります。
+扱うテキストが純粋にテキストだけで単純なものであれば、
+テキスト（text）モードを使いましょう。
+これは、自然言語テキストの構文上の約束事を扱えるように、
+Emacsを少しだけカスタマイズしてあります。
+アウトライン（outline）モードには、
+アウトライン構造を持つテキストを操作する特別なコマンドがあります。
+@iftex
+@c @xref{Outline Mode}.
+@xref{Outline Mode}。
+@end iftex
+
+@c   For text which contains embedded commands for text formatters, Emacs
+@c has other major modes, each for a particular text formatter.  Thus, for
+@c input to @TeX{}, you would use @TeX{}
+テキスト整形コマンドを埋め込んだテキストに対しては、
+特定のテキスト清書系ごとに別のメジャーモードが用意してあります。
+たとえば、@TeX{}用には@TeX{}
+@iftex
+@c mode (@pxref{TeX Mode}).
+モード（@pxref{TeX Mode}）がありますし、
+@end iftex
+@ifinfo
+@c mode.
+モードがあります。
+@end ifinfo
+@c For input to nroff, use Nroff mode.
+nroff用にはnroffモードがあります。
+
+@c   Instead of using a text formatter, you can edit formatted text in
+@c WYSIWYG style (``what you see is what you get''), with Enriched mode.
+@c Then the formatting appears on the screen in Emacs while you edit.
+テキスト清書系を使うかわりにエンリッチ（enriched）モードを使用すれば、
+WYSIWYG（what you see is what you get、『見たとおりを得る』）スタイルで
+整形済みテキストを編集することもできます。
+つまり、Emacsの画面上で整形結果を見ながら編集できるわけです。
+@iftex
+@c @xref{Formatted Text}.
+@xref{Formatted Text}。
+@end iftex
+
+@menu
+* Words::	        Moving over and killing words.
+* Sentences::	        Moving over and killing sentences.
+* Paragraphs::	        Moving over paragraphs.
+* Pages::	        Moving over pages.
+* Filling::	        Filling or justifying text.
+* Case::	        Changing the case of text.
+* Text Mode::	        The major modes for editing text files.
+* Outline Mode::        Editing outlines.
+* TeX Mode::	        Editing input to the formatter TeX.
+* Nroff Mode::	        Editing input to the formatter nroff.
+* Formatted Text::      Editing formatted text directly in WYSIWYG fashion.
+@end menu
+
+@node Words
+@c @section Words
+@section 単語
+@c @cindex words
+@cindex 単語
+@c @cindex Meta commands and words
+@cindex メタコマンドと単語
+
+@c   Emacs has commands for moving over or operating on words.  By convention,
+@c the keys for them are all Meta characters.
+Emacsには、単語を横断してポイントを移動したり、
+単語を操作対象とするコマンドがあります。
+慣例として、これらのコマンドのキーはメタ文字です。
+
+@c widecommands
+@table @kbd
+@item M-f
+@c Move forward over a word (@code{forward-word}).
+単語を横断してポイントを前向きに移動する（@code{forward-word}）。
+@item M-b
+@c Move backward over a word (@code{backward-word}).
+単語を横断してポイントを後向きに移動する（@code{backward-word}）。
+@item M-d
+@c Kill up to the end of a word (@code{kill-word}).
+ポイント位置から単語の末尾までをキルする（@code{kill-word}）。
+@item M-@key{DEL}
+@c Kill back to the beginning of a word (@code{backward-kill-word}).
+ポイント位置から単語の先頭までを後向きにキルする
+（@code{backward-kill-word}）。
+@item M-@@
+@c Mark the end of the next word (@code{mark-word}).
+つぎの単語の末尾にマークを設定する（@code{mark-word}）。
+@item M-t
+@c Transpose two words or drag a word across other words
+@c (@code{transpose-words}).
+隣接した2つの単語を入れ替える。
+あるいは、単語を複数の単語を飛び越して移す。
+（@code{transpose-words}）。
+@end table
+
+@c   Notice how these keys form a series that parallels the character-based
+@c @kbd{C-f}, @kbd{C-b}, @kbd{C-d}, @key{DEL} and @kbd{C-t}.  @kbd{M-@@} is
+@c cognate to @kbd{C-@@}, which is an alias for @kbd{C-@key{SPC}}.
+これらのキーは、文字単位の操作コマンド、@kbd{C-f}、@kbd{C-b}、
+@kbd{C-d}、@key{DEL}、@kbd{C-t}に対応していることに注目してください。
+@kbd{M-@@}も、@kbd{C-@key{SPC}}の別名である@kbd{C-@@}に対応しています。
+
+@kindex M-f
+@kindex M-b
+@findex forward-word
+@findex backward-word
+@c   The commands @kbd{M-f} (@code{forward-word}) and @kbd{M-b}
+@c (@code{backward-word}) move forward and backward over words.  These
+@c Meta characters are thus analogous to the corresponding control
+@c characters, @kbd{C-f} and @kbd{C-b}, which move over single characters
+@c in the text.  The analogy extends to numeric arguments, which serve as
+@c repeat counts.  @kbd{M-f} with a negative argument moves backward, and
+@c @kbd{M-b} with a negative argument moves forward.  Forward motion
+@c stops right after the last letter of the word, while backward motion
+@c stops right before the first letter.@refill
+コマンド@kbd{M-f}（@code{forward-word}）と
+@kbd{M-b}（@code{backward-word}）は、
+単語を横断してポイントを前向きに（末尾に向かって）
+あるいは後向きに（先頭に向かって）移動します。
+これらのメタ文字は、文字単位でポイントを前後に移動する
+コントロール文字@kbd{C-f}や@kbd{C-b}に類似しています。
+この類似性は、数引数を反復回数として扱うことにもおよびます。
+負の引数を指定すると、@kbd{M-f}は後向きに移動し、
+@kbd{M-b}は前向きに移動します。
+前向き移動では単語の最後の文字の直後に、
+後向き移動では最初の文字の直前に、ポイントを移動します。
+@footnote{【訳注】なお、移動方向に単語構成文字がない場合には、
+それらを飛び越えてポイントを移動します。}
+
+@kindex M-d
+@findex kill-word
+@c   @kbd{M-d} (@code{kill-word}) kills the word after point.  To be
+@c precise, it kills everything from point to the place @kbd{M-f} would
+@c move to.  Thus, if point is in the middle of a word, @kbd{M-d} kills
+@c just the part after point.  If some punctuation comes between point and the
+@c next word, it is killed along with the word.  (If you wish to kill only the
+@c next word but not the punctuation before it, simply do @kbd{M-f} to get
+@c the end, and kill the word backwards with @kbd{M-@key{DEL}}.)
+@c @kbd{M-d} takes arguments just like @kbd{M-f}.
+@kbd{M-d}（@code{kill-word}）はポイントの直後の単語をキルします。
+正確にいえば、ポイント位置から@kbd{M-f}による移動位置までの全文字をキルします。
+ポイントが単語の途中にあれば、ポイントよりあとの部分だけをキルします。
+また、ポイントとつぎの単語のあいだに句読点があれば、
+単語と一緒にそれらもキルします。
+（つぎの単語だけをキルしてそのまえにある句読点を残したければ、
+@kbd{M-f}でつぎの単語の末尾に移動してから、
+@kbd{M-@key{DEL}}でその単語を後向きにキルする。）
+@kbd{M-d}は、引数を@kbd{M-f}と同様に解釈します。
+
+@findex backward-kill-word
+@kindex M-DEL
+@c   @kbd{M-@key{DEL}} (@code{backward-kill-word}) kills the word before
+@c point.  It kills everything from point back to where @kbd{M-b} would
+@c move to.  If point is after the space in @w{@samp{FOO, BAR}}, then
+@c @w{@samp{FOO, }} is killed.  (If you wish to kill just @samp{FOO}, and
+@c not the comma and the space, use @kbd{M-b M-d} instead of
+@c @kbd{M-@key{DEL}}.)
+@kbd{M-@key{DEL}}（@code{backward-kill-word}）は、
+ポイントの直前の単語をキルします。
+ポイント位置から@kbd{M-b}による移動位置までの全文字をキルします。
+ポイントが@w{@samp{FOO, BAR}}の空白の直後にあるとすれば、
+@w{@samp{FOO, }}をキルします。
+（@samp{FOO}だけをキルしてコンマと空白を残したければ、
+@kbd{M-@key{DEL}}のかわりに@kbd{M-b M-d}を使う。）
+
+@kindex M-t
+@findex transpose-words
+@c   @kbd{M-t} (@code{transpose-words}) exchanges the word before or
+@c containing point with the following word.  The delimiter characters between
+@c the words do not move.  For example, @w{@samp{FOO, BAR}} transposes into
+@c @w{@samp{BAR, FOO}} rather than @samp{@w{BAR FOO,}}.  @xref{Transpose}, for
+@c more on transposition and on arguments to transposition commands.
+@kbd{M-t}（@code{transpose-words}）は、
+ポイントの直前にある単語あるいはポイントを含む単語と、
+後続の単語とを入れ替えます。
+単語のあいだにある区切り文字は動きせん。
+たとえば、@w{@samp{FOO, BAR}}を入れ替えると、
+@samp{@w{BAR FOO,}}ではなく@w{@samp{BAR, FOO}}となります。
+入れ替えや入れ替えコマンドの引数については、
+@xref{Transpose}。
+
+@kindex M-@@
+@findex mark-word
+@c   To operate on the next @var{n} words with an operation which applies
+@c between point and mark, you can either set the mark at point and then move
+@c over the words, or you can use the command @kbd{M-@@} (@code{mark-word})
+@c which does not move point, but sets the mark where @kbd{M-f} would move
+@c to.  @kbd{M-@@} accepts a numeric argument that says how many words to
+@c scan for the place to put the mark.  In Transient Mark mode, this command
+@c activates the mark.
+ポイントとマークのあいだに適用される操作を後続の@var{n}個の単語に適用する方法は、
+2つあります。
+ポイント位置にマークを設定してから、単語を横断してポイントを移動します。
+あるいは、コマンド@kbd{M-@@}（@code{mark-word}）を使います。
+このコマンドは、ポイントを移動せずに、
+@kbd{M-f}による移動位置にマークを設定します。
+@kbd{M-@@}には、何単語先にマークを設定するかを数引数で指定できます。
+暫定マーク（transient-mark）モードでは、このコマンドはマークを活性にします。
+
+@c   The word commands' understanding of syntax is completely controlled by
+@c the syntax table.  Any character can, for example, be declared to be a word
+@c delimiter.  @xref{Syntax}.
+単語操作コマンドが理解する構文は、すべて構文テーブルで制御されます。
+たとえば、任意の文字を単語の区切り文字として宣言できます。
+@xref{Syntax}。
+
+@node Sentences
+@c @section Sentences
+@section 文
+@c @cindex sentences
+@cindex 文
+@c @cindex manipulating sentences
+@cindex 文の操作
+
+@c   The Emacs commands for manipulating sentences and paragraphs are mostly
+@c on Meta keys, so as to be like the word-handling commands.
+Emacsの文／段落操作コマンドは、単語操作コマンドと同じく、
+ほとんどメタキーです。
+
+@table @kbd
+@item M-a
+@c Move back to the beginning of the sentence (@code{backward-sentence}).
+文の先頭にポイントを後向きに移動する（@code{backward-sentence}）。
+@item M-e
+@c Move forward to the end of the sentence (@code{forward-sentence}).
+文の末尾にポイントを前向きに移動する（@code{forward-sentence}）。
+@item M-k
+@c Kill forward to the end of the sentence (@code{kill-sentence}).
+ポイント位置から文末までを前向きにキルする
+（@code{kill-sentence}）。
+@item C-x @key{DEL}
+@c Kill back to the beginning of the sentence (@code{backward-kill-sentence}).
+ポイント位置から文頭までを後向きにキルする
+（@code{backward-kill-sentence}）。
+@end table
+
+@kindex M-a
+@kindex M-e
+@findex backward-sentence
+@findex forward-sentence
+@c   The commands @kbd{M-a} and @kbd{M-e} (@code{backward-sentence} and
+@c @code{forward-sentence}) move to the beginning and end of the current
+@c sentence, respectively.  They were chosen to resemble @kbd{C-a} and
+@c @kbd{C-e}, which move to the beginning and end of a line.  Unlike them,
+@c @kbd{M-a} and @kbd{M-e} if repeated or given numeric arguments move over
+@c successive sentences.
+コマンド@kbd{M-a}と@kbd{M-e}
+（@code{backward-sentence}と@code{forward-sentence}）は、
+それぞれ、ポイントを含む文の先頭あるいは末尾にポイントを移動します。
+これらは、行頭や行末にポイントを移動するコマンド@kbd{C-a}と@kbd{C-e}に
+類似するように選ばれました。
+ただし、@kbd{M-a}や@kbd{M-e}を反復して使ったり数引数を指定すると、
+ポイントは連続した文を横断して移動する点が違います。
+
+@c   Moving backward over a sentence places point just before the first
+@c character of the sentence; moving forward places point right after the
+@c punctuation that ends the sentence.  Neither one moves over the
+@c whitespace at the sentence boundary.
+（文頭に向かって）後向きに移動するときは、
+文の先頭の文字の直前にポイントを置きます。
+（文末に向かって）前向きに移動するときは、
+文を終える句読点の直後に置きます。
+どちらのコマンドも、文と文の境界にある白文字に
+ポイントを移動することはありません。
+
+@kindex M-k
+@kindex C-x DEL
+@findex kill-sentence
+@findex backward-kill-sentence
+@c   Just as @kbd{C-a} and @kbd{C-e} have a kill command, @kbd{C-k}, to go
+@c with them, so @kbd{M-a} and @kbd{M-e} have a corresponding kill command
+@c @kbd{M-k} (@code{kill-sentence}) which kills from point to the end of
+@c the sentence.  With minus one as an argument it kills back to the
+@c beginning of the sentence.  Larger arguments serve as a repeat count.
+@c There is also a command, @kbd{C-x @key{DEL}}
+@c (@code{backward-kill-sentence}), for killing back to the beginning of a
+@c sentence.  This command is useful when you change your mind in the
+@c middle of composing text.@refill
+@kbd{C-a}と@kbd{C-e}には調和したキルコマンド@kbd{C-k}があるように、
+@kbd{M-a}と@kbd{M-e}にもコマンド@kbd{M-k}（@code{kill-sentence}）があります。
+これはポイントから文末までをキルします。
+引数に@minus{}1を指定すると、文頭までを後向きにキルします。
+これより大きな引数は反復回数になります。
+また、ポイント位置から文頭までを後向きにキルするコマンドとして
+@kbd{C-x @key{DEL}}（@code{backward-kill-sentence}）もあります。
+このコマンドは、文の作成途中で考えが変わったときに便利です。
+
+@c   The sentence commands assume that you follow the American typist's
+@c convention of putting two spaces at the end of a sentence; they consider
+@c a sentence to end wherever there is a @samp{.}, @samp{?} or @samp{!}
+@c followed by the end of a line or two spaces, with any number of
+@c @samp{)}, @samp{]}, @samp{'}, or @samp{"} characters allowed in between.
+@c A sentence also begins or ends wherever a paragraph begins or ends.
+文操作コマンドでは、文末に空白を2個打つという米国のタイピストの習慣を
+踏襲しているものと仮定します。
+つまり、@samp{.}、@samp{?}、@samp{!}の直後が行末であるか空白が2個続けば、
+その箇所を文末とみなします。
+ただし、@samp{.}、@samp{?}、@samp{!}の直後には、
+@samp{)}、@samp{]}、@samp{'}、@samp{"}がいくつあってもかまいません。
+また、段落の先頭と末尾も、それぞれ、文の先頭と末尾になります。
+
+@vindex sentence-end
+@c   The variable @code{sentence-end} controls recognition of the end of a
+@c sentence.  It is a regexp that matches the last few characters of a
+@c sentence, together with the whitespace following the sentence.  Its
+@c normal value is
+変数@code{sentence-end}で、文末の識別方法を制御します。
+この値は、文末の数個の文字とそれらに続く白文字に一致する正規表現です。
+通常の値はつぎのとおりです。
+@footnote{【訳注】
+言語環境を@code{Japanese}にすると、変数@code{sentence-end}は
+@example
+"[.?!][]\"')]*\\($\\|\t\\|  \\)[ \t\n]*\\|[。？！]"
+@end example
+となっている。
+追加部分は、日本語の文末に対応する文字集合。}
+
+@example
+"[.?!][]\"')]*\\($\\|\t\\|  \\)[ \t\n]*"
+@end example
+
+@noindent
+@c This example is explained in the section on regexps.  @xref{Regexps}.
+この例は、正規表現の節で説明しました。
+@xref{Regexps}。
+
+@c   If you want to use just one space between sentences, you should
+@c set @code{sentence-end} to this value:
+文のあいだには空白を1個だけとしたければ、
+@code{sentence-end}にはつぎの値を設定します。
+
+@example
+"[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*"
+@end example
+
+@noindent
+@c You should also set the variable @code{sentence-end-double-space} to
+@c @code{nil} so that the fill commands expect and leave just one space at
+@c the end of a sentence.  Note that this makes it impossible to
+@c distinguish between periods that end sentences and those that indicate
+@c abbreviations.
+同時に、変数@code{sentence-end-double-space}には@code{nil}を設定して、
+詰め込みコマンドにも、文末には空白が1個だけあり、また、
+文末には空白を1個だけ追加することを指示します。
+ただし、このように設定すると、
+文末のピリオドと省略のピリオドとを区別できなくなることに注意してください。
+
+@node Paragraphs
+@c @section Paragraphs
+@section 段落
+@c @cindex paragraphs
+@cindex 段落
+@c @cindex manipulating paragraphs
+@cindex 段落の操作
+@kindex M-@{
+@kindex M-@}
+@findex backward-paragraph
+@findex forward-paragraph
+
+@c   The Emacs commands for manipulating paragraphs are also Meta keys.
+段落を操作するEmacsコマンドもメタキーです。
+
+@table @kbd
+@item M-@{
+@c Move back to previous paragraph beginning (@code{backward-paragraph}).
+まえの段落の先頭にポイントを後向きに移動する（@code{backward-paragraph}）。
+@item M-@}
+@c Move forward to next paragraph end (@code{forward-paragraph}).
+つぎの段落の末尾にポイントを前向きに移動する（@code{forward-paragraph}）。
+@item M-h
+@c Put point and mark around this or next paragraph (@code{mark-paragraph}).
+ポイントを含む段落かつぎの段落の周りにポイントとマークを置く
+（@code{mark-paragraph}）。
+@end table
+
+@c   @kbd{M-@{} moves to the beginning of the current or previous
+@c paragraph, while @kbd{M-@}} moves to the end of the current or next
+@c paragraph.  Blank lines and text-formatter command lines separate
+@c paragraphs and are not considered part of any paragraph.  In Fundamental
+@c mode, but not in Text mode, an indented line also starts a new
+@c paragraph.  (If a paragraph is preceded by a blank line, these commands
+@c treat that blank line as the beginning of the paragraph.)
+@kbd{M-@{}は、ポイントを含む段落の先頭か、
+まえの段落の先頭にポイントを移動します。
+一方、@kbd{M-@}}は、ポイントを含む段落の末尾か、
+つぎの段落の末尾にポイントを移動します。
+段落は、空行やテキスト整形コマンドの行で区切られますが、
+それらの行自体は段落には属しません。
+基本（fundamental）モードでは、
+字下げした行も新たな段落の始まりとみなしますが、
+テキスト（text）モードではそうしません。
+（段落の直前に空行があれば、
+これらのコマンドはそれらを段落の先頭として扱う。）
+
+@c   In major modes for programs, paragraphs begin and end only at blank
+@c lines.  This makes the paragraph commands continue to be useful even
+@c though there are no paragraphs per se.
+プログラム用のメジャーモードでは、段落は空行で始まり空行で終ります。
+こうしておけば、本来段落を持たないプログラムでも
+段落操作コマンドが役立ちます。
+
+@c   When there is a fill prefix, then paragraphs are delimited by all lines
+@c which don't start with the fill prefix.  @xref{Filling}.
+詰め込み接頭辞がある場合には、接頭辞で始まらない行が段落の区切りとなります。
+@xref{Filling}。
+
+@kindex M-h
+@findex mark-paragraph
+@c   When you wish to operate on a paragraph, you can use the command
+@c @kbd{M-h} (@code{mark-paragraph}) to set the region around it.  Thus,
+@c for example, @kbd{M-h C-w} kills the paragraph around or after point.
+@c The @kbd{M-h} command puts point at the beginning and mark at the end of
+@c the paragraph point was in.  In Transient Mark mode, it activates the
+@c mark.  If point is between paragraphs (in a run of blank lines, or at a
+@c boundary), the paragraph following point is surrounded by point and
+@c mark.  If there are blank lines preceding the first line of the
+@c paragraph, one of these blank lines is included in the region.
+段落を対象に操作したいときには、
+コマンド@kbd{M-h}（@code{mark-paragraph}）を使って
+段落を囲むようなリージョンを設定します。
+したがって、たとえば、@kbd{M-h C-w}とすると、
+ポイントを含むか直後の段落を削除します。
+@kbd{M-h}コマンドは、ポイントを含む段落の先頭にポイントを置き、
+末尾にマークを設定します。
+暫定マーク（transient-mark）モードでは、このマークを活性にします。
+ポイントが段落のあいだ（空行や境界）にある場合は、
+ポイントの直後にある段落の周りにポイントとマークを設定します。
+段落の1行目のまえに空行があれば、
+直前の空行1行も@kbd{M-h}が設定するリージョンに含まれます。
+
+@vindex paragraph-start
+@vindex paragraph-separate
+@c   The precise definition of a paragraph boundary is controlled by the
+@c variables @code{paragraph-separate} and @code{paragraph-start}.  The
+@c value of @code{paragraph-start} is a regexp that should match any line
+@c that either starts or separates paragraphs.  The value of
+@c @code{paragraph-separate} is another regexp that should match only lines
+@c that separate paragraphs without being part of any paragraph (for
+@c example, blank lines).  Lines that start a new paragraph and are
+@c contained in it must match only @code{paragraph-start}, not
+@c @code{paragraph-separate}.  For example, in Fundamental mode,
+@c @code{paragraph-start} is @code{"[ @t{\}t@t{\}n@t{\}f]"} and
+@c @code{paragraph-separate} is @code{"[ @t{\}t@t{\}f]*$"}.@refill
+正確な段落の境界は、変数@code{paragraph-separate}と
+@code{paragraph-start}で定義されます。
+@code{paragraph-start}の値は、
+段落を始めたり区切ったりする行に一致する正規表現です。
+@code{paragraph-separate}の値も別の正規表現ですが、
+どの段落にも属さない段落を分割する行（たとえば空行）だけに一致するものです。
+新たな段落を始めてその段落に属す行は、@code{paragraph-start}だけに一致して、
+@code{paragraph-separate}に一致してはいけません。
+たとえば、基本（fundamental）モードでは、
+@code{paragraph-start}は@code{"[ @t{\}t@t{\}n@t{\}f]"}であり、
+@code{paragraph-separate}は@code{"[ @t{\}t@t{\}f]*$"}です。
+
+@c   Normally it is desirable for page boundaries to separate paragraphs.
+@c The default values of these variables recognize the usual separator for
+@c pages.
+通常、ページ境界でも段落が区切られるのが望ましいです。
+これらの変数のデフォルト値は、ページの一般的な区切り文字も認識します。
+
+@node Pages
+@c @section Pages
+@section ページ
+
+@c @cindex pages
+@cindex ページ
+@c @cindex formfeed
+@cindex ページ送り
+@c   Files are often thought of as divided into @dfn{pages} by the
+@c @dfn{formfeed} character (ASCII control-L, octal code 014).  When you
+@c print hardcopy for a file, this character forces a page break; thus,
+@c each page of the file goes on a separate page on paper.  Most Emacs
+@c commands treat the page-separator character just like any other
+@c character: you can insert it with @kbd{C-q C-l}, and delete it with
+@c @key{DEL}.  Thus, you are free to paginate your file or not.  However,
+@c since pages are often meaningful divisions of the file, Emacs provides
+@c commands to move over them and operate on them.
+ファイルを@dfn{ページ送り}文字（ASCIIコードのコントロールL、8進コードの014）
+で区切った@dfn{ページ}の集まりとして捉えることがよくあります。
+ファイルを印刷すると、この文字は改ページを行います。
+そのため、ファイル内の各ページは別々の用紙に印刷されます。
+ほとんどのEmacsコマンドは、ページを区切る文字を他の文字と同様に扱いますから、
+@kbd{C-q C-l}でページ送り文字を挿入したり、@key{DEL}で削除できます。
+つまり、ファイルをページに区切るのも区切らないのも自由です。
+しかし、ページはファイルを分割する意味ある単位なので、
+Emacsには、ページ間の移動やページを対象とするコマンドがあります。
+
+@c WideCommands
+@table @kbd
+@item C-x [
+@c Move point to previous page boundary (@code{backward-page}).
+まえのページ境界にポイントを移動する（@code{backward-page}）。
+@item C-x ]
+@c Move point to next page boundary (@code{forward-page}).
+つぎのページ境界にポイントを移動する（@code{forward-page}）。
+@item C-x C-p
+@c Put point and mark around this page (or another page) (@code{mark-page}).
+このページ（か別のページ）の周りに、ポイントとマークを置く
+（@code{mark-page}）。
+@item C-x l
+@c Count the lines in this page (@code{count-lines-page}).
+このページの行数を数える（@code{count-lines-page}）。
+@end table
+
+@kindex C-x [
+@kindex C-x ]
+@findex forward-page
+@findex backward-page
+@c   The @kbd{C-x [} (@code{backward-page}) command moves point to immediately
+@c after the previous page delimiter.  If point is already right after a page
+@c delimiter, it skips that one and stops at the previous one.  A numeric
+@c argument serves as a repeat count.  The @kbd{C-x ]} (@code{forward-page})
+@c command moves forward past the next page delimiter.
+@kbd{C-x [}（@code{backward-page}）コマンドは、
+まえのページ区切り文字の直後にポイントを移動します。
+ポイントがすでにページ区切りの直後にあれば、
+さらにまえのページ区切り文字の直後に移動します。
+数引数は反復回数として扱われます。
+@kbd{C-x ]}（@code{forward-page}）コマンドは、
+つぎのページ区切り文字の直後にポイントを移動します。
+
+@kindex C-x C-p
+@findex mark-page
+@c   The @kbd{C-x C-p} command (@code{mark-page}) puts point at the
+@c beginning of the current page and the mark at the end.  The page
+@c delimiter at the end is included (the mark follows it).  The page
+@c delimiter at the front is excluded (point follows it).  @kbd{C-x C-p
+@c C-w} is a handy way to kill a page to move it elsewhere.  If you move to
+@c another page delimiter with @kbd{C-x [} and @kbd{C-x ]}, then yank the
+@c killed page, all the pages will be properly delimited once again.  The
+@c reason @kbd{C-x C-p} includes only the following page delimiter in the
+@c region is to ensure that.
+@kbd{C-x C-p}コマンド（@code{mark-page}）は、
+ページの先頭にポイントを置き、末尾にマークを設定します。
+末尾にあるページ区切り文字は含まれます
+（マークはページ区切り文字の直後にある）。
+先頭にあるページ区切り文字は除外されます
+（ポイントはページ区切り文字の直後にある）。
+@kbd{C-x C-p C-w}は、ページ全体をキルして別の場所に
+移動するのに便利な方法です。
+@kbd{C-x [}や@kbd{C-x ]}で別のページ区切り位置に移動してから
+キルしたページをヤンクすれば、
+すべてのページが適切に区切られた状態が維持されます。
+@kbd{C-x C-p}が末尾のページ区切り文字だけを含める理由は、
+これを保証するためです。
+
+@c   A numeric argument to @kbd{C-x C-p} is used to specify which page to go
+@c to, relative to the current one.  Zero means the current page.  One means
+@c the next page, and @minus{}1 means the previous one.
+@kbd{C-x C-p}への数引数は、現在のページを基準にして
+ポイントの移動先のページを指定します。
+0は現在のページを意味します。
+1はつぎのページ、@minus{}1はまえのページを意味します。
+
+@kindex C-x l
+@findex count-lines-page
+@c   The @kbd{C-x l} command (@code{count-lines-page}) is good for deciding
+@c where to break a page in two.  It prints in the echo area the total number
+@c of lines in the current page, and then divides it up into those preceding
+@c the current line and those following, as in
+@kbd{C-x l}コマンド（@code{count-lines-page}）は、
+ページをどこで2つに分割するかを決めるのに便利です。
+現在のページについて、総行数、現在行のまえにある行数とうしろにある行数を
+つぎのようにエコー領域に表示します。
+
+@example
+@c Page has 96 (72+25) lines
+@c = タイポ
+Page has 96 lines (72+25)
+@end example
+
+@noindent
+@c   Notice that the sum is off by one; this is correct if point is not at the
+@c beginning of a line.
+この例で、総行数が1だけ少ないことに注意してください。
+ポイントが行頭にないとつねにこうなります。
+
+@vindex page-delimiter
+@c   The variable @code{page-delimiter} controls where pages begin.  Its
+@c value is a regexp that matches the beginning of a line that separates
+@c pages.  The normal value of this variable is @code{"^@t{\}f"}, which
+@c matches a formfeed character at the beginning of a line.
+変数@code{page-delimiter}はページの始まりを制御します。
+この変数の値は、ページを区切る行の先頭に一致する正規表現です。
+この変数の通常の値は@code{"^@t{\}f"}で、
+行頭のページ送り文字に一致します。
+
+@node Filling
+@c @section Filling Text
+@section テキストの詰め込み
+@c @cindex filling text
+@cindex テキストの詰め込み
+
+@c   @dfn{Filling} text means breaking it up into lines that fit a
+@c specified width.  Emacs does filling in two ways.  In Auto Fill mode,
+@c inserting text with self-inserting characters also automatically fills
+@c it.  There are also explicit fill commands that you can use when editing
+@c text leaves it unfilled.  When you edit formatted text, you can specify
+@c a style of filling for each portion of the text (@pxref{Formatted
+@c Text}).
+テキストの@dfn{詰め込み}（filling）とは、
+指定した幅に納まるようにテキストを行に分割することです。
+Emacsには、詰め込む方法が2つあります。
+自動詰め込み（auto-fill）モードでは、
+自己挿入文字でテキストを挿入すると同時に詰め込みを行います。
+あるいは、詰め込まずにテキストを編集しているときには、
+陽に詰め込みコマンドを使います。
+整形済みテキストを編集しているときは、
+テキストの各部分ごとに詰め込みのスタイルを指定できます
+（@pxref{Formatted Text}）。
+
+@menu
+* Auto Fill::	        Auto Fill mode breaks long lines automatically.
+* Fill Commands::       Commands to refill paragraphs and center lines.
+* Fill Prefix::	        Filling paragraphs that are indented
+                          or in a comment, etc.
+* Adaptive Fill::       How Emacs can determine the fill prefix automatically.
+@end menu
+
+@node Auto Fill
+@c @subsection Auto Fill Mode
+@subsection 自動詰め込みモード（auto-fillモード）
+@c @cindex Auto Fill mode
+@c @cindex mode, Auto Fill
+@c @cindex word wrap
+@cindex 自動詰め込みモード（Auto Fill mode）
+@cindex auto-fillモード
+@cindex モード、Auto Fill
+@cindex 単語の折り返し
+
+@c   @dfn{Auto Fill} mode is a minor mode in which lines are broken
+@c automatically when they become too wide.  Breaking happens only when
+@c you type a @key{SPC} or @key{RET}.
+@dfn{自動詰め込み}（auto-fill）モードはマイナモードで、
+行が長くなりすぎると自動的に分割します。
+@key{SPC}や@key{RET}を打鍵したときだけ、行を分割します。
+
+@table @kbd
+@item M-x auto-fill-mode
+@c Enable or disable Auto Fill mode.
+自動詰め込み（auto-fill）モードをオンにしたりオフにする。
+@item @key{SPC}
+@itemx @key{RET}
+@c In Auto Fill mode, break lines when appropriate.
+自動詰め込み（auto-fill）モードでは、
+適切な場合には行を分割する。
+@end table
+
+@findex auto-fill-mode
+@c   @kbd{M-x auto-fill-mode} turns Auto Fill mode on if it was off, or off
+@c if it was on.  With a positive numeric argument it always turns Auto
+@c Fill mode on, and with a negative argument always turns it off.  You can
+@c see when Auto Fill mode is in effect by the presence of the word
+@c @samp{Fill} in the mode line, inside the parentheses.  Auto Fill mode is
+@c a minor mode which is enabled or disabled for each buffer individually.
+@c @xref{Minor Modes}.
+@kbd{M-x auto-fill-mode}は、
+自動詰め込み（auto-fill）モードがオフならばオンにし、
+オンならばオフにします。
+正の数引数を指定すると自動詰め込み（auto-fill）モードをつねにオンにしますが、
+負の引数を指定するとつねにオフにします。
+モード行の括弧の中に@samp{Fill}と表示されていれば、
+このモードはオンになっています。
+自動詰め込み（auto-fill）モードは、
+各バッファごとにオン／オフできるマイナモードです。
+@xref{Minor Modes}。
+
+@c   In Auto Fill mode, lines are broken automatically at spaces when they
+@c get longer than the desired width.  Line breaking and rearrangement
+@c takes place only when you type @key{SPC} or @key{RET}.  If you wish to
+@c insert a space or newline without permitting line-breaking, type
+@c @kbd{C-q @key{SPC}} or @kbd{C-q C-j} (recall that a newline is really a
+@c control-J).  Also, @kbd{C-o} inserts a newline without line breaking.
+自動詰め込み（auto-fill）モードでは、
+行が決められた幅より長くなると、自動的に空白の位置で行を分割します。
+行の分割と再配置は、@key{SPC}か@key{RET}を打鍵したときだけ行われます。
+行を分割せずに空白や改行を挿入するには、
+@kbd{C-q @key{SPC}}や@kbd{C-q C-j}と打鍵します
+（改行はまさにコントロールJであることを思い出してほしい）。
+@kbd{C-o}も行を分割せずに改行を挿入します。
+
+@c   Auto Fill mode works well with programming-language modes, because it
+@c indents new lines with @key{TAB}.  If a line ending in a comment gets
+@c too long, the text of the comment is split into two comment lines.
+@c Optionally, new comment delimiters are inserted at the end of the first
+@c line and the beginning of the second so that each line is a separate
+@c comment; the variable @code{comment-multi-line} controls the choice
+@c (@pxref{Comments}).
+自動詰め込み（auto-fill）モードは、@key{TAB}で新たな行を字下げするので、
+プログラム言語用のモードと組み合わせてもうまく動作します。
+コメントで終わる行が長くなりすぎた場合には、
+コメント内のテキストを2つのコメント行に分割します。
+始めの行の末尾とつぎの行の行頭に新たにコメントの区切り文字列を挿入して、
+2つの独立したコメント行にすることもできます。
+この付加機能は、変数@code{comment-multi-line}で制御します
+（@pxref{Comments}）。
+
+@c   Adaptive filling (see the following section) works for Auto Filling as
+@c well as for explicit fill commands.  It takes a fill prefix
+@c automatically from the second or first line of a paragraph.
+適応型詰め込み（後述）は、明示した詰め込みコマンドのみならず、
+自動詰め込みに対しても有効に働きます。
+これは、段落の先頭行あるいは第2行目から、
+自動的に詰め込み接頭辞を切り出します。
+
+@c   Auto Fill mode does not refill entire paragraphs; it can break lines but
+@c cannot merge lines.  So editing in the middle of a paragraph can result in
+@c a paragraph that is not correctly filled.  The easiest way to make the
+@c paragraph properly filled again is usually with the explicit fill commands.
+自動詰め込み（auto-fill）モードは、段落全体を詰め直すことはしません。
+行を分割できても、併合はできません。
+そのため、段落の途中を編集すると、必ずしも段落を正しく詰め込めません。
+段落をふたたび適切に詰め込まれた状態にするもっとも簡単な方法は、
+明示的に詰め込みコマンドを使用することです。
+@ifinfo
+@c @xref{Fill Commands}.
+@xref{Fill Commands}。
+@end ifinfo
+
+@c   Many users like Auto Fill mode and want to use it in all text files.
+@c The section on init files says how to arrange this permanently for yourself.
+@c @xref{Init File}.
+多くのユーザーは自動詰め込み（auto-fill）モードを好み、
+あらゆるテキストファイルの編集に使用しようとします。
+初期化ファイルの節では、こうする方法を説明します。
+@xref{Init File}。
+
+@node Fill Commands
+@c @subsection Explicit Fill Commands
+@subsection 明示的な詰め込みコマンド
+
+@table @kbd
+@item M-q
+@c Fill current paragraph (@code{fill-paragraph}).
+現在の段落を詰め込む（@code{fill-paragraph}）。
+@item C-x f
+@c Set the fill column (@code{set-fill-column}).
+詰め込み桁を設定する（@code{set-fill-column}）。
+@item M-x fill-region
+@c Fill each paragraph in the region (@code{fill-region}).
+リージョン内の各段落を詰め込む（@code{fill-region}）。
+@item M-x fill-region-as-paragraph
+@c Fill the region, considering it as one paragraph.
+リージョン全体を1つの段落とみなして詰め込む。
+@item M-s
+@c Center a line.
+行を中央に揃える。
+@end table
+
+@kindex M-q
+@findex fill-paragraph
+@c   To refill a paragraph, use the command @kbd{M-q}
+@c (@code{fill-paragraph}).  This operates on the paragraph that point is
+@c inside, or the one after point if point is between paragraphs.
+@c Refilling works by removing all the line-breaks, then inserting new ones
+@c where necessary.
+段落を詰め直すには、コマンド@kbd{M-q}（@code{fill-paragraph}）を使います。
+ポイントを含む段落、あるいは、
+ポイントが段落のあいだにある場合には直後の段落を操作します。
+改行をすべて取り除いてから、必要な箇所に新たに改行を挿入することで
+段落を詰め直します。
+
+@findex fill-region
+@c   To refill many paragraphs, use @kbd{M-x fill-region}, which
+@c divides the region into paragraphs and fills each of them.
+いくつもの段落を詰め直すには、@kbd{M-x fill-region}を使います。
+これは、リージョンを段落に分けてから、各段落を詰め込みます。
+
+@findex fill-region-as-paragraph
+@c   @kbd{M-q} and @code{fill-region} use the same criteria as @kbd{M-h}
+@c for finding paragraph boundaries (@pxref{Paragraphs}).  For more
+@c control, you can use @kbd{M-x fill-region-as-paragraph}, which refills
+@c everything between point and mark.  This command deletes any blank lines
+@c within the region, so separate blocks of text end up combined into one
+@c block.@refill
+@kbd{M-q}と@code{fill-region}は、@kbd{M-h}と同じ基準で段落の境界を
+探します（@pxref{Paragraphs}）。
+段落の大きさを制御するには、@kbd{M-x fill-region-as-paragraph}を使います。
+これは、ポイントとマークのあいだにあるものすべてを詰め直します。
+このコマンドはリージョン内の空行をすべて削除して、
+分かれていたテキストの塊を1つの塊にまとめ上げます。
+
+@c @cindex justification
+@cindex 幅揃え
+@c   A numeric argument to @kbd{M-q} causes it to @dfn{justify} the text as
+@c well as filling it.  This means that extra spaces are inserted to make
+@c the right margin line up exactly at the fill column.  To remove the
+@c extra spaces, use @kbd{M-q} with no argument.  (Likewise for
+@c @code{fill-region}.)  Another way to control justification, and choose
+@c other styles of filling, is with the @code{justification} text property;
+@c see @ref{Format Justification}.
+@kbd{M-q}に数引数を指定すると、テキストの詰め込みだけでなく、
+テキストの@dfn{幅揃え}（justify）も行います。
+つまり、余分に空白を挿入して、行の右端が詰め込み桁に一致するようにします。
+余分な空白を取り除くには、引数を指定しないで@kbd{M-q}を使います。
+（@code{fill-region}も同様。）
+幅揃えを制御して別の詰め込みスタイルを選択する別の方法は、
+テキスト属性@code{justification}を使うことです。
+これに関しては、@ref{Format Justification}を参照してください。
+
+@c @kindex M-s @r{(Text mode)}
+@kindex M-s @r{（テキストモード）}
+@c @cindex centering
+@cindex 中央揃え
+@findex center-line
+@c   The command @kbd{M-s} (@code{center-line}) centers the current line
+@c within the current fill column.  With an argument @var{n}, it centers
+@c @var{n} lines individually and moves past them.
+コマンド@kbd{M-s}（@code{center-line}）は、
+詰め込み桁までの範囲内で現在行を中央に揃えます。
+引数@var{n}を指定すると、
+現在行を含め@var{n}行をそれぞれ独立に中央に揃えてから、
+揃えた行のつぎにポイントを移動します。
+
+@vindex fill-column
+@kindex C-x f
+@findex set-fill-column
+@c   The maximum line width for filling is in the variable
+@c @code{fill-column}.  Altering the value of @code{fill-column} makes it
+@c local to the current buffer; until that time, the default value is in
+@c effect.  The default is initially 70.  @xref{Locals}.  The easiest way
+@c to set @code{fill-column} is to use the command @kbd{C-x f}
+@c (@code{set-fill-column}).  With a numeric argument, it uses that as the
+@c new fill column.  With just @kbd{C-u} as argument, it sets
+@c @code{fill-column} to the current horizontal position of point.
+詰め込むときの行の最大幅は、変数@code{fill-column}に入っています。
+@code{fill-column}の値を変更すると、
+カレントバッファにローカルな変数になります。
+それまではデフォルト値が有効です。
+デフォルト値は始めは70です。
+@xref{Locals}。
+@code{fill-column}を設定するもっとも簡単な方法は、
+コマンド@kbd{C-x f}（@code{set-fill-column}）を使うことです。
+このコマンドに数引数を指定すると、
+その値を新たな詰め込み桁として使います。
+@kbd{C-u}だけを引数に指定すると、
+ポイントの現在の水平位置を@code{fill-column}に設定します。
+
+@c   Emacs commands normally consider a period followed by two spaces or by
+@c a newline as the end of a sentence; a period followed by just one space
+@c indicates an abbreviation and not the end of a sentence.  To preserve
+@c the distinction between these two ways of using a period, the fill
+@c commands do not break a line after a period followed by just one space.
+Emacsコマンドは通常、
+ピリオドの直後に空白が2個あるか改行があれば文末として扱います。
+ピリオドの直後に空白が1個だけでは、文末ではなく省略とみなします。
+ピリオドのこれら2つの用法の違いを保存するために、
+ピリオドの直後に空白が1個だけの箇所では詰め込みコマンドは行を分割しません。
+
+@vindex sentence-end-double-space
+@c   If the variable @code{sentence-end-double-space} is @code{nil}, the
+@c fill commands expect and leave just one space at the end of a sentence.
+@c Ordinarily this variable is @code{t}, so the fill commands insist on
+@c two spaces for the end of a sentence, as explained above.  @xref{Sentences}.
+変数@code{sentence-end-double-space}が@code{nil}ならば、
+詰め込みコマンドは、文末には空白が1個だけあると仮定し、かつ、
+文末には空白を1個だけ残します。
+普通、この変数の値は@code{t}なので、
+上述のように空白が2個ある場合だけを文末として扱います。
+@xref{Sentences}。
+
+@vindex colon-double-space
+@c   If the variable @code{colon-double-space} is non-@code{nil}, the
+@c fill commands put two spaces after a colon.
+@code{colon-double-space}が@code{nil}以外ならば、
+詰め込みコマンドはコロンのうしろに空白を2個置きます。
+
+@node Fill Prefix
+@c @subsection The Fill Prefix
+@subsection 詰め込み接頭辞
+
+@c @cindex fill prefix
+@cindex 詰め込み接頭辞
+@c   To fill a paragraph in which each line starts with a special marker
+@c (which might be a few spaces, giving an indented paragraph), you can use
+@c the @dfn{fill prefix} feature.  The fill prefix is a string that Emacs
+@c expects every line to start with, and which is not included in filling.
+@c You can specify a fill prefix explicitly; Emacs can also deduce the
+@c fill prefix automatically (@pxref{Adaptive Fill}).
+各行が（段落を字下げする数個の空白などの）特別の印で始まっている
+段落を詰め込むには、@dfn{詰め込み接頭辞}（fill prefix）の機能を使えます。
+詰め込み接頭辞は文字列であり、
+Emacsはすべての行がその文字列で始まると仮定しますが、
+詰め込み接頭辞自体は詰め込みの対象ではありません。
+明示的に詰め込み接頭辞を指定できますが、
+Emacsが詰め込み接頭辞を自動的に推測することもできます
+（@pxref{Adaptive Fill}）。
+
+@table @kbd
+@item C-x .
+@c Set the fill prefix (@code{set-fill-prefix}).
+詰め込み接頭辞を設定する（@code{set-fill-prefix}）。
+@item M-q
+@c Fill a paragraph using current fill prefix (@code{fill-paragraph}).
+現在の詰め込み接頭辞を使って、段落を詰め込む（@code{fill-paragraph}）。
+@item M-x fill-individual-paragraphs
+@c Fill the region, considering each change of indentation as starting a
+@c new paragraph.
+字下げ幅の変化を新たな段落の始まりとみなして、リージョン内を詰め込む。
+@item M-x fill-nonuniform-paragraphs
+@c Fill the region, considering only paragraph-separator lines as starting
+@c a new paragraph.
+段落を分割する行だけを新たな段落の始まりとみなして、リージョン内を詰め込む。
+@end table
+
+@kindex C-x .
+@findex set-fill-prefix
+@c   To specify a fill prefix, move to a line that starts with the desired
+@c prefix, put point at the end of the prefix, and give the command
+@c @w{@kbd{C-x .}}@: (@code{set-fill-prefix}).  That's a period after the
+@c @kbd{C-x}.  To turn off the fill prefix, specify an empty prefix: type
+@c @w{@kbd{C-x .}}@: with point at the beginning of a line.@refill
+詰め込み接頭辞を指定するには、
+目的の接頭辞で始まっている行に移動して接頭辞の直後にポイントを置いてから、
+コマンド@w{@kbd{C-x .}}@:（@code{set-fill-prefix}）を実行します。
+@kbd{C-x}のあとはピリオドです。
+詰め込み接頭辞の使用をやめるには、空の接頭辞を設定します。
+つまり、行頭にポイントを置いてから@w{@kbd{C-x .}}@:と打ちます。
+
+@c   When a fill prefix is in effect, the fill commands remove the fill
+@c prefix from each line before filling and insert it on each line after
+@c filling.  Auto Fill mode also inserts the fill prefix automatically when
+@c it makes a new line.  The @kbd{C-o} command inserts the fill prefix on
+@c new lines it creates, when you use it at the beginning of a line
+@c (@pxref{Blank Lines}).  Conversely, the command @kbd{M-^} deletes the
+@c prefix (if it occurs) after the newline that it deletes
+@c (@pxref{Indentation}).
+詰め込み接頭辞が設定されている場合、
+詰め込みコマンドは処理に先だって各行から詰め込み接頭辞を取り除き、
+詰め込みを行ったあとに各行に挿入します。
+自動詰め込み（auto-fill）モードでも、
+新たに行を作成するときに自動的に詰め込み接頭辞を挿入します。
+行頭で@kbd{C-o}コマンド（@pxref{Blank Lines}）を使用すると、
+新たに作成する行にも詰め込み接頭辞を挿入します。
+逆に、コマンド@kbd{M-^}は、
+削除する改行の直後に詰め込み接頭辞があると接頭辞も削除します
+（@pxref{Indentation}）。
+
+@c   For example, if @code{fill-column} is 40 and you set the fill prefix
+@c to @samp{;; }, then @kbd{M-q} in the following text
+たとえば、@code{fill-column}が40で詰め込み接頭辞が@samp{;; }のときに、
+つぎのテキストで@kbd{M-q}を実行します。
+
+@example
+;; This is an
+;; example of a paragraph
+;; inside a Lisp-style comment.
+@end example
+
+@noindent
+@c produces this:
+結果はつぎのようになります。
+
+@example
+;; This is an example of a paragraph
+;; inside a Lisp-style comment.
+@end example
+
+@c   Lines that do not start with the fill prefix are considered to start
+@c paragraphs, both in @kbd{M-q} and the paragraph commands; this gives
+@c good results for paragraphs with hanging indentation (every line
+@c indented except the first one).  Lines which are blank or indented once
+@c the prefix is removed also separate or start paragraphs; this is what
+@c you want if you are writing multi-paragraph comments with a comment
+@c delimiter on each line.
+@kbd{M-q}および段落コマンドは、
+詰め込み接頭辞で始まらない行を段落の始まりとみなします。
+これにより、ぶら下がり字下げ（先頭行を除いてすべての行が字下げ）
+された段落も正しく詰め込みます。
+空行や接頭辞を取りさると字下げした行になる行も、
+段落の区切りや始まりとみなします。
+これによって、各行にコメント区切りがある複数段落のコメントを
+書いているときにも、望みどおりの結果を得られます。
+
+@findex fill-individual-paragraphs
+@c   You can use @kbd{M-x fill-individual-paragraphs} to set the fill
+@c prefix for each paragraph automatically.  This command divides the
+@c region into paragraphs, treating every change in the amount of
+@c indentation as the start of a new paragraph, and fills each of these
+@c paragraphs.  Thus, all the lines in one ``paragraph'' have the same
+@c amount of indentation.  That indentation serves as the fill prefix for
+@c that paragraph.
+各段落に対して自動的に詰め込み接頭辞を設定するには、
+@kbd{M-x fill-individual-paragraphs}を使います。
+このコマンドは、字下げ幅の変化を新たな段落の始まりとみなして、
+リージョンを段落に分割したあと、各段落を詰め込みます。
+つまり、1つの『段落』内の行はどれも同じ字下げ幅です。
+字下げ幅が、段落に対する詰め込み接頭辞として働きます。
+
+@findex fill-nonuniform-paragraphs
+@c   @kbd{M-x fill-nonuniform-paragraphs} is a similar command that divides
+@c the region into paragraphs in a different way.  It considers only
+@c paragraph-separating lines (as defined by @code{paragraph-separate}) as
+@c starting a new paragraph.  Since this means that the lines of one
+@c paragraph may have different amounts of indentation, the fill prefix
+@c used is the smallest amount of indentation of any of the lines of the
+@c paragraph.  This gives good results with styles that indent a paragraph's
+@c first line more or less that the rest of the paragraph.
+@kbd{M-x fill-nonuniform-paragraphs}も同様なコマンドですが、
+リージョンを段落に分割する方法が異なります。
+このコマンドは、（変数@code{paragraph-separate}で定義される）
+段落区切り行だけを新たな段落の始まりとみなします。
+つまり、各段落の行はさまざまに字下げされているかもしれないので、
+その中の最少の字下げを詰め込み接頭辞として使用するわけです。
+段落の最初の行の字下げが残りの行に比べて多くても少なくても、
+正しい詰め込み結果を得られます。
+
+@vindex fill-prefix
+@c   The fill prefix is stored in the variable @code{fill-prefix}.  Its value
+@c is a string, or @code{nil} when there is no fill prefix.  This is a
+@c per-buffer variable; altering the variable affects only the current buffer,
+@c but there is a default value which you can change as well.  @xref{Locals}.
+詰め込み接頭辞は変数@code{fill-prefix}に格納されます。
+この値は文字列であるか、詰め込み接頭辞が設定されていなければ@code{nil}です。
+この変数を変更してもカレントバッファだけに影響しますが、
+デフォルト値を変更することもできます。
+@xref{Locals}。
+
+@c   The @code{indentation} text property provides another way to control
+@c the amount of indentation paragraphs receive.  @xref{Format Indentation}.
+テキスト属性@code{indentation}は、
+段落に与える字下げ幅を調整する別の方法です。
+@xref{Format Indentation}。
+
+@node Adaptive Fill
+@c @subsection Adaptive Filling
+@subsection 適応型詰め込み
+
+@c @cindex adaptive filling
+@cindex 適応型詰め込み
+@c   The fill commands can deduce the proper fill prefix for a paragraph
+@c automatically in certain cases: either whitespace or certain punctuation
+@c characters at the beginning of a line are propagated to all lines of the
+@c paragraph.
+詰め込みコマンド自身が、
+段落に対する適切な詰め込み接頭辞を推測できる状況もあります。
+段落のすべての行の先頭に白文字やある種の句読点文字が使われている場合です。
+
+@c   If the paragraph has two or more lines, the fill prefix is taken from
+@c the paragraph's second line, but only if it appears on the first line as
+@c well.
+段落が2行以上から成る場合、
+段落の2行目から詰め込み接頭辞を切り出しますが、
+1行目にもそれが現れるときに限ります。
+
+@c   If a paragraph has just one line, fill commands @emph{may} take a
+@c prefix from that line.  The decision is complicated because there are
+@c three reasonable things to do in such a case:
+段落が1行だけの場合には、その行から詰め込み接頭辞を切り出す
+@emph{かもしれません}
+@footnote{【訳注】段落に1行しかなければ、
+詰め込み接頭辞を切り出す必要はないと思うかもしれないが、
+たとえば、その行が詰め込み桁より長かったり、
+新たな入力によって複数行の段落になったときのことを考えてみてほしい。}。
+こういった状況では、つぎのような3つの合理的な挙動が考えられるので、
+接頭辞の決定は複雑です。
+
+@itemize @bullet
+@item
+@c Use the first line's prefix on all the lines of the paragraph.
+最初の行の接頭辞を段落のすべての行に用いる。
+
+@item
+@c Indent subsequent lines with whitespace, so that they line up under the
+@c text that follows the prefix on the first line, but don't actually copy
+@c the prefix from the first line.
+1行目の接頭辞に続くテキストの直下に並ぶように
+後続の行を白文字で字下げするが、
+1行目から接頭辞をコピーしない。
+
+@item
+@c Don't do anything special with the second and following lines.
+2行目以降には何も特別なことは行わない。
+@end itemize
+
+@c   All three of these styles of formatting are commonly used.  So the
+@c fill commands try to determine what you would like, based on the prefix
+@c that appears and on the major mode.  Here is how.
+これら3つの整形スタイルは、いずれも一般的に使用されます。
+そこで、詰め込みコマンドは、現れた接頭辞とそのときのメジャーモードに基づいて、
+ユーザーが望むスタイルを決定しようとします。
+判断基準はつぎのとおりです。
+
+@vindex adaptive-fill-first-line-regexp
+@c   If the prefix found on the first line matches
+@c @code{adaptive-fill-first-line-regexp}, or if it appears to be a
+@c comment-starting sequence (this depends on the major mode), then the
+@c prefix found is used for filling the paragraph, provided it would not
+@c act as a paragraph starter on subsequent lines.
+1行目でみつけた接頭辞が@code{adaptive-fill-first-line-regexp}に一致するか、
+（メジャーモードに依存する）コメント開始文字列のようであれば、
+みつけた接頭辞を段落の詰め込みに用います。
+ただし、その接頭辞が後続の行に対して段落の始まりにならない場合に限ります。
+
+@c   Otherwise, the prefix found is converted to an equivalent number of
+@c spaces, and those spaces are used as the fill prefix for the rest of the
+@c lines, provided they would not act as a paragraph starter on subsequent
+@c lines.
+さもなければ、みつけた接頭辞を相当分の空白に変換して、
+それらの空白を段落の2行目以降の詰め込み接頭辞として使います。
+ただし、それらの空白が後続の行に対して段落の始まりにならない場合に限ります。
+
+@c   In Text mode, and other modes where only blank lines and page
+@c delimiters separate paragraphs, the prefix chosen by adaptive filling
+@c never acts as a paragraph starter, so it can always be used for filling.
+テキスト（text）モード、および、
+空行やページ区切りだけが段落を区切るモードでは、
+適応型詰め込みによって選ばれた接頭辞が
+段落の始まりになることはけっしてありませんから、
+その接頭辞を段落の詰め込みに使用することができます。
+
+@vindex adaptive-fill-mode
+@vindex adaptive-fill-regexp
+@c   The variable @code{adaptive-fill-regexp} determines what kinds of line
+@c beginnings can serve as a fill prefix: any characters at the start of
+@c the line that match this regular expression are used.  If you set the
+@c variable @code{adaptive-fill-mode} to @code{nil}, the fill prefix is
+@c never chosen automatically.
+変数@code{adaptive-fill-regexp}で、
+行頭のどんな文字列を詰め込み接頭辞として使えるかを決定します。
+この変数の正規表現に一致する行頭の文字列を接頭辞とします。
+変数@code{adaptive-fill-mode}に@code{nil}を設定すると、
+詰め込み接頭辞を自動的には切り出しません。
+
+@vindex adaptive-fill-function
+@c   You can specify more complex ways of choosing a fill prefix
+@c automatically by setting the variable @code{adaptive-fill-function} to a
+@c function.  This function is called with point after the left margin of a
+@c line, and it should return the appropriate fill prefix based on that
+@c line.  If it returns @code{nil}, that means it sees no fill prefix in
+@c that line.
+変数@code{adaptive-fill-function}に関数を設定すると、
+詰め込み接頭辞を自動的に切り出すためのより複雑な方法を指定できます。
+この関数は行の左端の直後にポイントを置いて呼び出されます。
+その行から類推される適切な詰め込み接頭辞を返さなくてはいけません。
+その行に詰め込み接頭辞がなさそうであれば@code{nil}を返します。
+
+@node Case
+@c @section Case Conversion Commands
+@section 大文字小文字変換コマンド
+@c @cindex case conversion
+@cindex 大文字小文字変換
+
+@c   Emacs has commands for converting either a single word or any arbitrary
+@c range of text to upper case or to lower case.
+Emacsには、単語や任意の長さのテキストを
+大文字あるいは小文字に変換するコマンドがあります。
+
+@c WideCommands
+@table @kbd
+@item M-l
+@c Convert following word to lower case (@code{downcase-word}).
+後続の単語を小文字に変換する（@code{downcase-word}）。
+@item M-u
+@c Convert following word to upper case (@code{upcase-word}).
+後続の単語を大文字に変換する（@code{upcase-word}）。
+@item M-c
+@c Capitalize the following word (@code{capitalize-word}).
+後続の単語の1文字目だけを大文字にする（@code{capitalize-word}）。
+@item C-x C-l
+@c Convert region to lower case (@code{downcase-region}).
+リージョン内のテキストを小文字に変換する（@code{downcase-region}）。
+@item C-x C-u
+@c Convert region to upper case (@code{upcase-region}).
+リージョン内のテキストを大文字に変換する（@code{upcase-region}）。
+@end table
+
+@kindex M-l
+@kindex M-u
+@kindex M-c
+@c @cindex words, case conversion
+@cindex 単語の大文字小文字変換
+@cindex 大文字小文字変換、単語
+@c @cindex converting text to upper or lower case
+@cindex テキストの大文字／小文字への変換
+@c @cindex capitalizing words
+@cindex 単語の頭文字の大文字化
+@findex downcase-word
+@findex upcase-word
+@findex capitalize-word
+@c   The word conversion commands are the most useful.  @kbd{M-l}
+@c (@code{downcase-word}) converts the word after point to lower case, moving
+@c past it.  Thus, repeating @kbd{M-l} converts successive words.
+@c @kbd{M-u} (@code{upcase-word}) converts to all capitals instead, while
+@c @kbd{M-c} (@code{capitalize-word}) puts the first letter of the word
+@c into upper case and the rest into lower case.  All these commands convert
+@c several words at once if given an argument.  They are especially convenient
+@c for converting a large amount of text from all upper case to mixed case,
+@c because you can move through the text using @kbd{M-l}, @kbd{M-u} or
+@c @kbd{M-c} on each word as appropriate, occasionally using @kbd{M-f} instead
+@c to skip a word.
+単語変換コマンドはたいへん便利です。
+@kbd{M-l}（@code{downcase-word}）は
+ポイントの直後の単語を小文字に変換し、
+単語の末尾にポイントを移動します。
+したがって、@kbd{M-l}を繰り返すと、連続した単語を変換できます。
+@kbd{M-u}（@code{upcase-word}）は単語を大文字に変換し、
+@kbd{M-c}（@code{capitalize-word}）は単語の1文字目を
+大文字して残りを小文字に変換します。
+これらのコマンドに引数を指定すると、一度に数単語を変換できます。
+これらのコマンドは、大文字だけの大量のテキストを
+大文字小文字が混在するように変換するときに、特に威力を発揮します。
+というのは、必要に応じて@kbd{M-l}、@kbd{M-u}、
+@kbd{M-c}を使い分けて移動したり、@kbd{M-f}で変換せずに単語を
+飛び越えられるからです。
+
+@c   When given a negative argument, the word case conversion commands apply
+@c to the appropriate number of words before point, but do not move point.
+@c This is convenient when you have just typed a word in the wrong case: you
+@c can give the case conversion command and continue typing.
+負の引数を指定すると、ポイントの直前にある数個の単語を変換しますが、
+ポイントは移動しません。
+これは、大文字小文字をまちがえて単語を入力した直後には便利です。
+大文字小文字変換コマンドを打ってからすぐに入力を再開できます。
+
+@c   If a word case conversion command is given in the middle of a word, it
+@c applies only to the part of the word which follows point.  This is just
+@c like what @kbd{M-d} (@code{kill-word}) does.  With a negative argument,
+@c case conversion applies only to the part of the word before point.
+単語の途中で大文字小文字変換コマンドを実行すると、
+ポイントのうしろにある部分だけを変換します。
+これは@kbd{M-d}（@code{kill-word}）のふるまいと同じです。
+また、負の引数を指定すると、ポイントよりまえの部分を変換します。
+
+@kindex C-x C-l
+@kindex C-x C-u
+@findex downcase-region
+@findex upcase-region
+@c   The other case conversion commands are @kbd{C-x C-u}
+@c (@code{upcase-region}) and @kbd{C-x C-l} (@code{downcase-region}), which
+@c convert everything between point and mark to the specified case.  Point and
+@c mark do not move.
+他の大文字小文字変換コマンドは、
+@kbd{C-x C-u}（@code{upcase-region}）と
+@kbd{C-x C-l}（@code{downcase-region}）です。
+これらは、リージョン内のテキストを指定どおりに変換します。
+ポイントもマークも移動しません。
+
+@c   The region case conversion commands @code{upcase-region} and
+@c @code{downcase-region} are normally disabled.  This means that they ask
+@c for confirmation if you try to use them.  When you confirm, you may
+@c enable the command, which means it will not ask for confirmation again.
+@c @xref{Disabling}.
+リージョンに対する大文字小文字変換コマンドである
+@code{upcase-region}と@code{downcase-region}は、
+通常、使用禁止になっています。
+つまり、これらのコマンドを使おうとすると、最初に確認を求めてきます。
+確認するときにコマンドを使用可にしておけば、つぎからは確認を求めてきません。
+@xref{Disabling}。
+
+@node Text Mode
+@c @section Text Mode
+@section テキストモード（textモード）
+@c @cindex Text mode
+@c @cindex mode, Text
+@cindex テキストモード（Text mode）
+@cindex textモード
+@cindex モード、Text
+@findex text-mode
+
+@c   When you edit files of text in a human language, it's more convenient
+@c to use Text mode rather than Fundamental mode.  To enter Text mode, type
+@c @kbd{M-x text-mode}.
+自然言語テキストのファイルを編集するときには、
+基本（fundamental）モードではなく
+テキスト（text）モードを使ったほうが便利です。
+テキスト（text）モードに入るには@kbd{M-x text-mode}と打ちます。
+
+@c   In Text mode, only blank lines and page delimiters separate
+@c paragraphs.  As a result, paragraphs can be indented, and adaptive
+@c filling determines what indentation to use when filling a paragraph.
+@c @xref{Adaptive Fill}.
+テキスト（text）モードでは、空行とページ区切りだけが段落の区切りです。
+その結果、段落を字下げできて、
+適応型詰め込みでは段落の詰め込みに使用する字下げを決定できます。
+@xref{Adaptive Fill}。
+
+@c @kindex TAB @r{(Text mode)}
+@kindex TAB @r{（テキストモード）}
+@c   Text mode defines @key{TAB} to run @code{indent-relative}
+@c (@pxref{Indentation}), so that you can conveniently indent a line like
+@c the previous line.  When the previous line is not indented,
+@c @code{indent-relative} runs @code{tab-to-tab-stop}, which uses Emacs tab
+@c stops that you can set (@pxref{Tab Stops}).
+テキスト（text）モードでは、@key{TAB}は
+@code{indent-relative}（@pxref{Indentation}）を実行するように
+定義してあるので、先行する行と同じように字下げするのに便利です。
+先行する行が字下げされてなければ、
+@code{indent-relative}は@code{tab-to-tab-stop}を実行します。
+これは、ユーザーが設定したEmacsのタブストップを使います（@pxref{Tab Stops}）。
+
+@c   Text mode turns off the features concerned with comments except when
+@c you explicitly invoke them.  It changes the syntax table so that periods
+@c are not considered part of a word, while apostrophes, backspaces and
+@c underlines are considered part of words.
+テキスト（text）モードでは、コメントに関する機能は、
+陽に起動した場合を除いてオフです。
+ピリオドは単語の一部ではなく、一方、
+アポストロフ、バックスペース、下線は単語の一部である、
+となるように構文テーブルを変更します。
+
+@c @cindex Paragraph-Indent Text mode
+@c @cindex mode, Paragraph-Indent Text
+@cindex 段落字下げ型テキストモード（Paragraph-Indent Text mode）
+@cindex paragraph-indent-textモード
+@cindex モード、Paragraph-Indent Text
+@findex paragraph-indent-text-mode
+@c   If you indent the first lines of paragraphs, then you should use
+@c Paragraph-Indent Text mode rather than Text mode.  In this mode, you do
+@c not need to have blank lines between paragraphs, because the first-line
+@c indentation is sufficient to start a paragraph; however paragraphs in
+@c which every line is indented are not supported.  Use @kbd{M-x
+@c paragraph-indent-text-mode} to enter this mode.
+段落の最初の行を字下げするのであれば、テキスト（text）モードではなく
+段落字下げ型テキスト（paragraph-indent-text）モードを使うべきです。
+このモードでは、段落のあいだに空行を設ける必要はありません。
+というのは、最初の行の字下げで、段落の始まりがわかるからです。
+ただし、すべての行が字下げされている段落は扱えません。
+このモードに入るには、@kbd{M-x paragraph-indent-text-mode}を使います。
+
+@c @kindex M-TAB @r{(Text mode)}
+@kindex M-TAB @r{（テキストモード）}
+@c   Text mode, and all the modes based on it, define @kbd{M-@key{TAB}} as
+@c the command @code{ispell-complete-word}, which performs completion of
+@c the partial word in the buffer before point, using the spelling
+@c dictionary as the space of possible words.  @xref{Spelling}.
+テキスト（text）モード、および、
+テキスト（text）モードに基づくすべてのモードでは、
+@kbd{M-@key{TAB}}をコマンド@code{ispell-complete-word}として定義します。
+このコマンドは、ポイントの直前の部分的な単語を綴り辞書を用いて補完します。
+@xref{Spelling}。
+
+@vindex text-mode-hook
+@c   Entering Text mode runs the hook @code{text-mode-hook}.  Other major
+@c modes related to Text mode also run this hook, followed by hooks of
+@c their own; this includes Paragraph-Indent Text mode, Nroff mode, @TeX{}
+@c mode, Outline mode, and Mail mode.  Hook functions on
+@c @code{text-mode-hook} can look at the value of @code{major-mode} to see
+@c which of these modes is actually being entered.  @xref{Hooks}.
+テキスト（text）モードに入ると、フック@code{text-mode-hook}を実行します。
+テキスト（text）モードに関連する他のモードも、このフックに続けて
+各モード専用のフックを実行します。
+つまり、段落字下げ型テキスト（paragraph-indent-text）モード、
+nroffモード、@TeX{}モード、アウトライン（outline）モード、
+メイル（mail）モードがそうです。
+@code{text-mode-hook}に登録されたフック関数では、
+@code{major-mode}の値を調べれば実際にどのモードに入ったかわかります。
+@xref{Hooks}。
+
+@ifinfo
+@c   Emacs provides two other modes for editing text that is to be passed
+@c through a text formatter to produce fancy formatted printed output.
+@c @xref{Nroff Mode}, for editing input to the formatter nroff.
+@c @xref{TeX Mode}, for editing input to the formatter TeX.
+Emacsには、綺麗な印刷出力を得るためにテキスト清書系に渡すテキストを
+編集するためのモードが他に2つあります。
+nroff入力の編集については、@xref{Nroff Mode}。
+TeX入力の変数については、@xref{TeX Mode}。
+
+@c   Another mode is used for editing outlines.  It allows you to view the
+@c text at various levels of detail.  You can view either the outline
+@c headings alone or both headings and text; you can also hide some of the
+@c headings at lower levels from view to make the high level structure more
+@c visible.  @xref{Outline Mode}.
+別のモードは、アウトラインの編集に使います。
+このモードは、さまざまなレベルの詳しさでテキストを眺めることができます。
+アウトラインの見出しだけを見たり、見出しとテキストを同時に見たりできます。
+低いレベルの見出しの一部を隠して、
+より高いレベルの構造を際だたせることもできます。
+@xref{Outline Mode}。
+@end ifinfo
+
+@node Outline Mode
+@c @section Outline Mode
+@section アウトラインモード（outlineモード）
+@c @cindex Outline mode
+@c @cindex mode, Outline
+@c @cindex selective display
+@c @cindex invisible lines
+@cindex アウトラインモード（Outline mode）
+@cindex outlineモード
+@cindex モード、Outline
+@cindex 選択的表示
+@cindex 不可視行
+
+@findex outline-mode
+@findex outline-minor-mode
+@vindex outline-minor-mode-prefix
+@c   Outline mode is a major mode much like Text mode but intended for
+@c editing outlines.  It allows you to make parts of the text temporarily
+@c invisible so that you can see the outline structure.  Type @kbd{M-x
+@c outline-mode} to switch to Outline mode as the major mode of the current
+@c buffer.
+アウトライン（outline）モードはテキスト（text）モードにたいへん
+よく似たメジャーモードですが、アウトライン構造を持つテキストの編集用です。
+アウトライン構造を把握できるようにテキストの一部を一時的に不可視にできます。
+カレントバッファのメジャーモードをアウトライン（outline）モードに
+切り替えるには、@kbd{M-x outline-mode}と打ちます。
+
+@c   When Outline mode makes a line invisible, the line does not appear on
+@c the screen.  The screen appears exactly as if the invisible line were
+@c deleted, except that an ellipsis (three periods in a row) appears at the
+@c end of the previous visible line (only one ellipsis no matter how many
+@c invisible lines follow).
+アウトライン（outline）モードで行を不可視にすると、
+その行は画面上に表示されません。
+画面上では、不可視にした行が削除されたかのように見えますが、
+それに先行する可視な行の末尾に省略記号（ピリオドが3つ...）が表示されます
+（何行不可視にしていても、省略記号は1つだけ）。
+
+@c   Editing commands that operate on lines, such as @kbd{C-n} and
+@c @kbd{C-p}, treat the text of the invisible line as part of the previous
+@c visible line.  Killing an entire visible line, including its terminating
+@c newline, really kills all the following invisible lines along with it.
+@kbd{C-n}や@kbd{C-p}のような行を対象とした編集コマンドは、
+不可視にした行のテキストを、先行する可視な行の一部であるかのように扱います。
+改行も含めて可視な行全体をキルすると、後続の不可視な行も一緒にキルします。
+
+@c   Outline minor mode provides the same commands as the major mode,
+@c Outline mode, but you can use it in conjunction with other major modes.
+@c Type @kbd{M-x outline-minor-mode} to enable the Outline minor mode in
+@c the current buffer.  You can also specify this in the text of a file,
+@c with a file local variable of the form @samp{mode: outline-minor}
+@c (@pxref{File Variables}).
+アウトラインマイナ（outline-minor）モードは、
+メジャーモードであるアウトライン（outline）モードと
+同じコマンドを提供しますが、他のメジャーモードと一緒に使用できます。
+カレントバッファでアウトラインマイナ（outline-minor）モードをオンにするには、
+@kbd{M-x outline-minor-mode}と打ちます。
+@samp{mode: outline-minor}といった形のファイルにローカルな変数で、
+テキストファイルにアウトラインマイナ（outline-minor）モードを
+指定することもできます（@pxref{File Variables}）。
+
+@c @kindex C-c @@ @r{(Outline minor mode)}
+@kindex C-c @@ @r{（アウトラインマイナモード）}
+@c   The major mode, Outline mode, provides special key bindings on the
+@c @kbd{C-c} prefix.  Outline minor mode provides similar bindings with
+@c @kbd{C-c @@} as the prefix; this is to reduce the conflicts with the
+@c major mode's special commands.  (The variable
+@c @code{outline-minor-mode-prefix} controls the prefix used.)
+メジャーモードであるアウトライン（outline）モードでは、
+プレフィックス@kbd{C-c}に特別なキーバインディングを設定しています。
+アウトラインマイナ（outline-minor）モードでは、
+@kbd{C-c @@}をプレフィックスとして同様のバインディングがあります。
+これは、一緒に用いるメジャーモードの特別なコマンドとの衝突を
+減らすための措置です。
+（変数@code{outline-minor-mode-prefix}で、
+実際に使用するプレフィックスを制御する。）
+
+@vindex outline-mode-hook
+@c   Entering Outline mode runs the hook @code{text-mode-hook} followed by
+@c the hook @code{outline-mode-hook} (@pxref{Hooks}).
+アウトライン（outline）モードに入ると、
+フック@code{text-mode-hook}に続けてフック@code{outline-mode-hook}を
+実行します（@pxref{Hooks}）。
+
+@menu
+* Format: Outline Format.	   What the text of an outline looks like.
+* Motion: Outline Motion.	   Special commands for moving through
+                                     outlines. 
+* Visibility: Outline Visibility.  Commands to control what is visible.
+* Views: Outline Views.            Outlines and multiple views.
+@end menu
+
+@node Outline Format
+@c @subsection Format of Outlines
+@subsection アウトラインの形式
+
+@c @cindex heading lines (Outline mode)
+@c @cindex body lines (Outline mode)
+@cindex 見出し行（アウトラインモード）
+@cindex 本体行（アウトラインモード）
+@c   Outline mode assumes that the lines in the buffer are of two types:
+@c @dfn{heading lines} and @dfn{body lines}.  A heading line represents a
+@c topic in the outline.  Heading lines start with one or more stars; the
+@c number of stars determines the depth of the heading in the outline
+@c structure.  Thus, a heading line with one star is a major topic; all the
+@c heading lines with two stars between it and the next one-star heading
+@c are its subtopics; and so on.  Any line that is not a heading line is a
+@c body line.  Body lines belong with the preceding heading line.  Here is
+@c an example:
+アウトライン（outline）モードは、
+バッファの中には2種類の行、つまり、
+@dfn{見出し行}（heading lines）、@dfn{本体行}（body lines）
+があると仮定します。
+見出し行は、アウトラインのトピックを表していて、
+1つ以上の星印で始まります。
+星印の個数は、アウトライン構造における見出しの深さを表します。
+つまり、星印1つの見出し行は主要なトピックを表します。
+この行とつぎの星印1個の行のあいだにある星印2個の見出し行は、
+この行の下位トピックです。
+星印がいくつであってもこのような関係が成り立ちます。
+見出し行以外は本体行です。
+これらは直前の見出し行に属します。
+以下に例を示します。
+
+@example
+* Food
+This is the body,
+which says something about the topic of food.
+
+** Delicious Food
+This is the body of the second-level header.
+
+** Distasteful Food
+This could have
+a body too, with
+several lines.
+
+*** Dormitory Food
+
+* Shelter
+Another first-level topic with its header line.
+@end example
+
+@c   A heading line together with all following body lines is called
+@c collectively an @dfn{entry}.  A heading line together with all following
+@c deeper heading lines and their body lines is called a @dfn{subtree}.
+見出し行とそれに続く本体行をまとめて@dfn{項目}（entry）と呼びます。
+また、見出し行と、それに続くさらに深いレベルの見出し行とそれらの本体行を
+まとめて@dfn{部分木}（subtree）と呼びます。
+
+@vindex outline-regexp
+@c   You can customize the criterion for distinguishing heading lines
+@c by setting the variable @code{outline-regexp}.  Any line whose
+@c beginning has a match for this regexp is considered a heading line.
+@c Matches that start within a line (not at the left margin) do not count.
+@c The length of the matching text determines the level of the heading;
+@c longer matches make a more deeply nested level.  Thus, for example,
+@c if a text formatter has commands @samp{@@chapter}, @samp{@@section}
+@c and @samp{@@subsection} to divide the document into chapters and
+@c sections, you could make those lines count as heading lines by
+@c setting @code{outline-regexp} to @samp{"@@chap\\|@@\\(sub\\)*section"}.
+@c Note the trick: the two words @samp{chapter} and @samp{section} are equally
+@c long, but by defining the regexp to match only @samp{chap} we ensure
+@c that the length of the text matched on a chapter heading is shorter,
+@c so that Outline mode will know that sections are contained in chapters.
+@c This works as long as no other command starts with @samp{@@chap}.
+変数@code{outline-regexp}に値を設定して、
+見出し行を判定する基準をカスタマイズできます。
+この正規表現に行頭が一致する行を見出し行とみなします。
+（左端からではなく）行の途中で一致するものは、無視します。
+一致したテキストの長さによって、見出しのレベルを決定します。
+一致したテキストが長いほどレベルが深くなります。
+したがって、たとえば、清書系に章や節を分ける
+@samp{@@chapter}、@samp{@@section}、@samp{@@subsection}といった
+コマンドがある場合、これらの行を見出しとして扱えばよいのですが、それには
+@code{outline-regexp}に@samp{"@@chap\\|@@\\(sub\\)*section"}と設定します。
+これには、ちょっとしたトリックがあります。
+2つの単語、@samp{chapter}と@samp{section}は同じ長さですが、
+正規表現では、@samp{chap}だけに一致するように定義することで、
+章見出しに一致するテキストの長さのほうを短くできます。
+これによって、アウトライン（outline）モードは、
+章（chapter）の中に節（section）が含まれるとわかるのです。
+他のコマンドが@samp{@@chap}で始まらない限り、この設定は有効です。
+
+@vindex outline-level
+@c   It is possible to change the rule for calculating the level of a
+@c heading line by setting the variable @code{outline-level}.  The value of
+@c @code{outline-level} should be a function that takes no arguments and
+@c returns the level of the current heading.  Some major modes such as C,
+@c Nroff, and Emacs Lisp mode set this variable in order to work with
+@c Outline minor mode.
+変数@code{outline-level}を設定すると、見出し行のレベル計算方法を変更できます。
+@code{outline-level}の値は、引数を取らない、
+現在の見出しのレベルを返す関数である必要があります。
+Cモード、nroffモード、Emacs Lispモードといったメジャーモードのいくつかでは、
+アウトラインマイナ（outline-minor）モードが有効に働くように、
+この変数を設定します。
+
+@node Outline Motion
+@c @subsection Outline Motion Commands
+@subsection アウトライン上での移動コマンド
+
+@c   Outline mode provides special motion commands that move backward and
+@c forward to heading lines.
+アウトライン（outline）モードには、
+前後の見出し行に移動する特別なコマンドがあります。
+
+@table @kbd
+@item C-c C-n
+@c Move point to the next visible heading line
+@c (@code{outline-next-visible-heading}).
+つぎの可視な見出し行にポイントを移動する
+（@code{outline-next-visible-heading}）。
+@item C-c C-p
+@c Move point to the previous visible heading line
+@c (@code{outline-previous-visible-heading}).
+まえの可視な見出し行にポイントを移動する
+（@code{outline-previous-visible-heading}）。
+@item C-c C-f
+@c Move point to the next visible heading line at the same level
+@c as the one point is on (@code{outline-forward-same-level}).
+ポイント位置と同じレベルのつぎの可視な見出し行にポイントを移動する
+（@code{outline-forward-same-level}）。
+@item C-c C-b
+@c Move point to the previous visible heading line at the same level
+@c (@code{outline-backward-same-level}).
+ポイント位置と同じレベルのまえの可視な見出し行にポイントを移動する
+（@code{outline-backward-same-level}）。
+@item C-c C-u
+@c Move point up to a lower-level (more inclusive) visible heading line
+@c (@code{outline-up-heading}).
+より浅い（より多くの項目を含む）レベルで、
+可視な見出し行にポイントを移動する（@code{outline-up-heading}）。
+@end table
+
+@findex outline-next-visible-heading
+@findex outline-previous-visible-heading
+@c @kindex C-c C-n @r{(Outline mode)}
+@c @kindex C-c C-p @r{(Outline mode)}
+@kindex C-c C-n @r{（アウトラインモード）}
+@kindex C-c C-p @r{（アウトラインモード）}
+@c   @kbd{C-c C-n} (@code{outline-next-visible-heading}) moves down to the next
+@c heading line.  @kbd{C-c C-p} (@code{outline-previous-visible-heading}) moves
+@c similarly backward.  Both accept numeric arguments as repeat counts.  The
+@c names emphasize that invisible headings are skipped, but this is not really
+@c a special feature.  All editing commands that look for lines ignore the
+@c invisible lines automatically.@refill
+@kbd{C-c C-n}（@code{outline-next-visible-heading}）は、
+つぎの見出し行にポイントを移動します。
+@kbd{C-c C-p}（@code{outline-previous-visible-heading}）も同様ですが、
+逆向きにポイントを移動します。
+どちらのコマンドも、数引数を反復回数として受け取ります。
+コマンドの名前は、不可視な見出し行を飛び越えることを強調していますが、
+これは何も特別な機能ではありません。
+行を探すようなすべての編集コマンドは、不可視な行を自動的に無視します。
+
+@findex outline-up-heading
+@findex outline-forward-same-level
+@findex outline-backward-same-level
+@c @kindex C-c C-f @r{(Outline mode)}
+@c @kindex C-c C-b @r{(Outline mode)}
+@c @kindex C-c C-u @r{(Outline mode)}
+@kindex C-c C-f @r{（アウトラインモード）}
+@kindex C-c C-b @r{（アウトラインモード）}
+@kindex C-c C-u @r{（アウトラインモード）}
+@c   More powerful motion commands understand the level structure of headings.
+@c @kbd{C-c C-f} (@code{outline-forward-same-level}) and
+@c @kbd{C-c C-b} (@code{outline-backward-same-level}) move from one
+@c heading line to another visible heading at the same depth in
+@c the outline.  @kbd{C-c C-u} (@code{outline-up-heading}) moves
+@c backward to another heading that is less deeply nested.
+もっと強力な移動コマンドは、見出しのレベル構造を把握して移動を行うものです。
+@kbd{C-c C-f}（@code{outline-forward-same-level}）と
+@kbd{C-c C-b}（@code{outline-backward-same-level}）は、
+アウトライン構造中で同じレベルにある別の見出し行にポイントを移動します。
+@kbd{C-c C-u}（@code{outline-up-heading}）は、
+より浅いレベルの見出し行へ戻るようにポイントを移動します。
+
+@node Outline Visibility
+@c @subsection Outline Visibility Commands
+@subsection アウトラインの可視／不可視制御コマンド
+
+@c   The other special commands of outline mode are used to make lines visible
+@c or invisible.  Their names all start with @code{hide} or @code{show}.
+@c Most of them fall into pairs of opposites.  They are not undoable; instead,
+@c you can undo right past them.  Making lines visible or invisible is simply
+@c not recorded by the undo mechanism.
+アウトライン（outline）モードの特別なコマンドとして、
+行を可視／不可視にするものもあります。
+これらのコマンドの名前は、すべて@code{hide}あるいは@code{show}で始まります。
+これらのほとんどは、逆の機能のコマンドと対になっています。
+これらのコマンドはアンドゥ可能ではありませんが、
+実行直後ならば戻すことはできます。
+行を可視／不可視にするのは、アンドゥ機構に単純に記録するのではありません。
+
+@table @kbd
+@item C-c C-t
+@c Make all body lines in the buffer invisible (@code{hide-body}).
+バッファ中の本体行をすべて不可視にする（@code{hide-body}）。
+@item C-c C-a
+@c Make all lines in the buffer visible (@code{show-all}).
+バッファ中のすべての行を可視にする（@code{show-all}）。
+@item C-c C-d
+@c Make everything under this heading invisible, not including this
+@c heading itself (@code{hide-subtree}).
+ポイント位置の見出し行を除いて、
+その下位レベルのすべてを不可視にする（@code{hide-subtree}）。
+@item C-c C-s
+@c Make everything under this heading visible, including body,
+@c subheadings, and their bodies (@code{show-subtree}).
+ポイント位置の見出し行、本体、下位の見出し／本体、
+すべてを可視にする（@code{show-subtree}）。
+@item C-c C-l
+@c Make the body of this heading line, and of all its subheadings,
+@c invisible (@code{hide-leaves}).
+ポイント位置の見出し行の本体と
+下位の見出し行のすべての本体を不可視にする
+（@code{hide-leaves}）。
+@item C-c C-k
+@c Make all subheadings of this heading line, at all levels, visible
+@c (@code{show-branches}). 
+ポイント位置の見出し行の下位の見出し行をすべて可視にする
+（@code{show-branches}）。
+@item C-c C-i
+@c Make immediate subheadings (one level down) of this heading line
+@c visible (@code{show-children}).
+ポイント位置の見出し行の直下（1レベル深い）の下位見出しを
+可視にする（@code{show-children}）。
+@item C-c C-c
+@c Make this heading line's body invisible (@code{hide-entry}).
+ポイント位置の見出し行の本体を不可視にする（@code{hide-entry}）。
+@item C-c C-e
+@c Make this heading line's body visible (@code{show-entry}).
+ポイント位置の見出し行の本体を可視にする（@code{show-entry}）。
+@item C-c C-q
+@c Hide everything except the top @var{n} levels of heading lines
+@c (@code{hide-sublevels}).
+最上位の@var{n}レベルまでを除き、すべてを不可視にする
+（@code{hide-sublevels}）。
+@item C-c C-o
+@c Hide everything except for the heading or body that point is in, plus
+@c the headings leading up from there to the top level of the outline
+@c (@code{hide-other}).
+ポイント位置の見出し行や本体、および、
+そこから最上位レベルに至るまでに通過する見出し行を除き、
+すべて不可視にする（@code{hide-other}）。
+@end table
+
+@findex hide-entry
+@findex show-entry
+@c @kindex C-c C-c @r{(Outline mode)}
+@c @kindex C-c C-e @r{(Outline mode)}
+@kindex C-c C-c @r{（アウトラインモード）}
+@kindex C-c C-e @r{（アウトラインモード）}
+@c   Two commands that are exact opposites are @kbd{C-c C-c}
+@c (@code{hide-entry}) and @kbd{C-c C-e} (@code{show-entry}).  They are
+@c used with point on a heading line, and apply only to the body lines of
+@c that heading.  Subheadings and their bodies are not affected.
+@kbd{C-c C-c}（@code{hide-entry}）と
+@kbd{C-c C-e}（@code{show-entry}）の2つのコマンドは、
+正反対の機能を持っています。
+これらは、見出し行にポイントがある場合
+@footnote{【訳注】ポイントが本体行にあっても動作する。}
+に、その本体のみに作用します。
+下位見出しとその本体は影響を受けません。
+
+@findex hide-subtree
+@findex show-subtree
+@c @kindex C-c C-s @r{(Outline mode)}
+@c @kindex C-c C-d @r{(Outline mode)}
+@kindex C-c C-s @r{（アウトラインモード）}
+@kindex C-c C-d @r{（アウトラインモード）}
+@c @cindex subtree (Outline mode)
+@cindex 部分木（アウトラインモード）
+@c   Two more powerful opposites are @kbd{C-c C-d} (@code{hide-subtree}) and
+@c @kbd{C-c C-s} (@code{show-subtree}).  Both expect to be used when point is
+@c on a heading line, and both apply to all the lines of that heading's
+@c @dfn{subtree}: its body, all its subheadings, both direct and indirect, and
+@c all of their bodies.  In other words, the subtree contains everything
+@c following this heading line, up to and not including the next heading of
+@c the same or higher rank.@refill
+もっと強力で機能が正反対のコマンドは、
+@kbd{C-c C-d}（@code{hide-subtree}）と
+@kbd{C-c C-s}（@code{show-subtree}）です。
+どちらも見出し行にポイントがあるとき
+@footnote{【訳注】ポイントが本体行にあっても動作し、結果も同じ。}
+に使い、
+見出しの@dfn{部分木}内のすべての行
+つまり、本体、直接／間接に関わらずあらゆる下位の見出しとその本体、
+に作用します。
+つまり、部分木には、その見出し行に続く
+つぎの同レベルか上位レベルの見出し行の直前までが含まれます。
+
+@findex hide-leaves
+@findex show-branches
+@c @kindex C-c C-l @r{(Outline mode)}
+@c @kindex C-c C-k @r{(Outline mode)}
+@kindex C-c C-l @r{（アウトラインモード）}
+@kindex C-c C-k @r{（アウトラインモード）}
+@c   Intermediate between a visible subtree and an invisible one is having
+@c all the subheadings visible but none of the body.  There are two
+@c commands for doing this, depending on whether you want to hide the
+@c bodies or make the subheadings visible.  They are @kbd{C-c C-l}
+@c (@code{hide-leaves}) and @kbd{C-c C-k} (@code{show-branches}).
+可視な部分木と、すべて不可視な部分木の中間的な状態には、
+本体は不可視で下位の見出し行はすべて可視といったものも存在します。
+この状態を作り出すコマンドは2つあり、
+本体を不可視にするか、下位見出しを可視にするかです。
+これらは、@kbd{C-c C-l}（@code{hide-leaves}）と
+@kbd{C-c C-k}（@code{show-branches}）です。
+
+@c @kindex C-c C-i @r{(Outline mode)}
+@kindex C-c C-i @r{（アウトラインモード）}
+@findex show-children
+@c   A little weaker than @code{show-branches} is @kbd{C-c C-i}
+@c (@code{show-children}).  It makes just the direct subheadings
+@c visible---those one level down.  Deeper subheadings remain invisible, if
+@c they were invisible.@refill
+@kbd{C-c C-i}（@code{show-children}）は、
+@code{show-branches}より少し弱いコマンドです。
+これは、直下の、つまり1レベル深い見出し行だけを可視にします。
+より深いレベルの見出しは不可視ならば不可視のままです。
+
+@findex hide-body
+@findex show-all
+@c @kindex C-c C-t @r{(Outline mode)}
+@c @kindex C-c C-a @r{(Outline mode)}
+@kindex C-c C-t @r{（アウトラインモード）}
+@kindex C-c C-a @r{（アウトラインモード）}
+@c   Two commands have a blanket effect on the whole file.  @kbd{C-c C-t}
+@c (@code{hide-body}) makes all body lines invisible, so that you see just
+@c the outline structure.  @kbd{C-c C-a} (@code{show-all}) makes all lines
+@c visible.  These commands can be thought of as a pair of opposites even
+@c though @kbd{C-c C-a} applies to more than just body lines.
+ファイル全体に効果がおよぶ2つのコマンドがあります。
+@kbd{C-c C-t}（@code{hide-entry}）は本体行をすべて不可視にするので、
+アウトライン構造だけを眺めることができます。
+@kbd{C-c C-a}（@code{show-all}）は、すべての行を可視にします。
+@kbd{C-c C-a}は本体行以外にも作用しますが、
+これらのコマンドは正反対の機能の対と考えることができます。
+
+@findex hide-sublevels
+@c @kindex C-c C-q @r{(Outline mode)}
+@kindex C-c C-q @r{（アウトラインモード）}
+@c   The command @kbd{C-c C-q} (@code{hide-sublevels}) hides all but the
+@c top level headings.  With a numeric argument @var{n}, it hides everything
+@c except the top @var{n} levels of heading lines.
+コマンド@kbd{C-c C-q}（@code{hide-sublevels}）は、
+最上位レベルの見出し以外をすべて不可視にします。
+数引数@var{n}を指定すると、最上位から@var{n}レベルまでの見出し行を除いた
+すべてを不可視にします。
+
+@findex hide-other
+@c @kindex C-c C-o @r{(Outline mode)}
+@kindex C-c C-o @r{（アウトラインモード）}
+@c   The command @kbd{C-c C-o} (@code{hide-other}) hides everything except
+@c the heading or body text that point is in, plus its parents (the headers
+@c leading up from there to top level in the outline).
+コマンド@kbd{C-c C-o}（@code{hide-other}）は、
+ポイント位置の見出しあるいは本体、その親（
+アウトライン構造においてポイント位置から最上位レベルまで至る見出し）を
+除いたすべてを不可視にします。
+
+@c   You can turn off the use of ellipses at the ends of visible lines by
+@c setting @code{selective-display-ellipses} to @code{nil}.  Then there is
+@c no visible indication of the presence of invisible lines.
+変数@code{selective-display-ellipses}に@code{nil}を設定すると、
+可視な行の末尾に現れる省略記号を消せます。
+そうすると、不可視な行の存在を示すものは何もなくなります。
+
+@c   When incremental search finds text that is hidden by Outline mode,
+@c it makes that part of the buffer visible.  If you exit the search
+@c at that position, the text remains visible.
+インクリメンタルサーチでアウトライン（outline）モードが
+不可視にしているテキストを探しだすと、バッファのその部分は可視になります。
+その箇所で探索から抜けると、テキストは可視のまま
+@footnote{【訳注】抜けると、また不可視にもどってしまう。
+}になります。
+
+@node Outline Views
+@c @subsection Viewing One Outline in Multiple Views
+@subsection 複数の視点からアウトラインを眺める
+@c @cindex multiple views of outline
+@c @cindex views of an outline
+@c @cindex outline with multiple views
+@c @cindex indirect buffers and outlines
+@cindex アウトラインに対する複数の視点
+@cindex アウトラインの視点
+@cindex 複数の視点を持つアウトライン
+@cindex 間接バッファとアウトライン
+@c   You can display two views of a single outline at the same time, in
+@c different windows.  To do this, you must create an indirect buffer using
+@c @kbd{M-x make-indirect-buffer}.  The first argument of this command is
+@c the existing outline buffer name, and its second argument is the name to
+@c use for the new indirect buffer.  @xref{Indirect Buffers}.
+1つのアウトライン構造を同時に2つの視点から別々のウィンドウに表示して
+眺めることができます。
+それには、@kbd{M-x make-indirect-buffer}を使って
+間接バッファを作成する必要があります。
+このコマンドの最初の引数は、既存のアウトライン用バッファの名前で、
+2番目の引数は新たに作成する間接バッファの名前です。
+@xref{Indirect Buffers}。
+
+@c   Once the indirect buffer exists, you can display it in a window in the
+@c normal fashion, with @kbd{C-x 4 b} or other Emacs commands.  The Outline
+@c mode commands to show and hide parts of the text operate on each buffer
+@c independently; as a result, each buffer can have its own view.  If you
+@c want more than two views on the same outline, create additional indirect
+@c buffers.
+間接バッファがあるならば、@kbd{C-x 4 b}や他のEmacsコマンドで普通に
+そのバッファをウィンドウに表示できます。
+テキストの一部を可視／不可視にするアウトライン（outline）モードのコマンドは、
+各バッファで独立に働きます。
+その結果、各バッファごとに独自の視点を持たせることが可能です。
+同じアウトラインに対して3つ以上の視点が必要ならば、
+間接バッファをさらに作成してください。
+
+@node TeX Mode
+@c @section @TeX{} Mode
+@section @TeX{}モード
+@c @cindex @TeX{} mode
+@c @cindex La@TeX{} mode
+@c @cindex Sli@TeX{} mode
+@c @cindex mode, @TeX{}
+@c @cindex mode, La@TeX{}
+@c @cindex mode, Sli@TeX{}
+@cindex @TeX{}モード
+@cindex La@TeX{}モード
+@cindex Sli@TeX{}モード
+@cindex モード、@TeX{}
+@cindex モード、La@TeX{}
+@cindex モード、Sli@TeX{}
+@findex tex-mode
+@findex plain-tex-mode
+@findex latex-mode
+@findex slitex-mode
+
+@c   @TeX{} is a powerful text formatter written by Donald Knuth; it is also
+@c free, like GNU Emacs.  La@TeX{} is a simplified input format for @TeX{},
+@c implemented by @TeX{} macros; it comes with @TeX{}.  Sli@TeX{} is a special
+@c form of La@TeX{}.@refill
+@TeX{}は、Donald Knuthが作成した強力な清書系です。
+しかも、GNU Emacsと同じくフリーです。
+La@TeX{}は、@TeX{}の入力形式を単純化したもので、
+@TeX{}のマクロで実現されています。
+これも@TeX{}に付属しています。
+Sli@TeX{}はスライドを作成するためにLa@TeX{}を特殊化したものです。
+
+@c   Emacs has a special @TeX{} mode for editing @TeX{} input files.
+@c It provides facilities for checking the balance of delimiters and for
+@c invoking @TeX{} on all or part of the file.
+Emacsには、@TeX{}の入力ファイルを編集するための特別な@TeX{}モードがあります。
+このモードには、区切りの対応を検査したり、
+ファイル全体やその一部に対して@TeX{}を起動したりする機能があります。
+
+@vindex tex-default-mode
+@c   @TeX{} mode has three variants, Plain @TeX{} mode, La@TeX{} mode, and
+@c Sli@TeX{} mode (these three distinct major modes differ only slightly).
+@c They are designed for editing the three different formats.  The command
+@c @kbd{M-x tex-mode} looks at the contents of the buffer to determine
+@c whether the contents appear to be either La@TeX{} input or Sli@TeX{}
+@c input; if so, it selects the appropriate mode.  If the file contents do
+@c not appear to be La@TeX{} or Sli@TeX{}, it selects Plain @TeX{} mode.
+@c If the contents are insufficient to determine this, the variable
+@c @code{tex-default-mode} controls which mode is used.
+@TeX{}モードには3つの変種があります。
+それぞれ、プレイン@TeX{}（plain-tex）モード、
+La@TeX{}（latex）モード、Sli@TeX{}（slitex）モードです
+（これら3つはメジャーモードですが、差異はわずか）。
+これらのモードは、異なる3つの入力形式を編集するように設計されています。
+コマンド@kbd{M-x tex-mode}は、バッファ内の内容を調べて、
+La@TeX{}の入力なのかSli@TeX{}の入力なのか判断します。
+そのいずれかであれば、それに適したモードを選択します。
+ファイルの中身がLa@TeX{}でもSli@TeX{}でもなさそうであれば、
+プレイン@TeX{}（plain-tex）モードを選択します。
+ファイルの内容が判断するに十分でなければ、
+変数@code{tex-default-mode}で使用するモードを制御します。
+
+@c   When @kbd{M-x tex-mode} does not guess right, you can use the commands
+@c @kbd{M-x plain-tex-mode}, @kbd{M-x latex-mode}, and @kbd{M-x
+@c slitex-mode} to select explicitly the particular variants of @TeX{}
+@c mode.
+@kbd{M-x tex-mode}が適切なモードを推測できなかった場合には、
+コマンド@kbd{M-x plain-tex-mode}、@kbd{M-x latex-mode}、
+@kbd{M-x slitex-mode}で明示的に@TeX{}の変種を選択できます。
+
+@menu
+* Editing: TeX Editing.   Special commands for editing in TeX mode.
+* LaTeX: LaTeX Editing.   Additional commands for LaTeX input files.
+* Printing: TeX Print.    Commands for printing part of a file with TeX.
+@end menu
+
+@node TeX Editing
+@c @subsection @TeX{} Editing Commands
+@subsection @TeX{}編集コマンド
+
+@c   Here are the special commands provided in @TeX{} mode for editing the
+@c text of the file.
+ここでは、@TeX{}の入力ファイルのテキストを編集するために
+@TeX{}モードに用意してある特別なコマンドについて述べます。
+
+@table @kbd
+@item "
+@c Insert, according to context, either @samp{``} or @samp{"} or
+@c @samp{''} (@code{tex-insert-quote}).
+文脈に応じて@samp{``}、@samp{"}、@samp{''}を挿入する
+（@code{tex-insert-quote}）。
+@item C-j
+@c Insert a paragraph break (two newlines) and check the previous
+@c paragraph for unbalanced braces or dollar signs
+@c (@code{tex-terminate-paragraph}).
+段落区切り（空行を2つ）を挿入し、
+まえの段落の中括弧やドル記号の対応を検査する
+（@code{tex-terminate-paragraph}）。
+@item M-x tex-validate-region
+@c Check each paragraph in the region for unbalanced braces or dollar signs.
+リージョン内の各段落に対して、
+中括弧やドル記号の対応を検査する。
+@item C-c @{
+@c Insert @samp{@{@}} and position point between them (@code{tex-insert-braces}).
+@samp{@{@}}を挿入して、そのあいだにポイントを移動する
+（@code{tex-insert-braces}）。
+@item C-c @}
+@c Move forward past the next unmatched close brace (@code{up-list}).
+対応が取れていないつぎの閉じ中括弧のあとに
+前向きにポイントを移動する（@code{up-list}）。
+@end table
+
+@findex tex-insert-quote
+@c @kindex " @r{(@TeX{} mode)}
+@kindex " @r{（@TeX{}モード）}
+@c   In @TeX{}, the character @samp{"} is not normally used; we use
+@c @samp{``} to start a quotation and @samp{''} to end one.  To make
+@c editing easier under this formatting convention, @TeX{} mode overrides
+@c the normal meaning of the key @kbd{"} with a command that inserts a pair
+@c of single-quotes or backquotes (@code{tex-insert-quote}).  To be
+@c precise, this command inserts @samp{``} after whitespace or an open
+@c brace, @samp{"} after a backslash, and @samp{''} after any other
+@c character.
+@TeX{}では、文字@samp{"}はまず使いません。
+引用を始めるには@samp{``}を、終るには@samp{''}を使います。
+こういったテキスト整形上の規則の下で編集作業を楽にするために、
+@TeX{}モードでは@samp{`}と@samp{'}を対で挿入する
+（@code{tex-insert-quote}）ようにキー@kbd{"}の意味を変えています。
+より正確にいえば、このコマンドは白文字や開き中括弧のあとでは@samp{``}を、
+バックスラッシュのあとでは@samp{"}を、
+これ以外の文字のあとでは@samp{''}を挿入します。
+
+@c   If you need the character @samp{"} itself in unusual contexts, use
+@c @kbd{C-q} to insert it.  Also, @kbd{"} with a numeric argument always
+@c inserts that number of @samp{"} characters.  You can turn off the
+@c feature of @kbd{"} expansion by eliminating that binding in the local
+@c map (@pxref{Key Bindings}).
+特別な文脈で@samp{"}文字が必要であれば、@kbd{C-q}を使って挿入します。
+また、@samp{"}に数引数を指定すると、その個数分の@samp{"}を入力します。
+ローカルマップからバインディング（@pxref{Key Bindings}）を取り除けば、
+@samp{"}を展開する機能をオフにできます。
+
+@c   In @TeX{} mode, @samp{$} has a special syntax code which attempts to
+@c understand the way @TeX{} math mode delimiters match.  When you insert a
+@c @samp{$} that is meant to exit math mode, the position of the matching
+@c @samp{$} that entered math mode is displayed for a second.  This is the
+@c same feature that displays the open brace that matches a close brace that
+@c is inserted.  However, there is no way to tell whether a @samp{$} enters
+@c math mode or leaves it; so when you insert a @samp{$} that enters math
+@c mode, the previous @samp{$} position is shown as if it were a match, even
+@c though they are actually unrelated.
+@TeX{}モードでは、@samp{$}には@TeX{}の数式モードの区切りの対応を確認する
+ための特別な構文コードが設定されています。
+数式モード終了を意味する@samp{$}を挿入すると、
+それに対応した数式モード開始の@samp{$}を1秒間ほど表示します。
+これは、閉じ中括弧を挿入すると、
+それに対応する開き中括弧を表示する機能と同じです。
+しかし、@samp{$}が数式モードを開始するものか終了するものかを
+知る方法がありません。
+したがって、数式モード開始の@samp{$}を挿入しても、
+たとえ実際には無関係であっても、
+まえにある@samp{$}が対応しているかのように表示されてしまいます。
+
+@findex tex-insert-braces
+@c @kindex C-c @{ @r{(@TeX{} mode)}
+@kindex C-c @{ @r{（@TeX{}モード）}
+@findex up-list
+@c @kindex C-c @} @r{(@TeX{} mode)}
+@kindex C-c @} @r{（@TeX{}モード）}
+@c   @TeX{} uses braces as delimiters that must match.  Some users prefer
+@c to keep braces balanced at all times, rather than inserting them
+@c singly.  Use @kbd{C-c @{} (@code{tex-insert-braces}) to insert a pair of
+@c braces.  It leaves point between the two braces so you can insert the
+@c text that belongs inside.  Afterward, use the command @kbd{C-c @}}
+@c (@code{up-list}) to move forward past the close brace.
+@TeX{}は、中括弧を必ず対応が取れている区切りとして使います。
+ユーザーの中には、中括弧を別々に入力するよりも、
+つねに対応が取れている中括弧の入力を好む人もいます。
+@kbd{C-c @{}（@code{tex-insert-braces}）と打てば中括弧の対を挿入できます。
+さらに、ポイントがそれらのあいだに置かれるので、
+中括弧の内側にテキストを挿入できます。
+そのあとに、コマンド@kbd{C-c @}}（@code{up-list}）を使って、
+閉じ中括弧のうしろに移動します。
+
+@findex tex-validate-region
+@findex tex-terminate-paragraph
+@c @kindex C-j @r{(@TeX{} mode)}
+@kindex C-j @r{（@TeX{}モード）}
+@c   There are two commands for checking the matching of braces.  @kbd{C-j}
+@c (@code{tex-terminate-paragraph}) checks the paragraph before point, and
+@c inserts two newlines to start a new paragraph.  It prints a message in
+@c the echo area if any mismatch is found.  @kbd{M-x tex-validate-region}
+@c checks a region, paragraph by paragraph.  The errors are listed in the
+@c @samp{*Occur*} buffer, and you can use @kbd{C-c C-c} or @kbd{Mouse-2} in
+@c that buffer to go to a particular mismatch.
+中括弧の対応を調べるコマンドは2つあります。
+@kbd{C-j}（@code{tex-terminate-paragraph}）は、
+ポイントの直前の段落を検査してから、新たな段落を始める空行を2つ挿入します。
+対応していない中括弧があれば、エコー領域にメッセージを表示します。
+@kbd{M-x tex-validate-region}は、リージョンの段落を1つ1つ検査します。
+エラーはバッファ@samp{*Occur*}に表示されます。
+このバッファで@kbd{C-c C-c}や@kbd{Mouse-2}を使えば、
+特定の非対応箇所へ移動できます。
+
+@c   Note that Emacs commands count square brackets and parentheses in
+@c @TeX{} mode, not just braces.  This is not strictly correct for the
+@c purpose of checking @TeX{} syntax.  However, parentheses and square
+@c brackets are likely to be used in text as matching delimiters and it is
+@c useful for the various motion commands and automatic match display to
+@c work with them.
+@TeX{}モードでは、Emacsコマンドは中括弧だけでなく、
+括弧（@samp{()}）や角括弧（@samp{[]}）も数えています。
+これは、@TeX{}の構文を検査する目的からいえば、厳密には正しくありません。
+しかし、括弧や角括弧はテキスト内で対応する区切りとしてよく使われますし、
+各種の移動コマンドや対応関係を自動表示するコマンドが
+それらを扱えると便利です。
+
+@node LaTeX Editing
+@c @subsection La@TeX{} Editing Commands
+@subsection La@TeX{}編集コマンド
+
+@c   La@TeX{} mode, and its variant, Sli@TeX{} mode, provide a few extra
+@c features not applicable to plain @TeX{}.
+La@TeX{}モードと、その変種のSli@TeX{} モードには、
+プレイン@TeX{}（plain-tex）では利用できない特別な機能がいくつかあります。
+
+@table @kbd
+@item C-c C-o
+@c Insert @samp{\begin} and @samp{\end} for La@TeX{} block and position
+@c point on a line between them (@code{tex-latex-block}).
+La@TeX{}のブロックを表す@samp{\begin}と@samp{\end}を挿入し、
+それらのあいだにポイントを置く（@code{tex-latex-block}）。
+@item C-c C-e
+@c Close the innermost La@TeX{} block not yet closed
+@c (@code{tex-close-latex-block}).
+まだ閉じていないもっとも内側のLa@TeX{}のブロックを閉じる
+（@code{tex-close-latex-block}）。
+@end table
+
+@findex tex-latex-block
+@c @kindex C-c C-o @r{(La@TeX{} mode)}
+@kindex C-c C-o @r{（La@TeX{}モード）}
+@vindex latex-block-names
+@c   In La@TeX{} input, @samp{\begin} and @samp{\end} commands are used to
+@c group blocks of text.  To insert a @samp{\begin} and a matching
+@c @samp{\end} (on a new line following the @samp{\begin}), use @kbd{C-c
+@c C-o} (@code{tex-latex-block}).  A blank line is inserted between the
+@c two, and point is left there.  You can use completion when you enter the
+@c block type; to specify additional block type names beyond the standard
+@c list, set the variable @code{latex-block-names}.  For example, here's
+@c how to add @samp{theorem}, @samp{corollary}, and @samp{proof}:
+La@TeX{}の入力では、@samp{\begin}と@samp{\end}がテキストのブロックを
+グループ化するために使われます。
+@samp{\begin}と対応する@samp{\end}を（@samp{\begin}のつぎの新しい行に）
+挿入するには、@kbd{C-c C-o}（@code{tex-latex-block}）を使います。
+それらのあいだには空行が挿入されてポイントもそこに置かれます。
+ブロックの種類を入力するときには、補完を使えます。
+標準のリストに含まれないブロック名を使う場合には、
+変数@code{latex-block-names}に設定します。
+つぎの例は、@samp{theorem}、@samp{corollary}、@samp{proof}を追加するものです。
+
+@example
+(setq latex-block-names '("theorem" "corollary" "proof"))
+@end example
+
+@findex tex-close-latex-block
+@c @kindex C-c C-e @r{(La@TeX{} mode)}
+@kindex C-c C-e @r{（La@TeX{}モード）}
+@c   In La@TeX{} input, @samp{\begin} and @samp{\end} commands must
+@c balance.  You can use @kbd{C-c C-e} (@code{tex-close-latex-block}) to
+@c insert automatically a matching @samp{\end} to match the last unmatched
+@c @samp{\begin}.  It indents the @samp{\end} to match the corresponding
+@c @samp{\begin}.  It inserts a newline after @samp{\end} if point is at
+@c the beginning of a line.
+La@TeX{}の入力では、
+@samp{\begin}と@samp{\end}は対応が取れている必要があります。
+@kbd{C-c C-e}（@code{tex-close-latex-block}）を使うと、
+対応が取れていない最後の@samp{\begin}に対応する@samp{\end}を
+自動的に挿入できます。
+また、対応する@samp{\begin}と同じ字下げを@samp{\end}にも施します。
+ポイントが行頭にあったときには、@samp{\end}のうしろで改行します。
+
+@node TeX Print
+@c @subsection @TeX{} Printing Commands
+@subsection @TeX{}印刷コマンド
+
+@c   You can invoke @TeX{} as an inferior of Emacs on either the entire
+@c contents of the buffer or just a region at a time.  Running @TeX{} in
+@c this way on just one chapter is a good way to see what your changes
+@c look like without taking the time to format the entire file.
+バッファ全体あるいは一部のテキストに対して、
+Emacsの下位プロセスとして@TeX{}を起動できます。
+特定の章だけに対してこのように@TeX{}を実行するのは、
+ファイル全体の清書に時間を費すことなく、
+変更部分の見え方を確認するよい方法です。
+
+@table @kbd
+@item C-c C-r
+@c Invoke @TeX{} on the current region, together with the buffer's header
+@c (@code{tex-region}).
+バッファのヘッダとともに、
+カレントリージョンに対して@TeX{}を起動する（@code{tex-region}）。
+@item C-c C-b
+@c Invoke @TeX{} on the entire current buffer (@code{tex-buffer}).
+カレントバッファ全体に対して@TeX{}を起動する（@code{tex-buffer}）。
+@item C-c @key{TAB}
+@c Invoke Bib@TeX{} on the current file (@code{tex-bibtex-file}).
+現在のファイルに対してBib@TeX{}を起動する（@code{tex-bibtex-file}）。
+@item C-c C-f
+@c Invoke @TeX{} on the current file (@code{tex-file}).
+現在のファイルに対して@TeX{}を起動する（@code{tex-file}）。
+@item C-c C-l
+@c Recenter the window showing output from the inferior @TeX{} so that
+@c the last line can be seen (@code{tex-recenter-output-buffer}).
+下位プロセスである@TeX{}の出力を表示したウィンドウをスクロールして、
+出力行の最後が見えるようにする（@code{tex-recenter-output-buffer}）。
+@item C-c C-k
+@c Kill the @TeX{} subprocess (@code{tex-kill-job}).
+@TeX{}のサブプロセスを終了させる（@code{tex-kill-job}）。
+@item C-c C-p
+@c Print the output from the last @kbd{C-c C-r}, @kbd{C-c C-b}, or @kbd{C-c
+@c C-f} command (@code{tex-print}).
+最後に実行した@kbd{C-c C-r}、@kbd{C-c C-b}、@kbd{C-c C-f}の出力を印刷する。
+（@code{tex-print}）。
+@item C-c C-v
+@c Preview the output from the last @kbd{C-c C-r}, @kbd{C-c C-b}, or @kbd{C-c
+@c C-f} command (@code{tex-view}).
+最後に実行した@kbd{C-c C-r}、@kbd{C-c C-b}、@kbd{C-c C-f}の出力を
+プレビューする（@code{tex-view}）。
+@item C-c C-q
+@c Show the printer queue (@code{tex-show-print-queue}).
+プリンタキューを表示する（@code{tex-show-print-queue}）。
+@end table
+
+@findex tex-buffer
+@c @kindex C-c C-b @r{(@TeX{} mode)}
+@kindex C-c C-b @r{（@TeX{}モード）}
+@findex tex-print
+@c @kindex C-c C-p @r{(@TeX{} mode)}
+@kindex C-c C-p @r{（@TeX{}モード）}
+@findex tex-view
+@c @kindex C-c C-v @r{(@TeX{} mode)}
+@kindex C-c C-v @r{（@TeX{}モード）}
+@findex tex-show-print-queue
+@c @kindex C-c C-q @r{(@TeX{} mode)}
+@kindex C-c C-q @r{（@TeX{}モード）}
+@c   You can pass the current buffer through an inferior @TeX{} by means of
+@c @kbd{C-c C-b} (@code{tex-buffer}).  The formatted output appears in a
+@c temporary file; to print it, type @kbd{C-c C-p} (@code{tex-print}).
+@c Afterward, you can use @kbd{C-c C-q} (@code{tex-show-print-queue}) to
+@c view the progress of your output towards being printed.  If your terminal
+@c has the ability to display @TeX{} output files, you can preview the
+@c output on the terminal with @kbd{C-c C-v} (@code{tex-view}).
+@kbd{C-c C-b}（@code{tex-buffer}）を使えば、
+カレントバッファの内容を下位の@TeX{}に渡すことができます。
+清書結果は一時ファイルに出力されます。
+それを印刷するには、@kbd{C-c C-p}（@code{tex-print}）と打ちます。
+そのあとで、印刷の進捗状況を確認するには
+@kbd{C-c C-q}（@code{tex-show-print-queue}）を利用できます。
+@TeX{}の出力ファイルを表示する機能を持った端末があれば、
+@kbd{C-c C-v}（@code{tex-view}）でプレビューできます。
+
+@c @cindex @code{TEXINPUTS} environment variable
+@cindex 環境変数@code{TEXINPUTS}
+@cindex @code{TEXINPUTS}（環境変数）
+@vindex tex-directory
+@c   You can specify the directory to use for running @TeX{} by setting the
+@c variable @code{tex-directory}.  @code{"."} is the default value.  If
+@c your environment variable @code{TEXINPUTS} contains relative directory
+@c names, or if your files contains @samp{\input} commands with relative
+@c file names, then @code{tex-directory} @emph{must} be @code{"."} or you
+@c will get the wrong results.  Otherwise, it is safe to specify some other
+@c directory, such as @code{"/tmp"}.
+@TeX{}が実行時に使うディレクトリを指定するには、
+変数@code{tex-directory}に設定します。
+デフォルトの値は@code{"."}です。
+環境変数@code{TEXINPUTS}に相対的なディレクトリ名が入っていたり、
+@TeX{}の@samp{\input}コマンドに相対的なファイル名を指定してある場合には、
+@code{tex-directory}は@code{"."}である@emph{必要}があります。
+さもないと、誤った結果になるでしょう。
+そういった状況でなければ、@code{"/tmp"}のような、
+他のディレクトリを設定しても安全です。
+
+@vindex tex-run-command
+@vindex latex-run-command
+@vindex slitex-run-command
+@vindex tex-dvi-print-command
+@vindex tex-dvi-view-command
+@vindex tex-show-queue-command
+@c   If you want to specify which shell commands are used in the inferior @TeX{},
+@c you can do so by setting the values of the variables @code{tex-run-command},
+@c @code{latex-run-command}, @code{slitex-run-command},
+@c @code{tex-dvi-print-command}, @code{tex-dvi-view-command}, and
+@c @code{tex-show-queue-command}.  You @emph{must} set the value of
+@c @code{tex-dvi-view-command} for your particular terminal; this variable
+@c has no default value.  The other variables have default values that may
+@c (or may not) be appropriate for your system.
+下位の@TeX{}を起動するために使うコマンドを指定したければ、
+変数@code{tex-run-command}、@code{latex-run-command}、
+@code{slitex-run-command}、@code{tex-dvi-print-command}、
+@code{tex-dvi-view-command}、@code{tex-show-queue-command}に
+それぞれ値を設定します。
+@code{tex-dvi-view-command}にはデフォルト値がないので、
+使用する端末にあわせた値を設定する@emph{必要}があります。
+これ以外の変数には、使用するシステムに適切と思われる
+（そうでないかもしれないが）デフォルト値が設定されています。
+
+@c   Normally, the file name given to these commands comes at the end of
+@c the command string; for example, @samp{latex @var{filename}}.  In some
+@c cases, however, the file name needs to be embedded in the command; an
+@c example is when you need to provide the file name as an argument to one
+@c command whose output is piped to another.  You can specify where to put
+@c the file name with @samp{*} in the command string.  For example,
+通常は、これらのコマンドに与えるファイル名はコマンド文字列の最後にきます。
+たとえば、@samp{latex @var{filename}}です。
+しかし、ときにはコマンドの途中にファイル名を埋め込む必要があります。
+たとえば、パイプを介して出力を他のコマンドに渡すようなコマンドの引数に
+ファイル名を指定する場合です。
+ファイル名を置く箇所は、コマンド文字列中の@samp{*}で指定できます。
+たとえば、以下のように設定します。
+
+@example
+(setq tex-dvi-print-command "dvips -f * | lpr")
+@end example
+
+@findex tex-kill-job
+@c @kindex C-c C-k @r{(@TeX{} mode)}
+@kindex C-c C-k @r{（@TeX{}モード）}
+@findex tex-recenter-output-buffer
+@c @kindex C-c C-l @r{(@TeX{} mode)}
+@kindex C-c C-l @r{（@TeX{}モード）}
+@c   The terminal output from @TeX{}, including any error messages, appears
+@c in a buffer called @samp{*tex-shell*}.  If @TeX{} gets an error, you can
+@c switch to this buffer and feed it input (this works as in Shell mode;
+@c @pxref{Interactive Shell}).  Without switching to this buffer you can
+@c scroll it so that its last line is visible by typing @kbd{C-c
+@c C-l}.
+エラーメッセージを含めた@TeX{}からの端末出力は、
+@samp{*tex-shell*}と呼ばれるバッファにすべて現れます。
+@TeX{}がエラーを報告した場合には、
+このバッファに切り替えれば適切な入力を与えることができます
+（これはシェル（shell）モードと同様に動作する。@pxref{Interactive Shell}）。
+このバッファに切り替えなくても@kbd{C-c C-l}と打てば、
+バッファの最後の行が表示されるようにスクロールできます。
+
+@c   Type @kbd{C-c C-k} (@code{tex-kill-job}) to kill the @TeX{} process if
+@c you see that its output is no longer useful.  Using @kbd{C-c C-b} or
+@c @kbd{C-c C-r} also kills any @TeX{} process still running.@refill
+@TeX{}の出力が不要となったら、@TeX{}プロセスを終了させるために
+@kbd{C-c C-k}（@code{tex-kill-job}）と打ちます。
+@kbd{C-c C-b}や@kbd{C-c C-r}を使っても、
+動作中の@TeX{}プロセスを終了できます。
+
+@findex tex-region
+@c @kindex C-c C-r @r{(@TeX{} mode)}
+@kindex C-c C-r @r{（@TeX{}モード）}
+@c   You can also pass an arbitrary region through an inferior @TeX{} by typing
+@c @kbd{C-c C-r} (@code{tex-region}).  This is tricky, however, because most files
+@c of @TeX{} input contain commands at the beginning to set parameters and
+@c define macros, without which no later part of the file will format
+@c correctly.  To solve this problem, @kbd{C-c C-r} allows you to designate a
+@c part of the file as containing essential commands; it is included before
+@c the specified region as part of the input to @TeX{}.  The designated part
+@c of the file is called the @dfn{header}.
+@kbd{C-c C-r}（@code{tex-region}）と打てば、
+任意のリージョンを下位の@TeX{}に渡せます。
+しかし、これには少々巧妙な手口を必要とします。
+というのは、たいていの場合、@TeX{}の入力ファイルの先頭部分には
+パラメータの設定やマクロ定義があり、それらがないと残りの部分を正しく
+清書できないからです。
+この問題を解決するために、@kbd{C-c C-r}では
+ファイルの中で必須の整形コマンドを含んでいる部分を指定できます。
+リージョンのまえにその部分を加えて@TeX{}への入力とします。
+ファイル中の必須であると指定された部分を@dfn{ヘッダ}と呼びます。
+
+@c @cindex header (@TeX{} mode)
+@cindex ヘッダ（@TeX{}モード）
+@c   To indicate the bounds of the header in Plain @TeX{} mode, you insert two
+@c special strings in the file.  Insert @samp{%**start of header} before the
+@c header, and @samp{%**end of header} after it.  Each string must appear
+@c entirely on one line, but there may be other text on the line before or
+@c after.  The lines containing the two strings are included in the header.
+@c If @samp{%**start of header} does not appear within the first 100 lines of
+@c the buffer, @kbd{C-c C-r} assumes that there is no header.
+プレイン@TeX{}（plain-tex）モードでヘッダの境界を示すには、
+ファイルに2つの特別な文字列を挿入します。
+ヘッダの直前に@samp{%**start of header}を、
+ヘッダの直後に@samp{%**end of header}を挿入します。
+どちらの文字列も2行にまたがってはいけませんが、
+前後に別のテキストがあってもかまいません。
+これらの文字列を持つ行もヘッダに含まれます。
+バッファの先頭から100行以内に@samp{%**start of header}が現れなければ、
+@kbd{C-c C-r}はヘッダがないと仮定します。
+
+@c   In La@TeX{} mode, the header begins with @samp{\documentstyle} and ends
+@c with @samp{\begin@{document@}}.  These are commands that La@TeX{} requires
+@c you to use in any case, so nothing special needs to be done to identify the
+@c header.
+La@TeX{}モードでは、@samp{\documentstyle}で始まり
+@samp{\begin@{document@}}で終わる部分がヘッダです。
+これらは、いかなる場合でもLa@TeX{}が要求するコマンドなので、
+ヘッダを認識するために特別なことをする必要はありません。
+
+@findex tex-file
+@c @kindex C-c C-f @r{(@TeX{} mode)}
+@kindex C-c C-f @r{（@TeX{}モード）}
+@c   The commands (@code{tex-buffer}) and (@code{tex-region}) do all of their
+@c work in a temporary directory, and do not have available any of the auxiliary
+@c files needed by @TeX{} for cross-references; these commands are generally
+@c not suitable for running the final copy in which all of the cross-references
+@c need to be correct.
+コマンド@code{tex-buffer}と@code{tex-region}は、
+一時的なディレクトリ上ですべての作業を行うので、
+相互参照のために@TeX{}が必要とする補助ファイルを使用できません。
+一般に、これらのコマンドは、相互参照がすべて正しい必要がある
+最終的な原稿の作成には適していません。
+
+@c   When you want the auxiliary files for cross references, use @kbd{C-c
+@c C-f} (@code{tex-file}) which runs @TeX{} on the current buffer's file,
+@c in that file's directory.  Before running @TeX{}, it offers to save any
+@c modified buffers.  Generally, you need to use (@code{tex-file}) twice to
+@c get the cross-references right.
+相互参照のための補助ファイルを必要とする場合には、
+カレントバッファのファイルを入力として、そのファイルを置いたディレクトリで
+@TeX{}を実行する@kbd{C-c C-f}（@code{tex-file}）を使います。
+@TeX{}を実行するまえに、変更したすべてのバッファを保存するか尋ねてきます。
+一般には、正しい相互参照を得るためには、
+@code{tex-file}を2度実行する必要があります。
+
+@vindex tex-start-options-string
+@c   The value of the variable @code{tex-start-options-string} specifies
+@c options for the @TeX{} run.  The default value causes @TeX{} to run in
+@c nonstopmode.  To run @TeX{} interactively, set the variable to @code{""}.
+変数@code{tex-start-options-string}の値は、
+@TeX{}の実行のオプションを指定します。
+デフォルト値は、@TeX{}をバッチモードで実行します。
+@TeX{}を対話的に実行するには、変数に@code{""}を設定します。
+
+@vindex tex-main-file
+@c   Large @TeX{} documents are often split into several files---one main
+@c file, plus subfiles.  Running @TeX{} on a subfile typically does not
+@c work; you have to run it on the main file.  In order to make
+@c @code{tex-file} useful when you are editing a subfile, you can set the
+@c variable @code{tex-main-file} to the name of the main file.  Then
+@c @code{tex-file} runs @TeX{} on that file.
+巨大な@TeX{}文書は、複数のファイル、つまり、1つのメインファイルと
+サブファイルとに分割されることがよくあります。
+サブファイルに対して@TeX{}を実行しても、うまくいくことはまずありません。
+メインファイルに対して@TeX{}を実行する必要があります。
+サブファイルを編集する場合でも@code{tex-file}を使えるように、
+メインファイルの名前を変数@code{tex-main-file}に設定できます。
+そうすると@code{tex-file}はそのファイルに対して@TeX{}を実行します。
+
+@c   The most convenient way to use @code{tex-main-file} is to specify it
+@c in a local variable list in each of the subfiles.  @xref{File
+@c Variables}.
+@code{tex-main-file}のもっとも便利な使い方は、
+各サブファイルのローカル変数リストで指定することです。
+@xref{File Variables}。
+
+@findex tex-bibtex-file
+@c @kindex C-c TAB @r{(@TeX{} mode)}
+@kindex C-c TAB @r{（@TeX{}モード）}
+@vindex tex-bibtex-command
+@c   For La@TeX{} files, you can use Bib@TeX{} to process the auxiliary
+@c file for the current buffer's file.  Bib@TeX{} looks up bibliographic
+@c citations in a data base and prepares the cited references for the
+@c bibliography section.  The command @kbd{C-c TAB}
+@c (@code{tex-bibtex-file}) runs the shell command
+@c (@code{tex-bibtex-command}) to produce a @samp{.bbl} file for the
+@c current buffer's file.  Generally, you need to do @kbd{C-c C-f}
+@c (@code{tex-file}) once to generate the @samp{.aux} file, then do
+@c @kbd{C-c TAB} (@code{tex-bibtex-file}), and then repeat @kbd{C-c C-f}
+@c (@code{tex-file}) twice more to get the cross-references correct.
+La@TeX{}用ファイルであれば、
+カレントバッファのファイルに対する補助ファイルを処理するために
+Bib@TeX{}を使えます。
+Bib@TeX{}は、参考文献をデータベースで調べて、
+参考文献の節のための文献リストを準備します。
+コマンド@kbd{C-c TAB}（@code{tex-bibtex-file}）は、
+カレントバッファのファイルに対する@samp{.bbl}ファイルを
+生成するためのシェルコマンド（@code{tex-bibtex-command}）を実行します。
+通常は、まず@samp{.aux}ファイルを作るために
+@kbd{C-c C-f}（@code{tex-file}）を一度実行してから、
+つぎに@kbd{C-c TAB}（@code{tex-bibtex-file}）を実行し、
+正しい相互参照を得るために@kbd{C-c C-f}（@code{tex-file}）を
+さらに2回実行します。
+
+@vindex tex-shell-hook
+@vindex tex-mode-hook
+@vindex latex-mode-hook
+@vindex slitex-mode-hook
+@vindex plain-tex-mode-hook
+@c   Entering any kind of @TeX{} mode runs the hooks @code{text-mode-hook}
+@c and @code{tex-mode-hook}.  Then it runs either
+@c @code{plain-tex-mode-hook} or @code{latex-mode-hook}, whichever is
+@c appropriate.  For Sli@TeX{} files, it calls @code{slitex-mode-hook}.
+@c Starting the @TeX{} shell runs the hook @code{tex-shell-hook}.
+@c @xref{Hooks}.
+どの@TeX{}モードに入っても、
+フック@code{text-mode-hook}と@code{tex-mode-hook}を実行します。
+そのあとで、
+@code{plain-tex-mode-hook}か@code{latex-mode-hook}の適切なフックを実行します。
+Sli@TeX{}ファイルに対しては、@code{slitex-mode-hook}を呼びます。
+@TeX{}用のシェルの開始時には、フック@code{tex-shell-hook}を実行します。
+@xref{Hooks}。
+
+@node Nroff Mode
+@c @section Nroff Mode
+@section nroffモード
+
+@cindex nroff
+@findex nroff-mode
+@c   Nroff mode is a mode like Text mode but modified to handle nroff commands
+@c present in the text.  Invoke @kbd{M-x nroff-mode} to enter this mode.  It
+@c differs from Text mode in only a few ways.  All nroff command lines are
+@c considered paragraph separators, so that filling will never garble the
+@c nroff commands.  Pages are separated by @samp{.bp} commands.  Comments
+@c start with backslash-doublequote.  Also, three special commands are
+@c provided that are not in Text mode:
+nroffモードはテキスト（text）モードに似ていますが、
+テキスト中のnroffコマンドを扱えるように変更してあります。
+このモードに入るには、@kbd{M-x nroff-mode}を実行します。
+テキスト（text）モードとは、2、3の点で異なるだけです。
+nroffコマンドを含んだ行は、すべて段落区切りとみなすので、
+詰め込みによってnroffコマンドが本文に混ざってしまうことはありません。
+ページは@samp{.bp}コマンドで分割されます。
+コメントは@samp{.\"}で始まります。
+また、テキスト（text）モードにはない、つぎの3つの特別なコマンドがあります。
+
+@findex forward-text-line
+@findex backward-text-line
+@findex count-text-lines
+@c @kindex M-n @r{(Nroff mode)}
+@c @kindex M-p @r{(Nroff mode)}
+@c @kindex M-? @r{(Nroff mode)}
+@kindex M-n @r{（nroffモード）}
+@kindex M-p @r{（nroffモード）}
+@kindex M-? @r{（nroffモード）}
+@table @kbd
+@item M-n
+@c Move to the beginning of the next line that isn't an nroff command
+@c (@code{forward-text-line}).  An argument is a repeat count.
+nroffコマンドではないつぎの行の先頭にポイントを移動する
+（@code{forward-text-line}）。
+引数は反復回数。
+@item M-p
+@c Like @kbd{M-n} but move up (@code{backward-text-line}).
+@kbd{M-n}と同様だが、まえの行に移動する（@code{backward-text-line}）。
+@item M-?
+@c Prints in the echo area the number of text lines (lines that are not
+@c nroff commands) in the region (@code{count-text-lines}).
+リージョン中のテキスト（nroffコマンド以外）の行数をエコー領域に表示する
+（@code{count-text-lines}）。
+@end table
+
+@findex electric-nroff-mode
+@c   The other feature of Nroff mode is that you can turn on Electric Nroff
+@c mode.  This is a minor mode that you can turn on or off with @kbd{M-x
+@c electric-nroff-mode} (@pxref{Minor Modes}).  When the mode is on, each
+@c time you use @key{RET} to end a line that contains an nroff command that
+@c opens a kind of grouping, the matching nroff command to close that
+@c grouping is automatically inserted on the following line.  For example,
+@c if you are at the beginning of a line and type @kbd{.@: ( b @key{RET}},
+@c this inserts the matching command @samp{.)b} on a new line following
+@c point.
+nroffモードの他の機能としては、エレクトリックnroff（electric-nroff）モードが
+あります。
+これは@kbd{M-x electric-nroff-mode}でオン／オフできるマイナモードです
+（@pxref{Minor Modes}）。
+このモードがオンのとき、
+グループを始めるnroffコマンドを含む行を終えるために@key{RET}
+@footnote{【訳注】実際には@kbd{C-j}。}を打つたびに、
+そのグループを終える対応したnroffコマンドを自動的につぎの行に挿入します。
+たとえば、行頭で@kbd{.@: ( b @key{RET}}と打つと、
+ポイントのうしろに新たな行として対応するnroffコマンド@samp{.)b}を挿入します。
+
+@c   If you use Outline minor mode with Nroff mode (@pxref{Outline Mode}),
+@c heading lines are lines of the form @samp{.H} followed by a number (the
+@c header level).
+nroffモードと一緒にアウトラインマイナ（outline-minor）モード
+（@pxref{Outline Mode}）を使用すると、
+見出し行は@samp{.H}のあとに（見出しのレベルにあたる）数字が続く形になります。
+
+@vindex nroff-mode-hook
+@c   Entering Nroff mode runs the hook @code{text-mode-hook}, followed by
+@c the hook @code{nroff-mode-hook} (@pxref{Hooks}).
+nroffモードに入ると、フック@code{text-mode-hook}に続いて
+フック@code{nroff-mode-hook}が実行されます（@pxref{Hooks}）。
+
+@node Formatted Text
+@c @section Editing Formatted Text
+@section 整形済みテキストの編集
+
+@c @cindex Enriched mode
+@c @cindex mode, Enriched
+@c @cindex formatted text
+@cindex エンリッチモード（enrichedモード）
+@cindex enrichedモード
+@cindex モード、Enriched
+@cindex 整形済みテキスト
+@cindex WYSIWYG
+@c @cindex word processing
+@cindex 文書処理
+@c   @dfn{Enriched mode} is a minor mode for editing files that contain
+@c formatted text in WYSIWYG fashion, as in a word processor.  Currently,
+@c formatted text in Enriched mode can specify fonts, colors, underlining,
+@c margins, and types of filling and justification.  In the future, we plan
+@c to implement other formatting features as well.
+@dfn{エンリッチ（enriched）モード}は、
+ワープロのようにWYSIWYG方式で、
+整形済みテキストを含むファイルの編集を行うためのマイナモードです。
+現在のところ、エンリッチ（enriched）モードの整形済みテキストには、
+フォント、表示色、下線、左右端、詰め込みと幅揃えの種類を指定できます。
+将来的には、その他の整形機能も実装しようと計画しています。
+
+@c   Enriched mode is a minor mode (@pxref{Minor Modes}).  Typically it is
+@c used in conjunction with Text mode (@pxref{Text Mode}).  However, you
+@c can also use it with other major modes such as Outline mode and
+@c Paragraph-Indent Text mode.
+エンリッチ（enriched）モードはマイナモードです（@pxref{Minor Modes}）。
+通常は、テキスト（text）モードと一緒に使います（@pxref{Text Mode}）。
+しかしながら、アウトライン（outline）モードや
+段落字下げ型テキスト（paragraph-indent-text）モードのような
+他のメジャーモードと一緒に使うことも可能です。
+
+@c   Potentially, Emacs can store formatted text files in various file
+@c formats.  Currently, only one format is implemented: @dfn{text/enriched}
+@c format, which is defined by the MIME protocol.  @xref{Format
+@c Conversion,, Format Conversion, elisp, the Emacs Lisp Reference Manual},
+@c for details of how Emacs recognizes and converts file formats.
+Emacsは能力的には整形済みテキストのファイルをさまざまなファイル形式で
+格納することができす。
+現在のところは、1種類の形式のみ、
+つまり、MIMEプロトコルで定義された@dfn{text/enriched}形式のみを
+実装してあります。
+Emacsがどのようにファイルの形式を識別し変換するかの詳細に関しては
+@xref{Format Conversion,, ファイル書式変換, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@c   The Emacs distribution contains a formatted text file that can serve as
+@c an example.  Its name is @file{etc/enriched.doc}.  It contains samples
+@c illustrating all the features described in this section.  It also
+@c contains a list of ideas for future enhancements.
+Emacsの配布の中には、実例として整形済みテキストファイル
+@file{etc/enriched.doc}があります。
+このファイルには、本節で説明するすべての機能の実例が盛り込まれています。
+また、将来の拡張に関するアイデアも述べてあります。
+
+@menu
+* Requesting Formatted Text::   Entering and exiting Enriched mode.
+* Hard and Soft Newlines::      There are two different kinds of newlines.
+* Editing Format Info::         How to edit text properties.
+* Faces: Format Faces.          Bold, italic, underline, etc.
+* Color: Format Colors.         Changing the color of text.
+* Indent: Format Indentation.   Changing the left and right margins.
+* Justification: Format Justification.
+                                Centering, setting text flush with the 
+                                  left or right margin, etc.
+* Other: Format Properties.     The "special" text properties submenu.
+* Forcing Enriched Mode::       How to force use of Enriched mode.
+@end menu
+
+@node Requesting Formatted Text
+@c @subsection Requesting to Edit Formatted Text
+@subsection 整形済みテキストの編集
+
+@c   Whenever you visit a file that Emacs saved in the text/enriched format,
+@c Emacs automatically converts the formatting information in the file into
+@c Emacs's own internal format (text properties), and turns on Enriched
+@c mode.
+text/enriched形式でEmacsが保存したファイルを訪れると、
+Emacsは自動的にファイル中の整形情報をEmacs自身の内部形式（テキスト属性）に
+変換し、エンリッチ（enriched）モードをオンにします。
+
+@findex enriched-mode
+@c   To create a new file of formatted text, first visit the nonexistent
+@c file, then type @kbd{M-x enriched-mode} before you start inserting text.
+@c This command turns on Enriched mode.  Do this before you begin inserting
+@c text, to ensure that the text you insert is handled properly.
+新たに整形済みテキストファイルを作成するには、
+まず、存在しないファイルを訪れてから、
+テキストを入力するまえに@kbd{M-x enriched-mode}と打ちます。
+このコマンドはエンリッチ（enriched）モードをオンにします。
+入力されるテキストが正しく扱われることを保証するために、
+テキストを挿入するまえにエンリッチ（enriched）モードをオンにしてください。
+
+@c   More generally, the command @code{enriched-mode} turns Enriched mode
+@c on if it was off, and off if it was on.  With a prefix argument, this
+@c command turns Enriched mode on if the argument is positive, and turns
+@c the mode off otherwise.
+より一般的にいえば、コマンド@code{enriched-mode}は、
+エンリッチ（enriched）モードがオフならオン、オンならオフにします。
+数引数を指定すると、それが正であればエンリッチ（enriched）モードを
+オンにし、それ以外ではオフにします。
+
+@c   When you save a buffer while Enriched mode is enabled in it, Emacs
+@c automatically converts the text to text/enriched format while writing it
+@c into the file.  When you visit the file again, Emacs will automatically
+@c recognize the format, reconvert the text, and turn on Enriched mode
+@c again.
+エンリッチ（enriched）モードがオンのときにバッファを保存すると、
+Emacsはテキストをファイルに書き出すときに
+自動的にtext/enriched形式へ変換します。
+ふたたびそのファイルを訪問すると、Emacsは自動的にその形式を認識して
+テキストを変換し、エンリッチ（enriched）モードをオンにします。
+
+@vindex enriched-fill-after-visiting
+@c   Normally, after visiting a file in text/enriched format, Emacs refills
+@c each paragraph to fit the specified right margin.  You can turn off this
+@c refilling, to save time, by setting the variable
+@c @code{enriched-fill-after-visiting} to @code{nil} or to @code{ask}.
+通常、text/enriched形式のファイルを訪問すると、
+Emacsは各段落を指定された右端に納まるように詰め込みます。
+この詰め込みをやめて時間を短縮するために、
+変数@code{enriched-fill-after-visiting}に@code{nil}か@code{ask}を設定します。
+
+@c   However, when visiting a file that was saved from Enriched mode, there
+@c is no need for refilling, because Emacs saves the right margin settings
+@c along with the text.
+しかし、エンリッチ（enriched）モードで保存したファイルを訪問するときには、
+Emacsは右端の設定をテキストと一緒に保存しているので、
+テキストを再度詰め込む必要はありません。
+
+@vindex enriched-translations
+@c   You can add annotations for saving additional text properties, which
+@c Emacs normally does not save, by adding to @code{enriched-translations}.
+@c Note that the text/enriched standard requires any non-standard
+@c annotations to have names starting with @samp{x-}, as in
+@c @samp{x-read-only}.  This ensures that they will not conflict with
+@c standard annotations that may be added later.
+通常はEmacsが保存しないテキスト属性に対する注記（annotation）も
+保存するようにするには、
+変数@code{enriched-translations}に追加しておきます。
+text/enriched規格では、非標準の注記には、@samp{x-read-only}のように
+@samp{x-}で始まる名前が必要なことに注目してください。
+これによって、あとから追加される標準的な注記と
+名前が衝突しないことが保証されます。
+
+@node Hard and Soft Newlines
+@c @subsection Hard and Soft Newlines
+@subsection ハード改行とソフト改行
+@c @cindex hard newline
+@c @cindex soft newline
+@c @cindex newlines, hard and soft
+@cindex ハード改行
+@cindex ソフト改行
+@cindex 改行、ハードとソフト
+
+@c   In formatted text, Emacs distinguishes between two different kinds of
+@c newlines, @dfn{hard} newlines and @dfn{soft} newlines.
+Emacsは整形済みテキスト中の改行を、
+@dfn{ハード}改行と@dfn{ソフト}改行の2種類に区別します。
+
+@c   Hard newlines are used to separate paragraphs, or items in a list, or
+@c anywhere that there should always be a line break regardless of the
+@c margins.  The @key{RET} command (@code{newline}) and @kbd{C-o}
+@c (@code{open-line}) insert hard newlines.
+ハード改行は、段落の区切り、リスト内の項目、
+左右端に関係なく行分割がつねに必要な箇所に用いられます。
+@key{RET}コマンド（@code{newline}）と@kbd{C-o}（@code{open-line}）は
+ハード改行を挿入します。
+
+@c   Soft newlines are used to make text fit between the margins.  All the
+@c fill commands, including Auto Fill, insert soft newlines---and they
+@c delete only soft newlines.
+ソフト改行は、テキストを左右端のあいだに納めるために使用されます。
+自動詰め込み（auto-fill）モードを含めたすべての詰め込みコマンドは
+ソフト改行を挿入し、ソフト改行だけを削除します。
+
+@c   Although hard and soft newlines look the same, it is important to bear
+@c the difference in mind.  Do not use @key{RET} to break lines in the
+@c middle of filled paragraphs, or else you will get hard newlines that are
+@c barriers to further filling.  Instead, let Auto Fill mode break lines,
+@c so that if the text or the margins change, Emacs can refill the lines
+@c properly.  @xref{Auto Fill}.
+ハード改行とソフト改行は見た目は同じですが、違いを理解することは重要です。
+詰め込んだ段落の途中で行に分割するときに@key{RET}を使ってはいけません。
+あとの詰め込みの妨げとなるハード改行を挿入してしまいます。
+かわりに、自動詰め込み（auto-fill）モードに行分割を行わせて、
+テキストや左右端が変化してもEmacsが適切に再度詰め込めるようにします。
+@xref{Auto Fill}。
+
+@c   On the other hand, in tables and lists, where the lines should always
+@c remain as you type them, you can use @key{RET} to end lines.  For these
+@c lines, you may also want to set the justification style to
+@c @code{unfilled}.  @xref{Format Justification}.
+一方、表やリストのように、入力したとおりの行にしておく必要がある場合には、
+@key{RET}で行を終えます。
+これらの行では、幅揃えのスタイルとして@code{unfilled}を
+指定するのもよいかもしれません。
+@xref{Format Justification}。
+
+@node Editing Format Info
+@c @subsection Editing Format Information
+@subsection 整形情報の編集
+
+@c   There are two ways to alter the formatting information for a formatted
+@c text file: with keyboard commands, and with the mouse.
+整形済みテキストファイルの整形情報を変更するには、2つの方法があります。
+キーボードコマンドを使うか、マウスを使います。
+
+@c   The easiest way to add properties to your document is by using the Text
+@c Properties menu.  You can get to this menu in two ways: from the Edit
+@c menu in the menu bar, or with @kbd{C-mouse-2} (hold the @key{CTRL} key
+@c and press the middle mouse button).
+文書に属性を追加するもっとも簡単な方法は、
+Text Propertiesメニューを使用することです。
+このメニューを出すには2つの方法があります。
+メニューバーのEditメニューから選択するか、
+@kbd{C-mouse-2}（@key{CTRL}キーを押し下げたままマウスの真中のボタンを押す）
+です。
+
+@c   Most of the items in the Text Properties menu lead to other submenus.
+@c These are described in the sections that follow.  Some items run
+@c commands directly:
+Text Propertiesメニューのほとんどの項目には、
+別のサブメニューがついています。
+これらについては後述します。
+コマンドを直接実行する項目もあります。
+
+@table @code
+@findex facemenu-remove-props
+@item Remove Properties
+@c Delete from the region all the text properties that the Text Properties
+@c menu works with (@code{facemenu-remove-props}).
+Text Propertiesメニューで扱えるすべてのテキスト属性をリージョンから取り除く
+（@code{facemenu-remove-props}）。
+
+@findex facemenu-remove-all
+@item Remove All
+@c Delete @emph{all} text properties from the region
+@c (@code{facemenu-remove-all}).
+@emph{すべて}のテキスト属性をリージョンから取り除く
+（@code{facemenu-remove-all}）。
+
+@findex list-text-properties-at
+@item List Properties
+@c List all the text properties of the character following point
+@c (@code{list-text-properties-at}).
+ポイント直後の文字のすべてのテキスト属性を表示する
+（@code{list-text-properties-at}）。
+
+@item Display Faces
+@c Display a list of all the defined faces.
+定義済みフェイス一覧を表示する。
+
+@item Display Colors
+@c Display a list of all the defined colors.
+定義済み表示色一覧を表示する。
+@end table
+            
+@node Format Faces
+@c @subsection Faces in Formatted Text
+@subsection 整形済みテキストのフェイス
+
+@c   The Faces submenu lists various Emacs faces including @code{bold},
+@c @code{italic}, and @code{underline}.  Selecting one of these adds the
+@c chosen face to the region.  @xref{Faces}.  You can also specify a face
+@c with these keyboard commands:
+Facesサブメニューには、@code{bold}、@code{italic}、@code{underline}といっ
+たEmacsで使用できる各種フェイスが並んでいます。
+その中から1つを選ぶと、リージョンにフェイスを追加します。
+@xref{Faces}。
+以下のキーボードコマンドでフェイスを指定することもできます。
+
+@table @kbd
+@c @kindex M-g d @r{(Enriched mode)}
+@kindex M-g d @r{（エンリッチモード）}
+@findex facemenu-set-default
+@item M-g d
+@c Set the region, or the next inserted character, to the @code{default} face
+@c (@code{facemenu-set-default}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@code{default}にする
+（@code{facemenu-set-default}）。
+@c @kindex M-g b @r{(Enriched mode)}
+@kindex M-g b @r{（エンリッチモード）}
+@findex facemenu-set-bold
+@item M-g b
+@c Set the region, or the next inserted character, to the @code{bold} face
+@c (@code{facemenu-set-bold}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@code{bold}にする
+（@code{facemenu-set-bold}）。
+@c @kindex M-g i @r{(Enriched mode)}
+@kindex M-g i @r{（エンリッチモード）}
+@findex facemenu-set-italic
+@item M-g i
+@c Set the region, or the next inserted character, to the @code{italic} face
+@c (@code{facemenu-set-italic}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@code{italic}にする
+（@code{facemenu-set-italic}）。
+@c @kindex M-g l @r{(Enriched mode)}
+@kindex M-g l @r{（エンリッチモード）}
+@findex facemenu-set-bold-italic
+@item M-g l
+@c Set the region, or the next inserted character, to the @code{bold-italic} face
+@c (@code{facemenu-set-bold-italic}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@code{bold-italic}にする
+（@code{facemenu-set-bold-italic}）。
+@c @kindex M-g u @r{(Enriched mode)}
+@kindex M-g u @r{（エンリッチ）}
+@findex facemenu-set-underline
+@item M-g u
+@c Set the region, or the next inserted character, to the @code{underline} face
+@c (@code{facemenu-set-underline}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@code{underline}にする
+（@code{facemenu-set-underline}）。
+@c @kindex M-g o @r{(Enriched mode)}
+@kindex M-g o @r{（エンリッチモード）}
+@findex facemenu-set-face
+@item M-g o @var{face} @key{RET}
+@c Set the region, or the next inserted character, to the face @var{face}
+@c (@code{facemenu-set-face}).
+リージョン、あるいは、つぎに挿入する文字のフェイスを@var{face}にする
+（@code{facemenu-set-face}）。
+@end table
+
+@c   If you use these commands with a prefix argument---or, in Transient Mark
+@c mode, if the region is not active---then these commands specify a face
+@c to use for your next self-inserting input.  @xref{Transient Mark}.  This
+@c applies to both the keyboard commands and the menu commands.
+前置引数を指定してこれらのコマンドを使ったり、
+暫定マーク（transient-mark）モードでリージョンが選択されていなければ、
+これらのコマンドはつぎに入力する自己挿入文字だけに使うフェイスを指定します。
+@xref{Transient Mark}。
+これはキーボードコマンドとメニューコマンドの両方に通用します。
+
+@c   Enriched mode defines two additional faces: @code{excerpt} and
+@c @code{fixed}.  These correspond to codes used in the text/enriched file
+@c format.
+エンリッチ（enriched）モードには、
+@code{excerpt}と@code{fixed}の2つの追加フェイスが定義されています。
+これらのフェイスは、text/enrichedファイル形式で
+使用されるコードに対応しています。
+
+@c   The @code{excerpt} face is intended for quotations.  This face is the
+@c same as @code{italic} unless you customize it (@pxref{Face Customization}).
+@code{excerpt}フェイスは引用を表すためのものです。
+カスタマイズしてなければ@code{italic}と同じです
+（@pxref{Face Customization}）。
+
+@c   The @code{fixed} face is meant to say, ``Use a fixed-width font for this
+@c part of the text.''  Emacs currently supports only fixed-width fonts;
+@c therefore, the @code{fixed} annotation is not necessary now.  However,
+@c we plan to support variable width fonts in future Emacs versions, and
+@c other systems that display text/enriched format may not use a
+@c fixed-width font as the default.  So if you specifically want a certain
+@c part of the text to use a fixed-width font, you should specify the
+@c @code{fixed} face for that part.
+@code{fixed}フェイスは、『この部分のテキストには固定幅フォントを使用する』と
+いう意味です。
+現在、Emacsは固定幅フォントにだけ対応しています。
+したがって、@code{fixed}の注記は今のところ必要ありません。
+しかしながら、将来のEmacsでは可変幅フォントに対応したり、
+固定幅フォントをデフォルトとしないtext/enriched形式を
+表示可能な他のシステムを計画しています。
+ですから、固定幅フォントをどうしても使いたい箇所には、
+その部分のテキストに@code{fixed}を指定するべきです。
+
+@c   The @code{fixed} face is normally defined to use a different font from
+@c the default.  However, different systems have different fonts installed,
+@c so you may need to customize this.
+通常、@code{fixed}フェイスには、デフォルトと異なるフォントを使うように
+定義されています。
+ところが、システムごとにさまざまなフォントがありますから、
+この定義をカスタマイズする必要があるかもしれません。
+
+@c   If your terminal cannot display different faces, you will not be able
+@c to see them, but you can still edit documents containing faces.  You can
+@c even add faces and colors to documents.  They will be visible when the
+@c file is viewed on a terminal that can display them.
+異なるフェイスを表示できない端末ではそれらの違いを目にすることはできませんが、
+それでも、さまざまなフェイスを含む文書の編集は行えます。
+文書にフェイスや表示色を追加することもできます。
+それらを表示可能な端末で見たときにフェイスや色を目にすることができます。
+
+@node Format Colors
+@c @subsection Colors in Formatted Text
+@subsection 整形済みテキストの表示色
+
+@c   You can specify foreground and background colors for portions of the
+@c text.  There is a menu for specifying the foreground color and a menu
+@c for specifying the background color.  Each color menu lists all the
+@c colors that you have used in Enriched mode in the current Emacs session.
+テキストの部分ごとに前景色と背景色を指定できます。
+前景色を指定するメニューと背景色を指定するメニューがあります。
+これらのメニューには、そのEmacsセッションのエンリッチ（enriched）モードで
+使っている表示色一覧が表示されます。
+
+@c   If you specify a color with a prefix argument---or, in Transient Mark
+@c mode, if the region is not active---then it applies to your next
+@c self-inserting input.  @xref{Transient Mark}.  Otherwise, the command
+@c applies to the region.
+前置引数とともに表示色を指定したり、
+暫定マーク（transient-mark）モードでリージョンが選択されていなければ、
+つぎに入力する自己挿入文字だけに作用します。
+@xref{Transient Mark}。
+そうでなければ、コマンドはリージョンに作用します。
+
+@c   Each color menu contains one additional item: @samp{Other}.  You can use
+@c this item to specify a color that is not listed in the menu; it reads
+@c the color name with the minibuffer.  To display list of available colors
+@c and their names, use the @samp{Display Colors} menu item in the Text
+@c Properties menu (@pxref{Editing Format Info}).
+それぞれの表示色メニューにはもう1つ@samp{Other}という項目があります。
+この項目は、メニューに表示されていない表示色を指定するために使います。
+これは、ミニバッファで表示色名称を読み取ります。
+利用可能な表示色と名前の一覧を表示するには、
+Text Propertiesメニューの@samp{Display Colors}項目を使います
+（@pxref{Editing Format Info}）。
+
+@c   Any color that you specify in this way, or that is mentioned in a
+@c formatted text file that you read in, is added to both color menus for
+@c the duration of the Emacs session.
+このようにして指定した表示色や、
+読み込んだ整形済みテキスト内で使われている表示色は、
+そのEmacsセッション中は、両方の表示色メニューに追加されます。
+
+@findex facemenu-set-foreground
+@findex facemenu-set-background
+@c   There are no key bindings for specifying colors, but you can do so
+@c with the extended commands @kbd{M-x facemenu-set-foreground} and
+@c @kbd{M-x facemenu-set-background}.  Both of these commands read the name
+@c of the color with the minibuffer.
+表示色を指定するためのキーバインディングはありませんが、
+拡張コマンド@kbd{M-x facemenu-set-foreground}や
+@kbd{M-x facemenu-set-background}を使えばできます。
+どちらのコマンドもミニバッファで表示色名称を読み取ります。
+
+@node Format Indentation
+@c @subsection Indentation in Formatted Text
+@subsection 整形済みテキストの字下げ
+
+@c   When editing formatted text, you can specify different amounts of
+@c indentation for the right or left margin of an entire paragraph or a
+@c part of a paragraph.  The margins you specify automatically affect the
+@c Emacs fill commands (@pxref{Filling}) and line-breaking commands.
+整形済みテキストの編集では、段落全体あるいは段落の一部に
+異なる左端と右端の字下げを指定できます。
+指定した左右端は、自動的に詰め込みコマンド（@pxref{Filling}）と
+行分割コマンドに反映されます
+
+@c   The Indentation submenu provides a convenient interface for specifying
+@c these properties.  The submenu contains four items:
+Indentationサブメニューは、
+これらの属性を指定するための便利なインターフェイスです。
+このサブメニューにはつぎの4つの項目があります。
+
+@table @code
+@c @kindex C-x TAB @r{(Enriched mode)}
+@kindex C-x TAB @r{（エンリッチモード）}
+@findex increase-left-margin
+@item Indent More
+@c Indent the region by 4 columns (@code{increase-left-margin}).  In
+@c Enriched mode, this command is also available on @kbd{C-x @key{TAB}}; if
+@c you supply a numeric argument, that says how many columns to add to the
+@c margin (a negative argument reduces the number of columns).
+リージョンを4桁分字下げする（@code{increase-left-margin}）。
+エンリッチ（enriched）モードでは、
+このコマンドは@kbd{C-x @key{TAB}}でも実行できる。
+数引数を指定すると、左端に加える桁数として扱う（負の値であれば桁を減らす）。
+
+@item Indent Less
+@c Remove 4 columns of indentation from the region.
+リージョンから4桁分字下げを取り除く。
+
+@item Indent Right More
+@c Make the text narrower by indenting 4 columns at the right margin.
+右端を4桁分字下げしてテキストの幅を狭める。
+
+@item Indent Right Less
+@c Remove 4 columns of indentation from the right margin.
+右端から4桁分字下げを取り除く。
+@end table
+
+@c   You can use these commands repeatedly to increase or decrease the
+@c indentation.
+なお、これらのコマンドを繰り返せば、字下げを増やしたり減らしたりできます。
+
+@c   The most common way to use these commands is to change the indentation
+@c of an entire paragraph.  However, that is not the only use.  You can
+@c change the margins at any point; the new values take effect at the end
+@c of the line (for right margins) or the beginning of the next line (for
+@c left margins).
+これらのコマンドの一般的な使い方は、段落全体の字下げを変更することです。
+しかし、それだけではありません。
+任意の箇所で左右端を変更できます。
+新たに設定された値は、行末（右端）や
+つぎの行の先頭（左端）に影響します。
+
+@c   This makes it possible to format paragraphs with @dfn{hanging indents},
+@c which means that the first line is indented less than subsequent lines.
+@c To set up a hanging indent, increase the indentation of the region
+@c starting after the first word of the paragraph and running until the end
+@c of the paragraph.
+それにより、@dfn{ぶら下がり字下げ}で段落を整形することができます。
+ぶら下がり字下げとは、1行目の字下げ幅が2行目以降の字下げ幅より少ないものです。
+ぶら下がり字下げするには、段落の最初の単語の直後から始まり段落の末尾まで
+続くリージョンの字下げ幅を増やします。
+
+@c   Indenting the first line of a paragraph is easier.  Set the margin for
+@c the whole paragraph where you want it to be for the body of the
+@c paragraph, then indent the first line by inserting extra spaces or tabs.
+段落の1行目の字下げはもっと簡単です。
+段落の本体があるべき位置に段落全体に対する左右端を設定してから、
+最初の行に追加の空白やタブを挿入すればよいのです。
+
+@c   Sometimes, as a result of editing, the filling of a paragraph becomes
+@c messed up---parts of the paragraph may extend past the left or right
+@c margins.  When this happens, use @kbd{M-q} (@code{fill-paragraph}) to
+@c refill the paragraph.
+編集の結果、段落の詰め込みが汚くなってしまうことがあります。
+たとえば、段落の一部が左端や右端からはみ出してしまうことです。
+そうなったときには、@kbd{M-q}（@code{fill-paragraph}）を使って、
+段落を詰め込み直します。
+
+@vindex standard-indent
+@c   The variable @code{standard-indent} specifies how many columns these
+@c commands should add to or subtract from the indentation.  The default
+@c value is 4.  The overall default right margin for Enriched mode is
+@c controlled by the variable @code{fill-column}, as usual.
+変数@code{standard-indent}は、これらのコマンドで増減する字下げ幅を指定します。
+デフォルト値は4です。
+エンリッチ（Enriched）モード全体に対する右端のデフォルトは、
+通常どおり変数@code{fill-column}で制御します。
+
+@c   The fill prefix, if any, works in addition to the specified paragraph
+@c indentation: @kbd{C-x .} does not include the specified indentation's
+@c whitespace in the new value for the fill prefix, and the fill commands
+@c look for the fill prefix after the indentation on each line.  @xref{Fill
+@c Prefix}.
+詰め込み接頭辞があれば、指定した段落の字下げに追加されます。
+@kbd{C-x .}は、
+詰め込み接頭辞として新たに指定された値には、字下げの白文字を含めません。
+しかも、詰め込みコマンドは各行の字下げのうしろにある詰め込み接頭辞を探します。
+@xref{Fill Prefix}。
+
+@node Format Justification
+@c @subsection Justification in Formatted Text
+@subsection 整形済みテキストの幅揃え
+            
+@c   When editing formatted text, you can specify various styles of
+@c justification for a paragraph.  The style you specify automatically
+@c affects the Emacs fill commands.
+整形済みテキストの編集では、段落に対してさまざまなスタイルの揃え方を
+指定できます。
+指定したスタイルは自動的にEmacsの詰め込みコマンドに影響します。
+
+@c   The Justification submenu provides a convenient interface for specifying
+@c the style.  The submenu contains five items:
+Justificationサブメニューは、
+スタイルを指定するための便利なインターフェイスです。
+このサブメニューにはつぎの5項目があります。
+
+@table @code
+@item Flush Left
+@c This is the most common style of justification (at least for English).
+@c Lines are aligned at the left margin but left uneven at the right.
+これは（少なくとも英語では）もっとも一般的な幅揃えスタイル。
+行は左端に揃えられるが、右側は不揃いのまま。
+
+@item Flush Right
+@c This aligns each line with the right margin.  Spaces and tabs are added
+@c on the left, if necessary, to make lines line up on the right.
+右端に行を揃える。
+必要に応じて左側に空白やタブを挿入して右側で行を揃える。
+
+@item Full
+@c This justifies the text, aligning both edges of each line.  Justified
+@c text looks very nice in a printed book, where the spaces can all be
+@c adjusted equally, but it does not look as nice with a fixed-width font
+@c on the screen.  Perhaps a future version of Emacs will be able to adjust
+@c the width of spaces in a line to achieve elegant justification.
+行ごとに左右両端を揃える。
+このスタイルで揃えると空白を均等に挿入する。
+印刷物では見栄えがたいへんよいが、
+画面上の固定幅フォントではそれほど美しくない。
+たぶん、将来のEmacsでは行内の空白量を調節できるようになり、
+エレガントな幅揃えが達成できるであろう。
+
+@item Center
+@c This centers every line between the current margins.
+各行を現在の左右端の中央に揃える。
+
+@item None
+@footnote{【訳注】
+メニューには@samp{None}ではなく@samp{Unfilled}が表示される。}
+@c This turns off filling entirely.  Each line will remain as you wrote it;
+@c the fill and auto-fill functions will have no effect on text which has
+@c this setting.  You can, however, still indent the left margin.  In
+@c unfilled regions, all newlines are treated as hard newlines (@pxref{Hard
+@c and Soft Newlines}) .
+詰め込みをいっさい止める。
+各行は入力したままになる。
+つまり、この設定をしたテキストでは、
+詰め込みコマンドも自動詰め込み機能も何の効果もない。
+それでも、左端を字下げすることは可能。
+詰め込まないリージョンでは、改行はすべてハード改行として扱う
+（@pxref{Hard and Soft Newlines}）。
+@end table
+
+@c   In Enriched mode, you can also specify justification from the keyboard
+@c using the @kbd{M-j} prefix character:
+エンリッチ（enriched）モードでは、
+@kbd{M-j}プレフィックス文字を使ってキーボードで幅揃えを指定することもできます。
+
+@table @kbd
+@c @kindex M-j l @r{(Enriched mode)}
+@kindex M-j l @r{（エンリッチモード）}
+@findex set-justification-left
+@item M-j l
+@c Make the region left-filled (@code{set-justification-left}).
+リージョンを左端揃えにする（@code{set-justification-left}）。
+@c @kindex M-j r @r{(Enriched mode)}
+@kindex M-j r @r{（エンリッチモード）}
+@findex set-justification-right
+@item M-j r
+@c Make the region right-filled (@code{set-justification-right}).
+リージョンを右端揃えにする（@code{set-justification-right}）。
+@c @kindex M-j f @r{(Enriched mode)}
+@kindex M-j f @r{（エンリッチモード）}
+@findex set-justification-full
+@item M-j f
+@c Make the region fully-justified (@code{set-justification-full}).
+リージョンを左右端揃えにする（@code{set-justification-full}）。
+@c @kindex M-j c @r{(Enriched mode)}
+@c @kindex M-S @r{(Enriched mode)}
+@kindex M-j c @r{（エンリッチモード）}
+@kindex M-S @r{（エンリッチモード）}
+@findex set-justification-center
+@item M-j c
+@itemx M-S
+@c Make the region centered (@code{set-justification-center}).
+リージョンを中央揃えにする（@code{set-justification-center}）。
+@c @kindex M-j u @r{(Enriched mode)}
+@kindex M-j u @r{（エンリッチモード）}
+@findex set-justification-none
+@item M-j u
+@c Make the region unfilled (@code{set-justification-none}).
+リージョンでは詰め込まない（@code{set-justification-none}）。
+@end table
+
+@c   Justification styles apply to entire paragraphs.  All the
+@c justification-changing commands operate on the paragraph containing
+@c point, or, if the region is active, on all paragraphs which overlap the
+@c region.
+揃え方のスタイルは段落全体に適用されます。
+揃え方を変更するコマンドは、ポイントを含む段落に作用しますが、
+リージョンが設定されているときには
+リージョンと重なる段落すべてが対象になります。
+
+@vindex default-justification
+@c   The default justification style is specified by the variable
+@c @code{default-justification}.  Its value should be one of the symbols
+@c @code{left}, @code{right}, @code{full}, @code{center}, or @code{none}.
+揃え方のスタイルのデフォルトは、
+変数@code{default-justification}で指定されます。
+この値は、@code{left}、@code{right}、@code{full}、
+@code{center}、@code{none}
+@footnote{【訳注】詰め込まないことを指定するシンボルは
+@samp{none}。@code{Unfilled}ではない。}
+のいずれかのシンボルでなくてはいけません。
+         
+@node Format Properties
+@c @subsection Setting Other Text Properties
+@subsection 他のテキスト属性の設定
+
+@c   The Other Properties menu lets you add or remove three other useful text
+@c properties: @code{read-only}, @code{invisible} and @code{intangible}.
+@c The @code{intangible} property disallows moving point within the text,
+@c the @code{invisible} text property hides text from display, and the
+@c @code{read-only} property disallows alteration of the text.
+Other Propertiesメニュー
+@footnote{【訳注】@samp{Other Properties}ではなく、
+@samp{Special Properties}と表示される。}には、
+@code{read-only}、@code{invisible}、@code{intangible}といった有用な
+テキスト属性を追加／削除する項目があります。
+@code{intangible}属性はテキスト内にポイントを移動できなくし、
+@code{invisible}属性はテキストを表示しないようにし、
+@code{read-only}属性はテキストを変更できなくします。
+
+@c   Each of these special properties has a menu item to add it to the
+@c region.  The last menu item, @samp{Remove Special}, removes all of these
+@c special properties from the text in the region.
+これらの特別な属性には、
+リージョンに属性を付加するためのメニュー項目があります。
+最後のメニュー項目@samp{Remove Special}は、
+これらの特別な属性すべてをリージョンから取り除きます。
+
+@c   Currently, the @code{invisible} and @code{intangible} properties are
+@c @emph{not} saved in the text/enriched format.  The @code{read-only}
+@c property is saved, but it is not a standard part of the text/enriched
+@c format, so other editors may not respect it.
+現在のところ、@code{invisible}属性と@code{intangible}属性は、
+text/enriched形式に保存され@emph{ません}。
+@code{read-only}属性は保存されますが、
+これはtext/enriched形式の標準的なものではないので、
+Emacs以外の他のエディタでは使用されないかもしれません。
+
+@node Forcing Enriched Mode
+@c @subsection Forcing Enriched Mode
+@subsection エンリッチ（enriched）モードの強制
+
+@c   Normally, Emacs knows when you are editing formatted text because it
+@c recognizes the special annotations used in the file that you visited.
+@c However, there are situations in which you must take special actions
+@c to convert file contents or turn on Enriched mode:
+普通は、Emacsは訪問したファイル内にある特別な注記を認識するので、
+整形済みテキストを編集中であることがわかります。
+ところが、ファイルの内容を変換するために特別な操作をしたり、
+手動でエンリッチ（enriched）モードをオンにする必要がある状況もあります。
+
+@itemize @bullet
+@item
+@c When you visit a file that was created with some other editor, Emacs may
+@c not recognize the file as being in the text/enriched format.  In this
+@c case, when you visit the file you will see the formatting commands
+@c rather than the formatted text.  Type @kbd{M-x format-decode-buffer} to
+@c translate it.
+他のエディタで作成したtext/enriched形式のファイルを訪問すると、
+Emacsがそのファイルをtext/enriched形式であると認識しないかもしれない。
+こういった場合、ファイルを訪れると、
+整形済みテキストではなく整形コマンドを目にする。
+@kbd{M-x format-decode-buffer}と打って形式を変換する。
+
+@item
+@c When you @emph{insert} a file into a buffer, rather than visiting it.
+@c Emacs does the necessary conversions on the text which you insert, but
+@c it does not enable Enriched mode.  If you wish to do that, type @kbd{M-x
+@c enriched-mode}.
+ファイルを訪問したのではなく、バッファにファイルを@emph{挿入}したとき。
+Emacsは挿入されたテキストに対しては必要な変換を行うが、
+エンリッチ（enriched）モードをオンにしない。
+オンにしたければ、@kbd{M-x enriched-mode}と打つ。
+@end itemize 
+
+@c   The command @code{format-decode-buffer} translates text in various
+@c formats into Emacs's internal format.  It asks you to specify the format
+@c to translate from; however, normally you can type just @key{RET}, which
+@c tells Emacs to guess the format.
+コマンド@code{format-decode-buffer}は、
+さまざまな形式のテキストをEmacsの内部形式に変換します。
+このコマンドは、どの形式からの変換であるのかを尋ねてきますが、
+通常は単に@key{RET}を打てばEmacsが形式を推測します。
+
+@findex format-find-file
+@c   If you wish to look at text/enriched file in its raw form, as a
+@c sequence of characters rather than as formatted text, use the @kbd{M-x
+@c find-file-literally} command.  This visits a file, like
+@c @code{find-file}, but does not do format conversion.  It also inhibits
+@c character code conversion (@pxref{Coding Systems}) and automatic
+@c uncompression (@pxref{Compressed Files}).  To disable format conversion
+@c but allow character code conversion and/or automatic uncompression if
+@c appropriate, use @code{format-find-file} with suitable arguments.
+text/enriched形式のファイルをそのままの形、
+つまり、整形済みテキストではなく文字列として見たいのであれば、
+@kbd{M-x find-file-literally}コマンドを使います。
+このコマンドは@code{find-file}のようにファイルを訪問しますが、
+形式変換を行いません。
+文字コード変換（@pxref{Coding Systems}）と
+自動展開（@pxref{Compressed Files}）も禁止します。
+形式変換を禁止しても、適宜、文字コード変換や自動展開を行わせたいのであれば、
+適当な引数を指定して@code{format-find-file}を使います。
+

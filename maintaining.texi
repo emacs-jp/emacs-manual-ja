@@ -1,0 +1,1653 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,97,99,00,2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Maintaining, Abbrevs, Building, Top
+@chapter Maintaining Programs
+@cindex Lisp editing
+@cindex C editing
+@cindex program editing
+
+  This chapter describes Emacs features for maintaining programs.  The
+version control features (@pxref{Version Control}) are also
+particularly useful for this purpose.
+
+@menu
+* Change Log::                  Maintaining a change history for your program.
+* Authors::                     
+* Tags::                        Go direct to any function in your program in one
+			  command.  Tags remembers which file it is in.
+* Emerge::                      A convenient way of merging two versions of a program.
+@end menu
+
+@node Change Log
+@c @section Change Logs
+@section 変更記録
+
+@c @cindex change log
+@cindex 変更記録
+@cindex チェンジログ
+@kindex C-x 4 a
+@findex add-change-log-entry-other-window
+@c   The Emacs command @kbd{C-x 4 a} adds a new entry to the change log
+@c file for the file you are editing
+@c (@code{add-change-log-entry-other-window}).
+コマンド@kbd{C-x 4 a}は、編集中のファイルに対する
+新たな項目を変更記録ファイルに追加します
+（@code{add-change-log-entry-other-window}）。
+
+@c   A change log file contains a chronological record of when and why you
+@c have changed a program, consisting of a sequence of entries describing
+@c individual changes.  Normally it is kept in a file called
+@c @file{ChangeLog} in the same directory as the file you are editing, or
+@c one of its parent directories.  A single @file{ChangeLog} file can
+@c record changes for all the files in its directory and all its
+@c subdirectories.
+変更記録ファイルは、プログラムを変更した日付やその理由を
+時間順に記録したもので、個々の変更を記述した項目の並びから成ります。
+通常は、編集しているファイルと同じディレクトリ、あるいは、
+その親ディレクトリに置いた@file{ChangeLog}と呼ばれる
+ファイルに保存されています。
+1つの@file{ChangeLog}ファイルで、このファイルを置いたディレクトリや
+そのサブディレクトリに置いた全ファイルの変更を記録できます。
+
+@c   A change log entry starts with a header line that contains your name,
+@c your email address (taken from the variable @code{user-mail-address}),
+@c and the current date and time.  Aside from these header lines, every
+@c line in the change log starts with a space or a tab.  The bulk of the
+@c entry consists of @dfn{items}, each of which starts with a line starting
+@c with whitespace and a star.  Here are two entries, both dated in May
+@c 1993, each with two items:
+変更記録項目は、名前、（@code{user-mail-address}から得られた）
+電子メイルアドレス、現在の日付と時刻から成るヘッダ行で始まります。
+変更記録内の各行はヘッダ行を除いて、つねに空白かタブで始まります。
+1つの項目は@dfn{小項目}から構成され、
+各小項目は空白と星印で始まる行で始まります。
+以下は、1993年5月付けの2つの項目で、
+それぞれに2つの小項目があります。
+
+@iftex
+@medbreak
+@end iftex
+@smallexample
+1993-05-25  Richard Stallman  <rms@@gnu.org>
+
+        * man.el: Rename symbols `man-*' to `Man-*'.
+        (manual-entry): Make prompt string clearer.
+
+        * simple.el (blink-matching-paren-distance):
+        Change default to 12,000.
+
+1993-05-24  Richard Stallman  <rms@@gnu.org>
+
+        * vc.el (minor-mode-map-alist): Don't use it if it's void.
+        (vc-cancel-version): Doc fix.
+@end smallexample
+
+@noindent
+@c (Previous Emacs versions used a different format for the date.)
+（Emacsの以前の版では、日付の形式が異なる。）
+
+@c   One entry can describe several changes; each change should have its
+@c own item.  Normally there should be a blank line between items.  When
+@c items are related (parts of the same change, in different places), group
+@c them by leaving no blank line between them.  The second entry above
+@c contains two items grouped in this way.
+1つの項目で複数の変更を記述できます。
+各変更について、それぞれの小項目を用意しなくてはいけません。
+通常、小項目のあいだには空行がなくてはいけません。
+小項目が関連している（場所は異なるが同じ変更の一部分の）場合には、
+それらのあいだには空行を入れずに一塊にしておきます。
+上記の2番目の項目には、このようにしてまとめた2つの小項目が含まれています。
+
+@c   @kbd{C-x 4 a} visits the change log file and creates a new entry
+@c unless the most recent entry is for today's date and your name.  It also
+@c creates a new item for the current file.  For many languages, it can
+@c even guess the name of the function or other object that was changed.
+@kbd{C-x 4 a}は、変更記録ファイルを訪問して、
+最新の項目が今日の日付で当人の名前のものでなければ、
+新たに項目を作成します。
+また、現在のファイルに対する新たな小項目も作成します。
+多くの言語に対して、変更された関数名やその他のオブジェクトを
+推測することもできます。
+
+@c @cindex Change Log mode
+@cindex 変更記録モード（Change Log mode）
+@cindex change-logモード
+@cindex モード、Change Log
+@findex change-log-mode
+@c   The change log file is visited in Change Log mode.  In this major
+@c mode, each bunch of grouped items counts as one paragraph, and each
+@c entry is considered a page.  This facilitates editing the entries.
+@c @kbd{C-j} and auto-fill indent each new line like the previous line;
+@c this is convenient for entering the contents of an entry.
+変更記録ファイルは、変更記録（change-log）モードで訪問します。
+このメジャーモードでは、（空行で区切らない）ひとまとまりの小項目群を
+段落として扱い、各項目をページとして扱います。
+これにより項目の編集が容易になります。
+@kbd{C-j}や自動詰め込みにより、
+新たな行は直前の行と同様に字下げされます。
+これは項目内容を入力するのに便利です。
+
+@c   Version control systems are another way to keep track of changes in your
+@c program and keep a change log.  @xref{Log Buffer}.
+プログラムの変更を掌握し、変更記録を維持する他の手段としては、
+版管理（バージョンコントロール）システムがあります。
+@xref{Log Buffer}。
+
+@node Tags
+@c @section Tags Tables
+@section タグテーブル
+@c @cindex tags table
+@cindex タグテーブル
+
+@c   A @dfn{tags table} is a description of how a multi-file program is
+@c broken up into files.  It lists the names of the component files and the
+@c names and positions of the functions (or other named subunits) in each
+@c file.  Grouping the related files makes it possible to search or replace
+@c through all the files with one command.  Recording the function names
+@c and positions makes possible the @kbd{M-.} command which finds the
+@c definition of a function by looking up which of the files it is in.
+@dfn{タグテーブル}とは、複数のファイルで構成されるプログラムが、
+どのように各ファイルに分割されているのか記述したものです。
+これは、プログラムを構成するファイル名、
+そのファイルに入っている関数の名前（または、名前の付いた別の単位）や
+ファイル内の位置の一覧です。
+こうして関連するファイルをまとめておけば、
+全ファイルを対象とした探索や置換をコマンド1つで行えます。
+また、関数名とその位置を記録してあるので、
+関数がどのファイルに入っているか調べて関数定義をみつけだす
+@kbd{M-.}のようなコマンドを実現できます。
+
+@c   Tags tables are stored in files called @dfn{tags table files}.  The
+@c conventional name for a tags table file is @file{TAGS}.
+タグテーブルは、@dfn{タグテーブルファイル}と呼ばれるファイルに格納されます。
+このファイルの慣習的な名前は@file{TAGS}です。
+
+@c   Each entry in the tags table records the name of one tag, the name of the
+@c file that the tag is defined in (implicitly), and the position in that file
+@c of the tag's definition.
+タグテーブルの各項目は、タグ名、タグが（暗黙に）定義されているファイルの名前、
+そして、ファイル中でタグが定義されている位置を記録しています。
+
+@c   Just what names from the described files are recorded in the tags table
+@c depends on the programming language of the described file.  They
+@c normally include all functions and subroutines, and may also include
+@c global variables, data types, and anything else convenient.  Each name
+@c recorded is called a @dfn{tag}.
+もとのプログラムファイルから、どんな名前がタグテーブルに記録されるかは、
+プログラム言語によって異なります。
+一般的には、すべての関数やサブルーチンを含み、
+大域変数、データ型、あると便利なその他の情報などを含むこともあります。
+記録された個々の名前を@dfn{タグ}と呼びます。
+
+@menu
+* Tag Syntax::		Tag syntax for various types of code and text files.  
+* Create Tags Table::	Creating a tags table with @code{etags}.
+* Select Tags Table::	How to visit a tags table.
+* Find Tag::		Commands to find the definition of a specific tag. 
+* Tags Search::		Using a tags table for searching and replacing.
+* List Tags::		Listing and finding tags defined in a file.
+@end menu
+
+@node Tag Syntax
+@c @subsection Source File Tag Syntax
+@subsection ソースファイルのタグ構文
+
+@c   Here is how tag syntax is defined for the most popular languages:
+ここでは、広く一般に使われている言語に対するタグ構文の定義を紹介します。
+
+@itemize @bullet
+@item
+@c In C code, any C function or typedef is a tag, and so are definitions of
+@c @code{struct}, @code{union} and @code{enum}.  @code{#define} macro
+@c definitions and @code{enum} constants are also tags, unless you specify
+@c @samp{--no-defines} when making the tags table.  Similarly, global
+@c variables are tags, unless you specify @samp{--no-globals}.  Use of
+@c @samp{--no-globals} and @samp{--no-defines} can make the tags table file
+@c much smaller.
+Cのコードでは、関数やtypedefで定義される型はタグであり、
+@code{struct}、@code{union}、@code{enum}の定義もやはりタグである。
+また、タグテーブルを作成するときにオプション@samp{--no-defines}を
+指定しなければ、@code{#define}によるマクロ定義や
+@code{enum}の定数もタグとして扱う。
+同様に、大域変数も@samp{--no-globals}を指定しない限りタグになる。
+@samp{--no-globals}と@samp{--no-defines}を指定すると、
+タグテーブルファイルはかなり小さくなる。
+
+@item
+@c In C++ code, in addition to all the tag constructs of C code, member
+@c functions are also recognized, and optionally member variables if you
+@c use the @samp{--members} option.  Tags for variables and functions in
+@c classes are named @samp{@var{class}::@var{variable}} and
+@c @samp{@var{class}::@var{function}}.
+C++のコードでは、Cのコードのタグ構成要素に加えて、
+メンバ関数もタグとして認識される。
+@samp{--members}オプションを指定すれば、メンバ変数もタグになる。
+クラス内の変数と関数に対するタグには、それぞれ、
+@samp{@var{class}::@var{variable}}、@samp{@var{class}::@var{function}}と
+名前が付く。
+
+@item
+@c In Java code, tags include all the constructs recognized in C++, plus
+@c the @code{extends} and @code{implements} constructs.  Tags for variables
+@c and functions in classes are named @samp{@var{class}.@var{variable}} and
+@c @samp{@var{class}.@var{function}}.
+Javaのコードでは、C++のタグ構成要素に加えて、
+@code{extends}と@code{implements}に現れる名前もタグとして含む。
+クラス内の変数と関数に対するタグには、それぞれ、
+@samp{@var{class}.@var{variable}}、
+@samp{@var{class}.@var{function}}と名前が付く。
+
+@item
+@c In La@TeX{} text, the argument of any of the commands @code{\chapter},
+@c @code{\section}, @code{\subsection}, @code{\subsubsection},
+@c @code{\eqno}, @code{\label}, @code{\ref}, @code{\cite}, @code{\bibitem},
+@c @code{\part}, @code{\appendix}, @code{\entry}, or @code{\index}, is a
+@c tag.@refill
+La@TeX{}のテキストでは、@code{\chapter}、@code{\section}、@code{\subsection}、
+@code{\subsubsection}、@code{\eqno}、@code{\label}、@code{\ref}、
+@code{\cite}、@code{\bibitem}、@code{\part}、@code{\appendix}、
+@code{\entry}、@code{\index}のコマンドの引数がタグになる。
+
+@c Other commands can make tags as well, if you specify them in the
+@c environment variable @code{TEXTAGS} before invoking @code{etags}.  The
+@c value of this environment variable should be a colon-separated list of
+@c command names.  For example,
+その他のLa@TeX{}コマンドでも、@code{etags}を起動するまえに、
+環境変数@code{TEXTAGS}にそれらのコマンドを指定しておけばタグの対象になる。
+この環境変数の値は、コマンド名をコロンで区切った並び。
+たとえば、（bourneシェルでは）
+
+@example
+TEXTAGS="def:newcommand:newenvironment"
+export TEXTAGS
+@end example
+
+@noindent
+@c specifies (using Bourne shell syntax) that the commands @samp{\def},
+@c @samp{\newcommand} and @samp{\newenvironment} also define tags.
+とすると、@samp{\def}、@samp{\newcommand}、@samp{\newenvironment}の
+コマンドの引数もタグの対象になる。
+
+@item
+@c In Lisp code, any function defined with @code{defun}, any variable
+@c defined with @code{defvar} or @code{defconst}, and in general the first
+@c argument of any expression that starts with @samp{(def} in column zero, is
+@c a tag.
+Lispコードでは、@code{defun}で定義した関数、
+@code{defvar}や@code{defconst}で定義した変数、
+および、一般に0桁目から@samp{(def}で始まる任意の式の最初の引数がタグ。
+
+@item
+@c In Scheme code, tags include anything defined with @code{def} or with a
+@c construct whose name starts with @samp{def}.  They also include variables
+@c set with @code{set!} at top level in the file.
+Schemeコードでは、
+@code{def}で定義されるものと、名前が@samp{def}で始まるものがタグに含まれる。
+また、ファイル内のトップレベルで@code{set!}を
+使って値が設定される変数もタグ。
+@end itemize
+
+@c   Several other languages are also supported:
+他にも以下の言語で使えます。
+
+@itemize @bullet
+@item
+@c In assembler code, labels appearing at the beginning of a line,
+@c followed by a colon, are tags.
+アセンブリコードでは、行の先頭から始まりコロンが続くラベルはタグ。
+
+@item
+@c In Bison or Yacc input files, each rule defines as a tag the nonterminal
+@c it constructs.  The portions of the file that contain C code are parsed
+@c as C code.
+BisonやYaccの入力ファイルでは、
+各構文規則で定義する非終端記号をタグとする。
+ファイル内のCコードの部分に対しては、Cのコードとしてタグの解析を行う。
+
+@item
+@c In Cobol code, tags are paragraph names; that is, any word starting in
+@c column 8 and followed by a period.
+Cobolでは、段落名、すなわち、8桁目から始まりピリオドが続く任意の単語がタグ。
+
+@item
+@c In Erlang code, the tags are the functions, records, and macros defined
+@c in the file.
+Erlangコードでは、ファイル内で定義された関数、レコード、マクロがタグ。
+
+@item
+@c In Fortran code, functions, subroutines and blockdata are tags.
+Fortranコードでは、関数、サブルーチン、ブロックデータがタグ。
+
+@item
+@c In Objective C code, tags include Objective C definitions for classes,
+@c class categories, methods, and protocols.
+Objective-Cコードでは、クラス、クラスカテゴリ、メソッド、
+プロトコルの定義がタグ。
+
+@item
+@c In Pascal code, the tags are the functions and procedures defined in
+@c the file.
+Pascalコードでは、関数と手続きがタグ。
+
+@item
+@c In Perl code, the tags are the procedures defined by the @code{sub}
+@c keyword.
+Perlコードでは、キーワード@code{sub}で定義される手続きがタグ。
+
+@item
+@c In Postscript code, the tags are the functions.
+Postscriptコードでは、関数（演算子）がタグ。
+
+@item
+@c In Prolog code, a tag name appears at the left margin.
+Prologコードでは、左端に現れる名前がタグ。
+@end itemize
+
+@c   You can also generate tags based on regexp matching (@pxref{Create
+@c Tags Table}) to handle other formats and languages.
+正規表現に基づいてタグを生成する方法
+（@pxref{Create Tags Table}）もあるので、
+上記以外の形式や言語を扱うこともできます。
+
+@node Create Tags Table
+@c @subsection Creating Tags Tables
+@subsection タグテーブルの作成
+@c @cindex @code{etags} program
+@cindex @code{etags}プログラム
+
+@c   The @code{etags} program is used to create a tags table file.  It knows
+@c the syntax of several languages, as described in
+タグテーブルファイルを作成するには、@code{etags}プログラムを使います。
+@code{etags}は、数種類の言語について、
+構文を解析しタグを取り出すことができます。
+@iftex
+@c the previous section.
+これは前節で述べたとおりです。
+@end iftex
+@ifinfo
+@c @ref{Tag Syntax}.
+@ref{Tag Syntax}。
+@end ifinfo
+@c Here is how to run @code{etags}:
+つぎのように実行します。
+
+@example
+etags @var{inputfiles}@dots{}
+@end example
+
+@noindent
+@c The @code{etags} program reads the specified files, and writes a tags table
+@c named @file{TAGS} in the current working directory.  @code{etags}
+@c recognizes the language used in an input file based on its file name and
+@c contents.  You can specify the language with the
+@c @samp{--language=@var{name}} option, described below.
+@code{etags}は指定されたファイルを読み、
+カレント作業ディレクトリの@file{TAGS}という名前のファイルに
+タグテーブルを書き出します。
+@code{etags}は、ファイル名とその内容から自動的に使用言語を識別します。
+後述の@samp{--language=@var{name}}オプションで、
+言語を明示することもできます。
+
+@c   If the tags table data become outdated due to changes in the files
+@c described in the table, the way to update the tags table is the same way it
+@c was made in the first place.  It is not necessary to do this often.
+ファイルを変更するなどしてタグテーブルの内容が古くなった場合、
+テーブルを更新するには、最初にタグテーブルを作成した手順を
+繰り返します。
+頻繁に更新する必要はありません。
+
+@c   If the tags table fails to record a tag, or records it for the wrong
+@c file, then Emacs cannot possibly find its definition.  However, if the
+@c position recorded in the tags table becomes a little bit wrong (due to
+@c some editing in the file that the tag definition is in), the only
+@c consequence is a slight delay in finding the tag.  Even if the stored
+@c position is very wrong, Emacs will still find the tag, but it must
+@c search the entire file for it.
+タグテーブルに記録できなかったり、誤ったファイルを記録してしまった場合、
+Emacsはタグの定義をみつけることはできません。
+しかし、（タグの定義を含んだファイルを多少編集するなどしたために）
+タグテーブルに記録された位置が多少ズレている程度ならば、
+タグをみつけるのに通常より少し時間がかかるだけです。
+記録された位置が大幅に狂っていたとしても、
+Emacsはタグをみつけることができますが、
+そのためにファイル全体を調べなくてはなりません。
+
+@c   So you should update a tags table when you define new tags that you want
+@c to have listed, or when you move tag definitions from one file to another,
+@c or when changes become substantial.  Normally there is no need to update
+@c the tags table after each edit, or even every day.
+ですから、新しいタグを定義したとき、タグの定義を別のファイルに移動したとき、
+ファイルを相当変更したときには、タグテーブルの更新が必要です。
+しかし、ファイルを編集するつどタグテーブルを更新する必要はありませんし、
+毎日更新する必要すらないでしょう。
+
+@c   One tags table can effectively include another.  Specify the included
+@c tags file name with the @samp{--include=@var{file}} option when creating
+@c the file that is to include it.  The latter file then acts as if it
+@c contained all the files specified in the included file, as well as the
+@c files it directly contains.
+タグテーブルに別のタグテーブルを取り込むこともできます。
+取り込むタグファイル名をオプション@samp{--include=@var{file}}で
+指定してタグファイルを作成します。
+このように作成したタグファイルには、
+指定したソースファイルに加えて、
+取り込んだタグファイルに記録されていたファイルも含まれます。
+
+@c   If you specify the source files with relative file names when you run
+@c @code{etags}, the tags file will contain file names relative to the
+@c directory where the tags file was initially written.  This way, you can
+@c move an entire directory tree containing both the tags file and the
+@c source files, and the tags file will still refer correctly to the source
+@c files.
+@code{etags}を実行するときに相対ファイル名でソースファイルを指定すると、
+タグファイルには、タグファイルを書き出したときのディレクトリを
+基準にしたファイル名が記録されます。
+こうした場合、
+タグファイルとソースファイルを含んだディレクトリ木構造全体を
+移動することができ、しかも、タグファイルはソースファイルを正しく指し続けます。
+
+@c   If you specify absolute file names as arguments to @code{etags}, then
+@c the tags file will contain absolute file names.  This way, the tags file
+@c will still refer to the same files even if you move it, as long as the
+@c source files remain in the same place.  Absolute file names start with
+@c @samp{/}, or with @samp{@var{device}:/} on MS-DOS and MS-Windows.
+@code{etags}の引数として絶対ファイル名を指定すると、
+タグファイルには絶対ファイル名が記録されます。
+こうした場合、ソースファイルが同じ場所にある限り、
+タグファイルを移動してもタグファイルは同じファイルを指し続けます。
+絶対ファイル名は、@samp{/}、あるいは、
+MS-DOSとMS-Windowsでは@samp{@var{device}:/}で始まります。
+
+@c   When you want to make a tags table from a great number of files, you
+@c may have problems listing them on the command line, because some systems
+@c have a limit on its length.  The simplest way to circumvent this limit
+@c is to tell @code{etags} to read the file names from its standard input,
+@c by typing a dash in place of the file names, like this:
+非常に多数のファイルからタグテーブルを作成する場合、
+コマンド行の長さを制限しているシステムもあるので、
+ファイル名をコマンドラインで指定するときに問題が起こる可能性があります。
+この制限を回避するもっとも単純な方法は、
+つぎのように、ファイル名を指定する位置にダッシュを打って、
+@code{etags}に標準入力からファイル名を読み込ませることです。
+
+@example
+find . -name "*.[chCH]" -print | etags -
+@end example
+
+@c   Use the option @samp{--language=@var{name}} to specify the language
+@c explicitly.  You can intermix these options with file names; each one
+@c applies to the file names that follow it.  Specify
+@c @samp{--language=auto} to tell @code{etags} to resume guessing the
+@c language from the file names and file contents.  Specify
+@c @samp{--language=none} to turn off language-specific processing
+@c entirely; then @code{etags} recognizes tags by regexp matching alone.
+@c @samp{etags --help} prints the list of the languages @code{etags} knows,
+@c and the file name rules for guessing the language.
+オプション@samp{--language=@var{name}}を使えば、
+言語を明示的に指定できます。
+このオプションはファイル名と混ぜていくつでも使用できます。
+それぞれ、あとに続くファイル名に適用されます。
+@samp{--language=auto}を指定すると、
+@code{etags}はファイル名とその内容からふたたび使用言語を推測します。
+@samp{--language=none}を指定すれば、
+言語に依存した処理をいっさい行わないようになります。
+すると、@code{etags}は正規表現による一致だけに
+基づいてタグを認識します。
+@code{etags}が知っている言語と、言語を推測するファイル名規則を表示するには、
+@samp{etags --help}を指定します。
+
+@c   The @samp{--regex} option provides a general way of recognizing tags
+@c based on regexp matching.  You can freely intermix it with file names.
+@c Each @samp{--regex} option adds to the preceding ones, and applies only
+@c to the following files.  The syntax is:
+@samp{--regex}オプションは、
+正規表現による一致に基づいてタグを認識させる一般的な方法です。
+このオプションとファイル名を自由に混ぜて使用できます。
+各@samp{--regex}オプションは、それ以前に指定した正規表現に追加され、
+オプションのあとにあるファイルに適用されます。
+オプションの構文はつぎのとおりです。
+
+@example
+--regex=/@var{tagregexp}[/@var{nameregexp}]/
+@end example
+
+@noindent
+@c where @var{tagregexp} is used to match the lines to tag.  It is always
+@c anchored, that is, it behaves as if preceded by @samp{^}.  If you want
+@c to account for indentation, just match any initial number of blanks by
+@c beginning your regular expression with @samp{[ \t]*}.  In the regular
+@c expressions, @samp{\} quotes the next character, and @samp{\t} stands
+@c for the tab character.  Note that @code{etags} does not handle the other
+@c C escape sequences for special characters.
+ここで、@var{tagregexp}は、行に一致させてタグを取り出すために使われます。
+これはつねに位置が固定されています。
+つまり、@samp{^}が前置されているかのように扱われます。
+字下げ分を考慮したければ、正規表現を@samp{[ \t]*}で始めて、
+行頭の任意個の空白に一致するようにします。
+正規表現においては、@samp{\}は直後の文字をクォートし、
+@samp{\t}はタブ文字を表します。
+@code{etags}では、これら以外にはCで使われるエスケープシーケンスを
+扱えないことに注意してください。
+
+@c @cindex interval operator (in regexps)
+@cindex 反復回数演算子（正規表現）
+@c   The syntax of regular expressions in @code{etags} is the same as in
+@c Emacs, augmented with the @dfn{interval operator}, which works as in
+@c @code{grep} and @code{ed}.  The syntax of an interval operator is
+@c @samp{\@{@var{m},@var{n}\@}}, and its meaning is to match the preceding
+@c expression at least @var{m} times and up to @var{n} times.
+@code{etags}の正規表現の構文は、Emacsのものと同じで、
+@dfn{反復回数演算子}（interval operator）が拡張されています。
+この演算子は、@code{grep}や@code{ed}で使えるものと同じ動作をします。
+反復回数演算子の構文は@samp{\@{@var{m},@var{n}\@}}であり、
+直前の正規表現の@var{m}回以上@var{n}回以下の繰り返しに一致します。
+
+@c   You should not match more characters with @var{tagregexp} than that
+@c needed to recognize what you want to tag.  If the match is such that
+@c more characters than needed are unavoidably matched by @var{tagregexp},
+@c you may find useful to add a @var{nameregexp}, in order to narrow the tag
+@c scope.  You can find some examples below.
+@var{tagregexp}がタグとして認識したい部分よりも長く一致するようには
+しないでください。
+@var{tagregexp}に一致する部分が必要以上に長くなるのが避けられないならば、
+タグの範囲を狭めるために@var{nameregexp}を追加するとよいかもしれません。
+正規表現を利用した例をいくつか紹介しましょう。
+
+@c   The @samp{-R} option deletes all the regexps defined with
+@c @samp{--regex} options.  It applies to the file names following it, as
+@c you can see from the following example:
+@samp{-R}オプションは、それまでに@samp{--regex}オプションで定義した
+すべての正規表現を削除します。
+つぎの使用例からもわかるように、
+オプションのあとに続くファイルに適用されます。
+
+@example
+etags --regex=/@var{reg1}/ voo.doo --regex=/@var{reg2}/ \
+    bar.ber -R --lang=lisp los.er
+@end example
+
+@noindent
+@c Here @code{etags} chooses the parsing language for @file{voo.doo} and
+@c @file{bar.ber} according to their contents.  @code{etags} also uses
+@c @var{reg1} to recognize additional tags in @file{voo.doo}, and both
+@c @var{reg1} and @var{reg2} to recognize additional tags in
+@c @file{bar.ber}.  @code{etags} uses the Lisp tags rules, and no regexp
+@c matching, to recognize tags in @file{los.er}.
+この例では、@code{etags}は、
+@file{voo.doo}と@file{bar.ber}に対しては、その内容から使用言語を推定します。
+さらに、@file{voo.doo}から余分にタグを認識するために@var{reg1}を使い、
+@file{bar.ber}から余分にタグを認識するためには
+@var{reg1}と@var{reg2}の両方を使います。
+@file{los.er}からタグを認識するには、
+Lispのタグ構文規則だけを使い、正規表現による一致はいっさい使いません。
+
+@c   Here are some more examples.  The regexps are quoted to protect them
+@c from shell interpretation.
+別の例を示しましょう。
+ここでは、シェルが解釈しないように正規表現をクォートします。
+
+@itemize @bullet
+@item
+@c Tag the @code{DEFVAR} macros in the emacs source files:
+Emacsのソースファイルに含まれる@code{DEFVAR}マクロをタグとする。
+
+@smallexample
+--regex='/[ \t]*DEFVAR_[A-Z_ \t(]+"\([^"]+\)"/'
+@end smallexample
+
+@item
+@c Tag VHDL files (this example is a single long line, broken here for
+@c formatting reasons):
+VHDLファイルからタグを取り出す
+（この例は本来は単一の長い行だが、印刷の関係で分割してある）。
+
+@smallexample
+--language=none
+--regex='/[ \t]*\(ARCHITECTURE\|CONFIGURATION\) +[^ ]* +OF/'
+--regex='/[ \t]*\(ATTRIBUTE\|ENTITY\|FUNCTION\|PACKAGE\
+\( BODY\)?\|PROCEDURE\|PROCESS\|TYPE\)[ \t]+\([^ \t(]+\)/\3/'
+@end smallexample
+
+@item
+@c Tag Tcl files (this last example shows the usage of a @var{nameregexp}):
+Tclファイルからタグを取り出す
+（この例は@var{nameregexp}の使用例でもある）。
+
+@smallexample
+--lang=none --regex='/proc[ \t]+\([^ \t]+\)/\1/'
+@end smallexample
+@end itemize
+
+@c   For a list of the other available @code{etags} options, execute
+@c @code{etags --help}.
+他のオプション一覧を表示するには、
+@code{etags --help}を実行してください。
+
+@node Select Tags Table
+@c @subsection Selecting a Tags Table
+@subsection タグテーブルの選択
+
+@vindex tags-file-name
+@findex visit-tags-table
+@c   Emacs has at any time one @dfn{selected} tags table, and all the commands
+@c for working with tags tables use the selected one.  To select a tags table,
+@c type @kbd{M-x visit-tags-table}, which reads the tags table file name as an
+@c argument.  The name @file{TAGS} in the default directory is used as the
+@c default file name.
+Emacsでは、いつでも1つの@dfn{選択された}タグテーブルがあり、
+タグテーブルを使って動作するコマンドは選択されたタグテーブルを使用します。
+タグテーブルを選択するには、@kbd{M-x visit-tags-table}と打ちます。
+すると、タグテーブルファイル名を聞いてきます。
+デフォルトのファイル名は、デフォルトディレクトリの@file{TAGS}です。
+
+@c   All this command does is store the file name in the variable
+@c @code{tags-file-name}.  Emacs does not actually read in the tags table
+@c contents until you try to use them.  Setting this variable yourself is just
+@c as good as using @code{visit-tags-table}.  The variable's initial value is
+@c @code{nil}; that value tells all the commands for working with tags tables
+@c that they must ask for a tags table file name to use.
+このコマンドは、ファイル名を変数@code{tags-file-name}に格納するだけです。
+タグテーブルを使おうとしない限り、
+Emacsは実際にはタグテーブルの内容を読み込みません。
+@code{visit-tags-table}を使わずに、
+自分自身でこの変数にファイル名を設定してもかまいません。
+この変数の初期値は@code{nil}です。
+これは、タグテーブルを使うすべてのコマンドに、
+使用するタグテーブルファイルを尋ねさせることになります。
+
+@c   Using @code{visit-tags-table} when a tags table is already loaded
+@c gives you a choice: you can add the new tags table to the current list
+@c of tags tables, or start a new list.  The tags commands use all the tags
+@c tables in the current list.  If you start a new list, the new tags table
+@c is used @emph{instead} of others.  If you add the new table to the
+@c current list, it is used @emph{as well as} the others.  When the tags
+@c commands scan the list of tags tables, they don't always start at the
+@c beginning of the list; they start with the first tags table (if any)
+@c that describes the current file, proceed from there to the end of the
+@c list, and then scan from the beginning of the list until they have
+@c covered all the tables in the list.
+すでにタグテーブルを読み込んであるときに@code{visit-tags-table}を使うと、
+2つの選択肢があります。
+現在のタグテーブルリストに新たにタグテーブルを追加するか、
+タグテーブルリストを新規に始めるかです。
+タグコマンドは、現在のリストにあるすべてのタグテーブルを使用します。
+新たなタグテーブルリストを始めると、他のタグテーブルの@emph{かわり}に
+新たなタグテーブルが使われます。
+現在のリストに新たなタグテーブルを追加すると、
+他のタグテーブルと@emph{ともに}新たなものも使われます。
+タグコマンドがタグテーブルリストを走査するときには、
+つねにリストの先頭から始めるわけではありません。
+現在のファイルを記録しているタグテーブルがあれば、
+まずそれから始めてリストの末尾まで進みます。
+そして、リストの先頭からリストに含まれる
+すべてのタグテーブルを調べ終るまで走査を続けます。
+
+@vindex tags-table-list
+@c   You can specify a precise list of tags tables by setting the variable
+@c @code{tags-table-list} to a list of strings, like this:
+変数@code{tags-table-list}に文字列のリストを設定すれば、
+タグテーブルの正確なリストをあらかじめ指定できます。
+たとえば、つぎのようにします。
+
+@c keep this on two lines for formatting in smallbook
+@example
+@group
+(setq tags-table-list
+      '("~/emacs" "/usr/local/lib/emacs/src"))
+@end group
+@end example
+
+@noindent
+@c This tells the tags commands to look at the @file{TAGS} files in your
+@c @file{~/emacs} directory and in the @file{/usr/local/lib/emacs/src}
+@c directory.  The order depends on which file you are in and which tags
+@c table mentions that file, as explained above.
+この設定例では、タグコマンドは、
+個人の@file{~/emacs}ディレクトリと
+@file{/usr/local/lib/emacs/src}ディレクトリの
+（2つの）@file{TAGS}ファイルを見にいきます。
+上で述べたように、タグファイルを使う順番は、
+対象としているファイルやそのファイルを記述しているタグテーブルに依存します。
+
+@c   Do not set both @code{tags-file-name} and @code{tags-table-list}.
+@code{tags-file-name}と@code{tags-table-list}の両方に
+値を設定してはいけません。
+
+@node Find Tag
+@c @subsection Finding a Tag
+@subsection タグの探索
+
+@c   The most important thing that a tags table enables you to do is to find
+@c the definition of a specific tag.
+タグテーブルで実現されるもっとも重要な機能は、
+指定したタグの定義を探し出すことです。
+
+@table @kbd
+@item M-.@: @var{tag} @key{RET}
+@c Find first definition of @var{tag} (@code{find-tag}).
+タグ@var{tag}の最初の定義を探す（@code{find-tag}）。
+@item C-u M-.
+@c Find next alternate definition of last tag specified.
+最後に指定したタグのつぎの定義を探す。
+@item C-u - M-.
+@c Go back to previous tag found.
+まえにみつかったタグに戻る。
+@item C-M-. @var{pattern} @key{RET}
+@c Find a tag whose name matches @var{pattern} (@code{find-tag-regexp}).
+名前が@var{pattern}に一致するタグを探す（@code{find-tag-regexp}）。
+@item C-u C-M-.
+@c Find the next tag whose name matches the last pattern used.
+最後に使用したパターンに一致するつぎのタグを探する。
+@item C-x 4 .@: @var{tag} @key{RET}
+@c Find first definition of @var{tag}, but display it in another window
+@c (@code{find-tag-other-window}).
+タグ@var{tag}の最初の定義を探し、
+別のウィンドウに表示する（@code{find-tag-other-window}）。
+@item C-x 5 .@: @var{tag} @key{RET}
+@c Find first definition of @var{tag}, and create a new frame to select the
+@c buffer (@code{find-tag-other-frame}).
+タグ@var{tag}の最初の定義を探し、
+バッファを選択するための新たなフレームを作る。
+（@code{find-tag-other-frame}）。
+@item M-*
+@c Pop back to where you previously invoked @kbd{M-.} and friends.
+まえに@kbd{M-.}を起動した場所へ戻る。
+@end table
+
+@kindex M-.
+@findex find-tag
+@c   @kbd{M-.}@: (@code{find-tag}) is the command to find the definition of
+@c a specified tag.  It searches through the tags table for that tag, as a
+@c string, and then uses the tags table info to determine the file that the
+@c definition is in and the approximate character position in the file of
+@c the definition.  Then @code{find-tag} visits that file, moves point to
+@c the approximate character position, and searches ever-increasing
+@c distances away to find the tag definition.
+@kbd{M-.}@:（@code{find-tag}）は、指定したタグの定義を探すコマンドです。
+まず、タグテーブルの中で文字列としてタグ名を探し、
+タグテーブルの情報を用いて、
+定義されているファイルの名前とファイル内でのおおよその文字位置を求めます。
+続いて、@code{find-tag}はそのソースファイルを訪れて、
+ポイントをおおよその文字位置に移動してから、
+範囲を広げながらタグの定義を探します。
+
+@c   If an empty argument is given (just type @key{RET}), the sexp in the
+@c buffer before or around point is used as the @var{tag} argument.
+@c @xref{Lists}, for info on sexps.
+（単に@key{RET}と打って）引数を指定しないと、
+ポイントの直前または周辺にあるS式を@var{tag}引数として使います。
+S式に関しては、@xref{Lists}。
+
+@c   You don't need to give @kbd{M-.} the full name of the tag; a part
+@c will do.  This is because @kbd{M-.} finds tags in the table which
+@c contain @var{tag} as a substring.  However, it prefers an exact match
+@c to a substring match.  To find other tags that match the same
+@c substring, give @code{find-tag} a numeric argument, as in @kbd{C-u
+@c M-.}; this does not read a tag name, but continues searching the tags
+@c table's text for another tag containing the same substring last used.
+@c If you have a real @key{META} key, @kbd{M-0 M-.}@: is an easier
+@c alternative to @kbd{C-u M-.}.
+コマンド@kbd{M-.}にタグの名前を完全に与える必要はありません。
+その一部分で十分です。
+というのは、@kbd{M-.}は、部分文字列として@var{tag}を含む
+タグをタグテーブルで探すからです。
+もちろん、部分一致よりも全一致のほうが望ましいです。
+同じ部分文字列に一致する別のタグを探すには、
+@kbd{C-u M-.}のように@code{find-tag}に数引数を指定します。
+こうするとタグ名を聞いてきませんが、
+最後に使ったものと同じ部分文字列を含む別のタグを
+タグテーブルから探します。
+もし本物の@key{META}キーが使えるのであれば、
+@kbd{C-u M-.}のかわりに@kbd{M-0 M-.}@:と打つほうが簡単でしょう。
+
+@kindex C-x 4 .
+@findex find-tag-other-window
+@kindex C-x 5 .
+@findex find-tag-other-frame
+@c   Like most commands that can switch buffers, @code{find-tag} has a
+@c variant that displays the new buffer in another window, and one that
+@c makes a new frame for it.  The former is @kbd{C-x 4 .}, which invokes
+@c the command @code{find-tag-other-window}.  The latter is @kbd{C-x 5 .},
+@c which invokes @code{find-tag-other-frame}.
+バッファの切り替えを伴う他のコマンドと同様に、
+@code{find-tag}にも新たなバッファを別のウィンドウに表示したり、
+新規作成したフレームに表示する変種があります。
+前者は@kbd{C-x 4 .}であり、コマンド@code{find-tag-other-window}を起動します。
+後者は@kbd{C-x 5 .}であり、@code{find-tag-other-frame}を起動します。
+
+@c   To move back to places you've found tags recently, use @kbd{C-u -
+@c M-.}; more generally, @kbd{M-.} with a negative numeric argument.  This
+@c command can take you to another buffer.  @kbd{C-x 4 .} with a negative
+@c argument finds the previous tag location in another window.
+最近にみつけたタグ位置に戻るには、@kbd{C-u - M-.}を使います。
+より一般的には、@kbd{M-.}に負の数引数を指定します。
+このコマンドは、別のバッファへも移動します。
+@kbd{C-x 4 .}に負の数引数を指定すると、
+別のウィンドウでまえのタグ位置に戻ります。
+
+@kindex M-*
+@findex pop-tag-mark
+@vindex find-tag-marker-ring-length
+@c   As well as going back to places you've found tags recently, you can go
+@c back to places @emph{from where} you found them.  Use @kbd{M-*}, which
+@c invokes the command @code{pop-tag-mark}, for this.  Typically you would
+@c find and study the definition of something with @kbd{M-.} and then
+@c return to where you were with @kbd{M-*}.
+最近にみつけたタグ位置に戻るだけでなく、
+タグを@emph{探したとき}の場所へ戻ることもできます。
+それには、コマンド@code{pop-tag-mark}を起動する@kbd{M-*}を使います。
+典型的な使い方では、@kbd{M-.}で何かの定義を調べてから、
+@kbd{M-*}でもとの場所に戻ります。
+
+@c   Both @kbd{C-u - M-.} and @kbd{M-*} allow you to retrace your steps to
+@c a depth determined by the variable @code{find-tag-marker-ring-length}.
+@kbd{C-u - M-.}と@kbd{M-*}のどちらも、
+変数@code{find-tag-marker-ring-length}で指定される深さまで、
+辿った経路を引き返せます。
+
+@findex find-tag-regexp
+@kindex C-M-.
+@c   The command @kbd{C-M-.} (@code{find-tag-regexp}) visits the tags that
+@c match a specified regular expression.  It is just like @kbd{M-.} except
+@c that it does regexp matching instead of substring matching.
+コマンド@kbd{C-M-.}（@code{find-tag-regexp}）は、
+指定した正規表現に一致するタグを訪れます。
+部分文字列ではなく正規表現に一致するものであることを除けば、
+@kbd{M-.}と同じです。
+
+@node Tags Search
+@c @subsection Searching and Replacing with Tags Tables
+@subsection タグテーブルを用いた探索と置換
+
+@c   The commands in this section visit and search all the files listed in the
+@c selected tags table, one by one.  For these commands, the tags table serves
+@c only to specify a sequence of files to search.
+ここで紹介するコマンドは、選択されたタグテーブルに記録されている
+すべてのファイルを1つ1つ訪れては探索を行います。
+これらのコマンドに対しては、タグテーブルは探索対象となる
+一連のファイルを指定するだけです。
+
+@table @kbd
+@item M-x tags-search @key{RET} @var{regexp} @key{RET}
+@c Search for @var{regexp} through the files in the selected tags
+@c table.
+選択されたタグテーブル内の各ファイルから
+指定された@var{正規表現}を探索する。
+@item M-x tags-query-replace @key{RET} @var{regexp} @key{RET} @var{replacement} @key{RET}
+@c Perform a @code{query-replace-regexp} on each file in the selected tags table.
+選択されたタグテーブル内の各ファイルに対して、
+@code{query-replace-regexp}を実行する。
+@item M-,
+@c Restart one of the commands above, from the current location of point
+@c (@code{tags-loop-continue}).
+ポイント位置から上記のコマンドのいずれかを再実行する
+（@code{tags-loop-continue}）。
+@end table
+
+@findex tags-search
+@c   @kbd{M-x tags-search} reads a regexp using the minibuffer, then
+@c searches for matches in all the files in the selected tags table, one
+@c file at a time.  It displays the name of the file being searched so you
+@c can follow its progress.  As soon as it finds an occurrence,
+@c @code{tags-search} returns.
+@kbd{M-x tags-search}は、ミニバッファで正規表現を読み取り、
+選択されたタグテーブル内のすべてのファイル1つ1つについて、
+正規表現に一致する部分を探します。
+このコマンドは探索しているファイル名を表示するので、
+進行状況がわかります。
+正規表現に一致する部分がみつかると、@code{tags-search}はすぐに戻ります。
+
+@kindex M-,
+@findex tags-loop-continue
+@c   Having found one match, you probably want to find all the rest.  To find
+@c one more match, type @kbd{M-,} (@code{tags-loop-continue}) to resume the
+@c @code{tags-search}.  This searches the rest of the current buffer, followed
+@c by the remaining files of the tags table.@refill
+一致する部分をみつけたあとに、残りも探したくなるでしょう。
+つぎの一致を探すには、
+@kbd{M-,}（@code{tags-loop-continue}）と打って、
+@code{tags-search}を再開します。
+これは、カレントバッファの残りを探索してから、
+タグテーブルの残りのファイルについても探索します。
+
+@findex tags-query-replace
+@c   @kbd{M-x tags-query-replace} performs a single
+@c @code{query-replace-regexp} through all the files in the tags table.  It
+@c reads a regexp to search for and a string to replace with, just like
+@c ordinary @kbd{M-x query-replace-regexp}.  It searches much like @kbd{M-x
+@c tags-search}, but repeatedly, processing matches according to your
+@c input.  @xref{Replace}, for more information on query replace.
+@kbd{M-x tags-query-replace}は、タグテーブル内のすべてのファイルを対象に、
+@code{query-replace-regexp}を実行します。
+このコマンドは、通常の@kbd{M-x query-replace-regexp}
+（問い合わせ型置換）と同じく、
+探索すべき正規表現と置換文字列を読み取ります。
+そして、@kbd{M-x tags-search}のように探索を行い、
+利用者の入力に応じて一致部分を処理することを繰り返します。
+問い合わせ型置換について詳しくは、@xref{Replace}。
+
+@c   It is possible to get through all the files in the tags table with a
+@c single invocation of @kbd{M-x tags-query-replace}.  But often it is
+@c useful to exit temporarily, which you can do with any input event that
+@c has no special query replace meaning.  You can resume the query replace
+@c subsequently by typing @kbd{M-,}; this command resumes the last tags
+@c search or replace command that you did.
+@kbd{M-x tags-query-replace}を一度起動するだけで、
+タグテーブル内の全ファイルの置換を行うことができます。
+しかし、一時的に置換作業から抜け出して、
+問い合わせ型置換とは関係ないことを行えると便利です。
+@kbd{M-,}と打てば、問い合わせ型置換を再開できます。
+このコマンドは、最後に行ったタグの探索コマンドか置換コマンドを
+再開します。
+
+@c   The commands in this section carry out much broader searches than the
+@c @code{find-tag} family.  The @code{find-tag} commands search only for
+@c definitions of tags that match your substring or regexp.  The commands
+@c @code{tags-search} and @code{tags-query-replace} find every occurrence
+@c of the regexp, as ordinary search commands and replace commands do in
+@c the current buffer.
+ここで紹介したコマンドは、@code{find-tag}系列のコマンドよりも、
+幅広い探索を実行します。
+@code{find-tag}コマンドは、指定した部分文字列や正規表現に一致する
+タグの定義だけをみつけます。
+コマンド@code{tags-search}と@code{tags-query-replace}は、
+通常の探索コマンドや置換コマンドがカレントバッファで行うように、
+正規表現に一致するあらゆる部分を探し出します。
+
+@c   These commands create buffers only temporarily for the files that they
+@c have to search (those which are not already visited in Emacs buffers).
+@c Buffers in which no match is found are quickly killed; the others
+@c continue to exist.
+これらのコマンドは、（Emacsバッファにまだ訪れていないものに対しては）
+探索すべきファイル用に一時的なバッファを作成します。
+一致部分がみつからなければバッファはただちに消されますが、
+みつかれば存続します。
+
+@c   It may have struck you that @code{tags-search} is a lot like
+@c @code{grep}.  You can also run @code{grep} itself as an inferior of
+@c Emacs and have Emacs show you the matching lines one by one.  This works
+@c much like running a compilation; finding the source locations of the
+@c @code{grep} matches works like finding the compilation errors.
+@c @xref{Compilation}.
+@code{tags-search}は、@code{grep}プログラムにたいへんよく似ていると
+思われたかもしれません。
+Emacsの下位プロセスとして@code{grep}を実行して、
+Emacsに一致した行を1つずつ表示させることもできます。
+これは、コンパイルを実行するのと同じように動作します。
+@code{grep}が一致を検出したソース箇所を探すことは、
+コンパイルエラーを探すのと同様に動作します。
+@xref{Compilation}。
+        
+@node List Tags
+@c @subsection Tags Table Inquiries
+@subsection タグテーブルの照会
+
+@table @kbd
+@item M-x list-tags @key{RET} @var{file} @key{RET}
+@c Display a list of the tags defined in the program file @var{file}.
+プログラムファイル@var{file}で定義されているタグの一覧を表示する。
+@item M-x tags-apropos @key{RET} @var{regexp} @key{RET}
+@c Display a list of all tags matching @var{regexp}.
+@var{regexp}に一致するすべてのタグを表示する。
+@end table
+
+@findex list-tags
+@c   @kbd{M-x list-tags} reads the name of one of the files described by
+@c the selected tags table, and displays a list of all the tags defined in
+@c that file.  The ``file name'' argument is really just a string to
+@c compare against the file names recorded in the tags table; it is read as
+@c a string rather than as a file name.  Therefore, completion and
+@c defaulting are not available, and you must enter the file name the same
+@c way it appears in the tags table.  Do not include a directory as part of
+@c the file name unless the file name recorded in the tags table includes a
+@c directory.
+@kbd{M-x list-tags}は、選択されたタグテーブルに記載されている
+ファイルのどれか1つのファイル名を読み取り、
+そのファイルで定義されているすべてのタグを表示します。
+引数の『ファイル名』は、タグテーブルに記録されたファイル名と
+単純に文字列として比較されます。
+ファイル名というよりは、文字列として読まれます。
+したがって、補完やデフォルトはありませんし、
+タグテーブルに格納されているとおりに正確にファイル名を入力する必要があります。
+タグテーブル内のファイル名にディレクトリが含まれない限り、
+ファイル名にもディレクトリを含めてはいけません。
+
+@findex tags-apropos
+@c   @kbd{M-x tags-apropos} is like @code{apropos} for tags
+@c (@pxref{Apropos}).  It reads a regexp, then finds all the tags in the
+@c selected tags table whose entries match that regexp, and displays the
+@c tag names found.
+@kbd{M-x tags-appropos}は、タグに対する@code{apropos}にあたります 
+（@pxref{Apropos}）。
+このコマンドは、正規表現を読み取り、
+選択されたタグテーブルの中から正規表現に一致する項目のタグを
+すべてみつけだし、そのタグ名を表示します。
+
+@c   You can also perform completion in the buffer on the name space of tag
+@c names in the current tags tables.  @xref{Symbol Completion}.
+現在のタグテーブルに含まれるタグ名を名前空間として、
+バッファ内で補完を行うこともできます。
+@xref{Symbol Completion}。
+
+@node Emerge
+@c @section Merging Files with Emerge
+@section emergeを用いたファイルの併合
+@c @cindex Emerge
+@cindex emerge
+@c @cindex merging files
+@cindex ファイルの併合
+
+@c It's not unusual for programmers to get their signals crossed and modify
+@c the same program in two different directions.  To recover from this
+@c confusion, you need to merge the two versions.  Emerge makes this
+@c easier.  See also @ref{Comparing Files}, for commands to compare
+@c in a more manual fashion, and @ref{Emerge,,, ediff, The Ediff Manual}.
+ちょっとしたミスで、1つのプログラムから2つの別の版を
+作ってしまうこともあります。
+この混乱した状態を収拾するには、それらを併合する必要があります。
+emergeを使うと、併合作業が容易になります。
+手動で比較するコマンドについては、@ref{Comparing Files}と
+@ref{Emerge,,, ediff, The Ediff Manual}を参照してください。
+
+@menu
+* Overview of Emerge::	How to start Emerge.  Basic concepts.
+* Submodes of Emerge::	Fast mode vs. Edit mode.
+			  Skip Prefers mode and Auto Advance mode.
+* State of Difference::	You do the merge by specifying state A or B
+			  for each difference.
+* Merge Commands::	Commands for selecting a difference,
+			  changing states of differences, etc.
+* Exiting Emerge::	What to do when you've finished the merge.
+* Combining in Emerge::	    How to keep both alternatives for a difference.
+* Fine Points of Emerge::   Misc.
+@end menu
+
+@node Overview of Emerge
+@c @subsection Overview of Emerge
+@subsection emergeの概要
+
+@c To start Emerge, run one of these four commands:
+以下の4つのコマンドのいずれかでemergeを実行します。
+
+@table @kbd
+@item M-x emerge-files
+@findex emerge-files
+@c Merge two specified files.
+指定した2つのファイルを併合する。
+
+@item M-x emerge-files-with-ancestor
+@findex emerge-files-with-ancestor
+@c Merge two specified files, with reference to a common ancestor.
+共通の祖先を参照しながら、指定した2つのファイルを併合する。
+
+@item M-x emerge-buffers
+@findex emerge-buffers
+@c Merge two buffers.
+2つのバッファを併合する。
+
+@item M-x emerge-buffers-with-ancestor
+@findex emerge-buffers-with-ancestor
+@c Merge two buffers with reference to a common ancestor in a third
+@c buffer.
+3番目のバッファに入っている共通の祖先を参照しながら、2つのバッファを併合する。
+@end table
+
+@c @cindex merge buffer (Emerge)
+@c @cindex A and B buffers (Emerge)
+@cindex 併合バッファ（emerge）
+@cindex AバッファとBバッファ（emerge）
+@c   The Emerge commands compare two files or buffers, and display the
+@c comparison in three buffers: one for each input text (the @dfn{A buffer}
+@c and the @dfn{B buffer}), and one (the @dfn{merge buffer}) where merging
+@c takes place.  The merge buffer shows the full merged text, not just the
+@c differences.  Wherever the two input texts differ, you can choose which
+@c one of them to include in the merge buffer.
+emergeコマンドは、2つのファイル、あるいは、2つのバッファを比較して、
+比較結果を3つのバッファ、つまり、
+各入力テキストに1つずつ（@dfn{Aバッファ}と@dfn{Bバッファ}）と、
+併合を実施するバッファ（@dfn{併合バッファ}）に表示します。
+併合バッファには、比較によって得られる差分だけでなく、
+併合したテキスト全体が表示されます。
+2つの入力テキストが相違している箇所については、
+どちらのテキストを併合バッファに含めるか選択できます。
+
+@c   The Emerge commands that take input from existing buffers use only the
+@c accessible portions of those buffers, if they are narrowed
+@c (@pxref{Narrowing}).
+既存のバッファを入力源とするemergeコマンドでは、
+入力バッファがナロイングされていると、
+バッファの参照可能な部分だけを使います（@pxref{Narrowing}）。
+
+@c   If a common ancestor version is available, from which the two texts to
+@c be merged were both derived, Emerge can use it to guess which
+@c alternative is right.  Wherever one current version agrees with the
+@c ancestor, Emerge presumes that the other current version is a deliberate
+@c change which should be kept in the merged version.  Use the
+@c @samp{with-ancestor} commands if you want to specify a common ancestor
+@c text.  These commands read three file or buffer names---variant A,
+@c variant B, and the common ancestor.
+併合したい2つのテキストのもとである共通の祖先にあたる版を利用できるときには、
+emergeはそれを使ってどちらの選択肢が正しいのか推測します。
+一方の入力と祖先との一致部分がどこかにあれば、
+もう一方の入力には併合結果に残すべき意図的な変更がなされていると推測します。
+共通の祖先のテキストを指定するには、
+名前に@samp{with-ancestor}の付いたコマンドを使ってください。
+これらのコマンドは、A版、B版、共通の祖先に対応する
+3つのファイル名かバッファ名を読み取ります。
+
+@c   After the comparison is done and the buffers are prepared, the
+@c interactive merging starts.  You control the merging by typing special
+@c @dfn{merge commands} in the merge buffer.  The merge buffer shows you a
+@c full merged text, not just differences.  For each run of differences
+@c between the input texts, you can choose which one of them to keep, or
+@c edit them both together.
+入力を比較してバッファの準備を終えると、つぎは対話的な併合作業が始まります。
+併合バッファで特別な@dfn{併合コマンド}を打って併合作業を制御します。
+併合バッファには、単なる差分ではなく併合したテキスト全体が表示されます。
+入力テキストの各相違箇所に対して、どちら側を残すか選択したり、
+両者をもとにして編集できます。
+
+@c   The merge buffer uses a special major mode, Emerge mode, with commands
+@c for making these choices.  But you can also edit the buffer with
+@c ordinary Emacs commands.
+併合バッファでは、emergeモードと呼ばれる特別なメジャーモードが使われ、
+これらを選択するコマンドがあります。
+もちろん、通常のEmacsコマンドでバッファを編集することもできます。
+
+@c   At any given time, the attention of Emerge is focused on one
+@c particular difference, called the @dfn{selected} difference.  This
+@c difference is marked off in the three buffers like this:
+emergeの注意は、いつでも@dfn{注目}相違箇所と呼ばれる
+相違箇所に向けられています。
+3つのバッファ内では、注目相違点はつぎのように印が付けられます。
+
+@example
+vvvvvvvvvvvvvvvvvvvv
+@var{text that differs}
+^^^^^^^^^^^^^^^^^^^^
+@end example
+
+@noindent
+@c Emerge numbers all the differences sequentially and the mode
+@c line always shows the number of the selected difference.
+emergeはすべての相違箇所に順に番号をふります。
+さらに、モード行にはつねに注目相違箇所の番号が表示されます。
+
+@c   Normally, the merge buffer starts out with the A version of the text.
+@c But when the A version of a difference agrees with the common ancestor,
+@c then the B version is initially preferred for that difference.
+通常、併合バッファはA版の内容で始まります。
+しかし、A版の内容が共通の祖先の内容と一致するときには、
+併合バッファはB版の内容で始まります。
+
+@c   Emerge leaves the merged text in the merge buffer when you exit.  At
+@c that point, you can save it in a file with @kbd{C-x C-w}.  If you give a
+@c numeric argument to @code{emerge-files} or
+@c @code{emerge-files-with-ancestor}, it reads the name of the output file
+@c using the minibuffer.  (This is the last file name those commands read.)
+@c Then exiting from Emerge saves the merged text in the output file.
+emergeを終えると、併合バッファにはその時点の併合済みテキストが残ります。
+emerge終了時には、@kbd{C-x C-w}でファイルに保存できます。
+@code{emerge-files}や@code{emerge-files-with-ancestor}に
+数引数を指定すると、ミニバッファで出力ファイル名を読み取ります。
+（どちらの場合でも、これがいちばん最後に聞かれるファイル名。）
+すると、emerge終了時には、併合済みのテキストがその出力ファイルに保存されます。
+
+@c   Normally, Emerge commands save the output buffer in its file when you
+@c exit.  If you abort Emerge with @kbd{C-]}, the Emerge command does not
+@c save the output buffer, but you can save it yourself if you wish.
+emergeを終えると、通常、emergeコマンドが併合バッファをファイルに保存します。
+emergeを@kbd{C-]}でアボートするとemergeコマンドは併合バッファを保存しませんが、
+必要ならばユーザー自身で保存できます。
+
+@node Submodes of Emerge
+@c @subsection Submodes of Emerge
+@subsection emergeのサブモード
+
+@c   You can choose between two modes for giving merge commands: Fast mode
+@c and Edit mode.  In Fast mode, basic merge commands are single
+@c characters, but ordinary Emacs commands are disabled.  This is
+@c convenient if you use only merge commands.  In Edit mode, all merge
+@c commands start with the prefix key @kbd{C-c C-c}, and the normal Emacs
+@c commands are also available.  This allows editing the merge buffer, but
+@c slows down Emerge operations.
+併合コマンドを指示するためのモードが2つ、つまり、
+高速モード（Fast mode）と編集モード（Edit mode）があり、どちらかを選べます。
+高速モードでは、基本的な併合コマンドは1文字で表され、
+通常のEmacsコマンドは禁止されています。
+併合コマンドだけを使用するのであれば、高速モードが便利です。
+編集モードでは、すべての併合コマンドはプレフィックス@kbd{C-c C-c}で始まり、
+通常のEmacsコマンドも使えます。
+このモードでは、併合バッファを編集できますが、emergeの処理は遅くなります。
+
+@c   Use @kbd{e} to switch to Edit mode, and @kbd{C-c C-c f} to switch to
+@c Fast mode.  The mode line indicates Edit and Fast modes with @samp{E}
+@c and @samp{F}.
+編集モードに切り替えるには@kbd{e}を使い、
+高速モードに切り替えるには@kbd{C-c C-c f}を使います。
+モード行には、編集モードは@samp{E}、高速モードは@samp{F}と表示されます。
+
+@c   Emerge has two additional submodes that affect how particular merge
+@c commands work: Auto Advance mode and Skip Prefers mode.
+emergeには、特定の併合コマンドの動作に影響を与えるサブモードが
+さらに2つあります。
+自動前進（auto-advance）モードと
+優先箇所スキップ（skip-prefers）モードです。
+
+@c   If Auto Advance mode is in effect, the @kbd{a} and @kbd{b} commands
+@c advance to the next difference.  This lets you go through the merge
+@c faster as long as you simply choose one of the alternatives from the
+@c input.  The mode line indicates Auto Advance mode with @samp{A}.
+自動前進モードがオンであると、コマンド@kbd{a}と@kbd{b}は、
+自動的につぎの相違箇所にポイントを進めます。
+このモードでは、どちらかの入力だけを選ぶ状況である限り、高速に併合を行えます。
+モード行には@samp{A}と表示され、自動前進モードであるを示します。
+
+@c   If Skip Prefers mode is in effect, the @kbd{n} and @kbd{p} commands
+@c skip over differences in states prefer-A and prefer-B (@pxref{State of
+@c Difference}).  Thus you see only differences for which neither version
+@c is presumed ``correct.''  The mode line indicates Skip Prefers mode with
+@c @samp{S}.
+優先箇所スキップモードがオンであると、
+コマンド@kbd{n}と@kbd{p}は、
+A優先／B優先の状態にある相違箇所をスキップします
+（@pxref{State of Difference}）。
+つまり、どちらの版も『正しい』と推定されない相違箇所だけを調べことになります。
+モード行には@samp{S}と表示され、優先箇所スキップモードであることを示します。
+
+@findex emerge-auto-advance-mode
+@findex emerge-skip-prefers-mode
+@c   Use the command @kbd{s a} (@code{emerge-auto-advance-mode}) to set or
+@c clear Auto Advance mode.  Use @kbd{s s}
+@c (@code{emerge-skip-prefers-mode}) to set or clear Skip Prefers mode.
+@c These commands turn on the mode with a positive argument, turns it off
+@c with a negative or zero argument, and toggle the mode with no argument.
+自動前進モードをオン／オフするには、
+コマンド@kbd{s a}（@code{emerge-auto-advance-mode}）を使います。
+優先箇所スキップモードをオン／オフするには、
+コマンド@kbd{s s}（@code{emerge-skip-prefers-mode}）を使います。
+どちらのコマンドも、正の数引数を指定するとオンにし、
+負あるいは0の数引数を指定するとオフにし、
+引数を指定しないとトグル（切り替え）します。
+
+@node State of Difference
+@c @subsection State of a Difference
+@subsection 相違箇所の状態
+
+@c   In the merge buffer, a difference is marked with lines of @samp{v} and
+@c @samp{^} characters.  Each difference has one of these seven states:
+併合バッファ内では、相違箇所は@samp{v}と@samp{^}の文字だけの行に
+挟まれて示されます。
+各相違箇所は、つぎの7つのいずれかの状態になっています。
+
+@table @asis
+@c @item A
+@item 状態A
+@c The difference is showing the A version.  The @kbd{a} command always
+@c produces this state; the mode line indicates it with @samp{A}.
+この相違箇所はA版の内容である。
+@kbd{a}コマンドは必ずこの状態にする。
+モード行には@samp{A}と表示される。
+
+@c @item B
+@item 状態B
+@c The difference is showing the B version.  The @kbd{b} command always
+@c produces this state; the mode line indicates it with @samp{B}.
+この相違箇所はB版の内容である。
+@kbd{b}コマンドは必ずこの状態にする。
+モード行には@samp{B}と表示される。
+
+@c @item default-A
+@c @itemx default-B
+@item デフォルトA
+@itemx デフォルトB
+@c The difference is showing the A or the B state by default, because you
+@c haven't made a choice.  All differences start in the default-A state
+@c (and thus the merge buffer is a copy of the A buffer), except those for
+@c which one alternative is ``preferred'' (see below).
+まだ決心していないので、『デフォルト』で、
+相違箇所は状態A（A版の内容）か状態B（B版の内容）である。
+どちらかの選択肢が『優先される』（下記参照）場合を除いて、
+相違箇所はすべてデフォルトAで始まる
+（つまり、併合バッファの内容はAバッファのコピー）。
+
+@c When you select a difference, its state changes from default-A or
+@c default-B to plain A or B.  Thus, the selected difference never has
+@c state default-A or default-B, and these states are never displayed in
+@c the mode line.
+相違箇所を選択すると、その状態は、デフォルトAやデフォルトBから
+状態Aや状態Bに遷移する。
+つまり、一度でも選択した相違箇所は、
+デフォルトAやデフォルトBの状態であることはなく、
+これらの状態はけっしてモード行には表示されない。
+
+@c The command @kbd{d a} chooses default-A as the default state, and @kbd{d
+@c b} chooses default-B.  This chosen default applies to all differences
+@c which you haven't ever selected and for which no alternative is preferred.
+@c If you are moving through the merge sequentially, the differences you
+@c haven't selected are those following the selected one.  Thus, while
+@c moving sequentially, you can effectively make the A version the default
+@c for some sections of the merge buffer and the B version the default for
+@c others by using @kbd{d a} and @kbd{d b} between sections.
+デフォルトの状態として、
+コマンド@kbd{d a}はデフォルトAを選び、
+@kbd{d b}デフォルトBを選ぶ。
+これらのコマンドで選んだデフォルトの状態は、
+一度も選択してなく、かつ、どちらの版も優先されない相違箇所に適用される。
+併合作業を先頭から順に行っている場合、
+最後に選択した相違箇所に続く相違箇所群が一度も選択されていないものである。
+したがって、先頭から順に進めるのであれば、
+@kbd{d a}と@kbd{d b}を使い分けて、
+併合バッファのある部分ではA版をデフォルトとし、
+別の部分ではB版をデフォルトとすることができる。
+
+@c @item prefer-A
+@c @itemx prefer-B
+@item 優先A
+@itemx 優先B
+@c The difference is showing the A or B state because it is
+@c @dfn{preferred}.  This means that you haven't made an explicit choice,
+@c but one alternative seems likely to be right because the other
+@c alternative agrees with the common ancestor.  Thus, where the A buffer
+@c agrees with the common ancestor, the B version is preferred, because
+@c chances are it is the one that was actually changed.
+どちらかが@dfn{優先され}ているので、
+相違箇所は状態A（A版の内容）か状態B（B版の内容）である。
+つまり、明示的にはまだ選択していないが、当該箇所では、
+一方の版が共通の祖先に一致するため、
+他方の版のほうが正しく思われるのである。
+したがって、Aバッファが共通の祖先と一致する箇所では、
+実際に変更されたほうが正しいものである可能性があるので、
+B版が優先される。
+
+@c These two states are displayed in the mode line as @samp{A*} and @samp{B*}.
+これらの2つの状態は、モード行では@samp{A*}や@samp{B*}と表示される。
+
+@c @item combined
+@item 混合状態
+@c The difference is showing a combination of the A and B states, as a
+@c result of the @kbd{x c} or @kbd{x C} commands.
+@kbd{x c}や@kbd{x C}コマンドの結果、
+相違箇所は、状態A（A版の内容）と状態B（B版の内容）の混合状態になっている。
+
+@c Once a difference is in this state, the @kbd{a} and @kbd{b} commands
+@c don't do anything to it unless you give them a numeric argument.
+相違箇所がいったんこの状態になると、
+コマンド@kbd{a}や@kbd{b}に数引数を指定しない限り、何もしない。
+
+@c The mode line displays this state as @samp{comb}.
+この状態は、モード行では@samp{comb}と表示される。
+@end table
+
+@node Merge Commands
+@c @subsection Merge Commands
+@subsection 併合コマンド
+
+@c   Here are the Merge commands for Fast mode; in Edit mode, precede them
+@c with @kbd{C-c C-c}:
+ここでは、高速モードの併合操作コマンドを示します。
+編集モードでは、これらのコマンドのまえに@kbd{C-c C-c}を付けます。
+
+@table @kbd
+@item p
+@c Select the previous difference.
+まえの相違箇所を選択する。
+
+@item n
+@c Select the next difference.
+つぎの相違箇所を選択する。
+
+@item a
+@c Choose the A version of this difference.
+この相違箇所をA版にする（状態A）。
+
+@item b
+@c Choose the B version of this difference.
+この相違箇所をB版にする（状態B）。
+
+@item C-u @var{n} j
+@c Select difference number @var{n}.
+番号@var{n}の相違箇所を選択する。
+
+@item .
+@c Select the difference containing point.  You can use this command in the
+@c merge buffer or in the A or B buffer.
+ポイントを含む相違箇所を選択する。
+このコマンドは、併合バッファ、Aバッファ、Bバッファのいずれでも使える。
+
+@item q
+@c Quit---finish the merge.
+終了する。
+併合作業を完了。
+
+@item C-]
+@c Abort---exit merging and do not save the output.
+アボートする。
+併合作業をやめ、併合結果も保存しない。
+
+@item f
+@c Go into Fast mode.  (In Edit mode, this is actually @kbd{C-c C-c f}.)
+高速モードに移行する。
+（編集モードでは、実際には@kbd{C-c C-c f}コマンド。）
+
+@item e
+@c Go into Edit mode.
+編集モードに移行する。
+
+@item l
+@c Recenter (like @kbd{C-l}) all three windows.
+3つのウィンドウすべてを（@kbd{C-l}のように）再表示する。
+
+@item - 
+@c Specify part of a prefix numeric argument.
+数引数の一部を指定する。
+
+@item @var{digit}
+@c Also specify part of a prefix numeric argument.
+これも、数引数の一部を指定する。
+
+@item d a
+@c Choose the A version as the default from here down in
+@c the merge buffer.
+併合バッファのこれ以降では、A版を選ぶ（デフォルトA）。
+
+@item d b
+@c Choose the B version as the default from here down in
+@c the merge buffer.
+併合バッファのこれ以降では、B版を選ぶ（デフォルトB）。
+
+@item c a
+@c Copy the A version of this difference into the kill ring.
+この相違箇所のA版のテキストをキルリングにコピーする。
+
+@item c b
+@c Copy the B version of this difference into the kill ring.
+この相違箇所のB版のテキストをキルリングにコピーする。
+
+@item i a
+@c Insert the A version of this difference at point.
+この相違箇所のA版のテキストをポイント位置に挿入する。
+
+@item i b
+@c Insert the B version of this difference at point.
+この相違箇所のB版のテキストをポイント位置に挿入する。
+
+@item m
+@c Put point and mark around the difference.
+相違箇所の周りにポイントとマークを設定する。
+
+@item ^
+@c Scroll all three windows down (like @kbd{M-v}).
+3つのウィンドウすべてを（@kbd{M-v}のように）下にスクロールする。
+
+@item v
+@c Scroll all three windows up (like @kbd{C-v}).
+3つのウィンドウすべてを（@kbd{C-v}のように）上にスクロールする。
+
+@item <
+@c Scroll all three windows left (like @kbd{C-x <}).
+3つのウィンドウすべてを（@kbd{C-x <}のように）左にスクロールする。
+
+@item >
+@c Scroll all three windows right (like @kbd{C-x >}).
+3つのウィンドウすべてを（@kbd{C-x >}のように）右にスクロールする。
+
+@item |
+@c Reset horizontal scroll on all three windows.
+3つのウィンドウすべてで、水平方向のスクロール分をリセットする。
+
+@item x 1
+@c Shrink the merge window to one line.  (Use @kbd{C-u l} to restore it
+@c to full size.)
+併合バッファを表示しているウィンドウの高さを1行に縮小する。
+（フルサイズに戻すには@kbd{C-u l}を使う。）
+
+@item x c
+@c Combine the two versions of this difference (@pxref{Combining in
+@c Emerge}).
+この相違箇所の2つの版を混合する（@pxref{Combining in Emerge}）。 
+
+@item x f
+@c Show the names of the files/buffers Emerge is operating on, in a Help
+@c window.  (Use @kbd{C-u l} to restore windows.)
+emergeで作業しているファイル／バッファの名前を、
+ヘルプ用ウィンドウに表示する。
+（ウィンドウをもとの状態に戻すには@kbd{C-u l}を使う。）
+
+@item x j
+@c Join this difference with the following one.
+@c (@kbd{C-u x j} joins this difference with the previous one.)
+この相違箇所を、つぎの相違箇所と結合する。
+（@kbd{C-u x j}では、まえの相違箇所と結合する。）
+
+@item x s
+@c Split this difference into two differences.  Before you use this
+@c command, position point in each of the three buffers at the place where
+@c you want to split the difference.
+この相違箇所を2つに分割する。
+このコマンドを使うまえに、3つのバッファそれぞれで、
+相違箇所を分割したい位置にポイントを移動しておく。
+
+@item x t
+@c Trim identical lines off the top and bottom of the difference.
+@c Such lines occur when the A and B versions are
+@c identical but differ from the ancestor version.
+相違箇所の先頭や末尾にある同じ行を取り去る。
+このような行が現れるのは、
+A版とB版は一致しているが、共通の祖先とは一致しない場合。
+@end table
+
+@node Exiting Emerge
+@c @subsection Exiting Emerge
+@subsection emergeの終了
+
+@c   The @kbd{q} command (@code{emerge-quit}) finishes the merge, storing
+@c the results into the output file if you specified one.  It restores the
+@c A and B buffers to their proper contents, or kills them if they were
+@c created by Emerge and you haven't changed them.  It also disables the
+@c Emerge commands in the merge buffer, since executing them later could
+@c damage the contents of the various buffers.
+@kbd{q}コマンド（@code{emerge-quit}）は、併合を終了し、
+出力ファイルを指定してあれば、そこに結果を保存します。
+AバッファとBバッファは正しい内容に復元されますが、
+emergeがAバッファとBバッファを作成して、かつ、編集されていなければ、
+それらをキルします。
+さらに、併合バッファでのemergeコマンドを使用禁止にします。
+というのは、これ以降に併合コマンドを実行すると
+さまざまなバッファが悪影響を受ける可能性があるからです。
+
+@c   @kbd{C-]} aborts the merge.  This means exiting without writing the
+@c output file.  If you didn't specify an output file, then there is no
+@c real difference between aborting and finishing the merge.
+@kbd{C-]}は、併合作業をアボートします。
+つまり、出力ファイルに書き出さずに終ります。
+出力ファイルを指定していなければ、併合作業をアボートしようが終了しようが、
+何の違いもありません。
+
+@c   If the Emerge command was called from another Lisp program, then its
+@c return value is @code{t} for successful completion, or @code{nil} if you
+@c abort.
+他のLispプログラムからemergeコマンドが呼び出された場合、
+正しく終了すると@code{t}、アボートしたときは@code{nil}が返されます。
+
+@node Combining in Emerge
+@c @subsection Combining the Two Versions
+@subsection 2つの版の混合
+
+@c   Sometimes you want to keep @emph{both} alternatives for a particular
+@c difference.  To do this, use @kbd{x c}, which edits the merge buffer
+@c like this:
+相違箇所によっては、@emph{両方}の版を残したいこともあるでしょう。
+そのような場合には、@kbd{x c}を使います。
+すると、併合バッファはつぎのようになります。
+
+@example
+@group
+#ifdef NEW
+@var{version from A buffer}
+#else /* not NEW */
+@var{version from B buffer}
+#endif /* not NEW */
+@end group
+@end example
+
+@noindent
+@vindex emerge-combine-versions-template
+@c While this example shows C preprocessor conditionals delimiting the two
+@c alternative versions, you can specify the strings to use by setting
+@c the variable @code{emerge-combine-versions-template} to a string of your
+@c choice.  In the string, @samp{%a} says where to put version A, and
+@c @samp{%b} says where to put version B.  The default setting, which
+@c produces the results shown above, looks like this:
+この例では、2つの版をCのプリプロセッサの条件節で分けていますが、
+変数@code{emerge-combine-versions-template}に好みの文字列を設定すれば、
+このコマンドで使用する文字列を指定できます。
+この文字列内では、A版のテキストを置く箇所には@samp{%a}を、
+B版のを置く箇所には@samp{%b}を指定します。
+上に示した結果を生じるデフォルトの設定はつぎのとおりです。
+
+@example
+@group
+"#ifdef NEW\n%a#else /* not NEW */\n%b#endif /* not NEW */\n"
+@end group
+@end example
+
+@node Fine Points of Emerge
+@c @subsection Fine Points of Emerge
+@subsection 細かな注意点
+
+@c   During the merge, you mustn't try to edit the A and B buffers yourself.
+@c Emerge modifies them temporarily, but ultimately puts them back the way
+@c they were.
+併合作業中には、AバッファやBバッファを勝手に編集してはいけません。
+emergeは一時的にこれらのバッファの内容を変更しますが、
+最終的にはもとの状態に戻します。
+
+@c   You can have any number of merges going at once---just don't use any one
+@c buffer as input to more than one merge at once, since the temporary
+@c changes made in these buffers would get in each other's way.
+複数の併合処理を同時に進めることもできますが、
+別の併合処理の入力に同じバッファを使用してはいけません。
+というのは、一時的にせよ、互いに異なる複数の変更が
+1つのバッファに加えられてしまうからです。
+
+@c   Starting Emerge can take a long time because it needs to compare the
+@c files fully.  Emacs can't do anything else until @code{diff} finishes.
+@c Perhaps in the future someone will change Emerge to do the comparison in
+@c the background when the input files are large---then you could keep on
+@c doing other things with Emacs until Emerge is ready to accept
+@c commands.
+入力ファイル全体を比較する必要があるため、
+emergeの開始にはしばらく時間がかかる場合もあります。
+また、@code{diff}コマンドが完了するまで、emergeは何もできません。
+たぶん、そのうち誰かがemergeを変更して、
+入力ファイルが大きいときにはバックグラウンドで比較を行うようにするでしょう。
+そうすれば、emergeがコマンドを受け付けるようになるまで、
+Emacsで他の作業を続けられます。
+
+@vindex emerge-startup-hook
+@c   After setting up the merge, Emerge runs the hook
+@c @code{emerge-startup-hook} (@pxref{Hooks}).
+フック@code{emerge-startup-hook}（@pxref{Hooks}）が、併合処理の設定の最後
+に実行されます。

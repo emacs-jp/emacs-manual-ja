@@ -1,0 +1,5541 @@
+\input texinfo   @c -*-texinfo-*-  -*- coding: iso-2022-7bit -*-
+
+@c このファイルは emacs-21.1 付属の faq.texi の日本語訳です。
+@c いくつかの項目については mule 付属の FAQ.jp を参考にしています。
+@c by yagi@is.titech.ac.jp
+
+@c %**start of header
+@setfilename ../info/efaq-ja
+@settitle GNU Emacs FAQ 日本語訳
+@c %**end of header
+
+@setchapternewpage odd
+@footnotestyle end
+@paragraphindent 3
+@definfoenclose emph, _, _
+@definfoenclose key, <, >
+
+@c This is used in many places
+@set VER 21.3
+
+@ignore
+@copying
+Copyright 2001, 2002, 2003 Free Software Foundation, Inc.
+Copyright 1994,1995,1996,1997,1998,1999,2000 Reuven M. Lerner@*
+Copyright 1992,1993 Steven Byrnes@*
+Copyright 1990,1991,1992 Joseph Brian Wells@*
+
+@quotation
+This list of frequently asked questions about GNU Emacs with answers
+("FAQ") may be translated into other languages, transformed into other
+formats (e.g. Texinfo, Info, WWW, WAIS), and updated with new information.
+
+The same conditions apply to any derivative of the FAQ as apply to the FAQ
+itself.  Every copy of the FAQ must include this notice or an approved
+translation, information on who is currently maintaining the FAQ and how to
+contact them (including their e-mail address), and information on where the
+latest version of the FAQ is archived (including FTP information).
+
+The FAQ may be copied and redistributed under these conditions, except that
+the FAQ may not be embedded in a larger literary work unless that work
+itself allows free copying and redistribution.
+
+[This version has been somewhat edited from the last-posted version
+(as of August 1999) for inclusion in the Emacs distribution.]
+@end quotation
+@end copying
+@end ignore
+
+@dircategory Emacs
+@direntry
+* Emacs FAQ JA: (efaq-ja).	Frequently Asked Questions about Emacs.
+@end direntry
+
+@c The @titlepage stuff only appears in the printed version
+@titlepage
+@sp 10
+@center @titlefont{GNU Emacs FAQ}
+
+@c The following two commands start the copyright page.
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@node    Top, FAQ notation, (dir), (dir)
+
+This is the GNU Emacs FAQ, last updated on @today{}.
+
+The FAQ is maintained as a Texinfo document, allowing us to create HTML,
+Info, and TeX documents from a single source file, and is slowly but
+surely being improved.  Please bear with us as we improve on this
+format.  This FAQ is maintained as a part of GNU Emacs.  If you find
+any errors, or have any suggestions, please use @kbd{M-x report-emacs-bug}
+to report them.
+
+@menu
+* FAQ notation::                表記法
+* General questions::           一般的な質問
+* Getting help::                ヘルプ
+* Status of Emacs::             Emacs の情勢
+* Common requests::             普通の人がやりたいこと
+* Bugs and problems::           バグや問題点
+* Compiling and installing Emacs::  Emacs のコンパイル・インストール
+* Finding Emacs and related packages::  Emacs 及び関連ファイルの入手法
+* Major packages and programs::  Emacs 関連パッケージ・プログラム
+* Key bindings::                キー割り当て
+* Alternate character sets::    英語以外の言語
+* Mail and news::               メール・ニュース
+* Concept index::               概念索引
+@end menu
+
+@c ------------------------------------------------------------
+@node FAQ notation, General questions, Top, Top
+@chapter FAQ notation @emph{(2004/07/28)}
+@cindex FAQ notation
+
+この章では Emacs FAQ(このファイル)や Emacs のオンラインマニュアルで
+使われる表記法について書かれています。
+表記法についてわからない場合はここを読んでください。
+
+@menu
+* Basic keys::                  基本的なキー
+* Extended commands::           M-x コマンド
+* On-line manual::              オンラインマニュアル
+* File-name conventions::       ファイル名
+* Common acronyms::             省略名
+@end menu
+
+@node Basic keys, Extended commands, FAQ notation, FAQ notation
+@section どんな意味ですか: @kbd{C-h}, @kbd{C-M-a}, @key{RET}, @kbd{@key{ESC} a} など @emph{(2004/07/28)}
+@cindex Basic keys
+@cindex Control key, notation for
+@cindex @key{Meta} key, notation for
+@cindex Control-Meta characters, notation for
+@cindex @kbd{C-h}, definition of
+@cindex @kbd{C-M-h}, definition of
+@cindex @key{DEL}, definition of
+@cindex @key{ESC}, definition of
+@cindex @key{LFD}, definition of
+@cindex @key{RET}, definition of
+@cindex @key{SPC}, definition of
+@cindex @key{TAB}, definition of
+@cindex Notation for keys
+
+@c yagi: @key{Ctrl}, @key{Esc} とかの表記については?
+@itemize @bullet
+
+@item
+@kbd{C-@var{x}}: @key{Control} キーを押しながら @key{@var{x}} キーを押す
+
+@item
+@kbd{M-@var{x}}: @key{Meta} キーを押しながら @key{@var{x}} キーを押す
+(@key{Meta} キーが無い場合は @ref{No Meta key} 参照)
+
+@item
+@kbd{M-C-@var{x}}: @key{Control} キーと @key{Meta} キーを両方押しながら
+             @key{@var{x}} キーを押す
+
+@item
+@kbd{C-M-@var{x}}: 上と同じ
+
+@item
+@key{LFD}: @key{Linefeed} キーまたは @key{Newline} キーまたは @kbd{C-j}
+
+@item
+@key{RET}: @key{Return} キーまたは @key{Enter} キーまたは @kbd{C-m}
+
+@item
+@key{DEL}: @key{Delete} キー(@key{Backspace} キーでは@strong{ありません})
+           または @kbd{C-?}
+           (文字を削除しようとして Emacs help が起動する場合は
+            @ref{Backspace invokes help} 参照)
+
+@item
+@key{ESC}: @key{Escape} キーまたは @kbd{C-[}
+
+@item
+@key{TAB}: @key{Tab} キーまたは @kbd{C-i}
+
+@item
+@key{SPC}: スペースキー
+
+@end itemize
+
+キー入力は次の様に引用符で囲んで記述します。
+@c yagi: written inside quotes or on lines by themselves
+@c yagi: って「引用符で囲むか、独立の行で記述する」と言う意味か?
+@c yagi: だとすると「独立の行で記述する」ことをわざわざ言う意味はあるのか?
+
+@display
+@kbd{M-x frobnicate-while-foo RET}
+@end display
+
+@noindent
+このようなキー入力の表示ではキーの間にスペースが入っていますがそれは無視して、
+スペースキーは @key{SPC} が書かれているところでのみ入力してください。
+
+@c yagi: Window system で受け取れるイベント @kbd{C-hoge} の記述は?
+@key{Control} キーとの組み合わせによるキー入力によって
+コンピュータに送られる @acronym{ASCII} コードは @key{Control} キーを押さない場合に
+送られる ASCII コードから 96 を引いた値になり
+(アルファベットの大文字の場合は 64 を引いた値になり)、
+その範囲は 0 から 31 です。
+つまり @key{Control} キーを押すと第5、第6ビットをオフにし、
+@key{Meta} キーを押すと第7ビットをオンにします。
+@footnote{
+DOS や Windows の端末は @key{Meta} キーを押しても第7ビットをオンにしません。
+}
+
+ただし例外として @kbd{C-?} (@key{DEL} と同じです) の @acronym{ASCII} コードは 127 です。
+127 は第5、第6ビットがオンになっているので
+@kbd{C-?} を``コントロール''コードと呼ぶのは間違いです。
+また、ほとんどのキーボードは @kbd{C-?} で @acronym{ASCII} コード 127 を送りません。
+
+より詳しく知りたいときはオンラインマニュアルの
+@inforef{Text Characters, , emacs} や
+@inforef{Keys, , emacs} を参照してください。
+@ifinfo
+(マニュアルの読み方については @ref{On-line manual} 参照)
+@end ifinfo
+
+@node Extended commands, On-line manual, Basic keys, FAQ notation
+@section @kbd{M-x @var{command}} ってどんな意味?
+@cindex Extended commands
+@cindex Commands, extended
+@cindex M-x, meaning of
+
+@kbd{M-x @var{command}} は @kbd{M-x} と入力してから
+ミニバッファにコマンド名を入力して
+@key{RET} でコマンド名を確定する操作を意味します。
+(@kbd{M-x} や @key{RET} の意味については @ref{Basic keys} 参照)
+
+@kbd{M-x} は(標準では) @code{execute-extended-command} を実行します。
+このコマンドは指定したコマンドを実行するためのコマンドです。
+コマンド名を正確に記憶していなくても @key{TAB} や @key{SPC} で
+入力を補完することができます。
+@key{?} で補完の候補の一覧を見ることができます。
+@kbd{M-p} または @kbd{M-n} で
+(カーソルキーがある場合は上向き/下向きのカーソルキーで)
+過去に入力したコマンドを指定できます。
+Emacs の @dfn{コマンド} とは @dfn{対話的(interactive)} に実行できる
+Emacs の関数のことです。
+
+@cindex @key{Do} key
+システム管理者が @code{execute-extended-command} を実行するキーを
+別のキーにも定義してくれているかもしれません。
+@key{Do} キーはその可能性が高いキーです。
+
+対話的でない Emacs の関数を実行したい場合については
+@ref{Evaluating Emacs Lisp code} 参照。
+
+@node On-line manual, File-name conventions, Extended commands, FAQ notation
+@section オンラインマニュアルで XXX について調べる方法は?
+@cindex On-line manual, reading topics in
+@cindex Reading topics in the on-line manual
+@cindex Finding topics in the on-line manual
+@cindex Info, finding topics in
+
+オンラインマニュアルで @var{topic} について調べてください、
+というときには(通常) Emacs に次の様に入力することで
+マニュアルを読むことができます。
+
+@kbd{C-h i m emacs @key{RET} m @var{topic} @key{RET}}.
+
+これで Info が起動します。Info は GNU のハイパーテキストブラウザです。
+Info の使い方が良くわからないときは Info の中で @key{?} を押してください。
+
+@var{topic}:@var{subtopic} の様に書いてある場合は次の様にしてください。
+
+@kbd{C-h i m emacs @key{RET} m @var{topic} @key{RET} m @var{subtopic} @key{RET}}
+
+もし上記の操作でマニュアルが読めないのなら、
+システム管理者が Info ファイルをインストールしていない可能性が考えられます。
+またはインストールしてあっても不備があるのかも知れません。
+その場合は管理者に正しくインストールするように頼みましょう。
+
+印刷された Emacs のマニュアルが欲しい時は
+@ref{Getting a printed manual} を参照してください。
+
+@node File-name conventions, Common acronyms, On-line manual, FAQ notation
+@section どんな意味ですか: @file{etc/SERVICE}, @file{src/config.h}, @file{lisp/default.el} など
+@cindex File-name conventions
+@cindex Conventions for file names
+@cindex Directories and files that come with Emacs
+
+Emacs には多くのファイル含まれています。
+Emacs の配布パッケージはいくつかのサブディレクトリに分類されています。
+中でも @file{etc}, @file{lisp}, @file{src} は特に重要です。
+
+Emacs を使っているけれども、Emacs がどこにインストールされているか
+わからないときには @kbd{C-h v data-directory @key{RET}} と入力して下さい。
+これで @file{etc} ディレクトリのパスが表示されます。
+(これは Emacs の変数 @code{data-directory} に記録されています。
+そして変数の値と説明を @kbd{C-h v} で表示させます。)
+
+Info ディレクトリ(オンラインマニュアルがインストールされているディレクトリ)
+は変数 @code{Info-default-directory-list} に記録されています。
+@kbd{C-h v Info-default-directory-list @key{RET}} で変数の内容を見てください。
+表示されたディレクトリのどれかに Info ファイルはインストールされています。
+おそらく一番下に表示されたディレクトリにほとんどの Info ファイルが
+インストールされていることでしょう。
+標準では Info ファイルは @file{/usr/local/info} にインストールされます。
+
+Emacs の配布パッケージに含まれるファイルのうちいくつかは
+個別に ftp や電子メールを使って入手することが可能です。
+詳しくは @ref{Informational files for Emacs} を参照してください。
+@c yagi: " が一個だけ有る
+@file{etc} ディレクトリの多くのファイルは Emacs の @menuitem{Help} メニュー
+または @kbd{C-h ?}(@kbd{M-x help-for-help}) で参照できます。
+
+場合によってはシステム管理者が @file{src} ディレクトリを削除し、
+@file{etc} ディレクトリからも多くのファイルを消してしまっているかも知れません。
+
+@node Common acronyms,  , File-name conventions, FAQ notation
+@section FSF, LPF, OSF, GNU, RMS, FTP, GPL ってなんですか?
+@cindex FSF, definition of
+@cindex LPF, definition of
+@cindex OSF, definition of
+@cindex GNU, definition of
+@cindex RMS, definition of
+@cindex Stallman, Richard, acronym for
+@cindex Richard Stallman, acronym for
+@cindex FTP, definition of
+@cindex GPL, definition of
+@cindex Acronyms, definitions for
+@cindex Common acronyms, definitions for
+
+@table @asis
+
+@item FSF
+Free Software Foundation
+
+@item LPF
+League for Programming Freedom
+
+@item OSF
+Open Software Foundation
+
+@item GNU
+GNU's Not Unix
+
+@item RMS
+Richard Matthew Stallman
+
+@item FTP
+File Transfer Protocol
+
+@item GPL
+GNU General Public License
+
+@end table
+
+FSF と LPF と OSF とを混同しないように。
+LPF は「ルックアンドフィール」に対する著作権とソフトウェア特許に
+反対する組織です。
+FSF は高品質のフリーソフトウェアをすべての人に提供する為の組織です。
+OSF は Unix を提供するベンダの商業団体です。
+
+Free Software Foundation の「free」は「無料」ではなく「自由」を
+意味します。GPL が適用されたソフトウェアを配布することにより
+対価を受け取ることもできますが、誰もが支払える程度の低価格であること、
+再販売または再配布できることを GPL では要求しています。
+
+@c ------------------------------------------------------------
+@node    General questions, Getting help, FAQ notation, Top
+@chapter General questions @emph{(2004/07/28)}
+@cindex General questions
+
+この章は Emacs や FSF などに関する一般的な質問について書かれています。
+
+@menu
+* The LPF::                     LPF
+* Real meaning of copyleft::    GNU copyleft の意義
+* Guidelines for newsgroup postings::  ネットニュース利用のガイドライン
+* Newsgroup archives::          ネットニュースの過去の記事のアーカイブ
+* Reporting bugs::              バグ報告
+* Unsubscribing from Emacs lists::  メーリングリストをやめる方法
+* Contacting the FSF::          FSF
+@end menu
+
+@node The LPF, Real meaning of copyleft, General questions, General questions
+@section LPF ってなんですか?
+@cindex LPF, description of
+@cindex League for Programming Freedom
+@cindex Software patents, opposition to
+@cindex Patents for software, opposition to
+
+LPF はソフトウェアに関する特許や「ルックアンドフィール」に関する
+著作権が広まることに危機感を持ち、反対しています。
+より詳しい情報は LPF にメールを出すなどして調べてください。
+@email{jbw@@cs.bu.edu, Joe Wells} と連絡を取っても良いでしょう。
+彼は喜んで LPF について語ってくれることでしょう。
+
+@file{etc/LPF} から LPF について詳しい情報を得ることができます。
+LPF の意見を述べた文書は他にも
+@uref{http://lpf.ai.mit.edu/, the LPF home page} から入手できます。
+
+@node Real meaning of copyleft, Guidelines for newsgroup postings, The LPF, General questions
+@section GNU copyleft の法的な意義はなんですか?
+@cindex Copyleft, real meaning of
+@cindex GPL, real meaning of
+@cindex General Public License, real meaning of
+@cindex Discussion of the GPL
+
+GNU 一般公有許諾(copyleft)の法的な意義は裁判官が法の下に判断したときに
+明らかになるでしょう。GPL を含むような著作権の侵害行為は前例がありません。
+この問題に関しては @uref{news:gnu.misc.discuss} で議論してください。
+このニュースグループはこの問題について広範囲にわたる激しい議論をするために
+作られたものです。
+
+RMS は次のように書いています:
+
+@quotation
+GNU copyleft が持つ法的な意味は、
+それが持つ精神的意味からしたら重要ではない。
+Emacs はフリーソフトウェアのプロジェクトであり、
+Emacs に付随する作品はすべてフリーソフトウェアであるべきなんだ。
+ここで「フリー」とはすべての利用者が Emacs を
+研究し、共有し、変更し、そして改善する自由を意味している。
+すべての人がこの自由を持つことを確認するために、
+Emacs のどんな版を配布するときもソースコードを一緒に配布すべきだし、
+受取った人にもあなたが謳歌しているのと同じ自由が与えられるべきなんだ。
+@end quotation
+
+@node Guidelines for newsgroup postings, Newsgroup archives, Real meaning of copyleft, General questions
+@section @uref{news:gnu.emacs.help}, @uref{news:gnu.emacs.bug}, @uref{news:comp.emacs} の使い分け方は?
+@cindex Newsgroups, appropriate messages for
+@cindex GNU newsgroups, appropriate messages for
+@cindex Usenet groups, appropriate messages for
+@cindex Mailing lists, appropriate messages for
+@cindex Posting messages to newsgroups
+
+@file{etc/MAILINGLISTS} に GNU のメーリングリストに関する情報が
+書かれています
+(このファイルの入手法は @ref{Informational files for Emacs} を参照)。
+メーリングリストに送られたメールが自動的にネットニュースにも投稿
+されるものについてはニュースグループ名とメールアドレスの両方を掲載しています。
+
+@uref{news:comp.emacs} は Emacs プログラム一般について議論するために使います。
+GNU Emacs だけでなく
+XEmacs, JOVE, MicroEmacs, Freemacs, MG, Unipress, CCA, Epsilon などの
+様々な Emacs についても議論できます。
+
+Emacs に関する質問は @uref{news:comp.emacs} に投稿します。
+と言うのは @url{news:gnu.*} ニュースグループを
+講読していないサイトも多いからです。
+@uref{news:comp.emacs} に GNU Emacs のみに関する記事を投稿することに
+関しては異論もあるでしょうが、個人の判断に任されています。
+
+「non-free」ソフトウェアを擁護する
+いかなる記事も @url{news:gnu.*} ニュースグループに投稿することは
+容認されません。ただし @uref{news:gnu.misc.discuss} はこのような
+問題について議論するために作成されたものです。
+ここで「non-free」ソフトウェアとはユーザがソースコードを入手して自由に改造する
+ことができないものを含みます。
+そのようなソフトウェアを推奨する記事にフォローアップするときは注意深く
+@header{Newsgroup:} 行から @url{news:gnu.*} ニュースグループを削除してください。
+
+@uref{news:gnu.emacs.bug} はバグレポートを見るためのニュースグループです。
+このニュースグループには直接投稿しないでください(@ref{Reporting bugs} 参照)。
+
+@node Newsgroup archives, Reporting bugs, Guidelines for newsgroup postings, General questions
+@section @uref{news:gnu.emacs.help} などの GNU グループの昔の記事はどこで入手できますか? @emph{(2004/07/28)}
+@cindex Archived postings from @uref{gnu.emacs.help}
+@cindex Usenet archives for GNU groups
+@cindex Old Usenet postings for GNU groups
+
+FSF はすべての GNU メーリングリストの記事を何年も保存していますが、
+中には不慮の事故で欠落したものもあります。アーカイブは特に編成されて
+いないし、個人の記事を取り出すことも容易ではありませんが、かなり多くの
+ものがそこにはあります。アーカイブは ftp で次のところから入手できます。
+
+@uref{ftp://ftp-mailing-list-archives.gnu.org}
+
+@c yagi: 今は?
+執筆時点ではこのアーカイブはまだ使えていません。
+
+@uref{http://groups.google.com, Google} の様な WWW 検索サービスでも
+@url{news:gnu.*} ニュースグループのアーカイブにアクセスすることができます。
+
+@node Reporting bugs, Unsubscribing from Emacs lists, Newsgroup archives, General questions
+@section Emacs のバグ報告などはどこに出せば良いのでしょうか?
+@cindex Bug reporting
+@cindex Good bug reports
+@cindex How to submit a bug report
+@cindex Reporting bugs
+
+Emacs のバグは電子メールで @email{bug-gnu-emacs@@gnu.org} へ報告してください。
+送られたメールは同時に @uref{news:gnu.emacs.bug} ニュースグループに
+投稿されます。
+くれぐれもニュースではなくメールでバグを報告してください。
+これにより信頼できる返信アドレスが得られ、バグの詳細をあなたに確認できます。
+
+@email{bug-gnu-emacs} へバグレポートを出す前に
+マニュアルの @inforef{Bugs, , emacs} を良く読んでください。
+マニュアルには有用なバグレポートの書き方が詳しく書かれています。
+@ifinfo
+(マニュアルの読み方については @ref{On-line manual} 参照)
+@end ifinfo
+
+RMS は次のように言っています:
+
+@quotation
+@email{help-gnu-emacs@@gnu.org} へバグを報告することはやめて欲しい。
+報告は同時に @uref{news:gnu.emacs.help} へも投稿されるが、
+このニュースグループを購読しているのは
+このような情報は不要なユーザであって、
+たぶん問題を解決できないだろうが
+そのために余分な時間を割かれることになるからだ。
+@email{bug-gnu-emacs@@gnu.org} なら
+もしかしたら問題を解決できるかもしれない精鋭が読んでいて、
+より詳細な情報を必要とするかもしれない。
+@end quotation
+
+しかし RMS は次のような場合には
+@uref{news:gnu.emacs.help} に投稿しても良いと言っています:
+
+@quotation
+もしバグレポートを出しても修正方法が見つからなかったなら、
+適当に間を(例えば一週間)置いてから @uref{news:gnu.emacs.help} に
+投稿することはかまわない。
+@end quotation
+
+FAQ を参考にしてもバグかどうか良くわからない場合ついて RMS は
+次のように言っています:
+
+@quotation
+もし Emacs がクラッシュするなら、それはバグだ。
+Emacs をコンパイルするときにエラーが出るなら、それもバグだ。
+Emacs を構築するときにクラッシュするなら、やはりバグだ。
+Lisp コードがドキュメント通りに動作しないなら、それもやはりバグだ。
+@end quotation
+
+@node Unsubscribing from Emacs lists, Contacting the FSF, Reporting bugs, General questions
+@section メーリングリストをやめる方法は?
+@cindex Unsubscribing from GNU mailing lists
+@cindex Removing yourself from GNU mailing lists
+
+@var{list} という GNU のメーリングリストに入っているなら、
+@email{@var{list}-request@@gnu.org} にメールを出すことで
+メーリングリストを辞められるかも知れない。
+しかし、そのメーリングリストに直接参加せず、再配布を受け取っているなら
+その再配布しているところからあなたのアドレスを削除する必要があります。
+メールの@header{Received:}ヘッダを見て、
+@samp{telnet @var{site-address} smtp} で @samp{EXPN} や @samp{VRFY} を
+試してみると良いでしょう。
+良くわからないときはポストマスターに尋ねてみてください。
+
+@node Contacting the FSF,  , Unsubscribing from Emacs lists, General questions
+@section FSF の連絡先はどこですか? @emph{(2004/07/28)}
+@cindex Snail mail address of the FSF
+@cindex Postal address of the FSF
+@cindex Contracting the FSF
+@cindex Free Software Foundation, contacting
+
+@table @asis
+
+@item E-mail
+@email{gnu@@gnu.org}
+
+@item 電話
++1-617-542-5942
+
+@item Fax
++1-617-542-2652
+
+@item WWW
+@uref{http://www.gnu.org/}
+
+@item 住所
+Free Software Foundation@*
+59 Temple Place - Suite 330@*
+Boston, MA 02111-1307@*
+USA@*
+
+@end table
+
+@cindex Ordering GNU software
+FSF に直接注文する方法については
+@uref{http://www.gnu.org/order/order.html, GNU Web site}
+を参照してください。
+
+@c ------------------------------------------------------------
+@node Getting help, Status of Emacs, General questions, Top
+@chapter Getting help @emph{(2004/07/28)}
+@cindex Getting help
+
+この章では Emacs に関するヘルプ(マニュアル、その他)について書かれています。
+
+@menu
+* Basic editing::               基本的な編集方法
+* Learning how to do something::  使い方を調べる方法
+* Getting a printed manual::    紙のマニュアル
+* Emacs Lisp documentation::    Emacs Lisp に関するドキュメント
+* Installing Texinfo documentation::  Texinfo ドキュメントのインストール
+* Printing a Texinfo file::     Texinfo ドキュメントの印刷
+* Viewing Info files outside of Emacs::  Info ドキュメントを読む
+* Informational files for Emacs::  Emacs に関連する情報
+* Help installing Emacs::       Emacs インストール方法
+* Obtaining the FAQ::           この FAQ の入手方法
+@end menu
+
+@node Basic editing, Learning how to do something, Getting help, Getting help
+@section Emacs を使い始めたばかりなのですが、基本的な操作はどうするのですか?
+@cindex Basic editing with Emacs
+@cindex Beginning editing
+@cindex Tutorial, invoking the
+@cindex Self-paced tutorial, invoking the
+@cindex Help system, entering the
+
+@kbd{C-h t} を入力するとチュートリアルが起動されます。
+@kbd{C-h} だけを入力するとヘルプが起動されます。
+
+システム管理者が @kbd{C-h} を @key{DEL} の様に働くよう設定を変更しているか
+も知れません。その時は @kbd{M-x help-for-help} でヘルプが起動できます。
+どのキーでヘルプが起動できるか調べるには
+@kbd{M-x where-is @key{RET} help-for-help @key{RET}}
+としてください。
+エコーエリアにコンマで区切られてヘルプを起動する
+キー入力方法のリストが表示されます。
+
+Emacs のヘルプ機能は変数 @code{help-char} に格納されている単独のキーで
+起動されたときに最もうまく働きます。
+
+Emacs 18 には WWW ベースのチュートリアルがあります。
+その多くは Emacs 20 にも通用します。URL は次の通り。
+
+@uref{http://kufacts.cc.ukans.edu/cwis/writeups/misc/emacsguide.html}
+
+@node Learning how to do something, Getting a printed manual, Basic editing, Getting help
+@section Emacs の使い方を調べる方法は?
+@cindex Help for Emacs
+@cindex Learning to do something in Emacs
+@cindex Reference card for Emacs
+@cindex Overview of help systems
+
+Emacs でどうすればやりたいことができるかを調べるには幾つか方法があります。
+
+@itemize @bullet
+
+@cindex Reading the Emacs manual
+@item
+Emacs のマニュアルは Info を使ってオンラインで参照することができます。
+Info を起動するには @kbd{C-h i} と入力してください。Info の中で @key{h} を入力
+すると Info の使い方が見られます。
+
+@cindex Lookup a subject in a manual
+@cindex Index search in a manual
+@item
+Emacs のマニュアルで問題点やコマンド、変数などを調べるには
+@kbd{C-h i m emacs @key{RET} i @var{topic} @key{RET}} としてください。
+ここで @var{topic} は調べたいものの名前です。
+知りたいことが書かれていなければ @key{,} を何度か入力してみてください。
+(@key{i} と @key{,} は索引から検索するコマンドを実行します。)
+
+@cindex Apropos
+@item
+@kbd{C-h a} (@kbd{M-x command-apropos}) で特定の文字列(正確には正規表現)を
+含むコマンドの一覧を見ることができます。
+
+@cindex Command description in the manual
+@item
+@kbd{C-h C-f} (@kbd{M-x Info-goto-emacs-command-node}) で
+コマンドを指定して、マニュアルで説明のされている場所を探します。
+
+@cindex Finding commands and variables
+@item
+@kbd{M-x apropos} で特定の文字列を含むすべての関数と変数を見ることができます。
+
+@item
+@kbd{M-x apropos-documentation} で正規表現を説明に含むすべての
+関数と変数を見ることができます。
+
+@item
+FSF に印刷されたマニュアルを注文できます。
+詳細は @ref{Getting a printed manual} 参照。
+
+@cindex Reference cards, in other languages
+@item
+コマンドとコマンドを起動するキー入力の一覧表を入手できます。
+FSF に 1 部 1 ドル(10 部まとめてなら 5 ドル)で注文するか、
+配布ファイルの @file{etc/refcard.tex} か
+@file{etc/refcard.ps} を印刷してください。
+バージョン 21.1 からは各国語に翻訳されたものも配布されています。
+@file{etc/@var{lang}-refcard.*} を見てください。
+@var{lang} は言語を表す 2 文字のアルファベットです。
+たとえばドイツ語版は @file{etc/de-refcard.tex} と
+@file{etc/de-refcard.ps} です。
+@c yagi: 日本語版は無い。
+
+@item
+その他にも情報を得るためのたくさんのコマンドがあります。
+@kbd{C-h} に続けて @key{?} を入力することでそれらのコマンドの
+一覧を見ることができます。
+
+@end itemize
+
+@node Getting a printed manual, Emacs Lisp documentation, Learning how to do something, Getting help
+@section Emacs の印刷されたマニュアルの入手方法は? @emph{(2004/07/28)}
+@cindex Printed Emacs manual, obtaining
+@cindex Manual, obtaining a printed or HTML copy of
+@cindex Emacs manual, obtaining a printed or HTML copy of
+
+Emacs の印刷されたマニュアルは FSF に注文することができます。
+詳しくは @uref{http://www.gnu.org/order/order.html, GNU Web site}
+を参照してください。
+
+@c The number 620 below is version-dependent!
+Emacs の配布パッケージの @file{man} ディレクトリに Texinfo で書かれた
+マニュアルのソースがあります。
+この 620 ページに及ぶマニュアルを印刷しても良いでしょう。
+(印刷の方法については @ref{Printing a Texinfo file} 参照。)
+
+印刷したいが @TeX{} がない、という場合は PostScript 形式のファイルを
+次のところから入手することができます。
+
+@uref{http://www.gnu.org/manual/emacs/ps/emacs.ps.gz}
+
+@cindex HTML version of Emacs manual, obtaining
+HTML 形式のマニュアルは次のところに有ります。
+
+@uref{www.gnu.org/manual/emacs/index.html}
+
+オンラインでマニュアルを見る方法については
+@ref{Learning how to do something} 参照。
+
+@node Emacs Lisp documentation, Installing Texinfo documentation, Getting a printed manual, Getting help
+@section Emacs Lisp ドキュメントの入手方法は? @emph{(2004/07/28)}
+@cindex Documentation on Emacs Lisp
+@cindex Function documentation
+@cindex Variable documentation
+@cindex Emacs Lisp Reference Manual
+@cindex Reference manual for Emacs Lisp
+
+Emacs を使っている最中に @kbd{C-h f} で関数の説明を、
+@kbd{C-h v} で変数の説明を読むことができます。
+
+より詳しい情報を得るには、 @cite{Emacs Lisp Reference Manual} を読んでください。
+FSF への注文の方法は
+@uref{http://www.gnu.org/order/order.html, GNU Web site} 
+を参照してください。
+
+オンラインで Info 形式の @cite{Emacs Lisp Reference Manual} を
+参照することが可能です。
+Texinfo 形式のソース(と Info 形式のファイル)が次のところから入手できます。
+
+@uref{ftp://ftp.gnu.org/pub/gnu/emacs/elisp-manual-21-2.6.tar.gz}
+
+また @url{ftp://ftp.gnu.org} のミラーサイト
+(@ref{Current GNU distributions} 参照)
+からも入手できます。
+Info ファイルのインストール方法については
+@ref{Installing Texinfo documentation} 参照。
+Texinfo ファイルを印刷する方法については
+@ref{Printing a Texinfo file} 参照。
+
+HTML 形式のマニュアルは次のところに有ります。
+
+@uref{http://www.gnu.org/manual/elisp-manual-21-2.6/elisp.html}
+
+@node Installing Texinfo documentation, Printing a Texinfo file, Emacs Lisp documentation, Getting help
+@section Texinfo ドキュメントのインストール方法は? @emph{(2004/07/28)}
+@cindex Texinfo documentation, installing
+@cindex Installing Texinfo documentation
+@cindex New Texinfo files, installing
+@cindex Documentation, installing new Texinfo files
+@cindex Info files, how to install
+
+まず Texinfo 形式のファイルから Info 形式のファイルを作成します。
+@command{makeinfo} という外部コマンドを使って Info ファイルを作成できます。
+@command{makeinfo} は最新の Texinfo パッケージに含まれていて、
+次のところから入手できます。
+
+@uref{ftp://ftp.gnu.org/pub/gnu/texinfo/texinfo-4.0.tar.gz}
+
+また @url{ftp://ftp.gnu.org} のミラーサイト
+(@ref{Current GNU distributions} 参照)
+からも入手できます。
+
+Texinfo 形式に関する情報については Emacs の配布パッケージに含まれる
+Texinfo についてのマニュアルを読んでください。
+このマニュアルは Info 形式でインストールされているはずなので、
+@kbd{C-h i m texinfo @key{RET}} と入力してオンラインで読むことができます。
+
+別の方法として Emacs の中で Texinfo 形式のソースファイルを読みこんで
+@kbd{M-x texinfo-format-buffer} とすることで
+Info ファイルを作成することもできます。
+
+@code{texinfo-format-buffer} も @command{makeinfo} も
+Info ファイルを作成するだけなので、
+インストールするには次の様にしてください。
+
+@enumerate
+@item
+出来上がった Info ファイルを @file{info} ディレクトリに移動してください。
+@file{info} ディレクトリについては @ref{File-name conventions} 参照。
+
+@item
+Texinfo 配布パッケージに含まれる外部コマンド @command{install-info} を実行して
+Info ディレクトリのメニューを更新してください。
+
+@example
+install-info --info-dir=@var{dir-path} @var{dir-path}/@var{file}
+@end example
+
+@noindent
+ここで  @var{dir-path} は Info ファイルをコピーしたディレクトリのフルパスで、
+@var{file} はインストールする Info ファイルのファイル名です。
+
+外部コマンド @command{install-info} がインストールされていない場合は
+インストールする Info ファイルを
+@file{info/dir} のトップレベルのノードに追加してください。
+既にあるノードを参考にしてください。
+形式は次の通りです。
+
+@example
+* 話題: (相対パス).  話題の短い説明。
+@end example
+
+@end enumerate
+
+Info ファイルをインストールしたいが、
+@file{info} ディレクトリや @file{info/dir} に
+書き込む権利がないときは次のいずれかの様にしてください。
+
+@itemize @bullet
+@item
+Info ファイルはインストールされていなくても使うことができます。
+@code{Info-goto-node} コマンドの引数にファイル名を
+丸括弧で囲んで指定することができます。
+@code{Info-goto-node} コマンドは Info の中で @key{g} を入力してください。
+このとき指定したファイルの ``Top'' という名前のノードに進みます。
+たとえばホームディレクトリの @file{@var{info-file}} というファイル
+を見たいときは次の様に入力します。
+
+@c yagi: @lisp -> @kbd
+@kbd{C-h i g (~/@var{info-file}) @key{RET}}
+
+@item
+自分専用の Info ディレクトリを作ることができます。
+変数 @code{Info-default-directory-list} にあなたの Info ディレクトリの
+パスを加えてください。たとえばホームディレクトリの @file{@var{info}} という
+サブディレクトリを自分の Info ディレクトリとして使うには
+@file{.emacs} に次のように書き加えてください。
+
+@lisp
+(setq Info-default-directory-list
+      (cons "~/@var{info}" Info-default-directory-list))
+@end lisp
+
+このディレクトリには @file{dir} という名前のファイルが必要で、
+そのディレクトリにあるファイルのリストを持ちます。
+それだけではうまくいかないときはシステムの @file{dir} ファイルの内容が
+すべての Info ファイルを参照するように書き加えてください。
+このディレクトリのファイルが他の @file{dir} ファイルから参照されるなら
+@file{dir} ファイルを作る必要はありません。
+@code{Info-default-directory-list} のディレクトリにあるすべての @file{dir}
+ファイルは Info によって統合されます。
+
+@end itemize
+
+@node Printing a Texinfo file, Viewing Info files outside of Emacs, Installing Texinfo documentation, Getting help
+@section Texinfo ドキュメントの印刷方法は?
+@cindex Printing a Texinfo file
+@cindex Texinfo file, printing
+@cindex Printing documentation
+
+Info ファイルからは綺麗な印刷結果を得ることはできません。
+あなたの望むようなマニュアルを印刷するためには Texinfo ファイルが必要です。
+
+@TeX{} がインストールされているなら次のようにしてください。
+
+@enumerate
+
+@item
+Texinfo ファイルの先頭に次のように書かれていることを確認してください。
+
+@example
+\input texinfo
+@end example
+
+@c yagi: man/texinfo.tex は無い?
+この @code{texinfo} を @file{texinfo.tex} へのフルパスに変える必要が
+あるかも知れません。
+(あるいはカレントディレクトリにコピーするかリンクを貼ってください。)
+
+@item
+外部コマンド @command{texi2dvi} を次の様に実行してください。
+Texinfo 形式のソースファイルを @var{texinfo-source} とします。
+
+@example
+texi2dvi @var{texinfo-source}
+@end example
+
+外部コマンド @command{texi2dvi} は Texinfo 配布パッケージに含まれています。
+(@ref{Installing Texinfo documentation} 参照。)
+
+@item
+できあがった DVI ファイル @file{@var{texinfo-source}.dvi} を
+DVI ファイルを普通に打ち出す方法で打ち出してください。
+たとえばポストスクリプトプリンタがあるなら
+外部コマンド @command{dvips} で印刷してください。
+
+@end enumerate
+
+より一般的な手順は最新の Texinfo パッケージを入手して調べてください。
+(@ref{Installing Texinfo documentation} 参照。)
+
+@node Viewing Info files outside of Emacs, Informational files for Emacs, Printing a Texinfo file, Getting help
+@section Info ファイルを Emacs を使わずに読むことはできますか?
+@cindex Viewing Info files
+@cindex Info file viewers
+@cindex Alternative Info file viewers
+
+はい。Info を読むためのプログラムは幾つかあります。
+
+@itemize @bullet
+
+@item
+@command{info}
+単独で Info を読むためのプログラム。
+Texinfo パッケージの一部として入手できます。
+@ref{Installing Texinfo documentation} 参照。
+
+@item
+@command{Xinfo}
+単独で Info を読むためのプログラム。X Window System で動く。
+@uref{ftp://ftp.gnu.org/pub/gnu/xinfo/xinfo-1.01.01.tar.gz}
+から入手可能。
+また @url{ftp://ftp.gnu.org} のミラーサイト
+(@ref{Current GNU distributions} 参照)
+からも入手できます。
+
+@item
+@command{tkinfo}
+Info ビューア。Tcl/Tk を使い X Window System で動く。
+@uref{http://math-www.uni-paderborn.de/~axel/tkinfo/}.
+から入手可能。
+
+@end itemize
+
+@node Informational files for Emacs, Help installing Emacs, Viewing Info files outside of Emacs, Getting help
+@section Emacs にはどんなファイルが付属していますか?
+@cindex Informational files included with Emacs
+@cindex Files included with Emacs
+@cindex @file{COPYING}, description of file
+@cindex @file{DISTRIB}, description of file
+@cindex @file{FTP}, description of file
+@cindex @file{GNU}, description of file
+@cindex @file{INTERVIEW}, description of file
+@cindex @file{LPF}, description of file
+@cindex @file{MACHINES}, description of file
+@cindex @file{MAILINGLISTS}, description of file
+@cindex @file{NEWS}, description of file
+@cindex @file{SERVICE}, description of file
+@cindex @file{SUN-SUPPORT}, description of file
+
+これは「しばしば出る質問」ではありませんが、書かずにはいられません!
+GNU Emacs と GNU プロジェクトに関連する情報を記した様々なファイルは
+あなたのそばで読まれるのを待っているのです。
+
+次のファイルは Emacs の配布パッケージの @file{etc} ディレクトリ
+(@ref{File-name conventions} 参照)
+にあります。
+
+@table @file
+
+@item COPYING
+Emacs General Public License
+
+@item DISTRIB
+Emacs を入手するための情報
+``Free Software Foundation Order Form'' を含みます
+
+@item FTP
+FTP や UUCP で GNU ソフトウェアを入手するための方法
+
+@item GNU
+GNU 宣言
+
+@item INTERVIEW
+Richard Stallman が BYTE の編集者と交した
+彼のパブリックドメインで UNIX と互換性のある
+ソフトウェアシステムに関するインタビュー
+
+@item LPF
+なぜ League for Programming Freedom に参加すべきなのか
+
+@item MACHINES
+Emacs が稼動するマシンとシステムの現状
+
+@item MAILINGLISTS
+GNU プロジェクトのメーリングリスト
+
+@item NEWS
+Emacs に関するニュース、ユーザにわかる変更点
+
+@item SERVICE
+GNU のサポートサービス
+
+@item SUN-SUPPORT
+``Using Emacstool with GNU Emacs'' を含む
+
+@end table
+
+これらのファイルの最新版は次のところから入手できます。
+
+@uref{ftp://ftp.gnu.org/pub/gnu/GNUinfo/}
+
+GNU に関しては、過去の @cite{GNU's Bulletin} を含めて、
+次のところから入手できます。
+
+@uref{http://www.gnu.org/bulletins/bulletins.html} と
+
+@uref{http://www.cs.pdx.edu/~trent/gnu/gnu.html}
+
+@node Help installing Emacs, Obtaining the FAQ, Informational files for Emacs, Getting help
+@section Emacs のインストールの手助けはどこに頼めば良いのですか?
+@cindex Installation help
+@cindex Help installing Emacs
+
+インストールに関する基本的なことは @ref{Installing Emacs} 参照。
+もしインストールにトラブルがあった場合は
+@ref{Problems building Emacs} や @ref{Linking with -lX11 fails} 参照。
+
+@file{etc/SERVICE} (@ref{File-name conventions} 参照)に
+インストールなどのサービスを有償で提供している
+会社や個人の情報が含まれています。
+このファイルの最新版は @url{ftp://ftp.gnu.org} から入手できます。
+(@ref{Informational files for Emacs} 参照)
+
+@node Obtaining the FAQ,  , Help installing Emacs, Getting help
+@section この FAQ (英語版 FAQ)の最新版の入手方法は?
+@cindex FAQ, obtaining the
+@cindex Latest FAQ version, obtaining the
+@cindex Retrieving the latest FAQ version
+@cindex E-mail, retrieving the FAQ via
+@cindex Web, reading the FAQ on the
+
+Emacs FAQ は幾つかの方法で入手できます。
+
+@itemize @bullet
+
+@item
+Emacs の @menuitem{Help} メニューから @menuitem{Emacs FAQ} を選べば
+FAQ を見ることができます。
+@kbd{C-h F} (@kbd{M-x view-emacs-FAQ}) でも見られます。
+
+@item
+ネットニュースを読むことができるのなら、
+@uref{news:gnu.emacs.help} か @uref{news:comp.emacs} のスプールから
+FAQ を読むことができます。
+以前に読んだ記事でもスプールに残ってさえいれば、
+どんなニュースリーダでも記事を読むことはできます。
+この方法はニュースリーダのマニュアルを読んで調べてください。
+@command{rn} ならば article selection level で次のようにしてください。
+
+@kbd{?GNU Emacs Frequently Asked Questions?rc:m}
+
+Gnus ならば @buffer{*Summary*} バッファで @kbd{C-u C-x C-s} と入力するか
+@buffer{*Newsgroup*} バッファで @kbd{C-u @key{SPC}} と入力すると
+スプールに残っているニュースグループの記事をすべて読むことができます。
+
+FAQ の記事が期限切れでスプールから削除されてしまっていたら、
+ニュースシステムの管理者に苦情を言ってみてください。
+最新の FAQ は暫く期限切れにならないように設定されているからです。
+
+@item
+@c yagi: Texinfo 版?
+HTTP または FTP で最新版を次のところから入手できます。
+
+@uref{http://www.lerner.co.il/emacs/} と
+
+@uref{ftp://ftp.lerner.co.il/pub/emacs/}
+
+@item
+@c yagi: etc/FAQ for 18.59 <= version < 21
+バージョン 21.1 以降の Emacs ではリリース時点での FAQ が
+@file{man/faq.texi} (@ref{File-name conventions} 参照)
+として、
+それ以前のバージョンでバージョン 18.56 以降の Emacs では
+リリース時点での FAQ が @file{etc/FAQ} として一緒に配布されています。
+
+@item
+WWW で html 版 FAQ が参照できます。
+
+@uref{http://www.lerner.co.il/emacs/}
+
+@item
+@url{ftp://rtfm.mit.edu} (とヨーロッパにあるミラーサイト)から
+ftp で FAQ を入手することができます。
+ここは @uref{news:news.answers} に投稿された FAQ などの貯蔵所です。
+Emacs FAQ は次のところから入手できます。
+
+@uref{ftp://rtfm.mit.edu/pub/usenet/comp.emacs/} と
+
+@uref{ftp://ftp.uni-paderborn.de/pub/doc/FAQ/comp/emacs/}
+
+ftp でアクセスすることができない場合は電子メールで
+FAQ を取り寄せることができます。@email{mail-server@@rtfm.mit.edu}
+にサブジェクト無しで本文に次の様に書いてメールを出します。
+
+@example
+send usenet/news.answers/GNU-Emacs-FAQ/diffs
+send usenet/news.answers/GNU-Emacs-FAQ/part1
+send usenet/news.answers/GNU-Emacs-FAQ/part2
+send usenet/news.answers/GNU-Emacs-FAQ/part3
+send usenet/news.answers/GNU-Emacs-FAQ/part4
+send usenet/news.answers/GNU-Emacs-FAQ/part5
+@end example
+
+詳しくは @email{mail-server@@rtfm.mit.edu} 宛に
+@samp{help} や @samp{index} などと
+本文に単独の行として記述したメールを出してください。
+
+@item
+最後の手段として @email{emacs-faq@@lerner.co.il} に
+電子メールで頼むことができます。しかしこれは最後の手段であり、
+上記のことを試してもどうしてもできない場合以外は実行しないでください。
+
+@end itemize
+
+@c ------------------------------------------------------------
+@node    Status of Emacs, Common requests, Getting help, Top
+@chapter Status of Emacs
+@cindex Status of Emacs
+
+この章では Emacs に関する基本的な情報が書かれています。
+
+@menu
+* Origin of the term Emacs::    Emacs の名前の由来
+* Latest version of Emacs::     Emacs の最新版
+* New in Emacs 20::             Emacs 20 の新機能
+* New in Emacs 21::             Emacs 21 の新機能
+@end menu
+
+@node Origin of the term Emacs, Latest version of Emacs, Status of Emacs, Status of Emacs
+@section ``Emacs'' という名前の由来は?
+@cindex Origin of the term ``Emacs''
+@cindex Emacs name origin
+@cindex TECO
+@cindex Original version of Emacs
+
+EMACS はもともと Editor MACroS からできた単語です。
+RMS は次のように言っています。
+「@key{E} は当時 ITS で省略として使われていなかったので "Emacs" を選んだ。」
+最初、 Emacs は PDP-11 の ITS 上で動く TECO (Text Editor and COrrector,
+元は Tape Editor and COrrector)というエディタのために RMS によって
+1976 年に MIT で書かれたマクロセットでした。 RMS はすでに TECO に
+変更可能なキーによる「リアルタイム」フルスクリーンモードに拡張していました。
+Emacs は MIT の多くの異なる TECO のコマンドとキー割り当てを
+統一するための計画として、 @email{gls@@east.sun.com, Guy Steele} によって
+始められ、 RMS が完成させました。
+
+多くの人が TECO のコードはラインノイズに見えると言います。
+興味があったら @uref{news:alt.lang.teco} を読んでみてください。
+TECO の実装を Emacs Lisp で書いた人がいます
+(@ref{Packages that do not come with Emacs} 参照)。
+オリジナルの TECO Emacs を GNU Emacs 内部で走らせるのは
+興味深い計画です。
+
+@cindex Why Emacs?
+@file{etc/JOKES} (@ref{File-name conventions} 参照) に Emacs の名前の由来が
+いろいろと書いてあります:-)
+
+@node Latest version of Emacs, New in Emacs 20, Origin of the term Emacs, Status of Emacs
+@section Emacs の最新版は?
+@cindex Version, latest
+@cindex Latest version of Emacs
+
+これを書いている段階では Emacs @value{VER} です。
+
+@node New in Emacs 20,  New in Emacs 21, Latest version of Emacs, Status of Emacs
+@section Emacs 20 で何が変わったのですか?
+@cindex Differences between Emacs 19 and Emacs 20
+@cindex Emacs 20, new features in
+
+最新版で何が変わったのかを知るには @kbd{C-h n} (@kbd{M-x view-emacs-news})
+を入力してください。古い変更点は読む必要性は少ないので
+ファイルの後ろの方にあります。
+
+Emacs 18 と 19 の違いは劇的で、frame, face, 色などがウィンドウシステム
+を使っているユーザにはわかりやすいところでしょう。
+
+Emacs 19 と 20 にも違いはありますが、それに比べると些細な違いで、
+違いを見つけるのは難しいでしょう。変更点の中には
+MULE (non-latin 文字を使う言語のサポート、
+一つの文書に複数の言語を使える)の統合、
+``cutomize'' (lisp コードを使わずに変数の値を設定できる)、
+Macintosh, Microsoft, Unix 間のファイルの自動変換
+などがあります。
+
+多くの lisp パッケージ(Gnus, Supercite, calendar/diary など)が
+Emacs 20 で動くように拡張して更新されました。
+これらは現在 Emacs の配布パッケージに含まれています。
+
+
+@node New in Emacs 21, , New in Emacs 20, Status of Emacs
+@section Emacs 21 で何が変わったのですか?
+@cindex Differences between Emacs 20 and Emacs 21
+@cindex Emacs 21, new features in
+@cindex Recently introduced features
+
+@cindex Variable-size fonts
+@cindex Toolbar support
+Emacs 21 では画面表示機構が完全に書きなおされました。
+新しい画面表示機構ではプロポーショナルフォントや画像を表示したり、
+音声を鳴らしたりできます。
+結果としてウィンドウシステムで実行したときには
+モダンな GUI プログラムの様に見えます。
+モードラインやスクロールバーなどが立体的になり、
+ツールバーやツールチップ(バルーンヘルプ)も追加されました。
+
+@cindex Colors on character terminals
+@cindex TTY colors
+また Emacs 21 では文字端末で実行した場合にも
+face が表示できるようになりました。
+つまり GNU/linux のコンソールや xterm 上で @option{-nw} オプション付きで
+実行した場合には色付きの表示が可能になりました。
+
+@c ------------------------------------------------------------
+@node    Common requests, Bugs and problems, Status of Emacs, Top
+@chapter Common requests @emph{(2004/07/28)}
+@cindex Common requests
+
+@menu
+* Setting up a customization file::  設定ファイル
+* Debugging a customization file::  設定ファイルの修正
+* Colors on a TTY::             端末でも色をつける
+* Displaying the current line or column::  現在位置の表示
+* Displaying the current file name in the titlebar::  タイトルバーにファイル名
+* Turning on abbrevs by default::  略語モード
+* Turning on auto-fill by default::  自動改行モード
+* Associating modes with files::  モード指定
+* Working with unprintable characters::  印字不能文字
+* Highlighting a region::       選択領域の強調表示
+* Controlling case sensitivity::  大文字小文字の区別
+* Wrapping words automatically::  自動改行
+* Spell-checkers::              スペルチェック
+* Checking TeX and *roff documents::  TeX や *roff ファイルのスペルチェック
+* Changing load-path::          load-path の設定
+* Using an already running Emacs process::  Emacs と外部から通信する
+* Compiler error messages::     コンパイラの出力の認識
+* Indenting switch statements::  C の switch 文のインデント
+* Horizontal scrolling::        水平スクロール
+* Overwrite mode::              上書きモード
+* Turning off beeping::         ベルを鳴らさない
+* Turning the volume down::     ベルの音量の調節
+* Automatic indentation::       自動インデント
+* Matching parentheses::        括弧の対応
+* Hiding #ifdef lines::         #ifdef 内部の隠匿
+* Repeating commands::          繰り返しのコマンド
+* Valid X resources::           X リソース
+* Evaluating Emacs Lisp code::  Emacs Lisp 式の評価方法
+* Changing the length of a Tab::  タブ位置の変更
+* Inserting > at the beginning of each line::  行頭に > を挿入
+* Underlining paragraphs::      アンダーライン
+* Repeating a command as many times as possible::  操作の繰り返し
+* Forcing the cursor to remain in the same column::  表や図を書く
+* Forcing Emacs to iconify itself::  アイコン化
+* Using regular expressions::   正規表現
+* Replacing text across multiple files::  複数ファイル内の置換
+* Documentation for etags::     etags ドキュメント
+* Disabling backups::           バックアップしない
+* Disabling auto-save-mode::    自動セーブしない
+* Going to a line by number::   行番号を使った移動
+* Modifying pull-down menus::   メニューの変更
+* Deleting menus and menu options::  メニューの削除
+* Turning on syntax highlighting::  構文の強調表示
+* Scrolling only one line::     一行づつスクロール
+* Replacing highlighted text::  選択領域の置き換え
+* Editing MS-DOS files::        MS-DOS 形式のファイルの編集
+* Filling paragraphs with a single space::  文末ごとに自動改行
+* Escape sequences in shell output::   シェルモードのエスケープシーケンス
+@end menu
+
+@node Setting up a customization file, Colors on a TTY, Common requests, Common requests
+@section @file{.emacs} ファイルを正しく設定する方法は? @emph{(2004/07/28)}
+@cindex @file{.emacs} file, setting up
+@cindex @file{.emacs} file, locating
+@cindex Init file, setting up
+@cindex Customization file, setting up
+
+オンラインマニュアルの @inforef{Init File, Init File, emacs} 参照。
+
+一般に Emacs を初めて使うユーザは @file{.emacs} ファイルを持たないほうが
+良いでしょう。マニュアルの記述とは違う振る舞いに混乱するからです。
+@email{help-gnu-emacs@@gnu.org} に Emacs がドキュメント通りに動作しないと
+質問するはめになりますよ。 :-)
+
+Emacs 20.1 以降では ``customize'' という仕組みがあって、
+@kbd{M-x customize} で起動することができます。
+これにより Emacs Lisp に慣れていないユーザでも
+メニューを使って比較的簡単に @file{.emacs} を変更することができます。
+執筆時点では、すべてのパッケージが ``customize'' に
+対応しているわけではありませんが、その数は確実に増えています。
+
+customize によって Emacs の設定が楽になりますが、少しは Emacs Lisp を
+勉強して @file{.emacs} を直接書き換えることも考えてみてください。
+オンラインマニュアルの @inforef{Init File, , emacs} には
+基本的な設定をする為の簡単な方法がほとんど書かれています。
+
+時々，@file{.emacs}がどこにあるのか分からないユーザがいるようです．その場合には，
+Emacs から @file{~/.emacs} というファイルを開くと，正しいファイルを見つけること
+ができます．
+
+@node Colors on a TTY, Debugging a customization file, Setting up a customization file, Common requests
+@section 文字端末上でも色をつける方法は?
+@cindex Colors on a TTY
+@cindex Syntax highlighting on a TTY
+@cindex Console, colors
+
+Emacs 21.1 では face が文字端末上でもサポートされていて、
+Unix や GNU/Linux の文字端末やコンソール上で実行した場合や
+X や MS-Windows 上で @option{-nw} オプション付きで実行した場合にも
+face が表示できます。
+(face は Emacs 19.29 以降の MS-DOS 版でサポートされていました。)
+Emacs は起動時に色が表示できるか自動的に判定し、可能ならば色を仕様します。
+色付き端末であるにもかかわらず Emacs で色が表示できていない場合には
+@samp{termcap} の色表示に関するエントリを調べてください。
+
+@kbd{M-x list-colors-display} で(Emacs の意味での)ウィンドウをポップアップし、
+利用可能なすべての(名前付きの)色を表示します。
+
+構文の強調表示は標準では無効になっています。
+有効にする方法については @ref{Turning on syntax highlighting} 参照。
+
+@node Debugging a customization file, Displaying the current line or column, Colors on a TTY, Common requests
+@section @file{.emacs} ファイルを修正する方法は?
+@cindex Debugging @file{.emacs} file
+@cindex @file{.emacs} debugging
+@cindex Init file debugging
+@cindex @option{-debug-init} option
+
+まず Emacs を @option{-debug-init} オプションを指定して起動してください。
+これで @file{.emacs} ファイルを評価する前に Emacs Lisp デバッガを有効にし、
+エラー検出されたらその場所を表示してくれます。
+@buffer{trace-back} バッファは一行目にエラーメッセージを
+二行目か三行目にエラーになった @file{.emacs} 中のリスプコードを表示します。
+
+また @file{.emacs} 中にある個々の関数や引数を式の最後にポイントを移動して
+@kbd{C-x C-e} (@kbd{M-x eval-last-sexp})を入力して評価することもできます。
+
+変数の値を調べるには @kbd{C-h v} (@kbd{M-x describe-variable}) としてください。
+
+@node Displaying the current line or column, Displaying the current file name in the titlebar, Debugging a customization file, Common requests
+@section 現在行(またはカラム)を表示させる方法は? @emph{(2004/07/28)}
+@cindex @code{line-number-mode}
+@cindex Displaying the current line or column
+@cindex Line number, displaying the current
+@cindex Column, displaying the current
+@cindex @code{mode-line-format}
+
+モードラインに自動的に現在の行番号を表示させるには
+@kbd{M-x line-number-mode} としてください。
+あるいは @file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(setq line-number-mode t)
+@end lisp
+
+@noindent
+(行番号は標準で表示されるようになっていますが、サイトの初期化ファイルで
+表示させないようにしているかもしれません。)
+バッファのバイトサイズが変数 @code{line-number-display-limit} よりも
+大きいときは行番号は表示されなくなることに注意してください。
+
+Emacs 20 では行番号と同じように @kbd{M-x column-number-mode} で現在の
+カラム位置をモードラインに表示するようになります。
+起動時に指定するには @file{.emacs} に次のように書き加えてください。
+
+@lisp
+(setq column-number-mode t)
+@end lisp
+
+変数 @code{mode-line-format} 中の @code{"%c"} 書式指定子は
+現在のカラム位置をあらわします。
+詳しくは @code{mode-line-format} の説明を読んでください
+(@kbd{C-h v mode-line-format RET} で見られます)。
+
+@email{abraham@@dina.kvl.dk, Per Abrahamsen} の @file{column} パッケージを
+使えば Emacs のバージョンによらずに現在のカラム位置を表示できます。
+パッケージの入手方法については
+@ref{Packages that do not come with Emacs} 参照。
+
+@cindex Set number capability in @code{vi} emulators
+@code{vi} エミュレーションで @samp{set number} を実現するものはありません
+(私の知る限りでは)。@email{kyle@@wonderworks.com, Kyle Jones} による
+@samp{setnu} パッケージはこの機能を提供します．
+@email{naoki.y.nakamura@@nifty.com, Naoki Nakamura} による @samp{wb-line-number}
+も同様のものです．
+
+@node Displaying the current file name in the titlebar, Turning on abbrevs by default, Displaying the current line or column, Common requests
+@section タイトルバーに編集中のファイル名を表示させる方法は?
+@cindex Titlebar, displaying the current file name in
+@cindex File name, displaying in the titlebar
+@cindex @code{frame-title-format}
+
+Emacs の frame のタイトルバーの文字列は変数 @code{frame-title-format} に
+よって制御されます。この変数の値は変数 @code{mode-line-format} と
+同じ形式で設定します。(変数の説明を読むには
+@kbd{C-h v} (@kbd{M-x describe-variable}) を使ってください)
+
+標準でタイトルバーは複数の frame が有るときは現在のバッファ名になり、
+frame が一つしかないときは Emacs を起動した時の
+コマンド名とマシンの名前になります。
+この設定は @code{frame-title-format} の標準の値を次の様にすることで
+実現されています。
+
+@lisp
+(multiple-frames "%b" ("" invocation-name "@@" system-name))
+@end lisp
+
+frame のタイトルバーに常にバッファ名を表示させる為には
+@file{.emacs} に次のように書き加えてください。
+
+@lisp
+(setq frame-title-format "%b")
+@end lisp
+
+@node Turning on abbrevs by default, Turning on auto-fill by default, Displaying the current file name in the titlebar, Common requests
+@section @var{mymode} モードで略語モードにする方法は?
+@cindex Abbrevs, turning on by default
+
+@file{.emacs} に次のように書き加えてください。
+
+@lisp
+(condition-case ()
+   (quietly-read-abbrev-file)
+  (file-error nil))
+
+(add-hook '@var{mymode}-mode-hook
+          (lambda ()
+           (setq abbrev-mode t)))
+@end lisp
+
+@node Turning on auto-fill by default, Associating modes with files, Turning on abbrevs by default, Common requests
+@section @code{auto-fill-mode} にする方法は?
+@cindex @code{auto-fill-mode}, activating automatically
+@cindex Filling automatically
+@cindex Automatic entry to @code{auto-fill-mode}
+
+@code{auto-fill-mode} をバッファに対して設定するには、
+@kbd{M-x auto-fill-mode} と入力します。
+
+特定のモードに対して常にバッファが @code{auto-fill-mode} になる様にするには
+そのモードの hook を設定する必要があります。たとえば @code{text-mode} に
+対して @code{auto-fill-mode} を設定するには
+次のよう @file{.emacs} に書き加えてください。。
+
+@lisp
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+@end lisp
+
+モードによらずに @code{auto-fill-mode} にするには次のようにしてください。
+
+@lisp
+(setq-default auto-fill-function 'do-auto-fill)
+@end lisp
+
+@node Associating modes with files, Working with unprintable characters, Turning on auto-fill by default, Common requests
+@section 特定のファイルに対してメジャーモードを指定する方法は?
+@cindex Associating modes with files
+@cindex File extensions and modes
+@cindex @code{auto-mode-alist}, modifying
+@cindex Modes, associating with file extensions
+
+拡張子 @var{.@var{bar}} を持つファイルを開いたときに @var{foo} モードに
+するには次のように @file{.emacs} に書き加えてください。
+
+@lisp
+(setq auto-mode-alist (cons '("\\.@var{bar}\\'" . @var{foo}-mode)
+                            auto-mode-alist))
+@end lisp
+
+拡張子を使わずに特定のファイルを @code{foo} モードに設定したいときは
+ファイルの一行目(が @samp{#!} で始まるなら二行目)のどこかに次の様に
+書き加えてください。
+
+@example
+-*- @var{foo} -*-
+@end example
+
+@cindex Major mode for shell scripts
+Emacs 19 以降では変数 @code{interpreter-mode-alist} でシェルスクリプトを
+読み込んだときにどのモードにするか決定します。
+(Emacs はファイルの一行目を見てどのインタープリタを使っているか判断します)
+この機能はファイル名からモードを決定できないときにのみ働きます。
+詳しくは @kbd{C-h v} (@kbd{M-x describe-variable}) で
+@code{interpreter-mode-alist} について調べてください。
+
+@node Working with unprintable characters, Highlighting a region, Associating modes with files, Common requests
+@section 印字不能文字を検索・削除・置換したりする方法は? @emph{(2004/07/28)}
+@cindex Unprintable characters, working with
+@cindex Working with unprintable characters
+@cindex Control characters, working with
+@cindex Eight-bit characters, working with
+@cindex Searching for unprintable characters
+@cindex Regexps and unprintable characters
+
+バッファに表示されている、例えば @samp{\237} のような一文字は
+@kbd{C-s C-q 2 3 7} と入力すると検索できます。
+(これは変数 @code{search-quote-char} の値が 17(@kbd{C-q})の場合です)
+@strong{すべての}印字不能文字を検索するには
+正規表現(@dfn{regexp})による検索を行います。
+印字不能文字を表す最も簡単な正規表現は印字可能文字の補集合です。
+
+@itemize @bullet
+
+@item
+印字可能文字の正規表現: @samp{[\t\n\r\f -~]}
+
+@item
+印字不能文字の正規表現: @samp{[^\t\n\r\f -~]}
+
+@end itemize
+
+@code{isearch-forward-regexp} や @code{re-search-forward} の引数に
+特殊文字を入力するには @kbd{C-q} を使う必要があります。
+(@samp{\t}, @samp{\n}, @samp{\r}, @samp{\f} はそれぞれ
+@key{TAB}, @key{LFD}, @key{RET}, @kbd{C-l} を表します。)
+@code{re-search-forward} で印字不能文字を検索するには次の様にします。
+
+@kbd{M-x re-search-forward @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET}}
+
+@code{isearch-forward-regexp} の場合は次の様になります。
+
+@c yagi: RET -> LFD
+@kbd{C-M-s [^ @key{TAB} @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~]}
+
+すべての印字不能文字を削除するには、@code{replace-regexp} コマンドを使います。
+
+@kbd{M-x replace-regexp @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET} @key{RET}}
+
+置換は上と似ています。すべての印字不能文字をコロンと置換するには、
+@code{replace-regexp} コマンドを次のように使います。
+
+@kbd{M-x replace-regexp @key{RET} [^ @key{TAB} C-q @key{LFD} C-q @key{RET} C-q C-l @key{SPC} -~] @key{RET} : @key{RET}}
+
+@itemize @bullet
+
+@item
+@key{TAB} を @code{isearch} などでミニバッファに入力するときは
+クォートする必要はありません。
+
+@end itemize
+
+@node Highlighting a region, Controlling case sensitivity, Working with unprintable characters, Common requests
+@section 選択領域を強調表示させる方法は?
+@cindex Highlighting text
+@cindex Text, highlighting
+@cindex @code{transient-mark-mode}
+@cindex Region, highlighting a
+
+選択領域を画面表示に反映させるには、
+@file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(transient-mark-mode t)
+@end lisp
+
+(@ref{Turning on syntax highlighting} も参考にしてください。)
+
+@node Controlling case sensitivity, Wrapping words automatically, Highlighting a region, Common requests
+@section 検索・置換のときに大文字と小文字の区別をする方法は?
+@cindex @code{case-fold-search}
+@cindex Case sensitivity of searches
+@cindex Searching without case sensitivity
+@cindex Ignoring case in searches
+
+@c yagi: buffer local variable で有ることについて言及されていない。
+検索の際には変数 @code{case-fold-search} の値により
+大文字と小文字を区別するか決定されます。
+
+@lisp
+(setq case-fold-search nil) ; 大文字と小文字を区別する
+(setq case-fold-search t)   ; 大文字と小文字を区別しない
+@end lisp
+
+@cindex Case sensitivity in replacements
+@cindex Replacing, and case sensitivity
+@cindex @code{case-replace}
+@c yagi: こっちは buffer local variable ではない。
+同様に置換の際には変数 @code{case-replace} の値により
+置換後の文字列が大文字になるか小文字になるかが決定されます。
+
+特定のモードでのみ大文字と小文字の区別をする(又はしない)場合には
+メジャーモードの hook を使ってください。
+たとえば @code{@var{foo}-mode} で、大文字と小文字を区別したい場合には
+次の様になります。
+
+@lisp
+(add-hook '@var{foo}-mode-hook
+          (lambda ()
+           (setq case-fold-search nil)))
+@end lisp
+
+@node Wrapping words automatically, Spell-checkers, Controlling case sensitivity, Common requests
+@section 自動で改行させる方法は?
+@cindex Wrapping word automatically
+@cindex Wrapping lines
+@cindex Line wrap
+@cindex @code{auto-fill-mode}, introduction to
+@cindex Maximum line width, default value
+@cindex @code{fill-column}, default value
+
+@kbd{M-x auto-fill-mode} で @code{auto-fill-mode} にして下さい。
+標準では 70 桁以下で改行されます。
+改行位置は @code{fill-column} で設定できます。
+自動的に @code{auto-fill-mode} にするについては
+@ref{Turning on auto-fill by default} を参照。
+
+@node Spell-checkers, Checking TeX and *roff documents, Wrapping words automatically, Common requests
+@section Emacs に対応した良いスペルチェッカはありませんか?
+@cindex Checking spelling
+@cindex Spelling, checking text documents
+
+Ispell を使ってください。
+@ref{Ispell} 参照。
+
+@node Checking TeX and *roff documents, Changing load-path, Spell-checkers, Common requests
+@section @TeX{} や *roff ドキュメントにスペルチェックをかける方法は?
+@cindex Spelling, checking @TeX{} documents
+@cindex @TeX{} documents, checking spelling in
+
+Ispell を使ってください。
+Ispell は @TeX{} や *roff 文書のソース
+@ref{Ispell} 参照。
+Ispell can handle @TeX{} and *roff documents.
+
+@node Changing load-path, Using an already running Emacs process, Checking TeX and *roff documents, Common requests
+@section @code{load-path} を設定する方法は?
+@cindex @code{load-path}, modifying
+@cindex Modifying @code{load-path}
+@cindex Adding to @code{load-path}
+
+一般的に @code{load-path} の値を変更するときは
+ディレクトリを @code{load-path} に追加します。
+@var{/dir/subdir} を @code{load-path} に追加するには次の様にします。
+
+@lisp
+(setq load-path (cons "@var{/dir/subdir/}" load-path))
+@end lisp
+
+ホームディレクトリからの相対パスを指定するには次の様にします。
+
+@lisp
+(setq load-path (cons "~/@var{mysubdir}/" load-path)
+@end lisp
+
+@node Using an already running Emacs process, Compiler error messages, Changing load-path, Common requests
+@section 既に起動している Emacs を他のプログラムから利用する方法は? @emph{(2004/07/28)}
+@cindex @code{emacsclient}
+@cindex Emacs server functions
+@cindex Using an existing Emacs process
+
+Emacs 配布パッケージに付属する @command{emacsclient} を使えば
+既に起動している Emacs と通信してファイルを編集するように指示できます。
+そのために Emacs 側で設定をしておく必要があります。
+
+@itemize @bullet
+
+@item
+設定:
+
+@command{emacsclient} からの要求を受け付けるように
+Emacs で関数 @code{server-start} を実行します。
+コマンドラインから指定するには次の様にします。
+
+@example
+emacs -f server-start
+@end example
+
+@file{.emacs} で実行するには次の様にします。
+
+@lisp
+(if @var{適当な条件} (server-start))
+@end lisp
+
+@c yagi: @samp{server} -> @command{emacsserver}
+これで Emacs は @command{emacsserver} というプログラムを起動します。
+@command{emacsserver} は Unix ドメインのソケットを作ります。
+@c yagi: user-id, system-name -> userid, systemname
+ソケットはユーザのホームディレクトリの @file{.emacs_server} か
+@file{/tmp} の @file{esrv-@var{userid}-@var{systemname}} に作られます。
+どちらに作られるからはシステムに依存します．
+@code{server-socket-name} を参照のこと．
+
+ニュースリーダやメーラなどが @command{emacsclient} を呼び出すようにするには
+環境変数 @env{EDITOR} (@env{VISUAL} かも知れません)の値を @samp{emacsclient} に
+設定してください。
+このとき @command{emacsclient} のフルパスを指定する必要があるかもしれません。
+例:
+
+@example
+# csh の場合
+setenv EDITOR emacsclient
+
+# フルパスを指定する場合
+setenv EDITOR /usr/local/emacs/etc/emacsclient  
+
+# sh の場合
+EDITOR=emacsclient ; export EDITOR
+@end example
+
+@item
+使い方:
+
+@command{emacsclient} を起動すると、ソケット @file{.emacs_server} に接続し、
+コマンドラインオプションを @command{emacsserver} に渡します。
+@command{emacsserver} はこれらの要求を受け取るとその情報を Emacs に送り、
+Emacs は入力待ちになった時に指定したファイルを開きます。
+(Emacs のコマンドラインオプションと同様にして行数を指定することもできます。)
+自動的に Emacs のウィンドウに切り替わるとは限りません。
+ファイルの編集を終えたら @kbd{c-x #} (@kbd{M-x server edit}) で
+サーバに編集が終了したことを通知します。
+もし @command{emacsclient} の要求で作成されたバッファが他にもあるときは
+そのバッファに切り替わります。なければ @command{emacsclient} は終了し、
+@command{emacsclient} を起動したプログラムに続行するようにシグナルを送ります。
+
+@command{emacsclient} と @command{emacsserver} は同じファイルシステムを
+共有しているマシン上で走らせる必要があります。
+@command{emacsclient} が指定するパス名は Emacs が走っているマシンの
+ファイルシステム上で正しいものでなければいけません。
+Emacs のプロセスは @command{emacsclient} が起動したときに
+サスペンドされていてはいけません。
+Unix や GNU/Linux システム上では @command{emacsclient} は
+別の X のウィンドウか、Emacs 内部のシェルウィンドウから呼び出さなくては
+なりません。あるいは @command{screen} や仮想端末などを利用して下さい。
+
+@cindex @code{gnuserv}
+@samp{gnuserv} という @samp{emacsclient}/@samp{emacsserver} の
+拡張版が @email{ange@@hplb.hpl.hp.com, Andy Norman} によって作成されたバージョン
+があります(@ref{Packages that do not come with Emacs} 参照)．
+@command{gnuserv} はインターネットドメインのソケットを使用しているので、
+ネットワーク経由でも接続できます。
+@command{gnuserv} は任意の Emacs Lisp 式を実行することも可能で、
+さらに編集が完了するまでクライアントプログラムが待つ必要はありません。
+
+@c yagi: enhanced gnuserv とは gnuserv の拡張版の意か?
+@c yagi: それとも emacsserver の拡張版の意か?
+拡張版 @command{gnuserv} は次のところから入手できます。
+
+@uref{ftp://ftp.wellfleet.com/netman/psmith/emacs/gnuserv-2.1alpha.tar.gz}
+
+@uref{http://meltin.net/hacks/emacs/} にあるのはもっと新しいもので，Emacs 21.2
+でテストされています．
+
+@end itemize
+
+@node Compiler error messages, Indenting switch statements, Using an already running Emacs process, Common requests
+@section コンパイラが出すエラーメッセージを Emacs に認識させる方法は?
+@cindex Compiler error messages, recognizing
+@cindex Recognizing non-standard compiler errors
+@cindex Regexps for recognizing compiler errors
+@cindex Errors, recognizing compiler
+
+変数 @code{compilation-error-regexp-alist} によって
+Emacs はコンパイラの出力を解釈します。
+この変数の値はリストで、要素は次のような要素数 3 のリストです。
+
+@code{(@var{regexp} @var{file-idx} @var{line-idx})}
+
+@var{regexp}, @var{file-idx}, @var{line-idx} は文字列です。
+それぞれの文字列の値を決めるには @file{compile.el} をロードし、
+次のようにして変数の値を調べると良いでしょう。
+
+@kbd{C-h v compilation-error-regexp-alist @key{RET}}
+
+@file{compile.el} の中のこの変数に関するコメントを読んでみるのも
+良いでしょう。あなたの使っているコンパイラの出力に良く似た正規表現
+が書かれているかも知れません。一度正しく値を設定したら、次のように
+@file{.emacs} に書き加えておきましょう。
+
+@lisp
+(setq compilation-error-regexp-alist
+      (cons '(@var{regexp} @var{file-idx} @var{line-idx})
+            compilation-error-regexp-alist))
+@end lisp
+
+@node Indenting switch statements, Customizing C and C++ indentation, Compiler error messages, Common requests
+@section C の @code{switch} 文でインデントする方法は?
+@cindex @code{switch}, indenting
+@cindex Indenting of @code{switch}
+
+多くの人は次のように @samp{switch} 文をインデントしたいでしょう。
+
+@example
+f()
+@{
+  switch(x) @{
+    case A:
+      x1;
+      break;
+    case B:
+      x2;
+      break;
+    default:
+      x3;
+  @}
+@}
+@end example
+
+一つの解法は @code{c-indent-level} を 4 に、@code{c-label-offset} を -2 に
+設定することです。しかしこの方法ではインデントレベルが 2 ではなく
+4 になってしまいます。
+
+@emph{本当の}解決方法は @code{cc-mode} (Emacs 20 以降では C プログラムを
+編集するときの標準のモード)を使うことです。
+そして @file{.emacs} に次のように書き加えておきます。
+
+@lisp
+(c-set-offset 'case-label '+)
+@end lisp
+
+古い @code{c-mode} では解決方法はありません。
+
+@node Customizing C and C++ indentation, Horizontal scrolling, Indenting switch statements, Common requests
+@section C, C@t{++}, Java のインデントを変更する方法は?
+@cindex Indentation, how to customize
+@cindex Customize indentation
+
+Emacs の @code{cc-mode} にはインデントを対話的に設定するための
+プログラムがあります。その方法については Emacs 付属の @cite{CC Mode} の
+マニュアルに説明があります。
+@inforef{Customizing Indentation, , ccmode}参照。
+@c @ref{Customizing Indentation, , , ccmode, The CC Mode Manual}
+簡単な説明をここに書いておきます。
+
+@enumerate
+@item
+インデント位置を変えたい行の行頭に移動し、 @kbd{C-c C-o} を入力します。
+Emacs は文法を表すシンボルの入力を要求しますが、
+最初に表示された値を利用することにして単に @key{RET} を入力します。
+
+@item
+次に Emacs がこの文法要素に対するオフセットの入力を要求してきます。
+括弧内に表示されているのは現在の値です。
+ここで次のいずれかを入力します。
+
+@table @code
+@item 0
+インデントなし
+@item +
+インデント一段
+@item -
+アウトデント一段
+@item ++
+インデント二段
+@item --
+アウトデント二段
+@item *
+インデント0.5段
+@item /
+アウトデント0.5段
+@end table
+
+@item
+上記のいずれかを入力したら @kbd{C-c C-q} を入力してブロックをインデント
+しなおします。
+
+@item
+期待通りにインデントされなかったら最初からやり直します。
+うまくいったのなら @file{.emacs} に次の様に書き加えます。
+
+@lisp
+(c-set-offset '@var{syntactic-symbol} '@var{offset})
+@end lisp
+
+@noindent
+@var{syntactic-symbol} は @kbd{C-c C-o} の入力の後に指定したシンボルで
+@var{offset} はインデントを表すシンボルです。
+(@code{+}, @code{/}, @code{0} など)
+
+@item
+他にもインデントを変更したい場所があれば以上の操作を繰り返します。
+@end enumerate
+
+@file{.emacs} に書き加える @code{(c-set-offset ...)} は
+@code{c-mode-hook} で実行するほうがお奨めです。
+そのためには次の様に書き換えます。
+
+@lisp
+(defun my-c-mode-hook ()
+  (c-set-offset ...)
+  (c-set-offset ...))
+(add-hook 'c-mode-hook 'my-c-mode-hook)
+@end lisp
+
+@noindent
+@code{c-mode-hook} を利用することで @w{@code{(require 'cc-mode)}} を
+@file{.emacs} に書かずに済みます。
+@code{c-set-offset} は @code{cc-mode} がロードされていないと利用できません。
+
+しかし @code{c-mode-hook} は C のソースファイルを編集する時にしか
+働かないので注意が必要です。
+C@t{++} に対しては @code{c++-mode-hook} が
+Java に対しては @code{java-mode-hook} が対応します。
+これらの(@code{cc-mode} のサポートする)言語すべてに対して
+インデントを有効にしたければ @code{c-mode-common-hook} を利用してください。
+
+@node Horizontal scrolling, Overwrite mode, Customizing C and C++ indentation, Common requests
+@section 水平方向に自動的にスクロールさせる方法は?
+@cindex @code{hscroll-mode}
+@cindex Horizontal scrolling
+@cindex Scrolling horizontally
+
+Emacs 21 以降では標準でこの機能が使えます。
+@code{truncate-lines} の値が non-@code{nil} なら、
+ポイントが右端もしくは左端からはみ出した時に
+自動で横方向にスクロールします。
+
+Emacs 20 では @code{hscroll-mode} を使ってください。
+@kbd{C-h f hscroll-mode @key{RET}} で読める説明を書いておきます。
+
+ポイントがウィンドウの右か左にはみ出たときに自動的に横方向にスクロールします。
+
+@itemize @minus
+@item
+@kbd{M-x hscroll-mode} でカレントバッファで有効になります。
+
+@item
+@kbd{M-x hscroll-global-mode} ですべてのバッファで有効になります。
+
+@item
+特定のモードで有効にするには関数 @code{turn-on-hscroll} を hook で
+使うと良いでしょう。
+
+@lisp
+(add-hook 'text-mode-hook 'turn-on-hscroll)
+@end lisp
+
+@item
+変数 @code{hscroll-margin} でどのくらいまでポイントが
+ウィンドウの端に近付いたらスクロールするか決まります。
+
+@item
+変数 @code{hscroll-step-percent} でスクロールの際に
+どの程度スクロールさせるか決まります。
+@end itemize
+
+@node Overwrite mode, Turning off beeping, Horizontal scrolling, Common requests
+@section 「挿入」ではなく「上書き」する方法は?
+@cindex @key{Insert}
+@cindex @code{overwrite-mode}
+@cindex Overwriting existing text
+@cindex Toggling @code{overwrite-mode}
+
+@kbd{M-x overwrite-mode} (マイナーモードです)。これで
+挿入モードと上書きモードを切り替えられます。
+
+システムによっては @key{Insert} キーで
+挿入モードと上書きモードを切り替えられます。
+
+@node Turning off beeping, Turning the volume down, Overwrite mode, Common requests
+@section 端末からビープ音がしないようにする方法は? @emph{(2004/07/28)}
+@cindex Beeping, turning off
+@cindex Visible bell
+@cindex Bell, visible
+
+@email{martin@@cc.gatech.edu, Martin R. Frank} は次の様に書いています。
+
+音響ベルではなくて視覚ベルを使うように Emacs を設定して、
+さらに視覚ベルは何もしないように設定すればいいんだ。
+
+環境変数 @env{TERMCAP} に
+
+@example
+... :vb=: ...
+@end example
+
+という設定を追加して
+
+@example
+(setq visible-bell t)
+@end example
+
+を評価すれば期待に沿えると思う。
+
+@node Turning the volume down, Automatic indentation, Turning off beeping, Common requests
+@section X 上で Emacs を使っている時にベルの音量を調節する方法は?
+@cindex Bell, volume of
+@cindex Volume of bell
+
+ベルの音量と持続時間は @command{xset} というシェルコマンドで
+すべてのプログラムについて調節できます。
+
+引数なしで @command{xset} を呼ぶと次のような簡単な説明が出ます。
+
+@example
+usage:  xset [-display host:dpy] option ...
+  To turn bell off:
+      -b                b off               b 0
+  To set bell volume, pitch and duration:
+       b [vol [pitch [dur]]]          b on
+@end example
+
+@node Automatic indentation, Matching parentheses, Turning the volume down, Common requests
+@section 改行したときに上の行のインデント位置まで自動的にインデントする方法は? @emph{(2004/07/28)}
+@cindex Indenting new lines
+@cindex New lines, indenting of
+@cindex Previous line, indenting according to
+@cindex Text indentation
+
+Emacs 20 以降では標準でそうなっています。
+Emacs 20.2 の @file{etc/NEWS} ファイルには次のように書かれています。
+
+@example
+** @code{text-mode} では空行が段落の切れ目になっています。
+これにより @code{adaptive-fill-mode} の特典が @code{text-mode} と
+それに似たモード(@code{mail-mode} など)で有効になります。
+@code{text-mode} では @key{TAB} は @code{indent-relative} コマンドを実行します。
+このことはインデントした段落を編集するときにのみ影響します。
+
+結果的に @code{indented-text-mode} は @code{text-mode} と同じことになるので
+それは単なる別名になっています。
+
+段落のはじめにスペースが欲しい場合は新しくできた
+@code{paragraph-indent-text-mode} を使ってください。
+@end example
+
+@cindex Prefixing lines
+@cindex Fill prefix
+もし @code{auto-fill-mode} (@ref{Turning on auto-fill by default} 参照)
+の設定をしているなら、変数 @code{fill-prefix} を設定して
+特定の文字列を行頭に付加させることができます。
+行頭に文字列を入力してその文字列の直後にポイントを移動させ、
+@kbd{C-x .} (@kbd{M-x set-fill-prefix}) を入力して下さい。
+行頭からポイントまでの文字列が @code{fill-prefix} に設定されます。
+これ以降、自動折り返しの際に @code{fill-prefix} が新しい行の
+行頭に付加されます。
+また @kbd{M-q} (@kbd{M-x fill-paragraph}) で段落内の改行位置を再設定する際に
+@code{fill-prefix} は行頭から移動することはありません。
+
+インデントレベルの異なる段落がある場合は、段落を移動するたびに
+@code{fill-prefix} を設定しなおす必要があります。これを避けるために多くのパッケー
+ジがあります (@ref{Packages that do not come with Emacs} 参照)．
+``fill'' 又は ``indent'' をキーワードとして検索してください．
+
+@node Matching parentheses, Hiding #ifdef lines, Automatic indentation, Common requests
+@section 括弧の対応を調べる方法は? @emph{(2004/07/28)}
+@cindex Parentheses, matching
+@cindex @file{paren.el}
+@cindex Highlighting matching parentheses
+@cindex Pairs of parentheses, highlighting
+@cindex Matching parentheses
+
+Emacs 19 には @file{paren.el} があります。これは(ロードした後)
+ポイントが括弧の上に来たら、自動的に対応する括弧を目立たせるものです。
+自動的に @file{paren.el} をロードするには @file{.emacs} に
+次の様に書き加えてください。
+
+@lisp
+(require 'paren)
+@end lisp
+
+@email{shutkoa@@ugsolutions.com, Alan Shutko} は
+Emacs 20.1 以降では @code{show-paren-mode} を書き加える必要がある
+と言っています。
+
+@lisp
+(show-paren-mode 1)
+@end lisp
+
+``customize'' を使って @code{show-paren-mode} にすることもできます。
+
+@kbd{M-x customize-group @key{RET} paren-showing @key{RET}}
+
+直接 ``paren-showing'' グループを選択できます。
+
+@file{paren.el} のほかにも次の様なものがあります。
+
+@itemize @bullet
+
+@item
+もし右側の括弧を見ているなら一旦消してから入力し直せば
+対応する左側の括弧へカーソルが一時的に移動します。
+
+@item
+@kbd{C-M-f} (@kbd{M-x forward-sexp}) や
+@kbd{C-M-b} (@kbd{M-x backward-sexp}) で
+丸括弧で囲まれた部分を飛ばして移動できます。
+(syntax table によっては波括弧や四角括弧でもできます)
+
+@cindex Show matching paren as in @code{vi}
+@item
+次の Emacs Lisp 式を評価すると @code{vi} の様に @key{%} キーで対応する括弧に
+移動できます。しかもカーソルが括弧の上にないときは普通に % が
+挿入されます。
+
+@lisp
+;; By an unknown contributor
+
+(global-set-key "%" 'match-paren)
+
+(defun match-paren (arg)
+  "Go to the matching paren if on a paren; otherwise insert %."
+  (interactive "p")
+  (cond ((looking-at "\\s\(") (forward-list 1) (backward-char 1))
+        ((looking-at "\\s\)") (forward-char 1) (backward-list 1))
+        (t (self-insert-command (or arg 1)))))
+@end lisp
+
+@end itemize
+
+@node Hiding #ifdef lines, Repeating commands, Matching parentheses, Common requests
+@section C モードで @samp{#ifdef} マクロをプリプロセッサで処理したように表示させる方法は? @emph{(2004/07/28)}
+@cindex @code{#ifdef}, selective display of
+@cindex @code{hide-ifdef-mode}
+@cindex Hiding @code{#ifdef} text
+@cindex Selectively displaying @code{#ifdef} code
+
+@kbd{M-x hide-ifdef-mode} (マイナーモードです)。
+Emacs に付属している @file{cpp.el} を調査する方法もあります。
+
+@node Repeating commands, Valid X resources, Hiding #ifdef lines, Common requests
+@section vi の @samp{.} コマンドと等価なコマンドはありますか?
+@cindex Repeating commands as with @code{vi}
+@cindex Command, repeat last
+@cindex @code{.}, equivalent to @code{vi} command
+
+(@samp{.} は @code{vi} では再実行コマンドです。
+直前の挿入・削除を繰り返します。)
+
+Emacs 20.3 以降では @code{repeat} コマンド(@kbd{C-x z})で
+最後のコマンドを再実行できます。
+prefix argument 付きで実行した場合は @code{repeat} コマンドが
+呼び出すコマンドに適用されます。
+
+あるいは @kbd{C-x @key{ESC} @key{ESC}} (@kbd{M-x repeat-complex-command})
+でミニバッファから引数を読み込んだコマンドを再実行することができます。
+@code{repeat-complex-command} では @kbd{M-p} または @kbd{M-n}
+(あるいはキーボードにあるなら上・下向きの矢印キー)で
+前後のコマンドを探すことができます。
+
+いくつかのコマンドをまとめて実行したい時はキーボードマクロを使ってください。
+(@inforef{Keyboard Macros, , emacs} 参照)
+
+どうしても @samp{.} コマンドを使いたいなら VIPER
+(Emacs 付属の @code{vi} エミュレータ)を使ってください。
+(@ref{VIPER} 参照)
+
+@node Valid X resources, Evaluating Emacs Lisp code, Repeating commands, Common requests
+@section X リソースの正しい設定方法は? @file{.Xdefaults} に書けばいいんですか? @emph{(2004/07/28)}
+@cindex Resources, X
+@cindex X resources
+@cindex Setting X resources
+
+@inforef{X Resources, X Resources, emacs} 参照。
+
+Emacs が X toolkit を使ってコンパイルされたものならメニューバーの
+リソース名などを調べるのにリソースエディタを使うこともできます。
+X11R5 以降なら editres が使えます。
+
+@node Evaluating Emacs Lisp code, Changing the length of a Tab, Valid X resources, Common requests
+@section Emacs Lisp のコードを実行(評価)する方法は?
+@cindex Evaluating Lisp code
+@cindex Lisp forms, evaluating
+
+Emacs Lisp の @dfn{式} を実行(lisp の言葉では @dfn{評価} と言う)するには
+幾つかの方法があります。
+
+@itemize @bullet
+
+@item
+Emacs を起動するとき毎回評価したい式はホームディレクトリの
+@file{.emacs} と言う名前のファイルに書き加える。
+これは個人の環境設定用ファイルです。
+
+@item
+@buffer{*scratch*} バッファで式を入力してポイントを式の後ろに置き、
+@key{LFD} (または @kbd{C-j}) を入力する。
+評価結果はバッファに挿入される。
+
+@item
+@code{emacs-lisp-mode} では @kbd{C-M-x} でポイントの直前、あるいは
+ポイントを含む top-level の式が評価される。
+
+@item
+@kbd{C-x C-e} でモードによらずにポイントの直前の Lisp 式が評価されて
+エコーエリアに評価結果が表示される。
+
+@item
+@kbd{M-:} (@kbd{M-x eval-expression}) でミニバッファに式を入力して
+評価できる。入力は @key{RET} で確定する。
+
+@item
+ファイルに記述されているすべての Lisp 式を評価するには
+@kbd{M-x load-file} を使う。
+(Lisp でファイルをロードするには関数 @code{load} を使う。)
+
+次の関数を使っても Lisp 式を評価することができます。
+
+@example
+@code{load-library}, @code{eval-region}, @code{eval-current-buffer},
+@code{require}, @code{autoload}
+@end example
+
+詳細については @ref{Emacs Lisp documentation} 参照。
+
+@end itemize
+
+@node Changing the length of a Tab, Inserting > at the beginning of each line, Evaluating Emacs Lisp code, Common requests
+@section タブ位置を変更する方法は?
+@cindex Tab length
+@cindex Length of tab character
+@cindex @code{default-tab-width}
+
+変数 @code{default-tab-width} の値を設定してください。
+たとえば 10 カラムにしたかったら次の様に @file{.emacs} に書き加えてください。
+
+@lisp
+(setq default-tab-width 10)
+@end lisp
+
+変数 @code{tab-width} と変数 @code{tab-stop-list} を混同しないで下さい。
+@code{tab-width} は表示を制御する変数で、
+@code{tab-stop-list} は特定のモードで @key{TAB} を入力した時に
+バッファに挿入される文字を決定します。
+
+@node Inserting > at the beginning of each line, Underlining paragraphs, Changing the length of a Tab, Common requests
+@section @samp{>} をすべての行頭に挿入する方法は?
+@cindex Prefix character, inserting in mail/news replies
+@cindex Replies to mail/news, inserting a prefix character
+@cindex @code{mail-yank-prefix}
+@cindex Mail replies, inserting a prefix character
+@cindex News replies, inserting a prefix character
+
+@kbd{M-< M-x replace-regexp @key{RET} ^ @key{RET} > @key{RET}}
+と入力してください。
+
+@c yagi: emacs21 feature
+選択領域内に制限したい時は @kbd{M-x string-insert-rectangle} を使ってください。
+@samp{>} を挿入したい最初の行に移動してマークし(@kbd{C-@key{SPC}})、
+@samp{>} を挿入したい最後の行に移動してから
+@kbd{M-x string-insert-rectangle @key{RET}} を入力してください。
+バッファ全体に適用するには
+@kbd{C-x h M-x string-insert-rectangle @key{RET}} と入力してください。
+
+メールのリプライで引用したメールの行頭に @samp{>} を挿入したい場合は
+変数 @code{mail-yank-prefix} を使うと良いでしょう。
+Supercite (@ref{Supercite} 参照)を使うと
+色々な引用の仕方をすることができます。
+Supercite は Emacs 19.20 以降には付属しています。
+詳しくは @ref{Changing the included text prefix} を参照してください。
+
+@node Underlining paragraphs, Repeating a command as many times as possible, Inserting > at the beginning of each line, Common requests
+@section 選択領域中の書く文字の前に ``_^H'' を挿入してアンダーラインを引く方法は?
+@cindex Underlining a region of text
+@cindex @code{underline-region}
+
+@kbd{M-x underline-region @key{RET}}
+
+@node Repeating a command as many times as possible, Forcing the cursor to remain in the same column, Underlining paragraphs, Common requests
+@section コマンドをできるだけ繰り返して実行する方法は?
+@cindex Repeating commands many times
+@cindex Commands, repeating many times
+
+@kbd{C-x (} と @kbd{C-x )} で一連のコマンドを実行するキーボードマクロを
+定義してから @kbd{M-0 C-x e} と入力してください。
+
+コマンドがエコーエリアに出力するメッセージは抑制されます。
+
+数回だけコマンドを繰り返したい場合は @kbd{C-x z} も使えます。
+@ref{Repeating commands} 参照。
+
+@node Forcing the cursor to remain in the same column, Forcing Emacs to iconify itself, Repeating a command as many times as possible, Common requests
+@section 上下の行が短くてもカラム位置を変えずにカーソルを上下に移動させる方法は?
+@cindex @code{picture-mode}
+@cindex Remaining in the same column, regardless of contents
+@cindex Vertical movement in empty documents
+
+@kbd{M-x picture-mode}.
+
+@node Forcing Emacs to iconify itself, Using regular expressions, Forcing the cursor to remain in the same column, Common requests
+@section Emacs に自分自身をアイコン化させる方法は? @emph{(2004/07/28)}
+@cindex Iconification under the X Window System
+@cindex X Window System and iconification
+@cindex Suspending Emacs
+
+X などのウィンドウシステム上で Emacs を実行しているなら@kbd{C-z} でアイコン化し
+ます。文字端末上ならサスペンドします。詳しくは @inforef{Frame Commands, Frame
+Commands, emacs} を参照してください。
+
+@node Using regular expressions, Replacing text across multiple files, Forcing Emacs to iconify itself, Common requests
+@section 正規表現の使い方は?
+@cindex Regexps
+@cindex Regular expressions
+@cindex Differences between Unix and Emacs regexps
+@cindex Unix regeps, differences from Emacs
+@cindex Text strings, putting regexps in
+
+@inforef{Regexps, , emacs} 参照。
+
+@c yagi: @code{or} -> @dfn{または}
+@dfn{または} は @samp{\|} です。@samp{|} ではありません。
+同様にグループ化オペレータは @samp{\(} と @samp{\)} です。
+また文字列のシンタックスではバックスラッシュ(@samp{\})を表すには
+@samp{\\} を使います。
+つまり正規表現 @samp{xxx\(foo\|bar\)} の文字列による表示は
+@code{"xxx\\(foo\\|bar\\)"} になります。
+
+バックスラッシュを二重にすることを忘れないように!
+
+@itemize @bullet
+
+@item
+Unix の @command{grep} や @command{sed} などとは異なり、
+文字集合が改行文字(@key{LFD}, @kbd{C-j} @samp{\n})を含んでいなければ
+その補集合(@samp{[^...]})は改行文字を含みます。
+
+@item
+シンタックスによる正規表現(たとえば @samp{\sw})は文字集合の正規表現
+(たとえば @samp{[aeiou]})内では特別な意味を持ちません。
+(これは正規表現のシンタックスとしては典型的なものです)
+
+@end itemize
+
+@node Replacing text across multiple files, Documentation for etags, Using regular expressions, Common requests
+@section 複数のファイルにまたがる置換をする方法は?
+@cindex Replacing strings across files
+@cindex Multiple files, replacing across
+@cindex Files, replacing strings across multiple
+
+Emacs の ``tags'' 機能にはコマンド @code{tags-query-replace} があって、
+@file{TAGS} ファイルに記述されるすべてのファイルに対して
+コマンド @command{query-replace} を実行します。
+@inforef{Tags Search, , emacs} 参照。
+
+Emacs 19.29 では @code{dired-mode} (@kbd{C-x d} (@kbd{M-x dired}))に
+@command{dired-do-query-replace} というコマンドがあり、
+複数のファイルに対して置換をすることができます。
+
+@node Documentation for etags, Disabling backups, Replacing text across multiple files, Common requests
+@section @command{etags} のドキュメントはどこにありますか?
+@cindex Documentation for @code{etags}
+@cindex @code{etags}, documentation for
+
+@code{etags} の man page は @code{emacs} の man page と同じ場所にあるはずです。
+
+
+コマンドラインオプションの簡単な説明は @samp{etags -H} で見られます。
+
+@node Disabling backups, Disabling auto-save-mode, Documentation for etags, Common requests
+@section バックアップファイルを作らないようにする方法は?
+@cindex Backups, disabling
+@cindex Disabling backups
+
+バックアップは重要なのでそのようなことは勧められません。
+
+バックアップファイル(や ``重要でない'' ファイル)を @code{dired-mode} で
+見えない様にするには @file{dired-x.el} をロードするように @file{.emacs} に
+次のように書き加えてください。
+
+@lisp
+(add-hook 'dired-load-hook
+          (lambda () (load "dired-x")))
+@end lisp
+
+@file{dired-x.el} をロードすると @kbd{M-o} でバックアップファイルを
+表示するか否かを切り替えられます。
+自動で表示しないようにするには @file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(add-hook 'dired-mode-hook 'dired-omit-toggle)
+@end lisp
+
+Unix のシェルで @command{ls} を実行する度にバックアップファイルが
+見えるのが嫌なら、GNU の @command{ls} で @option{-B} オプションを
+付けて実行してみてください。
+GNU @command{ls} は GNU Fileutils パッケージに含まれていて、
+@url{ftp://ftp.gnu.org} またはそのミラーサイトから入手できます。
+(@ref{Informational files for Emacs} 参照)
+
+バックアップを止めたり、バックアップのファイル名を変更したい場合は
+@inforef{Backup Names, ,emacs} を参照してください。
+
+@cindex Backup files in a single directory
+Emacs 21.1 以降では変数 @code{backup-directory-alist} を設定することで
+バックアップファイルを作るディレクトリを指定できます。
+この変数の値はファイル名の正規表現とディレクトリの連想リストで、
+バックアップファイルを@strong{すべて}特定のディレクトリ @file{@var{dir}} に
+作るようにするには @code{("." . "@var{dir}")} を要素として追加します。
+
+@node Disabling auto-save-mode, Going to a line by number, Disabling backups, Common requests
+@section @code{auto-save-mode} にしない方法は? @emph{(2004/07/28)}
+@cindex Disabling @code{auto-save-mode}
+@cindex Auto-saving
+@cindex Saving at frequent intervals
+
+auto-save は Emacs やマシンがクラッシュしたときに重要なので
+そのようなことは勧められません。
+
+変数 @code{auto-save-interval} を設定することで auto-save の回数を減らすことは
+できます。この変数は何回キーを押すと auto-save するか決めます。
+この変数の値を増やすことで auto-save の回数が減らせます。
+
+Sebastian Kremer の @file{auto-save} パッケージを使っても良いでしょう
+(@ref{Packages that do not come with Emacs} 参照)。このパッケージを使うとバック
+アップファイルを特定のディレクトリ(たとえば @file{/tmp})にまとめることができます。
+
+@code{auto-save-mode} の挙動を変更したいときは
+@inforef{Auto Save, , emacs} 参照。
+
+@node Going to a line by number, Modifying pull-down menus, Disabling auto-save-mode, Common requests
+@section 指定した行番号に移動する方法は?
+@cindex Going to a line by number
+@cindex Compilation error messages
+@cindex Recompilation
+
+本当に行番号という情報からその行に移動したいのですか?
+コンパイラがエラーメッセージを出した場所に移動したいのではありませんか?
+もしそうなら Emacs の中から @kbd{M-x compile}, @{M-x recompile} と
+入力してコンパイルしてください。
+Emacs はコンパイラの出力を @buffer{*compilation} バッファに取り込み、
+@kbd{C-x `} と入力することでエラーメッセージに対応する場所を順に表示します。
+@buffer{*compilation*} バッファのエラーメッセージ上で
+@kbd{Mouse-2} または @key{RET} を入力することで直接表示させることもできます。
+
+もし本当に特定の行番号の行に移動したいなら @kbd{M-x goto-line @key{RET}} と
+入力してから行番号を入力して移動することができます。
+
+プレフィクスキーを利用して行番号を先に指定することもできます。
+たとえば @kbd{C-u 286 M-x goto-line @key{RET}} で 286 行目に移動します。
+
+このコマンドを頻繁に利用するなら適当なキーに割り当てておくと良いでしょう。
+次の様に @file{.emacs} に書き加えれば @kbd{C-x g} で @code{goto-line} が
+起動されるようになります。
+
+@lisp
+(global-set-key "\C-xg" 'goto-line)
+@end lisp
+
+
+@node Modifying pull-down menus, Deleting menus and menu options, Going to a line by number, Common requests
+@section メニューバーの項目を変更する方法は?
+@cindex Pull-down menus, creating or modifying
+@cindex Menus, creating or modifying
+@cindex Creating new menu options
+@cindex Modifying pull-down menus
+@cindex Menus and keymaps
+@cindex Keymaps and menus
+
+@menuitem{File}, @menuitem{Edit}, @menuitem{Buffers} などの
+メニュータイトルは一つのキーマップを表します。
+メニュータイトルをマウスで選択するとそのキーマップに定義されている
+メニューを表示します。
+
+メニューに新しい項目を加えるには
+そのキーマップに新しい項目を定義してください。
+@menuitem{forward word} を @menuitem{Edit} メニューに追加するには
+次のようにします。
+
+@lisp
+(define-key global-map
+  [menu-bar edit forward]
+  '("Forward word" . forward-word))
+@end lisp
+
+@noindent
+最初の引数にキーマップ @code{global-map} を指定することでメニュー定義は
+グローバルになります。 @code{global-map} を適当なキーマップに置き換えれば
+特定のモードに対してメニューを追加することができます。
+
+二番目の引数は新しい項目のメニューでの位置を表しています。
+@code{edit} を @code{file} に置き換えれば @menuitem{Files} メニューに
+項目を追加することになります。
+
+三番目の引数は cons cell で、第一要素はメニューに表示される文字列、
+第二要素はメニュー項目を選択した時に実行されるコマンドです。
+
+メニュー項目としてサブメニューを追加するには
+メニュー定義にキーマップを指定します。
+
+@lisp
+(define-key global-map [menu-bar words]
+  (cons "Words" (make-sparse-keymap "Words")))
+@end lisp
+
+このコードでは新しいキーマップを定義してメニューバーに
+サブメニュー @menuitem{Words} を追加します。
+@menuitem{Words} メニューに @menuitem{Forward Word} を追加するには
+次の様にします。
+
+@lisp
+(define-key global-map
+  [menu-bar words forward]
+  '("Forward word" . forward-word))
+@end lisp
+
+@noindent
+キーマップの内部構造の問題から、新しいメニューの項目は一番上に追加されます。
+たとえば @menuitem{foo}, @menuitem{bar}, @menuitem{baz} の順に
+メニュー項目を追加するとメニューは
+@menuitem{baz}, @menuitem{bar}, @menuitem{foo} の順になります。
+
+この問題を回避するには @code{define-key-after} を使ってください。
+この関数は @code{define-key} と同様にキーマップを変更しますが、
+新しい定義の位置を指定することができます。
+@menuitem{Edit} メニューの @menuitem{Undo} の一つ下に
+@menuitem{Forward Word} を追加するには次の様にします。
+
+@lisp
+(define-key-after
+  (lookup-key global-map [menu-bar edit])
+  [forward]
+  '("Forward word" . forward-word)
+  'undo)
+@end lisp
+
+@code{define-key-after} の二番目の引数と三番目の引数が @code{define-key} と
+異なり、また四番目の引数があることに注意してください。
+四番目の引数に指定されるメニューの次に追加されます。
+メニューの最後に追加したい場合は第四引数を @code{t} にします。
+
+同一のサブメニュー内でメニュー項目を別の位置に移動したい場合は
+単に @code{define-key-after} を新しい位置を指定して評価してください。
+
+@c yagi: ``Keymaps'' -> ``Menu Keymaps''
+詳細については
+@cite{Emacs Lisp Reference Manual}(@ref{Emacs Lisp documentation} 参照)
+ の ``Menu Keymaps'' にあります。
+@c yagi: 追加
+@ifinfo
+(Emacs Lisp Reference Manual がインストールされているなら
+@inforef{Menu Keymaps, , elisp} 参照)
+@end ifinfo
+
+@node Deleting menus and menu options, Turning on syntax highlighting, Modifying pull-down menus, Common requests
+@section メニューバーの項目を削除する方法は?
+@cindex Deleting menus and menu options
+@cindex Menus, deleting
+
+最も単純な方法はキーマップを @code{nil} にしてしまうことです。
+たとえば (@ref{Modifying pull-down menus} の) @menuitem{Words} メニューを
+削除するには次の様にします。
+
+@lisp
+(define-key global-map [menu-bar words] nil)
+@end lisp
+
+@alias menuitem=samp
+同様にメニューの項目を削除するにもキーマップの定義を @code{nil} にします。
+たとえば(@ref{Modifying pull-down menus} で追加した)
+@menuitem{Forward Word} を @menuitem{Edit} メニューから削除するには
+次の様にします。
+
+@lisp
+(define-key global-map [menu-bar edit forward] nil)
+@end lisp
+
+@node Turning on syntax highlighting, Scrolling only one line, Deleting menus and menu options, Common requests
+@section 構文を強調表示させる方法は?
+@cindex Syntax highlighting
+@cindex @code{font-lock-mode}
+@cindex Highlighting based on syntax
+@cindex Colorizing text
+@cindex FAQ, @code{font-lock-mode}
+
+@code{font-lock-mode} は Emacs で構文の強調表示を行う標準的な方法です。
+@code{font-lock-mode} を使うと違う型の文字は違う色で表示されます。
+たとえば何かのプログラム言語のモードで @code{font-lock-mode} にすると
+変数はある色で、キーワードは別の色で、コメントは更に別の色で表示されます。
+
+@cindex hilit19 is deprecated
+以前のバージョンの Emacs では同様の事をするパッケージに hilit19 が
+ありましたが、 hilit19 の利用は現在では標準ではありません
+(しかし @file{hilit19.el} は Emacs に付属しています)。
+現在 hilit19 は誰も保守していません。
+
+@code{font-lock-mode} にするには @kbd{M-x font-lock-mode} と入力してください。
+
+特定のメジャーモードで @code{font-lock-mode} にするには
+モードの hook を使ってください。
+たとえば @code{c-mode} で @code{font-lock-mode} にするには
+次のように @file{.emacs} に書き加えてください。
+
+@lisp
+(add-hook 'c-mode-hook 'turn-on-font-lock)
+@end lisp
+
+メジャーモードによらずに @code{font-lock-mode} にするには @file{.emacs} に
+次のように書き加えてください。
+
+@lisp
+(global-font-lock-mode 1)
+@end lisp
+
+@noindent
+これで @code{font-lock-global-mode} にある
+すべてのメジャーモードで @code{font-lock-mode} になります。
+@code{pie-ala-mode} でファイルを編集するときに @code{pie-ala-mode} に対する
+@code{font-lock-mode} の定義がなければそのバッファに対しては
+上の式は意味を持ちません。
+
+@code{font-lock-mode} を用いた強調表示には時間がかかるので、
+表示が遅いことにいらいらさせられるかもしれません。
+これを回避するための仕組みがいくつかあります。
+
+@cindex Just-In-Time syntax highlighting
+Emacs 21 以降では @code{font-lock-mode} は @code{jit-lock-mode} の提供する
+新しい @dfn{その場での(Just-In-Time)文字の装飾} を利用します。
+@code{jit-lock-mode} はバッファの見えていない部分に対しての
+文字の装飾を実際に表示されるまで遅らせることができます。
+また Emacs が入力待ち状態になったときには変更を加えます。
+この様にすることで表示にかかる時間を最小限に抑えています。
+@code{jit-lock-mode} の設定については @kbd{C-h f jit-lock-mode @key{RET}} で
+説明を読んでください。
+
+@cindex Levels of syntax highlighting
+@cindex Decoration level, in @code{font-lock-mode}
+Emacs 20 以前では装飾レベルを設定することができます。
+装飾レベルにはささやかなものから派手なものまであり、
+派手な装飾ほど時間(または速いマシン)が必要です。
+装飾レベルは @code{font-lock-maximum-decoration} で決まります。
+@code{nil} が標準の装飾(大抵は最も簡素な装飾)で、
+@code{t} が最も派手な装飾となります。
+その場合は @file{.emacs} に次の様に書き加えます。
+
+@lisp
+(setq font-lock-maximum-decoration t)
+@end lisp
+
+@noindent
+モードごとに装飾レベルを設定することもできます。
+詳しい方法は @kbd{C-h v font-lock-maximum-decoration @key{RET}} で
+説明を読んでください。
+
+@cindex Lazy font-lock
+Emacs 20 以前では文字装飾に @code{fast-lock-mode} や @code{lazy-lock-mode} が
+あります。これらは Emacs 21 の @code{jit-lock-mode} に相当します。
+@code{lazy-lock-mode} の有利な点はある条件が満たされたときにだけ
+装飾をすることです。それはたとえばある一定期間 Emacs が入力待ちに
+なった時であるとか、スクロールした時などです。
+詳しくは @kbd{C-h f lazy-lock-mode @key{RET}}
+(@kbd{M-x describe-function @key{RET} lazy-lock-mode @key{RET}})
+で説明を読んでください。
+
+@kbd{C-h f font-lock-mode}
+(@kbd{M-x describe-function @key{RET} font-lock-mode @key{RET}})
+で @code{font-lock-mode} の説明も参考にして下さい。
+
+詳細については @code{font-lock-mode} FAQ を読んでください。
+FAQ は @email{jari.aalto@@ntc.nokia.com, Jari Aalto} が保守していて、
+次のところから入手可能です。
+
+@uref{ftp://cs.uta.fi/pub/ssjaaa/ema-font.gui}
+
+文字装飾付きで(色付けやフォント指定などをしたまま)
+バッファの内容を印刷したい時は
+@kbd{M-x ps-print-buffer-with-faces} または
+@kbd{M-x ps-print-region-with-faces} を利用してください。
+これは PostScript プリンタまたはインタプリタ(Ghostscript など)を必要とします。
+変数 @code{ps-printer-name}, @code{ps-lpr-command}, @code{ps-lpr-switches}
+の説明を参考にして下さい。
+
+@node Scrolling only one line, Replacing highlighted text, Turning on syntax highlighting, Common requests
+@section ウィンドウの一番上や下から移動するときに一行だけスクロールさせる方法は?
+@cindex Scrolling only one line
+@cindex Reducing the increment when scrolling
+
+@file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(setq scroll-step 1)
+@end lisp
+
+@inforef{Scrolling, Scrolling, emacs}.
+
+@node Replacing highlighted text, Editing MS-DOS files, Scrolling only one line, Common requests
+@section 選択領域を入力で置き換えるようにする方法は?
+@cindex @code{delete-selection-mode}
+@cindex Replacing highlighted text
+@cindex Highlighting and replacing text
+
+@code{delete-selection-mode} を使ってください。
+@code{delete-selection-mode} にするには
+@file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(delete-selection-mode t)
+@end lisp
+
+@code{delete-selection-mode} の説明
+(@kbd{M-x describe-function @key{RET} delete-selection-mode @key{RET}}
+で読めます)には次の様に書かれています。
+
+@quotation
+有効になっているときは選択領域を入力で置き換えます。
+無効になっているときはポイント位置にテキストを挿入するだけです。
+@end quotation
+
+@code{delete-selection-mode} が有効になっているときは
+選択領域を @key{DEL} で削除できます。
+
+@node Editing MS-DOS files, Filling paragraphs with a single space, Replacing highlighted text, Common requests
+@section MS-DOS 形式のテキストファイルを Emacs で編集する方法は?
+@cindex Editing MS-DOS files
+@cindex MS-DOS files, editing
+@cindex Microsoft files, editing
+@cindex Windows files, editing
+
+Emacs 20 では MS-DOS(と Windows)のファイルを自動的に判別して扱うので
+特に意識することなくファイルを編集することができます。
+
+MS-DOS 形式のファイルを編集している時は、モードラインにそれが表示されます。
+Unix や GNU/Linux システム、Mac では @samp{(DOS)} と左端のほうに表示されます。
+DOS や Windows ではバックスラッシュ(@samp{\})が表示されます。
+
+Emacs 19 以前では @file{crypt++} パッケージを入手してください
+(@ref{Packages that do not come with Emacs} 参照)．
+@file{crypt++} パッケージを使うと MS-DOS と Unix の改行コードの違いを
+意識することなくファイルを編集できます。
+
+@node Filling paragraphs with a single space,  Escape sequences in shell output, Editing MS-DOS files, Common requests
+@section ピリオドの後にスペースを入力した時に自動的に改行させる方法は?
+@cindex One space following periods
+@cindex Single space following periods
+@cindex Periods, one space following
+
+@email{ulm@@vsnhd1.cern.ch, Ulrich Mueller} は
+@file{.emacs} に次の様に書き加えると良いと言っています。
+
+@lisp
+(setq sentence-end "[.?!][]\"')@}]*\\($\\|[ \t]\\)[ \t\n]*")
+(setq sentence-end-double-space nil)
+@end lisp
+
+@node Escape sequences in shell output, , Filling paragraphs with a single space, Common requests
+@section シェルモードで @command{ls} を使うと表示される変な文字列を消す方法は?
+@cindex Escape sequences in @code{ls} output
+@cindex @code{ls} in Shell mode
+
+@command{ls} が @samp{ls --color} にエイリアスされているためです。
+この問題を回避するには次の様な方法があります。
+
+@itemize @bullet
+@item
+環境変数 @env{EMACS} を調べてエイリアスしない様にする。
+Emacs はサブシェルを実行するとき、環境変数 @env{Emacs} の値を
+@samp{t} に設定します。
+
+@item
+@code{ansi-color} パッケージ(Emacs 21 以降には付属しています)を利用する。
+このパッケージを使うと ANSI のエスケープシーケンスを解釈して
+色を付けることができます。
+@end itemize
+
+@c ------------------------------------------------------------
+@node    Bugs and problems, Compiling and installing Emacs, Common requests, Top
+@chapter Bugs and problems @emph{(2004/07/28)}
+@cindex Bugs and problems
+
+オンラインマニュアルにも良く発生する問題について書かれています。
+@c @ref{Lossage, , Dealing with Emacs Trouble, emacs, The GNU Emacs Manual}
+この章を読んでも問題が解決しない場合は
+@inforef{Lossage, , emacs}を参照して下さい。
+バグを発見した場合は
+@c @ref{Bugs, , Reporting Bugs, emacs, The GNU Emacs Manual}
+@inforef{Bugs, , emacs}を参照して報告して下さい。
+
+Emacs の配布パッケージに含まれる @file{etc/PROBLEMS} に
+Emacs をコンパイルする時・利用する時に発生する様々な問題が
+コンピュータの種類毎に記されています。
+このファイルは @kbd{C-h P} と入力することで読むことができます。
+
+@menu
+* Problems with very large files::  巨大なファイル
+* ^M in the shell buffer::      シェルモードの ^M
+* Shell process exits abnormally::  プロセスの異常終了
+* Problems with Shell Mode on MS-Windows::
+* Termcap/Terminfo entries for Emacs::  Termcap/Terminfo
+* Spontaneous entry into isearch-mode::  勝手に I-search:
+* Problems talking to certain hosts::  通信に失敗
+* Errors with init files::      初期化ファイル中のエラー
+* Emacs ignores X resources::   X リソース指定
+* Emacs ignores frame parameters::  frame パラメタ指定
+* Emacs takes a long time to visit files::  ファイルを開くのに時間がかかる
+* Editing files with $ in the name::  $ を含むファイル名
+* Shell mode loses the current directory::  シェルモードのカレントディレクトリ
+* Security risks with Emacs::   セキュリティ
+* Dired claims that no file is on this line::  Dired でファイルを開けない
+@end menu
+
+@node Problems with very large files, ^M in the shell buffer, Bugs and problems, Bugs and problems
+@section Emacs で 8 メガバイト以上のファイルを扱えますか?
+@cindex Very large files, opening
+@cindex Large files, opening
+@cindex Opening very large files
+@cindex Maximum file size
+@cindex Files, maximum size
+
+(19.29 よりも)古いバージョンの Emacs は 8 メガバイト以上のファイルを
+標準では扱えませんでした。Emacs 19.29 ではバッファの最大のサイズは
+最低 2^27-1 すなわち 134,217,727 バイト(132 メガバイト)です。
+Emacs 20 を 64 ビットシステムでコンパイルすれば理論上は
+576,460,752,303,423,487 バイト(549,755,813 ギガバイト)
+まで扱えます。
+
+古い Emacs を使っていて、バージョンアップできないなにがしかの理由があるなら、
+コンパイルし直すことで問題を回避できます。
+@email{lnz@@lucid.com, Leonard N. Zubkoff} は @file{src/config.h} に
+次のように書き加えることで 26 ビットの整数/ポインタが
+使えるようになると言っています。
+(33,554,431 バイトのファイルまで扱えるようになります)
+
+@example
+#define VALBITS 26
+#define GCTYPEBITS 5
+@end example
+
+@noindent
+この方法はシステムによっては @samp{ILLEGAL DATATYPE} などのエラーになります。
+
+@email{daveg@@csvax.cs.caltech.edu, David Gillespie} は
+この問題が起こった背景を次の様に説明しています。
+この説明は 19.29 以前の話ですが、現在も同じ話が通用します。
+
+@quotation
+Emacs はそのほとんどがリスプ方言のひとつで記述されている。
+リスプは、変数にどんな型の値も代入できたり、
+関数の戻り値も任意の型でよいという意味で型が自由な言語だ。
+しかし、このためすべての値には
+その値がどんな型なのかを記す @dfn{タグ} が必要なんだ。
+タグには整数、リストへのポインタ、編集バッファへのポインタなどの
+型が記される。
+Emacs は標準的な整数の幅である 32 ビットをデータオブジェクトを
+指すために使っている。
+そのうち先頭の 8 ビットをこのタグのために使い、
+残りの 24 ビットを値のために使っているんだ。
+だから整数(そしてポインタ)は C 言語の整数やポインタに比べて
+制限を受けているんだ。
+@end quotation
+
+@node ^M in the shell buffer, Shell process exits abnormally, Problems with very large files, Bugs and problems
+@section シェルモードのバッファから @samp{^M} を消す方法は?
+@cindex Shell buffer, echoed commands and @samp{^M} in
+@cindex Echoed commands in @code{shell-mode}
+
+@code{shell-mode} のバッファで @kbd{M-x shell-strip-ctrl-m @key{RET}} と
+入力してください。@samp{^M} が削除されます。
+
+それで駄目なときは次のような方法があります。
+
+@command{tcsh} を使っている時は @file{.cshrc} (または @file{.tcshrc}) に
+次の様に書き加えてください。
+
+@example
+if ($?EMACS) then
+    if ("$EMACS" == t) then
+        if ($?tcsh) unset edit
+        stty nl
+    endif
+endif
+@end example
+
+または @file{.emacs_tcsh} に次の様に書き加えてください。
+
+@example
+unset edit
+stty nl
+@end example
+
+もう一つの方法は @code{shell-mode} で @command{tcsh} の代わりに
+@command{csh} を起動するようにすることです。
+たとえば次の様にします。
+
+@lisp
+(setq explicit-shell-file-name "/bin/csh")
+@end lisp
+
+@noindent
+あるいは @file{.cshrc} (または @file{.tcshrc})に次の様に書き加えてください。
+
+@example
+setenv ESHELL /bin/csh
+@end example
+
+@noindent
+(環境変数を設定し直したら起動しなおすのを忘れないで下さい。)
+
+環境変数は Emacs の中でも設定することができます。
+たとえば次の様に鳴ります。
+
+@lisp
+(setenv "ESHELL" "/bin/csh")
+@end lisp
+
+この方法はシェルのほうが @samp{^M} を出力しないようにするための設定です。
+この方法では解決できない場合(たとえば Windows のシェルの場合)、
+次の様に @file{.emacs} に書き加えることで
+Emacs に @samp{^M} を取り除かせることができます。
+
+@smalllisp
+(add-hook 'comint-output-filter-functions 'shell-strip-ctrl-m)
+@end smalllisp
+
+関連: @code{shell-mode} で入力が 2 度表示される場合は
+シェルの設定ファイルに次の様に書き加えてください。
+
+@example
+stty -icrnl -onlcr -echo susp ^Z
+@end example
+
+@node Shell process exits abnormally, Problems with Shell Mode on MS-Windows, ^M in the shell buffer, Bugs and problems
+@section "Process shell exited abnormally with code 1" はなぜ出るのですか?
+@cindex Abnormal exits from @code{shell-mode}
+@cindex @code{shell-mode} exits
+@cindex Process shell exited
+
+もっともあり得るのは、@command{env} プログラムが
+正しくインストールされていない場合です。
+このプログラムは実行許可を与えて Emacs のプログラムディレクトリ
+(このディレクトリは変数 @code{exec-directory} に設定されているので、
+@kbd{C-h v exec-directory @key{RET}} で確かめることができます)
+にインストールされていなくてはなりません。
+
+また、パスの通っている @command{env} というプログラムがないか調べてください。
+(例えば SunOS には @file{/usr/bin/env} というプログラムがあります)
+この場合、なぜ失敗するのか、どうしたらこの問題を解決できるのかは
+わかっていません。
+
+@samp{make clean} で @command{env} などのプログラムを削除してしまうので
+気をつけてください。
+
+Emacs を @command{xterm} (tty コントロールを持つもの)
+から X クライアントとして起動し、その @command{xterm} を終了した場合にも
+この現象がときどき起こることが報告されています。
+
+@c yagi: @samp{PROBLEMS} -> @file{etc/PROBLEMS}
+その他の場合については @file{etc/PROBLEMS} を参考にして下さい。
+
+@node Problems with Shell Mode on MS-Windows, Termcap/Terminfo entries for Emacs, Shell process exits abnormally, Bugs and problems
+@section @kbd{M-x shell} でエラーが出るのはなぜ?
+
+@cindex Shell Mode, and MS-Windows
+@cindex @code{explicit-shell-file-name}
+MS-Windows では Emacs がシェルの実行ファイルの名前を間違えるために
+起こります。標準の値 @file{/bin/sh} は Unix 以外のシステムでは
+大抵無効になります。実行ファイルのファイル名がわかっているのなら
+変数 @code{explicit-shell-file-name} の値をフルパスに設定して下さい。
+たとえば @file{.emacs} に次の様に書き加えます。
+
+@lisp
+(setq explicit-shell-file-name "d:/shells/bash.exe")
+@end lisp
+
+ファイル名がわからないのなら @kbd{M-!} で適当なコマンドを
+実行してみてください。
+それでうまくいくのなら @file{.emacs} に次の様に書き加えてください。
+
+@lisp
+(setq explicit-shell-file-name shell-file-name)
+@end lisp
+
+@cindex Antivirus programs, and Shell Mode
+場合によってはアンチウィルスソフトが干渉してうまく行かないのかも知れません。
+その場合はアンチウィルスソフトの常駐を解除してみてください。
+
+@node Termcap/Terminfo entries for Emacs, Spontaneous entry into isearch-mode, Problems with Shell Mode on MS-Windows, Bugs and problems
+@section "emacs" の termcap/terminfo エントリはどこにありますか?
+@cindex Termcap
+@cindex Terminfo
+@cindex Emacs entries for termcap/terminfo
+
+@samp{emacs} の termcap エントリは通常、
+シェルの環境変数 @env{TERMCAP} にあります。
+システムの termcap ファイルに @samp{emacs} のエントリを加えると便利かも
+知れません。(例えば @code{shell-mode} で @command{rlogin} するとき)
+@samp{emacs} の正しい termcap エントリは次のようなものです。
+
+@example
+emacs:tc=unknown:
+@end example
+
+@samp{emacs} の terminfo エントリを作るときは、
+@command{tic} か @command{captoinfo} を使ってください。
+@file{/usr/lib/terminfo/e/emacs} を生成する必要があります。
+@file{/usr/lib/terminfo/d/dumb} を @file{/usr/lib/terminfo/e/emacs} に
+コピーするだけで良いでしょう。
+
+termcap/terminfo エントリを作っても @code{shell-mode} で
+フルスクリーンを使うプログラムは利用できません。
+その場合は、代わりに @kbd{M-x terminal-emulator} としてください。
+
+termcap/terminfo エントリがないときはシェルの設定ファイルで
+ターミナルタイプを @samp{emacs} から @samp{dumb} か @samp{unknown} に
+変えてください。
+@command{csh} を使っている場合は @file{.chrc} に次の行を加えてください。
+
+@example
+if ("$term" == emacs) set term=dumb
+@end example
+
+@node Spontaneous entry into isearch-mode, Problems talking to certain hosts, Termcap/Terminfo entries for Emacs, Bugs and problems
+@section Emacs が勝手に "I-search: " と表示してビープするのですがなぜですか?
+@cindex Spontaneous entry into isearch-mode
+@cindex isearch-mode, spontaneous entry into
+@cindex Beeping without obvious reason
+
+端末が(または端末とホストコンピュータの間で) @kbd{C-s} と @kbd{C-q} を
+フロー制御文字として使っていると、Emacs がこれらの文字を
+コマンドとして解釈してしまいます。
+(@kbd{C-s} は通常 @code{isearch-forward} コマンドを起動します)
+解決法については @ref{Handling C-s and C-q with flow control} 参照。
+
+@node Problems talking to certain hosts, Errors with init files, Spontaneous entry into isearch-mode, Bugs and problems
+@section 特定のホスト(名)と交信できないのですが、なぜですか?
+@cindex Hosts, Emacs cannot talk to
+@cindex @code{gethostbyname}, problematic version
+
+Emacs がリンクした @samp{gethostbyname} がダメなバージョンの場合に
+そのような問題が発生します。
+``X server not responding. Check your DISPLAY environment variable.''
+の様なメッセージが出るときや、
+@code{open-network-stream} で ``Unknown host'' と言われるときは、
+これが原因でしょう。
+
+こうなる原因は、Sun ではスタティックライブラリを
+リンクする必要があるため起こったものでしょう。
+スタティックライブラリの @samp{gethostbyname} は
+@file{/etc/hosts} と NIS(YP) しか見ないのに対し、
+ダイナミックライブラリの @samp{gethostbyname} は DNS も見るから
+(あるいは NIS の代わりに DNS を見るから)です。
+System V R3.6 の動いている Motorola Delta では標準ライブラリの
+@samp{gethostbyname} は良いのですが、
+NIS を見る版(-linet でコンパイルしたとき)ではうまくいきません。
+他の OS でも同じような問題があります。
+
+以下の様なことを試してみてください。
+
+@itemize @bullet
+
+@item
+@file{/etc/hosts} に直接ホスト名を書き加える。
+
+@item
+@file{src/config.h} に次のように書き加えて Emacs をリンクし直す。
+
+@example
+#define LIBS_SYSTEM -lresolv
+@end example
+
+@item
+@file{libc.a} の @samp{gethostbyname} や
+それに関連した関数を @samp{libresolv.a} などの
+もっと良いものに置き換えてから Emacs をリンクし直す。
+
+@item
+NIS を使っているのなら、@command{ypbind} が正しく DNS を見に行く様に設定する。
+
+@end itemize
+
+@node Errors with init files, Emacs ignores X resources, Problems talking to certain hosts, Bugs and problems
+@section Emacs に "Error in init file" と言われてしまうのはなぜですか?
+@cindex Error in @file{.emacs}
+@cindex Error in init file
+@cindex Init file, errors in
+@cindex @file{.emacs} file, errors in
+@cindex Debugging @file{.emacs} file
+
+@file{.emacs} かシステムの @file{lisp/default.el} をロードしたときに
+エラーが発生しています。
+Emacs 21.1 以降では @buffer{*Messages*} バッファを表示して
+ユーザにエラーの内容を知らせます。
+
+@file{.emacs} のデバッグの方法については
+@ref{Debugging a customization file} を参照してください。
+
+パッケージを読み込む順序に意味があるかも知れませんし、
+式を直接評価せずに hook を使う必要があるかも知れません。
+一般的な場合については、
+@ref{Terminal setup code works after Emacs has begun} に解説があります。
+
+@node Emacs ignores X resources, Emacs ignores frame parameters, Errors with init files, Bugs and problems
+@section @file{.Xdefaults} に書いた X リソースが無視されてしまうのは何故ですか? @emph{(2004/07/28)}
+@cindex X resources being ignored
+@cindex Ignored X resources
+@cindex @file{.Xdefaults}
+
+Emacs 19 では次の環境変数に指定される X リソースのファイルを検索します。
+
+@itemize @bullet
+
+@item @code{XFILESEARCHPATH}
+@item @code{XUSERFILESEARCHPATH}
+@item @code{XAPPLRESDIR}
+
+@end itemize
+
+これは Xt ツールキットで書かれたプログラムによって提供される機能を
+エミュレートします。
+
+@env{XFILESEARCHPATH} と @env{XUSERFILESEARCHPATH} には
+コロンで区切られたファイル名のリストを指定します。
+@env{XAPPLRESDIR} はコロンで区切られたディレクトリ名のリストです。
+
+Emacs は X リソースを次の順に検索します。
+
+@enumerate
+
+@item
+@samp{-xrm RESOURCESTRING} で指定されるコマンドラインオプション
+
+@item
+環境変数 @env{XENVIRONMENT} の値
+
+@itemize @minus
+
+@item
+@env{XENVIRONMENT} が設定されていないが、
+@file{~/.Xdefaults-@var{hostname}} が存在すれば
+@file{~/.Xdefaults-@var{hostname}} の値
+(@var{hostname} は Emacs が走っているマシンのホスト名です)
+
+@end itemize
+
+@item
+サーバが提供するスクリーンのリソース
+
+@itemize @minus
+
+@item
+リソースが設定されていなくて @file{~/.Xdefaults} が存在すれば
+@file{~/.Xdefaults} に指定される値
+
+@end itemize
+
+@item
+@env{XUSERFILESEARCHPATH} に指定されるファイルの値
+
+@itemize @minus
+
+@item
+環境変数 @env{LANG} が設定してあれば
+@env{XAPPLRESDIR} のディレクトリの
+@file{@var{LANG}/Emacs} というファイルの値
+(@var{lang} は環境変数 @env{LANG} の値です)
+@item
+@env{XAPPLRESDIR} のディレクトリの
+@file{Emacs} というファイルの値
+@item
+環境変数 @env{LANG} が設定してあれば
+@file{~/@var{lang}/Emacs} ファイルの値
+@item 
+@file{~/Emacs} のファイルの値
+
+@end itemize
+
+@item 
+@env{XFILESEARCHPATH} に指定されるファイルの値
+
+@end enumerate
+
+@node Emacs ignores frame parameters, Emacs takes a long time to visit files, Emacs ignores X resources, Bugs and problems
+@section frame のパラメタ指定が無視されるのはなぜですか?
+@cindex Frame parameters
+
+変数 @code{initial-frame-alist} の設定は Emacs 起動時に最初に作られる
+frame に対してのみ適用されます。
+すべての frame に適用されるパラメタを指定する時は
+変数 @code{default-frame-alist} を設定してください。
+
+この様に二つの変数が存在する理由は最初に作られる frame だけ特別な
+設定をしたいユーザが多いためです。
+たとえば frame の大きさや位置は最初の frame だけは指定したいかもしれませんが、
+それ以外は毎回作られるたびにマウスで選びたい場合があります。
+
+@node Emacs takes a long time to visit files, Editing files with $ in the name, Emacs ignores frame parameters, Bugs and problems
+@section ファイルを開くのに 20 秒もかかるのはなぜですか?
+@cindex Visiting files takes a long time
+@cindex Delay when visiting files
+@cindex Files, take a long time to visit
+
+古いバージョン(バージョン 20 以前)の Emacs で良くあるのは
+マスターのロックファイル @file{!!!SuperLock!!!} が
+ロックディレクトリに残ってしまっているということです。
+消してください。
+
+@email{meuer@@geom.umn.edu, Mark Meuer} は NeXT の NFS には
+排他的なファイルの作成が成功してもエラーを返すバグがあると言っています。
+この場合も同じ現象が起こります。
+とにかく NSF では Emacs のロック機構は働かないので、
+@samp{CLASH_DETECTION} を未定義にしてコンパイルしてください。
+
+@node Editing files with $ in the name, Shell mode loses the current directory, Emacs takes a long time to visit files, Bugs and problems
+@section @samp{$} をファイル名に持つファイルを編集する方法は?
+@cindex Editing files with @samp{$} in the name
+@cindex @samp{$} in file names
+@cindex File names containing @samp{$}, editing
+
+ファイル名をミニバッファに入力するとき、
+Emacs は @samp{$} 以降の単語を環境変数として展開しようとします。
+この働きを抑制するには、 @samp{$$} を代わりに使ってください。
+
+@node Shell mode loses the current directory, Security risks with Emacs, Editing files with $ in the name, Bugs and problems
+@section シェルモードでシェルのカレントディレクトリの追跡に失敗するのはなぜ? @emph{(2004/07/28)}
+@cindex Current directory and @code{shell-mode}
+@cindex @code{shell-mode} and current directory
+@cindex Directory, current in @code{shell-mode}
+
+Emacs にはシェルがディレクトリを変更したことを知る手段がありません。
+これは Unix の根本的な制限に起因するものです。
+Emacs は @command{cd} コマンドからディレクトリを推測しています。
+@command{cd} コマンドでディレクトリを指定するときに、
+変数を使ったり(@samp{cd $HOME/bin})
+シェルのメタキャラクタを使ったり(@samp{cd ../lib*})
+すると、Emacs はシェルのカレントディレクトリの推測に失敗します。
+@code{shell-mode} に対する非常に多くの修正や拡張がなされています
+(@ref{Finding a package with particular functionality} 参照)．
+
+@code{shell-mode} バッファで @kbd{M-x dirs} と入力することで Emacs に
+シェルのカレントディレクトリを知らせることができます。
+
+@node Security risks with Emacs, Dired claims that no file is on this line, Shell mode loses the current directory, Bugs and problems
+@section Emacs にセキュリティホールはありますか?
+@cindex Security with Emacs
+@cindex @samp{movemail} and security
+@cindex @code{file-local-variable} and security
+@cindex Synthetic X events and security
+@cindex X events and security
+
+@itemize @bullet
+
+@item
+@command{movemail} 事件(既に危険ではありません)
+
+Cliff Stoll は著書 @cite{かっこうの卵} の第四章でこの事件に触れています。
+LBL のとあるサイトで @command{etc/movemail} プログラム
+が root の setuid ビットを有効にしてインストールされていたそうです。
+(Emacs 19 では @command{movemail} はアーキテクチャ依存ディレクトリにあります。
+@kbd{C-h v exec-directory @key{RET}} で調べてみてください)
+@command{movemail} はこのように使われることを想定していなかったので、
+セキュリティホールとなりどのユーザでも root 権限を
+取得できるようになっていました。
+
+この事件以来 @command{movemail} は setuid root でインストールされても
+セキュリティホールにならないように変更されています。
+しかし、現在では @command{movemail} を setuid root で
+インストールする必要はないので、より安全と言えます。
+
+1988 年にあった、かの Internet worm もこの設定の問題点をつくように
+なっていたという報告もあります。
+
+@item
+@code{file-local-variable} 機能(危険ですが、容易に対処できます)
+
+Emacs にはファイルの終わりに特別な形式の文章を追加しておくことで
+そのファイルを開いたときに局所変数の値を設定できる機能があります。
+この機能を使えばファイルが開かれたときに
+任意の Emacs Lisp のコードを評価するようにできます。
+明らかにこの機能を悪用すればトロイの木馬を仕掛けることができます。
+
+Emacs 18 ではこの機能を標準で許可していました。
+変数 @code{inhibit-local-variables} に non-@code{nil} 値を設定しておけば、
+この機能を無効にできます。
+
+Emacs 19 ではセキュリティホールになるような変数のリストを Emacs が
+持っていて、それらの変数に値を設定しようとするとユーザに値を設定して
+良いか尋ねます。
+変数 @code{enable-local-variable} の値を設定することで
+ファイルの最後にある Emacs Lisp コードを評価しても良いか決められます。
+
+詳細は @inforef{File Variables, , emacs} 参照。
+
+@item
+synthetic X イベント
+(危険です。@samp{MIT-MAGIC-COOKIE-1} か何かを使ってください)
+
+Emacs は @samp{SendEvent} 要求によって通常のイベントとして送られた
+synthetic X イベントを受理します。結果として、もし普通のホストベースの
+認証を使っていればあなたが X を使っているワークステーションに
+X connection を持てるユーザーはあなたの Emacs プロセスに何でもさせる
+ことができます。例えば他のプロセスをあなたの権限で走らせることができます。
+
+これを回避する唯一の方法は他のユーザーが X connection を持てないように
+することです。このための標準的な方法は @samp{MIT-MAGIC-COOKIE-1} の様な正しい
+認証方法を使うことです。もし @command{xauth} プログラムで効力を得られるなら、
+あなたは @samp{MIT-MAGIC-COOKIE-1} を使っているはずです。あなたのサイトは
+より高度な認証方法を取っているかも知れません。システム管理者に尋ねてください。
+
+正しい認証が無理なら、 X のプログラムを起動する短い時間だけホストに
+アクセス可能にし、すぐアクセス不可能にしてください。これで悪意を持った
+ユーザーのアクセスできる時間を減らすことができ、リスクを軽減できます。
+しかし@emph{リスクを完全に排除できるわけではありません}。
+
+Unix 上の X が動いているほとんどのマシンでは @command{xhost} プログラムで
+アクセス制御が可能です。あらゆるホストからアクセスできるようにする
+にはシェルから次のように入力します。
+
+@example
+xhost +
+@end example
+
+@noindent
+このとき、出力は次のようになります(少なくとも HP のマシンでは)。
+
+@example
+access control disabled, clients can connect from any host
+@end example
+
+どのホストからも(特別に許可されたホストを除き) X サーバにアクセス
+できない様にするには次のようにします。
+
+@example
+xhost -
+@end example
+
+このとき、HP のマシンでは出力は次のようになります。
+
+@example
+access control enabled, only authorized clients can connect
+@end example
+
+@end itemize
+
+@node Dired claims that no file is on this line,  , Security risks with Emacs, Bugs and problems
+@section Dired で "no file on this line" と言われてしまいます。
+@cindex Dired does not see a file
+
+@c FIXME: I think this is fixed in Emacs 21, but I didn't have time to
+@c check.
+Unix がローカライズされていて、Dired で表示される日付の形式が
+アメリカのものと違うのでしょう。Dired のバッファを直接見るか、
+シェルから @samp{ls -l} を実行することで確認できます。
+
+Dired はファイル名を正規表現を使って見つけ出します。それは Unix の
+@samp{ls -l} の出力の形式をもとに日付に続いてファイル名があることを仮定
+しています。しかしアメリカ以外のシステムでは日付の形式が違うことがあります。
+
+解決方法は二つ有って、一つは @samp{ls -l} の出力をアメリカに合わせることです。
+これは locale を設定すればできます。詳しくは OS のマニュアルを読んで
+ください。
+
+もう一つの方法は @code{dired-move-to-filename-regexp} を変更する方法です。
+
+@c ------------------------------------------------------------
+@node Compiling and installing Emacs, Finding Emacs and related packages, Bugs and problems, Top
+@chapter    Compiling and installing Emacs
+@cindex    Compiling and installing Emacs
+
+@menu
+* Installing Emacs::            Emacs のインストール
+* Updating Emacs::              最新版 Emacs への更新
+* Problems building Emacs::     コンパイル時の問題点
+* Linking with -lX11 fails::    -lX11 でリンクに失敗する
+@end menu
+
+@node Installing Emacs, Updating Emacs, Compiling and installing Emacs, Compiling and installing Emacs
+@section Emacs をインストールする方法は?
+@cindex Installing Emacs
+@cindex Unix systems, installing Emacs on
+@cindex Downloading and installing Emacs
+@cindex Retrieving and installing Emacs
+@cindex Building Emacs from source
+@cindex Source code, building Emacs from
+@cindex Unpacking and installing Emacs
+
+この解答は Unix で Emacs をインストールする場合に限っています。
+他の OS を使っている場合は
+@ref{Emacs for MS-DOS} 以降の質問を参照してください。
+Unix 以外のシステムでのソース・バイナリの入手方法や
+インストール方法が書かれています。
+
+Unix では一からコンパイルするのが簡単でしょう。
+それには以下のものが必要です。
+
+@itemize @bullet
+
+@item
+Emacs のソースファイル
+ftp サイトについては  @ref{Current GNU distributions} 参照。
+GNU の配布サイトである @uref{ftp://ftp.gnu.org} ではソースファイルは
+次のところにあります。
+
+@example
+@uref{ftp://ftp.gnu.org/pub/gnu/emacs/emacs-@value{VER}.tar.gz}
+@end example
+
+新しいバージョンが出ればバージョン番号の変わったファイルになります。
+たとえば Emacs 21.42 がリリースされたらファイルは次の様になるでしょう。
+
+@c yagi: @uref{...} -> @url{...}
+@url{ftp://ftp.gnu.org/pub/gnu/emacs/emacs-21.42.tar.gz}
+
+@uref{ftp://ftp.gnu.org} の負荷を上げない様になるべくミラーサイト
+(@ref{Current GNU distributions} 参照。URL は適宜変更してください。)
+を利用してください。
+
+@item
+@command{gzip} -- GNU の圧縮ユーティリティ
+@command{gzip} は @uref{ftp://ftp.gnu.org} のミラーサイトから入手できます。
+ほとんどのシステムで問題なくコンパイル・インストールできるでしょう。
+次のようにしてソースの圧縮を解除できます。
+
+@example
+gunzip --verbose emacs-@value{VER}.tar.gz
+@end example
+
+@noindent
+Emacs のバージョン番号の部分(@value{VER})は適当に変えてください。
+@command{gunzip} が終わると @file{emacs-@value{VER}.tar} という
+ファイルができます。
+
+@item 
+@command{tar} -- テープアーカイバ
+アーカイバとは複数のファイルを一つにまとめたり、その逆を行うプログラムです。
+Emacs のソースファイルはすべて一つの @command{tar} ファイルに
+まとめられているので、@command{tar} で展開します。
+次のようにしてファイルを展開できます。
+
+@example
+tar -xvvf emacs-@value{VER}.tar
+@end example
+
+@noindent
+@option{x} でファイルを展開(extract)することを意味します。
+二つの @option{v} は長い出力を出させます。
+@option{f} でどの @command{tar} ファイルを展開するか指定します。
+
+GNU の @command{tar} (@uref{ftp://ftp.gnu.org} のミラーサイトから入手可能)
+を使っているのならこの @command{gzip} と @command{tar} の二つの段階を
+一つにまとめることができます。次のようにします。
+
+@example
+tar -zxvvf emacs-@value{VER}.tar.gz
+@end example
+
+@noindent
+@option{z} で @command{tar} ファイルが @command{gzip} で
+圧縮されていることを指示し、展開の前に圧縮を解除させます。
+
+@end itemize
+
+この時点で Emacs のソース(70 メガバイト強)は @file{emacs-@value{VER}} と言う
+ディレクトリの下に展開されます。ほとんどの Unix システムでは次のように
+して Emacs を(X サポート付きで)コンパイルできます。
+
+@example
+cd emacs-@value{VER}       # カレントディレクトリを emacs-@value{VER} にする
+./configure         # Emacs のコンパイルオプションを設定する
+make                # Emacs をコンパイルする
+@end example
+
+@command{make} が正常に終了したらコンパイルはうまくいったと考えて良いでしょう。
+(うまくいかないときについては
+@ref{Problems building Emacs} 参照)
+
+標準では Emacs は次のディレクトリにファイルをインストールします。
+
+@table @file
+@item /usr/local/bin
+実行ファイル
+
+@item /usr/local/share/emacs/@value{VER}
+Lisp コードなどのデータファイル
+
+@item /usr/local/info
+Info 文書ファイル
+@end table
+
+これらのディレクトリにファイルをインストールできるのは
+適切な権限を持ったユーザだけです。
+権限を持っているなら次の様にしてください。
+
+@example
+make install
+@end example
+
+この時、すでにあった @file{/usr/local/bin/emacs} と @file{/usr/local/info} の
+Info ファイルを上書きしてしまうので注意してください。
+
+@file{INSTALL} ファイル(Emacs の配布ディレクトリのトップにあります)
+により詳しい情報が有ります。
+
+@node Updating Emacs, Problems building Emacs, Installing Emacs, Compiling and installing Emacs
+@section Emacs を最新版に更新する方法は?
+@cindex Updating Emacs
+
+@ref{Installing Emacs} の手順を実行してください。
+
+Emacs はほとんどのファイルをバージョンに依存したディレクトリ
+(たとえば @file{/usr/local/share/emacs/@value{VER}})にインストールします。
+
+Emacs のインストールでバージョンによらずに上書きするファイルは
+@file{/usr/local/bin/emacs} と @file{/usr/local/info} の Info ファイル
+だけです。
+これらのファイルのバックアップを取ってからインストールしてください。
+そうすればトラブルはほとんどないでしょう。
+
+@node Problems building Emacs, Linking with -lX11 fails, Updating Emacs, Compiling and installing Emacs
+@section Emacs のコンパイル中にトラブルに突き当たったらどうしたらよいのですか?
+@cindex Problems building Emacs
+@cindex Errors when building Emacs
+
+@c yagi: @file{PROBLEMS} -> @file{etc/PROBLEMS}
+まず第一に @file{etc/PROBLEMS} を読んでください。
+解決法が書かれているかもしれません。
+次にこの FAQ のインストール・コンパイルに関する部分を読んでください。
+
+誰かに手助けをして欲しいときは @ref{Help installing Emacs} 参照。
+
+それでも解決できなかったら、問題を電子メールで
+@email{bug-gnu-emacs@@gnu.org} へ送ってください。
+
+@uref{news:gnu.emacs.help} には投稿しないでください。
+また @email{help-gnu-emacs@@gnu.org} にはメールを送らないで下さい。
+詳しくは @ref{Guidelines for newsgroup postings} と
+@ref{Reporting bugs} 参照。
+
+@node Linking with -lX11 fails,  , Problems building Emacs, Compiling and installing Emacs
+@section @option{-lX11} 付きで Emacs をリンクできないのはなぜですか?
+@cindex Linking with -lX11 fails
+@cindex lX11, linking fails with
+
+Emacs は X11 のスタティックライブラリ @file{libX11.a} をリンクする
+必要が有ります。このファイルがないのでしょう。
+
+OpenWindows では @command{add_services} を使って CD-ROM から
+``OpenWindows Programmers'' のソフトウェアを追加する必要があります。
+
+HP-UX 8.2 では @command{update} を実行して X11-PRG ``ファイルセット'' を
+ロードする必要があります。これは最初に ``all filesets'' を指定しても
+ロードされません。@file{libcurses.a} がない場合は
+``Berkeley Development Option'' をロードしてください。
+
+@email{zoo@@armadillo.com, David Zuhn} は MIT の X がシェアードライブラリを
+サポートするシステムではデフォルトでシェアードライブラリのみを作ると
+言っています。これらのライブラリは @file{temacs} (Emacs を作成する最後の段階
+でコンパイルしたファイル)を undump することができません。
+スタティックライブラリも作るには @file{site.cf} に次のように書き加えてください。
+
+@example
+#define ForceNormalLib YES
+@end example
+
+その他のシステムでも同じような問題が有ります。
+@samp{CANNOT_DUMP} を定義してシェアードライブラリを
+リンクする様にすることも可能です。
+
+@cindex X Menus don't work
+Xmenu が動くようにするには MIT の @file{liboldX.a} を入手してください。
+
+@c ------------------------------------------------------------
+@node Finding Emacs and related packages, Major packages and programs, Compiling and installing Emacs, Top
+@chapter Finding Emacs and related packages @emph{(2004/07/29)}
+@cindex Finding Emacs and related packages
+
+@menu
+* Finding Emacs on the Internet::  インターネットから入手
+* Finding a package with particular functionality::  パッケージの検索
+* Packages that do not come with Emacs::  非標準パッケージ
+* Current GNU distributions::   GNU ソフトウェア
+* Difference between Emacs and XEmacs::  Emacs と XEmacs の違い
+* Emacs for MS-DOS::            MS-DOS 版 Emacs
+* Emacs for Windows::           Windows 版 Emacs
+* Emacs for OS/2::              OS/2 版 Emacs
+* Emacs for Atari ST::          Atari ST 版 Emacs
+* Emacs for the Amiga ::        Amiga 版 Emacs
+* Emacs for NeXTSTEP::          NeXTSTEP 版 Emacs
+* Emacs for Apple computers::   Macintosh 版 Emacs
+* Emacs for VMS and DECwindows::  VMS 版 Emacs
+* Modes for various languages::  プログラム言語編集用のモード
+* Translating names to IP addresses::  IP アドレス
+@end menu
+
+@node Finding Emacs on the Internet, Finding a package with particular functionality, Finding Emacs and related packages, Finding Emacs and related packages
+@section Emacs をインターネットから入手する方法は?
+@cindex Finding Emacs on the Internet
+@cindex Snail mail, ordering Emacs via
+@cindex Postal service, ordering Emacs via
+@cindex Distribution, retrieving Emacs
+@cindex Internet, retrieving from
+
+@file{etc/DISTRIB} と @file{etc/FTP} ファイルから
+近くのアーカイブサイトを捜してください。
+メールの場合は @file{etc/ORDERS} を見てください。
+まだ GNU Emacs を入手していないときは、
+@ref{Informational files for Emacs} を読んで、
+まずこの二つのファイルを入手してください。
+
+Emacs の最新版を入手・コンパイルする方法については
+@ref{Installing Emacs} 参照。
+GNU ソフトウェアの入手先については @ref{Current GNU distributions} 参照。
+
+@node Finding a package with particular functionality, Packages that do not come with Emacs, Finding Emacs on the Internet, Finding Emacs and related packages
+@section XXX なことをするための Emacs Lips パッケージを入手する方法は? @emph{(2004/07/29)}
+@cindex Package, finding
+@cindex Finding an Emacs Lisp package
+@cindex Functionality, finding a particular package
+
+パッケージが既に利用可能になっているかもしれないので、
+まず第一にそうでないかを調べてください。
+たとえば @kbd{M-x apropos @key{RET} wordstar @key{RET}} と入力することで
+@samp{wordstar} という文字列を名前に含む変数や関数の一覧を見ることができます。
+
+パッケージはインストールされているが、ロードされていないのかもしれません。
+どんなパッケージがロードできるかについては lisp ファイルのある
+ディレクトリ(@ref{File-name conventions} 参照)の中を見てください。
+lisp のソースファイルにはパッケージのロード方法や起動方法、設定方法などが
+書かれているかもしれません。
+
+@kbd{C-h p} (@code{finder-by-keyword}) で Emacs の標準パッケージを検索できます．
+
+Emacs に標準でない外部パッケージを探すには，@ref{Packages that do not come with
+Emacs} を参照ください．
+
+@node Packages that do not come with Emacs, Current GNU distributions, Finding a package with particular functionality, Finding Emacs and related packages
+@section Emacs の配布パッケージに含まれない Emacs Lisp パッケージの入手方法は? @emph{(2004/07/29)}
+@cindex Unbundled packages
+@cindex Finding other packages
+@cindex Lisp packages that do not come with Emacs
+@cindex Packages, those that do not come with Emacs
+@cindex Emacs Lisp List
+@cindex Emacs Lisp Archive
+
+@email{stephen@@anc.ed.ac.uk, Stephen Eglen} による @uref{http://www.anc.ed.ac.uk/~stephen/emacs/ell.html, The Emacs Lisp
+List (ELL)} インターネット上で入手できるEmacs Lisp ファイルへのリンクがまとめら
+れています．ELL は Web ブラウザだけでなく，@uref{http://www.anc.ed.ac.uk/~stephen/emacs/ell.el, 
+the @file{ell} package} により Emacs からでも見ることができます．
+
+多くの作者は @uref{news:gnu.emacs.sources,
+Emacs sources newsgroup} にEmacs Lisp を投稿しています．このアーカイブは例えば
+@uref{http://groups.google.com, Google} で検索できます．
+
+@uref{http://emacswiki.org/elisp/, the Lisp area of the Emacs Wiki} にも多くのパッ
+ケージが保存されています．
+
+For a long time, the Emacs Lisp Archive provided a central repository
+for Emacs packages.  Sadly, it has not been active for some time,
+although you can still access the old files at
+長い間，Emacs Lisp Archive は Emacs のパッケージを精力的に提供してきました．残念
+ながら現在は更新されていませんが，下記のサイトで古いファイルを見ることはできます．
+
+@uref{ftp://ftp.cis.ohio-state.edu/pub/emacs-lisp/WWW/index.html}
+
+@node Current GNU distributions, Difference between Emacs and XEmacs, Packages that do not come with Emacs, Finding Emacs and related packages
+@section 最新の GNU のソフトウェアを入手する方法は?
+@cindex Current GNU distributions
+@cindex Sources for current GNU distributions
+@cindex Stuff, current GNU
+@cindex Up-to-date GNU stuff
+@cindex Finding current GNU software
+@cindex Official GNU software sites
+
+GNU ソフトウェアの公式な最新版は次のところから入手できます。
+
+@uref{ftp://ftp.gnu.org/pub/gnu}
+
+詳しくは @file{etc/DISTRIB} と @file{etc/FTP} を読んでください。
+
+@url{ftp://ftp.gnu.org} のミラーサイトの一覧は次のところで見られます。
+
+@uref{http://www.gnu.org/order/ftp.html}
+
+@node Difference between Emacs and XEmacs, Emacs for MS-DOS, Current GNU distributions, Finding Emacs and related packages
+@section Emacs と XEmacs (元 "Lucid Emacs")の違いは? @emph{(2004/07/29)}
+@cindex XEmacs
+@cindex Difference Emacs and XEmacs
+@cindex Lucid Emacs
+@cindex Epoch
+
+まず第一に、どちらも GNU Emacs であることには変わりありません。
+XEmacs は FSF の配布する Emacs と同程度に最新のバージョンです。
+この FAQ では FSF の配布しているものだけを ``Emacs'' と呼びます。
+その理由は一つには XEmacs の保守をしている人たちは
+彼らのプログラムを ``XEmacs'' と呼んで区別しているからで、
+一つには Emacs と XEmacs の違いを難解な用語や歴史に惑わされることなく
+うまく正確に説明することはできないからです。
+
+XEmacs は Lucid Emacs として開発が始まりました。
+それは Emacs 19 の古いバージョンと Epoch をベースにしていました。
+Epoch は Emacs 18 に X に対応した機能を組み込んだものです。
+
+Emacs (つまり FSF の配布するバージョン)は様々なシステムにインストール
+できるようになっていて、現在では MULE (多言語対応)を含んでいます。
+一方 XEmacs は X と MS-Windows に対応する特別なコードを含んでいて
+バッファに画像を表示したりできます。
+類似のコードは Emacs 21 以降にも導入されています。
+Emacs と XEmacs の Lisp パッケージにはそれぞれに独自のものがあります。
+RMS は FSF Emacs に XEmacs のすべてのパッケージを含めるようにしたい言って
+いますが、XEmacs のパッケージは誰が書いたものなのか良くわからなくなって
+しまっているものもあるので、FSF で法的な手続きをできずにいるものも有ります。
+(このような手続きがなければ FSF はパッケージを Emacs に付属して配布すること
+はしません)
+この二つのバージョンの Emacs は Lisp プログラミングレベルでも
+重要な違いが幾つかあります。
+
+XEmacs で実装された機能の多くは最新の Emacs に取り込まれ、
+あるいはこれから取り込まれるでしょうが、
+それでも Emacs と XEmacs の間には大きな違いがあります。
+
+この FAQ の執筆時点での XEmacs の最新版は XEmacs 21.4 です。
+これは次のところから入手できます。
+
+@uref{ftp://ftp.xemacs.org/pub/xemacs/xemacs-21.4/xemacs-21.4.12.tar.gz}
+
+XEmacs についての詳しい情報は FAQ も含めて次のところから入手できます。
+
+@uref{http://www.xemacs.org/}
+
+@node Emacs for MS-DOS, Emacs for Windows, Difference between Emacs and XEmacs, Finding Emacs and related packages
+@section MS-DOS で動く Emacs は有りますか? @emph{(2004/07/29)}
+@cindex MS-DOS, Emacs for
+@cindex DOS, Emacs for
+@cindex Compiling Emacs for DOS
+@cindex Emacs for MS-DOS
+@cindex Tools needed to compile Emacs under DOS
+
+MS-DOS と Windows(3.X, 9X, ME, NT, 2000) で動く Emacs のバイナリ
+が Simtel アーカイブにあります。
+Windows 9X, ME, 2000 ではロングファイル名にも対応しています。
+詳しくは次のところを参照してください。
+
+@uref{http://www.simtel.net/pub/djgpp/v2gnu/emacs.README}
+
+バイナリは次のディレクトリにある @file{em*.zip} です。
+
+@uref{http://www.simtel.net/pub/djgpp/v2gnu/}
+
+自分でコンパイルするには 386 系のプロセッサと MS-DOS 3.0 以上が必要です。
+@email{eliz@@is.elta.co.il, Eli Zaretskii} と
+@email{hankedr@@dms.auburn.edu, Darrel Hankerson} は
+次のものが必要であると言っています。
+
+@table @emph
+
+@item コンパイラ
+DJGPP version 1.12 maint 1 以降。
+Djgpp 2.0 以降推奨。
+djgpp 1.x は廃れつつあります。
+djgpp 2 は Windows9X/ME/2K のロングファイル名に対応しています。
+
+djgpp の最新版は次のところから入手できます。
+
+@uref{http://www.simtel.net/pub/gnu/djgpp/v2*}
+
+@item 展開プログラム
+DJGPP v2.x 付属の @command{djtar} を使うと良いでしょう。
+@command{gzip} で圧縮された @command{tar} ファイル
+(ファイル名が @file{.tar.gz} で終わるファイル)
+の展開にも対応しています。
+@command{djtar} は上の URL のディレクトリの @file{djdev@var{nnn}.zip}
+(@var{nnn} は DJGPP のバージョン番号)に含まれています。
+
+@strong{警告}
+WinZip を展開には使用@strong{しない}で下さい。
+WinZip はファイル中の LF を DOS の改行コード CR-LF に変換してしまい、
+正しく展開できません。
+また、Emacs の配布ファイルのディレクトリ構造を保って展開しないかもしれません。
+他にも問題はあるようです。
+このために Emacs のコンパイルに失敗することがあります。
+
+@item その他のユーティリティ: make, mv, sed, rm
+これらのプログラムは次のところから入手できます。
+
+@uref{http://www.simtel.net/pub/gnu/djgpp/v2gnu}
+
+16 ビット版は GNUish にあります。
+
+@uref{http://www.simtel.net/pub/gnuish/}
+
+@noindent
+(@command{mv} と @command{rm} は Fileutils パッケージに含まれています。
+@command{sed} と @command{make} はそれぞれ単独のパッケージになっています。)
+
+@end table
+
+@c yagi: PROBLEMS -> etc/PROBLEMS
+@file{INSTALL} (の終わりの方) と @file{etc/PROBLEMS} に
+MS-DOS で動く Emacs に関する情報が書かれています。
+
+他にも MS-DOS に移植された Emacs があり、
+その一覧 ``Emacs implementations and literature'' が
+次のところから入手できます。
+
+@uref{ftp://rtfm.mit.edu/pub/usenet/comp.emacs/}
+
+ここに書かれているプログラムは一見 Emacs と同じように見えますが、
+一部の機能を持たないことがあります。
+たとえば Emacs Lisp による設定ができなかったりします。
+
+@node Emacs for Windows, Emacs for OS/2, Emacs for MS-DOS, Finding Emacs and related packages
+@section MS-Windows で動く Emacs は有りますか?
+@cindex FAQ for NT Emacs
+@cindex Emacs for MS-Windows
+@cindex Microsoft Windows, Emacs for
+@cindex Windows 9X, ME, NT, 2K, and CE, Emacs for
+
+Windows 95/NT については
+@email{voelker@@cs.washington.edu, Geoff Voelker}
+の作った FAQ を参照してください。次のところから入手可能です。
+
+@uref{http://www.gnu.org/software/emacs/windows/ntemacs.html}
+
+Windows 3.1 については @ref{Emacs for MS-DOS} 参照。
+
+NTEmacs をベースにした Emacs 20.7 の Windows CE への移植がなされていて
+次のところから入手できます。
+
+@uref{http://www.rainer-keuchel.de/software.html}
+
+@noindent
+この移植は @email{coyxc@@rainer-keuchel.de, Rainer Keuchel} が行いました。
+非同期プロセスとメニューを除くすべての機能が利用できます。
+コンパイルするには MSVC 6.0 と Windows CE SDK が必要です。
+
+@node Emacs for OS/2, Emacs for Atari ST, Emacs for Windows, Finding Emacs and related packages
+@section OS/2 で動く Emacs は有りますか?
+@cindex OS/2, Emacs for
+
+Emacs 20.6 が OS/2 2.0 か 2.1 の emx に移植されています。
+次のところにあります。
+
+@uref{ftp://hobbes.nmsu.edu/pub/os2/apps/editors/emacs/e206*.zip}
+
+@uref{http://archiv.leo.org/pub/comp/os/os2/leo/gnu/emacs%2d20/}
+
+OS/2 上でのインストール方法や基本的な設定方法などに関する説明が
+次のところにあります。
+
+@uref{http://userpage.fu-berlin.de/~oheiabbd/emacs/emacs206-os2.html}
+
+@node Emacs for Atari ST, Emacs for the Amiga , Emacs for OS/2, Finding Emacs and related packages
+@section Atari ST で動く Emacs は有りますか?
+@cindex Atari ST, Emacs for
+@cindex TOS, Emacs for
+
+@c yagi: [a"] -> @"a
+Roland Sch@"auble は plain TOS と MiNT で動く Emacs 18.59 が
+次のところから入手できると言っています。
+
+@uref{ftp://atari.archive.umich.edu/Editors/Emacs-18-58/1858b-d3.zoo}.
+
+@node Emacs for the Amiga , Emacs for NeXTSTEP, Emacs for Atari ST, Finding Emacs and related packages
+@section Amiga で動く Emacs は有りますか?
+@cindex Amiga, Emacs for
+
+次のところから必要なファイルを入手してください。
+
+@uref{ftp://ftp.wustl.edu/pub/aminet/util/gnu/}
+
+@email{dgilbert@@gamiga.guelphnet.dweomer.org, David Gilbert} は Amiga 版
+Emacs 19.25 のβ版を公開しています。
+バイナリは次のところから入手できます。
+
+@uref{ftp://ftp.wustl.edu/pub/aminet/util/gnu/a2.0bEmacs-bin.lha}
+
+@node Emacs for NeXTSTEP, Emacs for Apple computers, Emacs for the Amiga , Finding Emacs and related packages
+@section NeXTSTEP で動く Emacs は有りますか?
+@cindex NeXTSTEP, Emacs for
+
+色、メニュー、frame をサポートした Emacs 19.34 の NeXTSTEP 版である
+Emacs.app が次のところから入手できます。
+
+@uref{ftp://next-ftp.peak.org/pub/next/apps/emacs/Emacs_for_NeXTstep.4.20a1.NIHS.b.tar.gz}
+
+@node Emacs for Apple computers, Emacs for VMS and DECwindows, Emacs for NeXTSTEP, Finding Emacs and related packages
+@section Apple コンピュータで動く Emacs は有りますか?
+@cindex Apple computers, Emacs for
+@cindex Macintosh, Emacs for
+
+Emacs 18.59 の非公式な Macintosh 版が幾つかの ftp サイトから
+入手できます。オリジナルは次のところです。
+
+@uref{ftp://ftp.cs.cornell.edu/pub/parmet/Emacs-1.17.sit.bin}.
+
+Emacs 20.4 の Macintosh 版は次のところにあります。
+
+@uref{http://www.cs.hku.hk/~choi/emacs/index.html}.
+
+Emacs 21.1 以降では Macintosh は公式にサポートされています。
+@file{mac/README} と @file{mac/INSTALL} を読んでください。
+
+Apple の次期 OS ``OS X'' は NeXTSTEP と OpenStep をベースにしています。
+@ref{Emacs for NeXTSTEP} を参照してください。
+
+@node Emacs for VMS and DECwindows, Modes for various languages, Emacs for Apple computers, Finding Emacs and related packages
+@section VMS と DECwindows で動く Emacs は有りますか?
+@cindex DECwindows, Emacs for
+@cindex VMS, Emacs for
+
+Emacs を含めて VMS 版の GNU のソフトウェアの最新版に関する情報は
+次のところから入手できます。
+
+@uref{http://vms.gnu.org/}.
+
+@node Modes for various languages, Translating names to IP addresses, Emacs for VMS and DECwindows, Finding Emacs and related packages
+@section 色々なメジャーモードはどこで入手できますか? @emph{(2004/07/29)}
+@cindex Awk, mode for
+@cindex @code{awk-mode}
+@cindex Bison, mode for
+@cindex Bourne Shell, mode for
+@cindex C@t{++}, mode for
+@cindex Java, mode for
+@cindex Lex mode
+@cindex Objective-C, mode for
+@cindex @code{pascal-mode}
+@cindex Shell mode
+@cindex Yacc mode
+@cindex @file{csh} mode
+@cindex @code{sh-mode}
+@cindex @code{cc-mode}
+
+Lex, Yacc/Bison, Bourne shell, csh, C@t{++}, Objective-C, Pascal, Java, Awk
+これらのモードのほとんどは Emacs の配布パッケージに含まれます。
+他にもメジャーモードが欲しかったら@ref{Finding a package with particular
+functionality}を参照してください．
+
+Barry Warsaw の @code{cc-mode} は
+C, C@t{++}, Objective-C, Java で使えます。
+Emacs に付属していますが，@uref{http://cc-mode.sourceforge.net/, ホームページ}で
+も入手できます．
+
+@node Translating names to IP addresses,  , Modes for various languages, Finding Emacs and related packages
+@section XXX.YYY.ZZZ とか言う IP アドレスって何ですか?
+@cindex Translating names to IP addresses
+@cindex IP addresses from names
+@cindex Using BIND to translate addresses
+@cindex DNS and IP addresses
+
+Unix を使っているなら @command{nslookup} プログラムを試してください。
+@command{nslookup} は Berkeley の BIND パッケージに含まれています。
+たとえば @samp{ftp.gnu.org} の IP アドレスを調べるには次のようにします。
+
+@example
+nslookup ftp.gnu.org
+@end example
+
+IP アドレスが表示されるでしょう。
+
+もし不完全なネームサーバしかないサイトなら
+ファイルを ftp するときに IP アドレスを知っておく必要があります。
+この情報は電子メールで次のようにして得られます。
+
+@example
+To: dns@@[134.214.84.25]    (to grasp.insa-lyon.fr)
+Body: ip XXX.YYY.ZZZ        (使い方を知りたい時は help と書く) 
+@end example
+
+@noindent
+または
+
+@example
+To: resolve@@[147.31.254.130]         (to laverne.cs.widener.edu)
+Body: site XXX.YYY.ZZZ
+@end example
+
+@c ------------------------------------------------------------
+@node Major packages and programs, Key bindings, Finding Emacs and related packages, Top
+@chapter Major packages and programs @emph{(2004/07/29)}
+@cindex Major packages and programs
+
+@menu
+* VM::                          VM
+* Supercite::                   Supercite
+* Calc::                        Calc
+* VIPER::                       VIPER
+* AUCTeX:::                     AUC-TeX
+* BBDB::                        BBDB
+* Ispell::                      Ispell
+* w3-mode::                     w3-mode
+* EDB::                         EDB
+* Mailcrypt::                   Mailcrypt
+* JDE::                         JDE
+* Patch::                       Patch
+@end menu
+
+@node VM, Supercite, Major packages and programs, Major packages and programs
+@section VM (View Mail) -- もう一つの Emacs のメーラ。 MIME サポート付き @emph{(2004/07/29)}
+@cindex VM
+@cindex Alternative mail software
+@cindex View Mail
+@cindex E-mail reader, VM
+
+@table @b
+
+@item 作者
+@email{kyle_jones@@wonderworks.com, Kyle Jones}
+
+@item 最新版
+7.15
+
+@item 配布場所
+@uref{ftp://ftp.wonderworks.com/pub/vm/vm.tar.gz}
+
+@item ニュースグループ
+@uref{news:gnu.emacs.vm.info}@*
+
+@item バグレポート先
+@uref{news:gnu.emacs.vm.bug}@*
+あるいは @email{bug-vm@@wonderworks.com} に送付ください．
+@end table
+
+Emacs 21 では VM 7 は動作します．古い Emacs で使うのに適した古い バージョンの VM
+は@uref{ftp://ftp.wonderworks.com/pub/vm/, FTP サイト} で入手できます．
+
+@node Supercite, Calc, VM, Major packages and programs
+@section Supercite -- メール・ニュースで記事を引用するためのパッケージ @emph{(2004/07/29)}
+@cindex Supercite
+@cindex Superyank
+@cindex Mail and news citations
+@cindex News and mail citations
+@cindex Citations in mail and news
+
+@table @b
+
+@item 作者
+@email{barry@@python.org, Barry Warsaw}
+
+@item 最新版
+3.54 (Emacs 20 以降に付属しています)
+
+@item 配布場所
+@uref{http://www.python.org/emacs/supercite.tar.gz}
+
+@item メーリングリスト
+メーリングリスト登録依頼の宛先 @email{supercite-request@@python.org}@*
+メーリングリスト @email{supercite@@python.org}
+
+@end table
+
+Superyank は Supercite の古いバージョンです。
+
+@node Calc, VIPER, Supercite, Major packages and programs
+@section Calc -- 簡単な Mathematica
+@cindex Programmable calculator
+@cindex Calc
+@cindex Mathematical package
+
+@table @b
+
+@item 作者
+@email{daveg@@csvax.cs.caltech.edu, Dave Gillespie}
+
+@item 最新版
+2.02f
+
+@item 配布場所
+@uref{ftp://ftp.gnu.org/pub/gnu/calc/calc-2.02f.tar.gz}
+
+@end table
+
+Calc 2.02f を Emacs 21 以降で動かすにはパッチを当てる必要があります。
+
+@cindex @code{calculator}, a package
+Emacs 21.1 以降には @file{calculator.el} というパッケージが付属しています。
+行列計算や統計処理ができないなど、Calc に比べれば機能が落ちますが、
+@code{xcalc} などの簡単な処理しかしないプログラムに対しては
+より良い代替品となります。
+
+@node VIPER, AUCTeX, Calc, Major packages and programs
+@section VIPER -- @code{vi} エミュレーション @emph{(2004/07/29)}
+@cindex @code{vi} emulation
+@cindex VIPER
+@cindex Emulation of @code{vi}
+
+Emacs 19.29 以降では @code{vi} エミュレーションパッケージとして VIPER
+(@kbd{M-x viper-mode @key{RET}})が付属しています。
+VIPER は VIP (VIP 4.3 を含む)を拡張して置き換えたものです。
+VIPER は色々なレベルで @code{vi} エミュレーションをすることができます。
+
+Emacs 19.28 以前では Emacs 付属の VIP よりも次のところから入手して
+使うほうが良いでしょう。
+
+@table @b
+@item 作者
+@email{sane@@cs.uiuc.edu, Aamod Sane}
+
+@item 最新版
+4.3
+
+@item 配布場所
+@uref{ftp://archive.cis.ohio-state.edu/pub/emacs-lisp/old-archive/modes/vip-mode.tar.Z}
+
+@end table
+
+@node AUCTeX, BBDB, VIPER, Major packages and programs
+@section AUC TeX -- デバッグもできる LaTeX モード拡張版 @emph{(2004/07/29)}
+@cindex Mode for @TeX{}
+@cindex @TeX{} mode
+@cindex AUCTeX mode for editing @TeX{}
+@cindex Writing and debugging @TeX{}
+
+@table @b
+
+@item 作者
+@email{krab@@iesd.auc.dk, Kresten Krab Thorup}@*
+@email{abraham@@dina.kvl.dk, Per Abrahamsen}
+
+@item Maintainer
+@email{dak@@gnu.org, David Kastrup}
+
+@item 最新版
+11.13
+
+@item 配布場所
+@uref{http://savannah.gnu.org/download/auctex/stable.pkg/11.13/auctex-11.13.tar.gz}
+
+@item WWW
+@uref{http://www.gnu.org/software/auctex/}
+
+@item メーリングリスト:
+メーリングリスト登録依頼の宛先 @email{auc-tex-subscribe@@sunsite.dk}@*
+ユーザ用メーリングリスト @email{auc-tex@@sunsite.dk}@*
+開発者用メーリングリスト @email{auc-tex_mgr@@sunsite.dk}
+
+@end table
+
+@node BBDB, Ispell, AUCTeX, Major packages and programs
+@section BBDB -- メール・ニュースを統合した個人情報ファイル @emph{(2004/07/29)}
+@cindex BBDB
+@cindex Rolodex-like functionality
+@cindex Integrated contact database
+@cindex Contact database
+@cindex Big Brother Database
+@cindex Address book
+
+@table @b
+
+@item 保守管理者
+@email{waider@@waider.ie, Ronan Waide}
+
+@item 最新版
+2.34
+
+@item 配布場所
+@uref{http://bbdb.sourceforge.net/}
+
+@item メーリングリスト
+メーリングリスト登録依頼の宛先 @email{bbdb-info-request@@lists.sourceforge.net}@*
+メーリングリスト @email{bbdb-info@@lists.sourceforge.net}@*
+リリース告知用メーリングリスト: @email{bbdb-announce-request@@lists.sourceforge.net}
+
+@end table
+
+@node Ispell, w3-mode, BBDB, Major packages and programs
+@section Ispell -- Emacs インターフェース付きの C プログラム
+@cindex Spell-checker
+@cindex Checking spelling
+@cindex Ispell
+
+@table @b
+
+@item 作者
+@email{geoff@@itcorp.com, Geoff Kuenning}
+
+@item 最新版
+3.1.20
+
+@item 配布場所
+@uref{ftp://ftp.cs.ucla.edu/pub/ispell/ispell-3.1.20.tar.gz}@*
+
+@item WWW
+@uref{http://fmg-www.cs.ucla.edu/geoff/ispell.html}
+
+@end table
+
+@itemize @bullet
+
+@item
+Geoff Kuenning に Ispell の最新版を送れなどとメールを出さないように。
+彼は無料で電子メールを読むことができません。
+
+@item
+この Ispell は GNU Ispell 4.0 とは別のものです。
+GNU Ispell 4.0 は現在サポートされていません。
+
+@end itemize
+
+@node w3-mode, EDB, Ispell, Major packages and programs
+@section w3-mode -- WWW ブラウザ
+@cindex WWW browser
+@cindex Web browser
+@cindex HTML browser in Emacs
+@cindex @code{w3-mode}
+
+@table @b
+
+@item 作者
+@email{wmperry@@spry.com, Bill Perry}
+
+@item 最新版
+4.0pre.39
+
+@item 配布場所
+@uref{ftp://ftp.cs.indiana.edu/pub/elisp/w3/w3.tar.gz}
+
+@item メーリングリスト
+告知用メーリングリスト @email{w3-announce-request@@indiana.edu}@*
+βテスタ用メーリングリスト @email{w3-beta-request@@indiana.edu}@*
+開発者用メーリングリスト @code{w3-mode} at @email{w3-dev@@indiana.edu}
+
+@end table
+
+@node EDB, Mailcrypt, w3-mode, Major packages and programs
+@section EDB -- データベース管理プログラム
+@cindex EDB
+@cindex Database
+@cindex Forms mode
+
+@table @b
+@item 作者
+@email{mernst@@theory.lcs.mit.edu, Michael Ernst}
+
+@item 最新版
+1.21
+
+@item 配布場所
+@uref{ftp://theory.lcs.mit.edu/pub/emacs/edb}
+
+@end table
+
+@node Mailcrypt, JDE, EDB, Major packages and programs
+@section Mailcrypt -- メール・ニュース用の PGP インターフェース @emph{(2004/07/29)}
+@cindex PGP
+@cindex GPG
+@cindex Interface to PGP from Emacs mail and news
+@cindex News, interface to PGP from
+@cindex Mail, interface to PGP from
+@cindex Encryption software, interface to
+
+@table @b
+
+@item 作者
+@email{patl@@lcs.mit.edu, Patrick J. LoPresti}@*
+@email{jin@@atype.com, Jin S. Choi}
+
+@item 保守管理者
+@email{warner-mailcrypt@@lothar.com, Brian Warner}
+
+@item 最新版
+3.5.8
+
+@item 配布場所
+@uref{http://dl.sourceforge.net/sourceforge/mailcrypt/mailcrypt-3.5.8.tar.gz}
+
+@item WWW
+@uref{http://mailcrypt.sourceforge.net/}
+
+@end table
+
+@node JDE, Patch, Mailcrypt, Major packages and programs
+@section JDE -- Java プログラム統合開発環境
+@cindex Java development environment
+@cindex Integrated Java development environment
+@cindex JDE
+
+@table @b
+
+@item 作者
+@email{paulk@@mathworks.com, Paul Kinnucan}
+
+@item メーリングリスト
+@email{jde-subscribe@@sunsite.auc.dk}
+
+@item 最新版
+2.1.1
+
+@item WWW
+@uref{http://sunsite.auc.dk/jde/}
+
+@end table
+
+@node Patch,  , JDE, Major packages and programs
+@section Patch -- パッチ当てプログラム
+@cindex Updating files with diffs
+@cindex Patching source files with diffs
+@cindex Diffs and patching
+@cindex @file{patch}
+
+@table @b
+
+@item 作者
+@email{lwall@@wall.org, Larry Wall} (with GNU modifications)
+
+@item 最新版
+2.5.4
+
+@item 配布場所
+@ref{Current GNU distributions} 参照。
+
+@end table
+
+@c ------------------------------------------------------------
+@node Key bindings, Alternate character sets, Major packages and programs, Top
+@chapter Key bindings @emph{(2004/07/29)}
+@cindex Key bindings
+
+@menu
+* Binding keys to commands::    キー割り当て
+* Invalid prefix characters::   invalid prefix characters?
+* Terminal setup code works after Emacs has begun::  端末用の設定
+* Using function keys under X::  ファンクションキー
+* Working with function and arrow keys::  ファンクションキーのシンボル
+* X key translations for Emacs::  キーの読み替え
+* Handling C-s and C-q with flow control::  フロー制御
+* Binding C-s and C-q::         C-s と C-q を使う
+* Backspace invokes help::      Backspace でヘルプ
+* stty and Backspace key::      stty による設定
+* Swapping keys::               キーの入れ替え
+* Producing C-XXX with the keyboard::  特定のキーコードを入力
+* No Meta key::                 メタキーが無い
+* No Escape key::               エスケープキーが無い
+* Compose Character::           Compose Character キー
+* Binding combinations of modifiers and function keys::  特殊キーの組み合わせ
+* Meta key does not work in xterm::  xterm 上でメタキーを使う
+* ExtendChar key does not work as Meta::  ExtendChar キー
+@end menu
+
+@node Binding keys to commands, Invalid prefix characters, Key bindings, Key bindings
+@section キー(ファンクションキーを含む)にコマンドを割り当てる方法は?
+@cindex Binding keys to commands
+@cindex Keys, binding to commands
+@cindex Commands, binding keys to
+
+キーは対話的に割り当てることもできるし、
+@file{.emacs} ファイルであらかじめ割り当てることもできます。
+対話的にすべてのモードでキー割り当てが使えるようにするには
+次のように入力してください。
+
+@kbd{M-x global-set-key @key{RET} @var{key} @var{cmd} @key{RET}}
+
+現在のメジャーモードでのみ割り当てたいときは次のように入力してください。
+
+@kbd{M-x local-set-key @key{RET} @var{key} @var{cmd} @key{RET}}
+
+詳しくは @inforef{Key Bindings, , emacs} を参照してください。
+
+キーを割り当てるための lisp コードを @file{.emacs} に書きこむには
+次の様にすると簡単にできます。
+まず対話的にキーを割り当てます。
+直後に @kbd{C-x @key{ESC} @key{ESC} C-a C-k C-g} と入力します。
+これでキー割り当てのための Lisp コードがキルリングにセーブされるので
+@file{.emacs} にペーストすることができます。
+グローバルに割り当てるときはそのままで構いません。
+たとえば次のコードは直接 @file{.emacs} に書き込めます。
+
+@lisp
+(global-set-key (quote [f1]) (quote help-for-help))
+@end lisp
+
+@noindent
+特定のモードでキーを割り当てるときは @code{add-hook} を使ってください。
+たとえば @code{tex-mode} でローカルに割り当てるときは次のようにします。
+
+@lisp
+(add-hook 'tex-mode-hook
+  (lambda ()
+   (local-set-key (quote [f1]) (quote help-for-help))))
+@end lisp
+
+
+@itemize @bullet
+
+@item
+キー入力列中の制御文字はペーストされた場所にグラフィック形式で
+表示されます。つまり @key{CTRL} が @samp{^} で表され、
+@key{TAB} は複数(通常は 8)個のスペースで表されます。
+これはベクトルや文字列の形式に書き換えたくなるでしょう。
+
+@item
+キー入力列のプレフィクスキーが完全なキー入力列として既に
+割り当てられている場合は新しく割り当てる前に
+キー割り当てを解除する必要があります。
+たとえば @kbd{ESC @{} が既に割り当てられている時は次のようにします。
+
+@lisp
+(global-unset-key [?\e ?@{])   ;;   または
+(local-unset-key [?\e ?@{])
+@end lisp
+
+@item
+コマンドや「ラムダリスト」だけでなく、
+ベクトルや文字列をキーボードマクロとしてキーに割り当てることができます。
+たとえば次のようにします。
+
+@lisp
+(global-set-key [f10] [?\C-x?\e?\e?\C-a?\C-k?\C-g])  ;;  または
+(global-set-key [f10] "\C-x\e\e\C-a\C-k\C-g")
+@end lisp
+
+@end itemize
+
+@node Invalid prefix characters, Terminal setup code works after Emacs has begun, Binding keys to commands, Key bindings
+@section "Key sequence XXX uses invalid prefix characters" って何のことですか?
+@cindex Prefix characters, invalid
+@cindex Invalid prefix characters
+@cindex Misspecified key sequences
+
+大抵は以下の二つの場合のいずれかでしょう。
+一つ目の場合として、キー入力列中のの制御文字の記述が
+間違っているということがあります。
+(例えば Lisp 式の中で @samp{\C-f} ではなく、 @samp{C-f} が使われている場合)
+もう一つの場合として、割り当てようとしているキー入力列のプレフィクス
+キーがすでに完全なキー入力列として割り当てられているということがあります。
+歴史的経緯で @samp{ESC [} をプレフィクスキーにすると問題がありました。
+このときはキー入力列を割り当てる前に次の式を評価してください。
+
+@lisp
+(global-unset-key [?\e ?[])  ;;  または
+(global-unset-key "\e[")
+@end lisp
+
+@node Terminal setup code works after Emacs has begun, Using function keys under X, Invalid prefix characters, Key bindings
+@section セットアップが @file{.emacs} の中でだとうまくいきません。なぜですか?
+@cindex Terminal setup code in @file{.emacs}
+
+起動時に Emacs は与えられたコードまたはファイルの順番に従って自分自身を
+初期化しようとします。端末やウィンドウの設定の初期化が実行される
+まで有効にならないコードが書かれているとこの問題が発生します。
+(この順番は起動後にはあまり問題になりません)
+
+端末・ウィンドウシステムの設定の初期化が実行されてから Lisp コードを
+実行させるには、あなたが実行したいと思っているコードを @dfn{ラムダ式} にして
+変数 @code{term-setup-hook} まはた @code{window-setup-hook} の値に
+追加してください。たとえば次の様にします。
+
+@lisp
+(add-hook 'term-setup-hook
+          (lambda ()
+           (when (string-match "\\`vt220" (or (getenv "TERM") ""))
+             ;; vt220 の "Do" キーを M-x と同じにする
+             (global-set-key [do] 'execute-extended-command))))
+@end lisp
+
+Emacs が起動時に何をするのかを知るためには
+@file{lisp/startup.el} を見てください。
+
+@node Using function keys under X, Working with function and arrow keys, Terminal setup code works after Emacs has begun, Key bindings
+@section X 上でファンクションキーを使う方法は?
+@cindex Function keys
+@cindex X Window System and function keys
+@cindex Binding function keys
+
+Emacs 19 以降ではファンクションキーは他のキーと同様に利用できます。
+@ref{Binding keys to commands} 参照。
+
+@node Working with function and arrow keys, X key translations for Emacs, Using function keys under X, Key bindings
+@section ファンクションキーやカーソルキーが生成する文字列を知る方法は?
+@cindex Working with arrow keys
+@cindex Arrow keys, symbols generated by
+@cindex Working with function keys
+@cindex Function keys, symbols generated by
+@cindex Symbols generated by function keys
+
+@kbd{C-h c} と入力してからファンクションキーやカーソルキーを押してください。
+ファンクションキーのシンボルか文字列を表示します。
+@c yagi: オンラインマニュアルのどこ?
+(詳細はオンラインマニュアル参照)
+他のキーに対しても使えます。
+
+@node X key translations for Emacs, Handling C-s and C-q with flow control, Working with function and arrow keys, Key bindings
+@section X 上で ``キーの読み変え'' をする方法は?
+@cindex X key translations
+@cindex Key translations under X
+@cindex Translations for keys under X
+
+Emacs は標準では Xt ライブラリを使って書かれてはいないので、
+``キーの読み替え'' はできません。
+(Xt ライブラリを使ってコンパイルした Emacs での
+キーの読み替えについて知っていたら教えてください)
+
+Emacs にそう言った挙動をさせるには
+(Emacs の外で) @command{xmodmap} を使うか、
+(Emacs の中で) @code{define-key} を使ってください。
+関数 @code{define-key} は変数 @code{function-key-map} と合わせて使ってください。
+たとえば次の式は @kbd{M-@key{TAB}} というキー入力列を定義します。
+
+@lisp
+(define-key function-key-map [M-@key{TAB}] [?\M-\t])
+@end lisp
+
+@node Handling C-s and C-q with flow control, Binding C-s and C-q, X key translations for Emacs, Key bindings
+@section フロー制御に使われている @kbd{C-s} と @kbd{C-q} を扱う方法は?
+@cindex Flow control, @kbd{C-s} and @kbd{C-q} with
+@cindex @kbd{C-s} and @kbd{C-q} with flow control
+
+@key{C-s} と @key{C-q} は XON/XOFF のフロー制御に使われているので
+Emacs は混乱します。それは Emacs が標準で @key{C-s} と @key{C-q} に
+コマンドを割り当てているからです。
+Emacs はこれらをフロー制御文字として認識せず、
+出力のバッファを埋め尽くすかも知れません。
+時に XON/XOFF フロー制御をするソフトは Emacs から
+@key{C-s} と @key{C-q} を見えないようにしているかも知れません。
+
+解決方法:
+
+@itemize @bullet
+
+@item
+@kbd{C-s}, @kbd{C-q} によるフロー制御を止める
+
+フロー制御の原因を特定します。
+
+@itemize @minus
+
+@item
+端末
+
+あなたの使っている端末はすべてのキャラクタを表示する時間を
+取るために XON/XOFF フロー制御をしているかも知れません。
+たとえば VT 端末がこれをしています。
+セットアッップメニューを使えばこれを無効にできるかも知れません。
+これはいくつかの PC のターミナルエミュレータにも使えます。
+
+端末のフロー制御を無効にすると、
+もう一端のフロー制御も無効にしなければなりません。
+それはログインしたコンピュータかも知れませんし、
+端末サーバかも知れません。
+
+フロー制御を無効にするとキャラクタが失われる可能性があります。
+端末につながっているプリンタは誤動作するかも知れません。
+これを回避するには、端末の @samp{termcap} エントリを修正して
+ヌルキャラクタで埋めてください。
+
+@item
+モデム
+
+電話回線で接続しているなら、モデムが XON/XOFF フロー制御をしています。
+これを回避する方法は明らかになっていません。
+
+@item
+ルータ、端末サーバ
+
+端末とコンピュータをつなぐ装置が XON/XOFF フロー制御をしている場合が
+あります。他のフロー制御に切り替える事ができるかも知れません。
+近くにいるネットワークに詳しい人に尋ねてみてください。
+
+@item
+@code{tty}, @code{pty} デバイス
+
+Emacs が動いているマシンまでの接続が
+いくつかの @code{tty}, @code{pty} を通っている場合は、
+必要もないのに XON/XOFF フロー制御をしている場合があります。
+
+@email{eirik@@theory.tn.cornell.edu, Eirik Fuller} は次の様に書いています。
+
+@quotation
+@command{rlogin} (と @command{telnet})のいくつかのバージョンは
+フロー制御文字を接続しているリモートシステムに渡さないんだ。
+そのようなシステムでは、
+リモートシステム上の Emacs はフロー制御を抑制できない。
+@samp{rlogin -8} で回避できることもある。
+
+これを直す一つの方法はローカルホスト(@command{rlogin} を実行しているマシン。
+@command{rlogind} を実行している方ではない)で @command{rlogin} を
+実行する前に @command{stty} コマンドを使ってフロー制御を抑制することだ。
+多くのシステムでは @samp{stty start u stop u} で良いだろう。
+
+@command{tcsh} を使っている場合、
+バージョンによってはこれもうまくいかないかも知れない。
+これを回避するには @command{rlogin} する前に別のシェルを起動し、
+そのシェルから @command{stty} コマンドを使ってフロー制御を抑制することだ。
+@end quotation
+
+システムによっては @samp{stty start u stop u} の
+代わりに @samp{stty -ixon} を使う必要があります。
+
+@end itemize
+
+@item
+Emacs に XON/XOFF フロー制御をさせる
+
+次の式を評価すると Emacs は無条件に @key{C-s} と @key{C-q} を
+フロー制御文字として扱うようになります。
+
+@lisp
+(enable-flow-control)
+@end lisp
+
+@noindent
+端末によって設定を変える場合は次の様にしてください。
+(@samp{vt100} や @samp{h19} は実際の端末名に置き換えてください。)
+
+@lisp
+(enable-flow-control-on "vt100" "h19")
+@end lisp
+
+@noindent
+これらのコマンドは自動的に @key{C-s} と @key{C-q} を
+@key{C-\} と @key{C-^} に入れ替えます。
+変数 @code{flow-control-c-s-replacement} と
+@code{flow-control-c-q-replacement} で交換用のキーを変更できます。
+
+個人で対処する場合は @file{.emacs} に記述してください。
+サイトで対処する場合は @file{site-lisp/site-start.el} に
+記述するのが良いでしょう。
+(実際にはこの @file{site-lisp} は Emacs をインストールしたディレクトリ
+(Unix なら大抵の場合 @file{/usr/local/share/emacs})のサブディレクトリです。)
+@file{site-lisp/default.el} に書くのは問題があります。
+もしユーザーの @file{.emacs} にエラーがあると @file{site-lisp/default.el} は
+ロードされません。
+そうなると、ユーザはたとえ @file{.emacs} を修正するためであっても Emacs を
+使うことができなくなってしまいます。
+@c yagi: @option{-q} 追加
+(@file{.emacs} の名前を変更するとか @option{-q} オプションを使う
+と言う方法に気付けば話は別ですが)
+
+コマンド @code{enable-flow-control} は次の様に対話的に使うこともできます。
+
+@kbd{M-x enable-flow-control @key{RET}}
+
+@end itemize
+
+詳しくは @file{etc/PROBLEMS} ファイルを読んでください。
+(このファイルは Emacs の配布ファイルに含まれています。)
+
+
+@node Binding C-s and C-q, Backspace invokes help, Handling C-s and C-q with flow control, Key bindings
+@section @kbd{C-s} や @kbd{C-q} がフロー制御に利用されている場合にコマンドを割り当てる方法は?
+@cindex Binding @kbd{C-s} and @kbd{C-q}
+@cindex @kbd{C-s} and @kbd{C-q}, binding
+
+@key{C-s} と @key{C-q} にコマンドを割り当てるには関数 @code{enable-flow-control} か
+関数 @code{enable-flow-control-on} を使ってください。
+使い方については @ref{Handling C-s and C-q with flow control} 参照。
+
+他のキーに割り当てるには関数 @code{keyboard-translate} を使ってください。
+使い方については @ref{Swapping keys} 参照。
+サイトで対処する場合は @file{site-lisp/site-start.el} に記述してください。
+@file{site-lisp/default.el} を使っていけない理由については
+@ref{Handling C-s and C-q with flow control} 参照。
+
+@itemize @bullet
+
+@item
+サイトで対処する場合、ドキュメントと Emacs の実際の動作が異なるので
+ユーザーが混乱するかも知れません。
+
+@end itemize
+
+@node Backspace invokes help, stty and Backspace key, Binding C-s and C-q, Key bindings
+@section 何故 @key{Backspace} キーでヘルプが起動するのですか? @emph{(2004/07/29)}
+@cindex Backspace key invokes help
+@cindex Help invoked by Backspace
+@cindex DEL key does not delete
+
+@key{Backspace} キーは(ほとんどのキーボードでは) @acronym{ASCII} コードの 8 を
+生成します。@key{C-h} も同じコードを生成します。
+Emacs は標準で @key{C-h} でヘルプを起動します。
+@samp{help} の先頭が @samp{h} なので覚えやすいようにこう決められました。
+もっとも簡単な解決法は @key{C-h} (と @key{Backspace})でヘルプを起動し、
+@key{DEL}(@key{Delete})で直前の文字を削除する
+という標準のの設定のまま Emacs を使うことです。
+
+この解決方法を好まない人もいます。
+
+@itemize @bullet
+
+@item
+Emacs 以外では通常 @key{Backspace} は
+直前の文字を削除するように定義されています。
+Emacs 以外でも @key{DEL} を直前の文字の削除に利用すれば解決できます。
+次のコマンドは多くの Unix システムで有効でしょう。
+
+@example
+stty erase `^?'
+@end example
+
+@item
+@key{Backspace} の方がキーボードの便利な位置にあるとか、
+@key{Delete} がないとかの理由で
+@key{Backspace} に直前の文字を削除させたい場合、
+@key{Backspace} に @key{Delete} のように振る舞わせることもできます。
+
+@itemize @minus
+@item
+
+@item
+端末(例えば VT3## 端末)あるいは端末エミュレータ(例えば TeraTerm)
+によっては @{Backspace} の生成するコードをセットアップメニューで変更できます。
+
+@item
+
+
+@item
+好きなように設定できるキーボードを利用するという方法もあります。
+キーの読み替え機能のある端末エミュレータもあります。
+
+@item
+Emacs 21.1 以降では @key{Backspace} と @key{Delete} の役割
+を変数 @code{normal-erase-is-backspace-mode} の値を設定することで
+変えることができます。
+設定は端末でもウィンドウシステムでも有効です。
+これは @kbd{M-x normal-erase-is-backspace} と入力することでも設定できます。
+詳しくは変数や関数の説明を読んで下さい(@ref{Emacs Lisp documentation}参照)。
+
+@item
+Emacs 内部で @key{Backspace} と @key{DEL} を
+交換できます。
+
+@lisp
+(keyboard-translate ?\C-h ?\C-?)
+@end lisp
+
+@noindent
+@key{Backspace} を @key{DEL} の様にする方法としてはこれがお薦めです。
+この方法なら @key{DEL} に @code{delete-backward-char} 以外のコマンド
+を割り当てているモードでも @key{Backspace} を @key{DEL} として扱います。
+
+同様にして @key{DEL} を @kbd{C-d} にするには次の様にします。
+(@kbd{C-d} は現在位置の文字を消します。)
+
+@lisp
+(keyboard-translate ?\C-? ?\C-d)
+@end lisp
+
+@code{keyboard-translate} の詳細については @ref{Swapping keys} 参照。
+
+@item
+別の方法として、ヘルプを @kbd{C-x h} に割り当てることができます。
+
+@lisp
+(global-set-key "\C-h" 'delete-backward-char)
+
+;;; overrides mark-whole-buffer
+(global-set-key "\C-xh" 'help-command)
+@end lisp
+
+@noindent
+この方法はお薦めできません。
+この方法では @key{DEL} を @code{delete-backward-char} に割り当てている
+モードでのみうまくいきます。
+そうでないモード(例えば@code{view-mode})では @key{Backspace} で
+ヘルプが起動するでしょう。
+このため上記の @code{keyboard-translate} を利用する方法をお薦めします。
+
+他にヘルプを割り当てるキーとしては @key{M-?} や @key{C-x ?} が
+良く使われるようです。
+@end itemize
+
+@key{DEL} をヘルプに割り当てないでください。
+@key{DEL} にローカルな割り当てを持つモードが多数存在し、うまく機能しません。
+
+@end itemize
+
+Emacs 21 以降ではウィンドウシステム上で起動された場合、
+@key{Delete} でポイント位置の文字を削除するようになっています。
+このためウィンドウシステム上ではあまりキー操作に悩むことはありません。
+
+この問題についてオンラインマニュアルにも書かれています。
+@c @ref{DEL Does Not Delete, , If @key{DEL} Fails to Delete, emacs,
+@c      The GNU Emacs Manual}
+@inforef{DEL Does Not Delete, , emacs}を参照して下さい。
+
+@node stty and Backspace key, Swapping keys, Backspace invokes help, Key bindings
+@section Emacs が @key{Backspace} と @key{Delete} に関する @command{stty} の設定を無視するのはなぜですか?
+@cindex @file{stty} and Emacs
+@cindex Backspace and @file{stty}
+@cindex Delete and @file{stty}
+
+良い質問です。
+
+@c FIXME: RMS explained the reasons for this on emacs-hackers.  It's
+@c probably worth putting that explanation here.
+
+@node Swapping keys, Producing C-XXX with the keyboard, stty and Backspace key, Key bindings
+@section キーを交換する方法は?
+@cindex Swapping keys
+@cindex Keys, swapping
+@cindex @code{keyboard-translate}
+
+Emacs 19 では関数 @code{keyboard-translate} を使ってキー
+(またはキー入力列)を交換することができます。
+例えば @key{C-h} と @key{DEL} を交換したいときは次の式を評価してください。
+
+@lisp
+(keyboard-translate ?\C-h ?\C-?)  ; translate `C-h' to DEL
+(keyboard-translate ?\C-? ?\C-h)  ; translate DEL to `C-h'.
+@end lisp
+
+@noindent
+一番目の引数はキーボードから入力されるシーケンスです。
+二番目の引数はキーマップに適用されるシーケンスです。
+
+キーボードトランスレーションはキー割り当てとは異なります。
+Emacs は色々な状況で適用される様々なキーマップを持ちますが、
+キーボードトランスレーションはただ一つしか存在せず、
+Emacs が端末から読み取る文字すべてに適用されます。
+キーボードトランスレーションは入力プロセスの最下層で実現されます。
+キーマップに適用されるキーはキーボードトランスレーションの結果の文字列です。
+
+オンラインマニュアルの @inforef{Keyboard Translations, , emacs} 参照。
+
+@node Producing C-XXX with the keyboard, No Meta key, Swapping keys, Key bindings
+@section C-XXX を入力する方法は?
+@cindex Producing control characters
+@cindex Generating control characters
+@cindex Control characters, generating
+
+X 以外の端末では次の様な ``エイリアス'' が一般的です。
+
+@table @asis
+
+@item @kbd{C-2} または @kbd{C-@key{SPC}}
+@kbd{C-@@}
+
+@item @kbd{C-6}
+@kbd{C-^}
+
+@item @kbd{C-7} または @kbd{C-S--}
+@kbd{C-_}
+
+@item @kbd{C-4}
+@kbd{C-\}
+
+@item @kbd{C-5}
+@kbd{C-]}
+
+@item @kbd{C-/}
+@kbd{C-?}
+
+@end table
+
+他のエイリアスも存在します。
+@key{CTRL} キーと数字キーでどんなキーが生成されるか
+@kbd{C-h c} を使って調べてみてください。
+コマンド名がわかっているなら @kbd{C-h w} を使ってみてください。
+
+@node No Meta key, No Escape key, Producing C-XXX with the keyboard, Key bindings
+@section @key{Meta} キーがない場合はどうしたらいいのですか?
+@cindex No @key{Meta} key
+@cindex @key{Meta} key, what to do if you lack it
+
+多くのキーボードでは @key{Alt} キーが @key{Meta} キーとして使えるでしょう。
+
+@kbd{M-a} と入力する代わりに、@kbd{@key{ESC} a} と入力することができます。
+実際、Emacs は内部で @kbd{M-a} を @kbd{@key{ESC} a} に分解して処理しています。
+(ただし変数 @code{meta-prefix-char} の値にもよります)
+@key{Meta} キーと @key{a} は同時に押しますが、
+@key{ESC} を使うときは同時に押すのではなく、
+@key{ESC} を離してから @key{a} を押すことに注意してください。
+
+@node No Escape key, Compose Character, No Meta key, Key bindings
+@section @key{Escape} キーがない場合はどうしたらいいのですか? @emph{(2004/07/29)}
+@cindex No Escape key
+@cindex Lacking an Escape key
+@cindex Escape key, lacking
+
+@kbd{C-[} を代わりに使ってください。
+これは @key{ESC} と同じく @acronym{ASCII} コードの 27 を送信します。
+@kbd{C-3} も端末によっては(X 上でないときは)うまくいくでしょう。
+@key{F11} は多くの端末(特に DEC の端末)で @key{ESC} を生成します。
+そうでなければ次の式で利用できるようになります。
+
+@lisp
+;;; F11 is the documented ESC replacement on DEC terminals.
+(define-key function-key-map [f11] [?\e])
+@end lisp
+
+@node Compose Character, Binding combinations of modifiers and function keys, No Escape key, Key bindings
+@section @key{Compose Character} キーを @key{Meta} キーの代わりに使う事はできますか?
+@cindex @key{Compose Character} key, using as @key{Meta}
+@cindex @key{Meta}, using @key{Compose Character} for
+
+VT220 のようなダム端末ではできません。
+VT220 クローンでそのようなことができる物があるという噂はあります。
+X を使っているなら @command{xmodmap} を使ってできるかも知れません。
+
+@node Binding combinations of modifiers and function keys, Meta key does not work in xterm, Compose Character, Key bindings
+@section モディファイアキーとファンクションキーの組み合わせをコマンドに割り当てる方法は? @emph{(2004/07/29)}
+@cindex Modifiers and function keys
+@cindex Function keys and modifiers
+@cindex Binding modifiers and function keys
+
+Emacs 19 以降ではベクトルを使ってモディファイアキーとファンクションキーを
+組み合わせたキー入力列を表すことができます。
+例: (オンラインマニュアルにあります)
+
+@lisp
+(global-set-key [?\C-x right] 'forward-page)
+@end lisp
+
+@noindent
+@samp{?\C-x} は @key{C-x} の Lisp 表現です。
+
+ファンクションキーとモディファイアキー
+(@key{CTRL}, @key{META}, @key{HYPER}, @key{SUPER}, @key{ALT}, @key{SHIFT})を
+同時に使うにはファンクションキーを表すシンボル名の前に
+@samp{C-}, @samp{M-}, @samp{H-}, @samp{s-}, @samp{A-}, @samp{S-} を
+付けてください。
+次の式は @kbd{Hyper-Meta-RIGHT} に @code{forward-word} を割り当てます。
+
+@lisp
+(global-set-key [H-M-right] 'forward-word)
+@end lisp
+
+@itemize @bullet
+
+@item
+すべてのモディファイアキーが使えるとは限りません。
+@key{HYPER}, @key{SUPER}, @key{ALT} は文字端末上では利用できません。
+@acronym{ASCII} でないキーやマウスイベント
+(例えば @kbd{C-=} や @kbd{Mouse-1})についても同様です。
+
+@end itemize
+
+一般的なキー割り当ての方法については @ref{Binding keys to commands} 参照。
+
+@node Meta key does not work in xterm, ExtendChar key does not work as Meta, Binding combinations of modifiers and function keys, Key bindings
+@section @command{xterm} で @key{Meta} キーが使えないのはなぜ? @emph{(2004/07/29)}
+@cindex @key{Meta} key and @code{xterm}
+@cindex Xterm and @key{Meta} key
+
+@inforef{Single-Byte Character Support, , emacs} を参照してください。
+
+それでうまく行かない場合は以下の点を確認してみてください。
+
+@itemize @bullet
+
+@item
+ウィンドウマネージャーに @command{mwm} を使っているなら無理でしょう。
+(誰か良い解決法を知りませんか?)
+
+@item
+X11 上で使っているなら、キーが本当に @key{Meta} キーか確認してください。
+@command{xev} を使って @key{Meta} キー(らしきキー)の生成するコードを
+調べられます。
+それは @code{Meta_L} か @code{Meta_R} でなくてはいけません。
+そうでなかったら @command{xmodmap} で修正してください。
+@key{Meta} キーが @code{Meta_L} か @code{Meta_R} を生成し、
+@kbd{M-x} が non-@acronym{ASCII} 文字を生成するのならば
+@file{~/.Xdefaults}に以下の様に書き加えて下さい。
+
+@example
+XTerm*eightBitInput:   false
+XTerm*eightBitOutput:  true
+@end example
+
+@item
+@command{xterm} の使う @file{pty} が 8 ビット文字を通すか確認してください。
+@samp{stty -a} (または @samp{stty everything})で @samp{cs8} が
+表示されなければいけません。
+@samp{cs7} が表示されたなら @samp{stty cs8 -istrip}(または @samp{stty pass8})
+で修正してください。
+
+@item
+@command{xterm} と Emacs の間を @command{rlogin} で
+つないでいるなら 8 ビット文字を通すために
+@option{-8} を @command{rlogin} の引数に指定する必要があります。
+
+@item
+Emacs が Ultrix 上で走っているなら @code{(set-input-mode t nil)} で
+うまくいくと言う報告があります。
+
+@item
+以上全部が駄目なら @kbd{M-W} を入力した時に @kbd{@key{ESC} W} を
+@command{xterm} に生成させる方法があります。
+これは Emacs では同じキー入力列となります。
+X11R4 では次のリソースを指定してください。
+
+@example
+XTerm.VT100.EightBitInput: false
+@end example
+
+@noindent
+(これは @samp{insert-eight-bit} の挙動を変更します)
+
+古い @command{xterm} ではトランスレーションで同じことができます。
+
+@example
+XTerm.VT100.Translations: #override \
+  Meta<KeyPress>: string(0x1b) insert()
+@end example
+
+@noindent
+リソース中の @samp{Meta} を @samp{Alt} に置き換える必要があるかも知れません。
+
+@end itemize
+
+@node ExtendChar key does not work as Meta,  , Meta key does not work in xterm, Key bindings
+@section HP-UX 8.0 と 9.x で @key{ExtendChar} キーが @key{Meta} キーとして使えないのはなぜ?
+@cindex @key{ExtendChar} key as @key{Meta}
+@cindex @key{Meta}, using @key{ExtendChar} for
+@cindex HP-UX, the @key{ExtendChar} key
+
+これは X11R4 で国際化拡張がなされ、現在 HP がこの拡張を使っているためです。
+Emacs は @samp{XLookupString} が @key{Meta} キーの状態によらずに
+同じ結果を返すものと見なすためです。
+Emacs 側で修正されるようになるまでは、
+X サーバを起動する度に @command{xterm} を起動する前に次の様にしてください。
+
+@example
+xmodmap -e 'remove mod1 = Mode_switch'
+@end example
+
+@c FIXME: Emacs 21 supports I18N in X11; does that mean that this bug is
+@c solved?
+
+これによりシステム全体で新たなキーシムが使えなくなるので、
+期待した解決法ではないかもしれません。
+
+@c ------------------------------------------------------------
+@node Alternate character sets, Mail and news, Key bindings, Top
+@chapter Alternate character sets @emph{(2004/07/29)}
+@cindex Alternate character sets
+
+@menu
+* Emacs does not display 8-bit characters::  8 ビット文字の表示
+* Inputting eight-bit characters::  8 ビット文字の入力
+* Kanji and Chinese characters::  漢字
+* Right-to-left alphabets::     右から左に書く文字
+@end menu
+
+@node Emacs does not display 8-bit characters, Inputting eight-bit characters, Alternate character sets, Alternate character sets
+@section 8 ビット文字を表示する方法は? @emph{(2004/07/29)}
+@cindex Displaying eight-bit characters
+@cindex Eight-bit characters, displaying
+
+@inforef{Single-Byte Character Support, , emacs} を参照してください。
+
+Unix では Emacs が文字端末上で起動された場合
+(X 上であっても @option{-nw} オプション付きで起動された場合)、
+コマンド @code{set-terminal-coding-system} を使って Emacs に
+端末が表示できる文字を知らせる必要があります。
+これは言語環境の設定をしても自動的に設定されることはありません。
+この設定をしないと @acronym{ASCII} 以外の文字は
+すべて @samp{?} に置き換えて表示されます。
+Unix 以外の OS、たとえば MS-DOS や MS-Windows では
+Emacs は端末で表示できる文字を調べて文字コードを自動的に設定をします。
+
+@node Inputting eight-bit characters, Kanji and Chinese characters, Emacs does not display 8-bit characters, Alternate character sets
+@section 8 ビット文字を入力する方法は?
+@cindex Entering eight-bit characters
+@cindex Eight-bit characters, entering
+@cindex Input, 8-bit characters
+
+8 ビット文字を入力する方法には様々なものがあります。
+@inforef{Single-Byte Character Support, , emacs} を参照してください。
+また、言語ごとに専用の入力方法が用意されています。
+@inforef{Input Methods, , emacs} を参照してください。
+
+@node Kanji and Chinese characters, Right-to-left alphabets, Inputting eight-bit characters, Alternate character sets
+@section 日本語や中国語の使える Emacs はありますか?
+@cindex Kanji, handling with Emacs
+@cindex Chinese, handling with Emacs
+@cindex Japanese, handling with Emacs
+@cindex Korean, handling with Emacs
+
+Emacs 20 以降では MULE (Emacs の多言語化拡張)の機能が取り込まれています。
+Emacs の最新版を入手する方法については @ref{Installing Emacs} 参照。
+
+@node Right-to-left alphabets,  , Kanji and Chinese characters, Alternate character sets
+@section セム語(右から左に書く言語)が扱える Emacs はありますか?
+@cindex Right-to-left alphabets
+@cindex Hebrew, handling with Emacs
+@cindex Semitic alphabets
+@cindex Arabic alphabets
+
+Emacs 20 ではヘブライ文字(ISO 8859-8)を扱えますが、
+右から左に表示させることはできません。
+
+@email{joel@@exc.com, Joel M. Hoffman} が作った @file{hebrew.el} パッケージ
+を使えばヘブライ語を右から左に書くということが実現できます。
+これは Emacs 19 でも動作するそうですが、
+Emacs 18 用のパッチを当てる必要があります。
+パッチが必要なら Joel M. Hoffman にメールを出してください。
+
+@c FIXME: Should we mention Ehud Karni's package?
+
+@file{hebrew.el} を使うにはヘブライ語のフォントが必要です。
+他に必要なものは特にありません。
+Joel M. Hoffman は MS-DOS と GNU/Linux 用のフォントを持っています。
+
+archie で @samp{hebrew} を検索してみるのも良いでしょう。
+必要なファイルがイスラエルの ftp サイトから入手できるかもしれません。
+
+@c ------------------------------------------------------------
+@node Mail and news, Concept index, Alternate character sets, Top
+@chapter Mail and news @emph{(2004/07/29)}
+@cindex Mail and news
+
+@menu
+* Changing the included text prefix::  引用記号の変更
+* Saving a copy of outgoing mail::  差出メールの保存
+* Expanding aliases when sending mail::  エイリアス展開
+* Rmail thinks all messages are one big one::  Rmail でメールの区切りを認識
+* Sorting the messages in an Rmail folder::  Rmail でメールの並べ替え
+* Rmail writes to /usr/spool/mail::  Rmail が /usr/spool/mail に書き込む
+* Recovering mail files when Rmail munges them::  Rmail からの復帰
+* Replying to the sender of a message::  差出人にのみ返信
+* MIME with Emacs mail packages::  MIME サポート
+* Automatically starting a mail or news reader::  メーラ・ニュースリーダ起動
+* Reading news with Emacs::     ネットニュース
+* Gnus does not work with NNTP::  Gnus が動かない
+* Viewing articles with embedded underlining::  記事中のアンダーライン
+* Saving a multi-part Gnus posting::  分割投稿された記事
+* Starting Gnus faster::        Gnus の起動の高速化
+* Catching up in all newsgroups::  すべての記事を読んだことにする
+* Killing based on nonstandard headers::  いらない記事を消す
+* Removing flashing messages::  無駄なメッセージを出さない
+* Catch-up is slow in Gnus::    全部の記事を読んだことにするのに時間がかかる
+* Gnus hangs for a long time::  Gnus が固まる
+* Learning more about Gnus::    Gnus についてもっと知りたい
+@end menu
+
+@node Changing the included text prefix, Saving a copy of outgoing mail, Mail and news, Mail and news
+@section メールやニュースにフォローアップするときの引用記号の変更方法は?
+@cindex Prefix in mail/news followups, changing
+@cindex Included text prefix, changing
+@cindex Setting the included text character
+@cindex Quoting in mail messages
+
+メールを Rmail で読んでいる、あるいはニュースを Gnus で読んでいる場合は、
+変数 @code{mail-yank-prefix} の値を設定してください。
+VM では変数 @code{vm-included-text-prefix} を、
+mh-e では変数 @code{mh-ins-buf-prefix} の値を設定してください。
+
+より好みに合わせたいときは Supercite を使うと良いでしょう。
+@ref{Supercite} 参照。
+
+返信のメッセージに余計なヘッダを含めない様にするには
+変数 @code{mail-yank-ignored-headers} の値を設定してください。
+
+@node Saving a copy of outgoing mail, Expanding aliases when sending mail, Changing the included text prefix, Mail and news
+@section メールをだすときにコピーを取っておく方法は?
+@cindex Saving a copy of outgoing mail
+@cindex Copying outgoing mail to a file
+@cindex Filing outgoing mail
+@cindex Automatic filing of outgoing mail
+@cindex Mail, saving outgoing automatically
+
+@header{BCC:} ヘッダをメールの中に書いておけば自分自身にもメールをだせます。
+あるいは @header{FCC:} ヘッダを書くことで直接ファイルにコピーできます。
+
+標準の mail コマンドを使っているなら、
+次の式を @file{.emacs} に書いておけば
+自動的に自分宛の @header{BCC:} ヘッダが付くようになります。
+
+@lisp
+(setq mail-self-blind t)
+@end lisp
+
+@noindent
+@header{FCC:} ヘッダを自動的に付けたい場合はこうです。
+
+@lisp
+(setq mail-archive-file-name (expand-file-name "~/outgoing"))
+@end lisp
+
+このときファイルは Unix mail 形式で保存されます。
+この形式のファイルは VM では直接読むことができますが、
+Rmail で読めるとは限りません。
+@ref{Learning how to do something} 参照。
+
+mh-e を使っているなら @file{components} ファイル
+(変数 @code{mh-comp-formfile} に指定される名前のファイル)に
+@samp{FCC} か @samp{BCC} フィールドを追加してください。
+
+@samp{set record filename} を @file{.mailrc} に追加してもうまくいきません。
+
+@node Expanding aliases when sending mail, Rmail thinks all messages are one big one, Saving a copy of outgoing mail, Mail and news
+@section メールを送信するときに Emacs はなぜエリアスを展開しないのですか?
+@cindex Expanding aliases when sending mail
+@cindex Mail alias expansion
+@cindex Sending mail with aliases
+
+@itemize @bullet
+
+@item
+複数のアドレスはコンマ(@samp{,})で区切って入力する必要があります。
+これは Emacs が RFC822 で定められている
+次のようなアドレスの記述に対応しているからです。
+
+@example
+To: Willy Smith <wks@@xpnsv.lwyrs.com>
+@end example
+
+しかし @file{.mailrc} ファイル中ではコンマで区切る必要はありません。
+むしろ @command{/usr/ucb/mail} (別名 @command{mailx})が
+RFC822 をサポートしていないならコンマで区切ってはいけません。
+
+@item
+Emacs は通常 @file{.mailrc} ファイルを一回の Emacs セッションに付き
+ただ一度、一番最初にメールを書き始めるときにしか読み込みません。
+@file{.mailrc} を編集したときは、
+@kbd{M-x rebuild-mail-abbrevs} と入力して
+@file{.mailrc} を再び読み込んでください。
+
+@item
+次の式を評価すればエイリアスを入力してその場で展開するようになります。
+
+@lisp
+(add-hook 'mail-mode-hook 'mail-abbrevs-setup)
+@end lisp
+
+エイリアスは @key{RET} か区切り文字(@key{,})を入力したときに
+展開されることに注意してください。
+エイリアスの直後にポイントを移動して
+@kbd{C-x a e} (@kbd{M-x expand-abbrev}) と入力することで
+強制的にエイリアスを展開できます。
+
+@end itemize
+
+@node Rmail thinks all messages are one big one, Sorting the messages in an Rmail folder, Expanding aliases when sending mail, Mail and news
+@section Rmail がすべてのセーブしたメッセージを一つのメッセージと見なすのはなぜ?
+@cindex Rmail thinks all messages are one large message
+
+メッセージの @samp{FCC} フィールドにより作られた Unix mail 形式のファイルは
+Rmail の使う形式(BABYL 形式)ではありません。
+Rmail は Unix mail 形式を入力としたとき、
+できるだけ BABYL 形式に変換しようとしますが、時には変換に失敗します。
+より確実にファイルを読むためには関数 @code{set-rmail-inbox-list} を
+使ってメッセージをセーブするファイルを @file{saved-messages} にしてください。
+
+@node Sorting the messages in an Rmail folder, Rmail writes to /usr/spool/mail, Rmail thinks all messages are one big one, Mail and news
+@section Rmail フォルダのメッセージを並べ変える方法は?
+@cindex Rmail, sorting messages in
+@cindex Folder, sorting messages in an Rmail
+@cindex Sorting messages in an Rmail folder
+
+Rmail の中で @kbd{C-c C-s C-h} と入力して
+並べ変えの関数とキー割り当ての一覧を見てください。
+
+@node Rmail writes to /usr/spool/mail, Recovering mail files when Rmail munges them, Sorting the messages in an Rmail folder, Mail and news
+@section Rmail はなぜ @file{/usr/spool/mail} に書き込む必要があるのですか?
+@cindex Rmail and @file{/usr/spool/mail}
+@cindex @file{/usr/spool/mail} and Rmail
+
+Rmail が使う @command{movemail} の挙動によるものです。
+このことから @command{movemail} がロックファイルを使うように
+指定されていることがわかります。
+
+RMS は次の様に言っています。
+
+@quotation
+あるシステムはメールファイルをロックするためにロックファイルを使う。
+このシステムでは @command{movemail} はロックファイルを書かなくてはいけない。
+さもなくばメールを失う危険をおかすことになる。
+ただ @command{movemail} にロックファイルを書かせる様にすれば良い。
+
+その他のシステムでは、 @samp{flock} システムを使う。
+このシステムでは @command{movemail} が @samp{flock} を使う様にすれば良い。
+@end quotation
+
+@node Recovering mail files when Rmail munges them, Replying to the sender of a message, Rmail writes to /usr/spool/mail, Mail and news
+@section Rmail 形式のファイルをもとの Unix mail 形式に戻す方法は?
+@cindex Recovering munged mail files
+@cindex Rmail munged my files
+@cindex Mail files, recovering those munged by Rmail
+
+@kbd{M-x rmail-input} を使っただけであって、
+バッファを Rmail の形式(BABYL 形式と呼ぶ)で保存したくない場合は
+単にバッファを消して下さい(@kbd{C-x k} で消せます)。
+
+@cindex Exporting messages as Unix mail files
+既に @kbd{M-x rmail} で @file{inbox} のメールを読んでしまったが
+バッファを Unix mail 形式で保存したい場合は、
+個々のメールに対して @kbd{C-o} を入力してください。
+
+@cindex Converting from BABYL to Unix mail format
+@cindex @code{unrmail} command
+BABYL 形式のファイルを Unix mail 形式に変換したい場合は
+@kbd{M-x unrmail} と入力してください。
+入力ファイルと出力ファイルを指定できます。
+
+@pindex b2m
+他に Emacs 付属のプログラム @command{b2m} を利用する方法があります。
+@command{b2m} はフィルタプログラムで、次の様に使います。
+
+@example
+b2m < @var{babyl-file} > @var{mbox-file}
+@end example
+
+@noindent
+ここで @var{babyl-file} は BABYL ファイルのファイル名前で、
+@var{mbox-file} は変換後のファイルのファイル名です。
+
+@node Replying to the sender of a message, MIME with Emacs mail packages, Recovering mail files when Rmail munges them, Mail and news
+@section Rmail でリプライするときに差出人にのみ返信する方法は?
+@cindex Replying only to the sender of a message
+@cindex Sender, replying only to
+@cindex Rmail, replying to the sender of a message in
+
+@email{isaacson@@seas.upenn.edu, Ron Isaacson} は次の様に言っています。
+
+Rmail 中で @key{r} を入力したとき、標準ではもとのメールの受取人
+(@header{To:} と @header{CC:} フィールドに書かれている人)
+が @header{CC:} フィールドに挿入されます。
+プレフィクスアーギュメントを付けると(@kbd{C-u r})差出人にのみ返信します。
+しかし毎回 @kbd{C-u} を入力するのは面倒です。
+次のコードは私が見つけた最も良いコードです。
+
+@lisp
+(defun rmail-reply-t ()
+  "Reply only to the sender of the current message. (See rmail-reply.)"
+  (interactive)
+  (rmail-reply t))
+
+(add-hook 'rmail-mode-hook
+  (lambda ()
+    (define-key rmail-mode-map "r" 'rmail-reply-t)
+    (define-key rmail-mode-map "R" 'rmail-reply)))
+@end lisp
+
+@node MIME with Emacs mail packages, Automatically starting a mail or news reader, Replying to the sender of a message, Mail and news
+@section MIME を利用する方法は?
+@cindex MIME and Emacs mail packages
+@cindex Mail packages and MIME
+@cindex FAQ for MIME and Emacs
+
+Emacs MIME FAQ を見てください。
+これは @email{trey@@cs.berkeley.edu, MacDonald Hall Jackson} が保守しています。
+次のところから入手できます。
+
+@uref{http://bmrc.berkeley.edu/~trey/emacs/mime.html}
+
+VM 6.x は MIME をサポートしています。 @ref{VM} 参照。
+
+Gnus はメール・ニュースともに MIME をサポートしています
+(バージョン 5.8.1(Pterodactyl) 時点)。
+
+Rmail は Emacs 20.3 以降で MIME がサポートされていますが、
+マルチパートには対応していません。
+
+@node Automatically starting a mail or news reader, Reading news with Emacs, MIME with Emacs mail packages, Mail and news
+@section Emacs に自動的にメール・ニュースリーダを起動させる方法は?
+@cindex Mail reader, starting automatically
+@cindex News reader, starting automatically
+@cindex Starting mail/news reader automatically
+
+Gnus を起動する場合:
+
+@example
+emacs -f gnus
+@end example
+
+Rmail の場合:
+
+@example
+emacs -f rmail
+@end example
+
+Gnus を起動する便利な方法:
+
+@example
+alias gnus 'emacs -f gnus'
+gnus
+@end example
+
+@file{.emacs} ファイルからメールリーダ・ニュースリーダを起動するのは
+あさはかです。
+こうした場合、 Emacs を二つ同時に走らせると問題になります。
+また Emacs を速く起動したいときには邪魔になります。
+
+@node Reading news with Emacs, Gnus does not work with NNTP, Automatically starting a mail or news reader, Mail and news
+@section Emacs でニュースを読む方法は?
+How do I read news under Emacs?
+@cindex Reading news under Emacs
+@cindex Usenet reader in Emacs
+@cindex Gnus newsreader
+
+@kbd{M-x gnus} と入力してください。
+Info ドキュメントもあります(@ref{Learning how to do something})。
+
+@node Gnus does not work with NNTP, Viewing articles with embedded underlining, Reading news with Emacs, Mail and news
+@section Gnus が NNTP で動かないのはなぜですか?
+@cindex Gnus and NNTP
+@cindex NNTP, Gnus fails to work with
+
+NNTP 1.5.10 にはバグがあって、複数の要求が同時に NNTP サーバに送られた時に
+最初の要求だけを受け付け、それ以外の要求を無視してしまいます。
+NNTP 1.5.11 では修正されるそうです。
+
+次の様にすればこのバグを回避できます。
+
+@lisp
+(setq nntp-maximum-request 1)
+@end lisp
+
+NNTP のバージョンはニュースサーバの走っているマシンの
+NNTP ポート(通常は 119)に @command{telnet} して
+(つまり @samp{telnet @var{server-machine} 119})知ることができます。
+サーバは最初にバージョンを表示するはずです。
+終了するときは @samp{quit} と入力してください。
+
+@c yagi: どういうことか?
+他の場合については @ref{Spontaneous entry into isearch-mode} 参照。
+
+@node Viewing articles with embedded underlining, Saving a multi-part Gnus posting, Gnus does not work with NNTP, Mail and news
+@section アンダーラインの埋め込まれた記事を見る方法は(例えば ClariNews)?
+@cindex Underlining, embedded in news articles
+@cindex News articles with embedded underlining
+@cindex Embedded underlining in news articles
+
+アンダーラインが埋め込まれた記事は次の様に見えます。
+
+@example
+_^Hu_^Hn_^Hd_^He_^Hr_^Hl_^Hi_^Hn_^Hi_^Hn_^Hg
+@end example
+
+@email{abraham@@dina.kvl.dk, Per Abrahamsen} は
+次のコードを使うと良いといっています。
+このコードは Gnus で記事を読んでいる時に、実際にアンダーラインを表示させます。
+
+@lisp
+(defun gnus-article-prepare-overstrike ()
+  ;; Prepare article for overstrike commands.
+  (save-excursion
+    (set-buffer gnus-article-buffer)
+    (let ((buffer-read-only nil))
+    (goto-char (point-min))
+      (while (search-forward "\b" nil t)
+        (let ((next (following-char))
+              (previous (char-after (- (point) 2))))
+          (cond ((eq next previous)
+                 (delete-region (- (point) 2) (point))
+                 (put-text-property (point) (1+ (point))
+                                    'face 'bold))
+                ((eq next ?_)
+                 (delete-region (1- (point)) (1+ (point)))
+                 (put-text-property (1- (point)) (point)
+                                    'face 'underline))
+                ((eq previous ?_)
+                 (delete-region (- (point) 2) (point))
+                 (put-text-property (point) (1+ (point))
+                                    'face 'underline))))))))
+
+(add-hook 'gnus-article-prepare-hook 'gnus-article-prepare-overstrike)
+@end lisp
+
+最新版の Gnus では自動的にこのような変換をします。
+
+アンダーライン自体も消してしまいたい時は kbd{M-x ununderline-region} で
+消せます。
+これを自動的に行うには次のようにしてください。
+
+@lisp
+(add-hook 'gnus-article-prepare-hook
+  (lambda () (ununderline-region (point-min) (point-max))))
+@end lisp
+
+@node Saving a multi-part Gnus posting, Starting Gnus faster, Viewing articles with embedded underlining, Mail and news
+@section 分割投稿された記事をすべて保存する方法は?
+@cindex Multi-part postings in Gnus, saving
+@cindex Saving multi-part postings in Gnus
+@cindex Gnus, saving multi-part postings in
+
+@file{gnus-uu} を使ってください。
+Gnus のサマリバッファで @kbd{C-c C-v C-h} と入力すれば
+利用できるコマンドの一覧が見られます。
+
+@node Starting Gnus faster, Catching up in all newsgroups, Saving a multi-part Gnus posting, Mail and news
+@section Gnus をもっと速く起動する方法は?
+@cindex Faster, starting Gnus
+@cindex Starting Gnus faster
+@cindex Gnus, starting faster
+
+Gnus FAQ(@ref{Learning more about Gnus} 参照)より
+
+@quotation
+@email{pktiwari@@eos.ncsu.edu, Pranav Kumar Tiwari} は次の様に書いています。
+同じような質問を最近投稿して解答を貰った。その解答。
+まず新しいバージョンの gnus(5.0.4 以降)が必要。
+私が使っているのは 5.0.12 で次の設定でうまくいっている。
+
+@lisp
+(setq gnus-check-new-newsgroups nil
+      gnus-read-active-file 'some
+      gnus-nov-is-evil nil
+      gnus-select-method '(nntp gnus-nntp-server))
+@end lisp
+@end quotation
+
+@node Catching up in all newsgroups, Killing based on nonstandard headers, Starting Gnus faster, Mail and news
+@section Gnus ですべてのニュースグループを読んだことにする方法は?
+@cindex Catching up all newsgroups in Gnus
+@cindex Gnus, Catching up all newsgroups in
+
+@buffer{*Newsgroup*} バッファで @kbd{M-< C-x ( c y C-x ) M-0 C-x e} と
+入力してください。
+
+ポイントのあるところから先だけでいいときは最初の @kbd{M-<} は
+入力しないでください。
+
+@node Killing based on nonstandard headers, Removing flashing messages, Catching up in all newsgroups, Mail and news
+@section Gnus で Newsgroups/Keywords/Control ヘッダで記事を消せないのはなぜですか?
+@cindex Killing articles based on nonstandard headers
+@cindex Newsgroups header, killing articles based on
+@cindex Keywords header, killing articles based on
+@cindex Control header, killing articles based on
+
+Gnus では @header{Newsgroups:}, @header{Keywords:}, @header{Control:} ヘッダは
+``Unknown header'' フィールドです。
+
+@header{Newsgroups:} ヘッダについては簡単な回避方法があります。
+@header{Xref:} ヘッダを利用してください。
+このヘッダはクロスポストされた記事には必ずついています。
+(あなたのサイトがクロスポスト先ののグループも講読している限りは)
+
+本当にこれらのヘッダで記事を消したいときは次の様にしてください。
+
+@lisp
+(gnus-kill nil "^Newsgroups: .*\\(bad\\.group\\|worse\\.group\\)")
+@end lisp
+
+@node Removing flashing messages, Catch-up is slow in Gnus, Killing based on nonstandard headers, Mail and news
+@section 遅い接続でのすぐ消えるようなメッセージを出さない様にする方法は?
+@cindex Flashing Gnus messages, removing
+@cindex Removing flashing Gnus messages
+@cindex Slow connections causing flashing messages in Gnus
+@cindex Gnus, flashing messages in
+
+変数 @code{nntp-debug-read} を @code{nil} に設定してください。
+
+@node Catch-up is slow in Gnus, Gnus hangs for a long time, Removing flashing messages, Mail and news
+@section Gnus で記事を全部読んだことにすると時間がかかるのはなぜですか
+@cindex Slow catch up in Gnus
+@cindex Gnus is slow when catching up
+@cindex Crosspostings make Gnus catching up slow
+
+Gnus はクロスポストされた記事は他のグループについても
+読んだことにするからです。
+この機能は変数 @code{gnus-use-cross-reference} で制御できます。
+
+@node Gnus hangs for a long time, Learning more about Gnus, Catch-up is slow in Gnus, Mail and news
+@section Gnus で記事を投稿するとすごく時間がかかるのはなぜですか?
+@cindex Hangs in Gnus
+@cindex Gnus hangs while posting
+@cindex Posting, Gnus hangs wile
+
+@email{tale@@uunet.uu.net, David Lawrence} は次の様に説明しています。
+
+@quotation
+この問題はほとんどの場合 C News と NNTP の間の通信方法によります。
+NNTP の POST コマンドは投稿が成功したかどうかを返すために C News の
+@command{inews} をバックグラウンドで動かさずに完了するまで待ちます。
+(このことと、システムによっては成功したかどうかを返さない
+ことがあることとは別の問題です)
+@command{inews} は @command{relaynews} を呼び出すので長い時間かかります。
+@command{relaynews} は他の @command{relaynews} が動いていると
+ロックが解法されるまで待ちます。
+
+@command{inews} が @command{relaynews} を使わずに @command{newsspool} を
+使う様にするとと良いでしょう。
+これによりエラー検出ができなくなる場合もありますが、ほとんどの場合
+@command{inews} がエラーを検出した場合と同程度にうまくいくきます。
+C News を使っている人たちは @command{inews} を色々と高速化しているので、
+最新のバージョンではもっと速くなっているでしょう。
+@end quotation
+
+@node Learning more about Gnus,  , Gnus hangs for a long time, Mail and news
+@section Gnus についてもっと知りたいのですが。 @emph{(2004/07/29)}
+@cindex FAQ for Gnus
+@cindex Gnus FAQ
+@cindex Learning more about Gnus
+
+Gnus に関する情報が欲しければ，Gnus に付属している Gnus マニュアルや FAQ を参照
+してください．
+
+@node Concept index,  , Mail and news, Top
+@unnumbered Concept Index
+@printindex cp
+
+@contents
+@bye
+
+@ignore
+   arch-tag: fee0d62d-06cf-43d8-ac21-123408eaf10f
+@end ignore

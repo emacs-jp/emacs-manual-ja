@@ -1,0 +1,699 @@
+@c =============================================================
+@c = 元 翻 訳: 鈴木悦子＠津田塾大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,97,2000,2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Windows, Frames, Buffers, Top
+@c @chapter Multiple Windows
+@c @cindex windows in Emacs
+@c @cindex multiple windows in Emacs
+@chapter 複数のウィンドウ @emph{(2004/03/23)}
+@cindex Emacsのウィンドウ
+@cindex Emacsの複数のウィンドウ
+
+@c   Emacs can split a frame into two or many windows.  Multiple windows
+@c can display parts of different buffers, or different parts of one
+@c buffer.  Multiple frames always imply multiple windows, because each
+@c frame has its own set of windows.  Each window belongs to one and only
+@c one frame.
+Emacsは、フレームを2つ以上のウィンドウに分割できます。
+複数のウィンドウは、異なるバッファの一部分、あるいは、
+1つのバッファの異なる部分を表示することができます。
+複数フレームはつねに複数ウィンドウを意味します。
+というのは、各フレームはそれ独自のウィンドウの集合を持つからです。
+各ウィンドウはたった1つのフレームだけに属します。
+
+@menu
+* Basic Window::        Introduction to Emacs windows.
+* Split Window::        New windows are made by splitting existing windows.
+* Other Window::        Moving to another window or doing something to it.
+* Pop Up Window::       Finding a file or buffer in another window.
+* Force Same Window::   Forcing certain buffers to appear in the selected
+                          window rather than in another window.
+* Change Window::       Deleting windows and changing their sizes.
+* Window Convenience::  Convenience functions for window handling.
+@end menu
+
+@node Basic Window
+@c @section Concepts of Emacs Windows
+@section Emacsウィンドウの概念 @emph{(2004/03/23)}
+
+@c   Each Emacs window displays one Emacs buffer at any time.  A single
+@c buffer may appear in more than one window; if it does, any changes in
+@c its text are displayed in all the windows where it appears.  But the
+@c windows showing the same buffer can show different parts of it, because
+@c each window has its own value of point.
+各Emacsウィンドウは、いつでも1つのEmacsバッファを表示します。
+1つのバッファは複数のウィンドウに表示できます。
+その場合、そのテキストの変更は、そのバッファを表示している
+すべてのウィンドウで表示されます。
+しかし、同じバッファを表示している各ウィンドウでは
+バッファの異なる部分を表示することができます。
+なぜなら、各ウィンドウはそれ自身のポイント値を持つからです。
+
+@c @cindex selected window
+@cindex 選択されているウィンドウ
+@c   At any time, one of the windows is the @dfn{selected window}; the
+@c buffer this window is displaying is the current buffer.  The terminal's
+@c cursor shows the location of point in this window.  Each other window
+@c has a location of point as well, but since the terminal has only one
+@c cursor there is no way to show where those locations are.  When multiple
+@c frames are visible in X, each frame has a cursor which appears
+@c in the frame's selected window.  The cursor in the selected frame is
+@c solid; the cursor in other frames is a hollow box.
+どんなときでも、1つのウィンドウだけが@dfn{選択されたウィンドウ}です。
+そのウィンドウに表示されているバッファがカレントバッファです。
+端末のカーソルは、そのウィンドウのポイント位置を示します。
+別の各ウィンドウにもそれぞれ同じようにポイント位置がありますが、
+端末にはカーソルは1つしかないので、
+それらの位置を示す方法がありません。
+Xウィンドウシステムで複数フレームを表示しているときには、
+各フレームには、そのフレームで選択されたウィンドウにカーソルがあります。
+選択されているフレームのカーソルは塗り潰されている矩形で、
+それ以外のフレームのカーソルは中空の矩形です。
+
+@c   Commands to move point affect the value of point for the selected Emacs
+@c window only.  They do not change the value of point in any other Emacs
+@c window, even one showing the same buffer.  The same is true for commands
+@c such as @kbd{C-x b} to change the current buffer in the selected window;
+@c they do not affect other windows at all.  However, there are other commands
+@c such as @kbd{C-x 4 b} that select a different window and switch buffers in
+@c it.  Also, all commands that display information in a window, including
+@c (for example) @kbd{C-h f} (@code{describe-function}) and @kbd{C-x C-b}
+@c (@code{list-buffers}), work by switching buffers in a nonselected window
+@c without affecting the selected window.
+ポイントを移動するコマンドは、選択されているEmacsウィンドウのポイント
+値に対してだけ影響します。
+たとえ同じバッファを表示しているとしても、
+他のEmacsウィンドウのポイント値は変更しません。
+選択しているウィンドウでカレントバッファを変更する
+@kbd{C-x b}といったコマンドでも同様です。
+他のウィンドウには少しも影響しません。
+しかし、別のウィンドウを選択してそのバッファを切り替える
+@kbd{C-x 4 b}のようなコマンドもあります。
+さらに、（たとえば）@kbd{C-h f}（@code{describe-function}）や
+@kbd{C-x C-b}（@code{list-buffers}）などを含む
+ウィンドウに情報を表示するコマンドは、
+選択されているウィンドウに影響することなく、
+選択されていないウィンドウのバッファを切り替えます。
+
+@c   When multiple windows show the same buffer, they can have different
+@c regions, because they can have different values of point.  However,
+@c they all have the same value for the mark, because each buffer has
+@c only one mark position.
+複数のウィンドウが同じバッファを表示するとき、
+異なるリージョンを持つことができます。
+というのは、各ウィンドウは、それぞれ異なるポイント値を持てるからです。
+しかしながら、各バッファにはたった1つのマーク位置しかないため、
+マークの値はすべて同じになります。
+
+@c   Each window has its own mode line, which displays the buffer name,
+@c modification status and major and minor modes of the buffer that is
+@c displayed in the window.  @xref{Mode Line}, for full details on the mode
+@c line.
+各ウィンドウにはそれ専用のモード行があり、
+そこにはウィンドウに表示しているバッファの名前、修正状態、
+バッファのメジャーモード、バッファのマイナモードを表示します。
+モード行に関して詳しくは、@xref{Mode Line}。
+
+@iftex
+@break
+@end iftex
+
+@node Split Window
+@c @section Splitting Windows
+@section ウィンドウの分割 @emph{(2004/03/23)}
+
+@table @kbd
+@item C-x 2
+@c Split the selected window into two windows, one above the other
+@c (@code{split-window-vertically}).
+選択されているウィンドウを上下2つに分割する。
+（@code{split-window-vertically}）。
+@item C-x 3
+@c Split the selected window into two windows positioned side by side
+@c (@code{split-window-horizontally}).
+選択されているウィンドウを左右2つに分割する
+（@code{split-window-horizontally}）。
+@item C-Mouse-2
+@c In the mode line or scroll bar of a window, split that window.
+ウィンドウのモード行やスクロールバー上の位置で、
+そのウィンドウを分割する。
+@end table
+
+@kindex C-x 2
+@findex split-window-vertically
+@c   The command @kbd{C-x 2} (@code{split-window-vertically}) breaks the
+@c selected window into two windows, one above the other.  Both windows start
+@c out displaying the same buffer, with the same value of point.  By default
+@c the two windows each get half the height of the window that was split; a
+@c numeric argument specifies how many lines to give to the top window.
+コマンド@kbd{C-x 2}（@code{split-window-vertically}）は、
+選択されているウィンドウを上下2つのウィンドウに分割します。
+どちらのウィンドウも同じポイント値、同じバッファを表示するところから
+始まります。
+デフォルトでは2つのウィンドウは、
+それぞれ、分割されるウィンドウの半分の高さになります。
+数引数は上のウィンドウの行数を指定します。
+
+@kindex C-x 3
+@findex split-window-horizontally
+@c   @kbd{C-x 3} (@code{split-window-horizontally}) breaks the selected
+@c window into two side-by-side windows.  A numeric argument specifies how
+@c many columns to give the one on the left.  A line of vertical bars
+@c separates the two windows.  Windows that are not the full width of the
+@c screen have mode lines, but they are truncated.  On terminals where
+@c Emacs does not support highlighting, truncated mode lines sometimes do
+@c not appear in inverse video.
+@kbd{C-x 3}（@code{split-window-horizontally}）は、
+選択されているウィンドウを左右2つのウィンドウに分割します。
+数引数は左側のウィンドウの桁数を指定します。
+2つのウィンドウはスクロールバーで分けられます。
+画面幅に満たないウィンドウのモード行は、切り詰められます。
+Emacsが強調表示を扱えない端末では、
+切り詰めたモード行が反転表示されない場合があります。
+
+@c @kindex C-Mouse-2 @r{(scroll bar)}
+@kindex C-Mouse-2 @r{（スクロールバー）}
+@c   You can split a window horizontally or vertically by clicking
+@c @kbd{C-Mouse-2} in the mode line or the scroll bar.  (This does not
+@c work in scroll bars implemented by X toolkits.)  The line of splitting
+@c goes through the place where you click: if you click on the mode line,
+@c the new scroll bar goes above the spot; if you click in the scroll
+@c bar, the mode line of the split window is side by side with your
+@c click.
+モード行やスクロールバーで@kbd{C-Mouse-2}をクリックすることで、
+ウィンドウを左右や上下に分割できます(この機能はX toolkitsによるスクロールバーで
+は動作しません)。  
+分割する線はクリックした位置を通ります。
+モード行でクリックすると、新しいスクロールバーはクリックした点上を通ります。
+スクロールバーでクリックすると、
+分割したウィンドウのモード行はクリックした位置に並びます。 
+
+@vindex truncate-partial-width-windows
+@c   When a window is less than the full width, text lines too long to fit are
+@c frequent.  Continuing all those lines might be confusing.  The variable
+@c @code{truncate-partial-width-windows} can be set non-@code{nil} to force
+@c truncation in all windows less than the full width of the screen,
+@c independent of the buffer being displayed and its value for
+@c @code{truncate-lines}.  @xref{Continuation Lines}.@refill
+ウィンドウの幅が十分でないと、長すぎて行に入りきらないテキスト行が
+多くなります。
+これらの行すべてを継続すると混乱してしまうかもしれません。
+変数@code{truncate-partial-width-windows}に@code{nil}以外を設定すると、
+画面幅に満たないすべてのウィンドウで切り詰めを強制できます。
+これは、表示されているバッファや@code{truncate-lines}の値とは独立しています。
+@xref{Continuation Lines}。
+
+@c   Horizontal scrolling is often used in side-by-side windows.
+@c @xref{Display}.
+水平スクロールは左右に並べたウィンドウでよく使われます。
+@xref{Display}。
+
+@vindex split-window-keep-point
+@c   If @code{split-window-keep-point} is non-@code{nil}, the default, both
+@c of the windows resulting from @kbd{C-x 2} inherit the value of point
+@c from the window that was split.  This means that scrolling is
+@c inevitable.  If this variable is @code{nil}, then @kbd{C-x 2} tries to
+@c avoid scrolling the text currently visible on the screen, by putting
+@c point in each window at a position already visible in the window.  It
+@c also selects whichever window contain the screen line that the cursor
+@c was previously on.  Some users prefer the latter mode on slow
+@c terminals.
+@code{split-window-keep-point}の値が@code{nil}以外（デフォルト）ならば、
+@kbd{C-x 2}で分割した2つのウィンドウは、
+分割前のウィンドウのポイント値を継承します。
+つまり、スクロールを避けられません。
+この変数が@code{nil}ならば、
+@kbd{C-x 2}は、画面上のテキストが移動しないように、
+各ウィンドウで見えている部分にポイントを移動しようと試みます。
+また、分割前にカーソルがあった行を表示しているウィンドウを選択します。
+遅い端末では後者の動作を好むユーザーもいます。
+
+@node Other Window
+@c @section Using Other Windows
+@section 別のウィンドウの使い方 @emph{(2004/03/23)}
+
+@table @kbd
+@item C-x o
+@c Select another window (@code{other-window}).  That is @kbd{o}, not zero.
+別のウィンドウを選択する（@code{other-window}）。
+（小文字の）@kbd{o}であってゼロではない。
+@item C-M-v
+@c Scroll the next window (@code{scroll-other-window}).
+つぎのウィンドウをスクロールする（@code{scroll-other-window}）。
+@item M-x compare-windows
+@c Find next place where the text in the selected window does not match
+@c the text in the next window.
+選択されているウィンドウのテキストとつぎのウィンドウのテキストで
+一致していないつぎの箇所を探す。
+@item Mouse-1
+@c @kbd{Mouse-1}, in a window's mode line, selects that window
+@c but does not move point in it (@code{mouse-select-window}).
+ウィンドウのモード行で@kbd{Mouse-1}をクリックすると、
+そのウィンドウを選択するがポイントは移動しない（@code{mouse-select-window}）。
+@end table
+
+@kindex C-x o
+@findex other-window
+@c   To select a different window, click with @kbd{Mouse-1} on its mode
+@c line.  With the keyboard, you can switch windows by typing @kbd{C-x o}
+@c (@code{other-window}).  That is an @kbd{o}, for ``other,'' not a zero.
+@c When there are more than two windows, this command moves through all the
+@c windows in a cyclic order, generally top to bottom and left to right.
+@c After the rightmost and bottommost window, it goes back to the one at
+@c the upper left corner.  A numeric argument means to move several steps
+@c in the cyclic order of windows.  A negative argument moves around the
+@c cycle in the opposite order.  When the minibuffer is active, the
+@c minibuffer is the last window in the cycle; you can switch from the
+@c minibuffer window to one of the other windows, and later switch back and
+@c finish supplying the minibuffer argument that is requested.
+@c @xref{Minibuffer Edit}.
+別のウィンドウを選択するには、そのモード行で@kbd{Mouse-1}をクリックします。
+キーボードからは、@kbd{C-x o}（@code{other-window}）で
+ウィンドウを切り替えられます。
+これは「other」の@kbd{o}であってゼロではありません。
+2つ以上のウィンドウがあるときは、このコマンドはすべてのウィンドウを、
+一般的には、上から下へ、左から右へ巡回します。
+もっとも右下のウィンドウのつぎは、左上隅にあるウィンドウに戻ります。
+数引数は、ウィンドウを巡回する回数を意味します。
+負の引数では逆順に巡回します。
+ミニバッファを使っているときには、
+ミニバッファが巡回の最後のウィンドウになります。
+ミニバッファウィンドウから別のウィンドウに切り替えて、
+あとで戻ってきて、ミニバッファ引数が要求しているものを与えてから終了できます。
+@xref{Minibuffer Edit}。
+
+@kindex C-M-v
+@findex scroll-other-window
+@c   The usual scrolling commands (@pxref{Display}) apply to the selected
+@c window only, but there is one command to scroll the next window.
+@c @kbd{C-M-v} (@code{scroll-other-window}) scrolls the window that
+@c @kbd{C-x o} would select.  It takes arguments, positive and negative,
+@c like @kbd{C-v}.  (In the minibuffer, @kbd{C-M-v} scrolls the window
+@c that contains the minibuffer help display, if any, rather than the
+@c next window in the standard cyclic order.)
+通常のスクロールコマンド（@pxref{Display}）は、
+選択されているウィンドウのみに作用しますが、
+つぎのウィンドウをスクロールするコマンドが1つあります。
+@kbd{C-M-v}（@code{scroll-other-window}）は、
+@kbd{C-x o}が選択するウィンドウをスクロールします。
+@kbd{C-v}のように正負の引数を取ります。
+（ミニバッファでは、ミニバッファヘルプがあると、
+標準の巡回順でつぎのウィンドウではなくて、
+ミニバッファヘルプを表示しているウィンドウをスクロールする。）
+
+@c   The command @kbd{M-x compare-windows} lets you compare two files or
+@c buffers visible in two windows, by moving through them to the next
+@c mismatch.  @xref{Comparing Files}, for details.
+コマンド@kbd{M-x compare-windows}は、
+2つのウィンドウで見えている2つのファイル、つまり、バッファを比較して、
+一致しないつぎの箇所へ移動します。
+詳細は、@xref{Comparing Files}。
+
+@vindex mouse-autoselect-window
+@c   If you set @code{mouse-autoselect-window} to a non-@code{nil} value,
+@c moving the mouse into a different window selects that window.  This
+@c feature is off by default.
+@code{mouse-autoselect-window} を @code{nil} 以外にすると，別のウィンドウ上にマ
+ウスを移動させることでウィンドウを選択できます．この機能はデフォルトではオフになっ
+ています．
+
+@node Pop Up Window
+@c @section Displaying in Another Window
+@section 別のウィンドウに表示する
+
+@c @cindex selecting buffers in other windows
+@cindex 別のウィンドウにバッファを選択する
+@kindex C-x 4
+@c   @kbd{C-x 4} is a prefix key for commands that select another window
+@c (splitting the window if there is only one) and select a buffer in that
+@c window.  Different @kbd{C-x 4} commands have different ways of finding the
+@c buffer to select.
+@kbd{C-x 4}は、（ウィンドウが1つだけならば分割して）
+別のウィンドウを選択して、そのウィンドウでバッファを選択するコマンドの
+プレフィックスキーです。
+異なる@kbd{C-x 4}コマンドは、異なる方法で選択するバッファを探します。
+
+@table @kbd
+@item C-x 4 b @var{bufname} @key{RET}
+@c Select buffer @var{bufname} in another window.  This runs
+@c @code{switch-to-buffer-other-window}.
+別のウィンドウでバッファ@var{bufname}を選択する。
+このコマンドは、@code{switch-to-buffer-other-window}を実行する。
+@item C-x 4 C-o @var{bufname} @key{RET}
+@c Display buffer @var{bufname} in another window, but
+@c don't select that buffer or that window.  This runs
+@c @code{display-buffer}.
+別のウィンドウでバッファ@var{bufname}を表示するが、
+そのウィンドウもそのバッファも選択しない。
+このコマンドは、@code{display-buffer}を実行する。
+@item C-x 4 f @var{filename} @key{RET}
+@c Visit file @var{filename} and select its buffer in another window.  This
+@c runs @code{find-file-other-window}.  @xref{Visiting}.
+ファイル@var{filename}を訪問して、
+別のウィンドウでそのバッファを選択する。
+このコマンドは、@code{find-file-other-window}を実行する。
+@pxref{Visiting}。
+@item C-x 4 d @var{directory} @key{RET}
+@c Select a Dired buffer for directory @var{directory} in another window.
+@c This runs @code{dired-other-window}.  @xref{Dired}.
+別のウィンドウでディレクトリ@var{directory}に対する
+diredバッファを選択する。
+このコマンドは、@code{dired-other-window}を実行する。
+@pxref{Dired}。
+@item C-x 4 m
+@c Start composing a mail message in another window.  This runs
+@c @code{mail-other-window}; its same-window analogue is @kbd{C-x m}
+@c (@pxref{Sending Mail}).
+別のウィンドウでメイルメッセージを作成し始める。
+このコマンドは、@code{mail-other-window}を実行する。
+これは、同じウィンドウを使う@kbd{C-x m}に類似したもの。
+（@pxref{Sending Mail}）。
+@item C-x 4 .
+@c Find a tag in the current tags table, in another window.  This runs
+@c @code{find-tag-other-window}, the multiple-window variant of @kbd{M-.}
+@c (@pxref{Tags}).
+別のウィンドウで現在のタグテーブルのタグを探す。
+このコマンドは、@code{find-tag-other-window}を実行するが、
+@kbd{M-.}の複数ウィンドウ向けの変種
+（@pxref{Tags}）。
+@item C-x 4 r @var{filename} @key{RET}
+@c Visit file @var{filename} read-only, and select its buffer in another
+@c window.  This runs @code{find-file-read-only-other-window}.
+@c @xref{Visiting}.
+ファイル@var{filename}を読み出し専用で訪問し、
+別のウィンドウでそのバッファを選択する。
+このコマンドは @code{find-file-read-only-other-window}を実行する。
+@pxref{Visiting}。
+@end table
+
+@node Force Same Window
+@c @section Forcing Display in the Same Window
+@section 同じウィンドウへの強制表示
+
+@c   Certain Emacs commands switch to a specific buffer with special
+@c contents.  For example, @kbd{M-x shell} switches to a buffer named
+@c @samp{*Shell*}.  By convention, all these commands are written to pop up
+@c the buffer in a separate window.  But you can specify that certain of
+@c these buffers should appear in the selected window.
+ある種のEmacsコマンドは、特別な内容を持つ特有のバッファに切り替えます。
+たとえば、 @kbd{M-x shell}は、@samp{*Shell*}という名前のバッファに切り替えます。
+慣習では、これらのすべてのコマンドは、
+別のウィンドウにバッファを立ち上げるようにプログラムされています。
+しかし、これらのバッファのいくつかを選択されている
+ウィンドウに表示するように指定できます。
+
+@vindex same-window-buffer-names
+@c   If you add a buffer name to the list @code{same-window-buffer-names},
+@c the effect is that such commands display that particular buffer by
+@c switching to it in the selected window.  For example, if you add the
+@c element @code{"*grep*"} to the list, the @code{grep} command will
+@c display its output buffer in the selected window.
+バッファ名をリスト@code{same-window-buffer-names}に追加すると、
+そういったコマンドは、選択されているウィンドウで特定のバッファに切り替えます。
+たとえば、そのリストに要素@code{"*grep*"}を追加すれば、
+@code{grep}コマンドは、選択されているウィンドウにその出力バッファを表示します。
+
+@c   The default value of @code{same-window-buffer-names} is not
+@c @code{nil}: it specifies buffer names @samp{*info*}, @samp{*mail*} and
+@c @samp{*shell*} (as well as others used by more obscure Emacs packages).
+@c This is why @kbd{M-x shell} normally switches to the @samp{*shell*}
+@c buffer in the selected window.  If you delete this element from the
+@c value of @code{same-window-buffer-names}, the behavior of @kbd{M-x
+@c shell} will change---it will pop up the buffer in another window
+@c instead.
+@code{same-window-buffer-names}のデフォルト値は@code{nil}ではありません。
+（古いEmacsパッケージが使うものも含めて）
+バッファ名、@samp{*info*}、@samp{*mail*}、@samp{*shell*}を指定してあります。
+このため、@kbd{M-x shell}が通常は選択されているウィンドウで
+@samp{*shell*}バッファに切り替えるのです。
+もしこの要素を@code{same-window-buffer-names}から削除すると、
+ @kbd{M-x shell}のふるまいは変わります。
+かわりに別のウィンドウでバッファを立ち上げます。
+
+@vindex same-window-regexps
+@c   You can specify these buffers more generally with the variable
+@c @code{same-window-regexps}.  Set it to a list of regular expressions;
+@c then any buffer whose name matches one of those regular expressions is
+@c displayed by switching to it in the selected window.  (Once again, this
+@c applies only to buffers that normally get displayed for you in a
+@c separate window.)  The default value of this variable specifies Telnet
+@c and rlogin buffers.
+これらのバッファを、より一般的に変数@code{same-window-regexps}で指定できます。
+この変数には、正規表現のリストを設定します。
+そうすると、正規表現の1つに一致するバッファはどれも、
+選択されているウィンドウでバッファを切り替えて表示します。
+（繰り返すが、これは、普通は別のウィンドウに
+表示されるバッファのみにあてはまる。）
+この変数のデフォルト値には、telnetバッファとrloginバッファが指定されています。
+
+@c   An analogous feature lets you specify buffers which should be
+@c displayed in their own individual frames.  @xref{Special Buffer Frames}.
+類似の機能で、独立したフレームに表示させるバッファを指定することができます。
+@xref{Special Buffer Frames}。
+
+@node Change Window
+@c @section Deleting and Rearranging Windows
+@section ウィンドウの削除と再配置 @emph{(2004/03/23)}
+
+@table @kbd
+@item C-x 0
+@c Delete the selected window (@code{delete-window}).  The last character
+@c in this key sequence is a zero.
+選択されているウィンドウを削除する（@code{delete-window}）。
+このキー列の最後の文字はゼロ。
+@item C-x 1
+@c Delete all windows in the selected frame except the selected window
+@c (@code{delete-other-windows}).
+選択されているウィンドウを除いて、
+選択されているフレームのウィンドウすべてを削除する
+（@code{delete-other-windows}）。
+@item C-x 4 0
+@c Delete the selected window and kill the buffer that was showing in it
+@c (@code{kill-buffer-and-window}).  The last character in this key
+@c sequence is a zero.
+選択されているウィンドウを削除し、
+その中に表示されているバッファを削除する
+（@code{kill-buffer-and-window}）。
+このキー列の最後の文字はゼロ。
+@item C-x ^
+@c Make selected window taller (@code{enlarge-window}).
+選択されているウィンドウの高さを大きくする（@code{enlarge-window}）。
+@item C-x @}
+@c Make selected window wider (@code{enlarge-window-horizontally}).
+選択されているウィンドウの幅を広くする（@code{enlarge-window-horizontally}）。
+@item C-x @{
+@c Make selected window narrower (@code{shrink-window-horizontally}).
+選択されているウィンドウの幅を狭くする（@code{shrink-window-horizontally}）。
+@item C-x -
+@c Shrink this window if its buffer doesn't need so many lines
+@c (@code{shrink-window-if-larger-than-buffer}).
+バッファがそんなに多くの行を必要としないならウィンドウを縮める
+（@code{shrink-window-if-larger-than-buffer}）。
+@item C-x +
+@c Make all windows the same height (@code{balance-windows}).
+すべてのウィンドウを同じ高さにする（@code{balance-windows}）。
+@item Drag-Mouse-1
+@c Dragging a window's mode line up or down with @kbd{Mouse-1} changes
+@c window heights.
+ウィンドウのモード行を@kbd{Mouse-1}で上下にドラッグして、
+ウィンドウの高さを変更する。
+@item Mouse-2
+@c @kbd{Mouse-2} in a window's mode line deletes all other windows in the frame
+@c (@code{mouse-delete-other-windows}).
+ウィンドウのモード行で@kbd{Mouse-2}をクリックすると、
+フレーム内のそのウィンドウ以外のすべてのウィンドウを削除する
+（@code{mouse-delete-other-windows}）。
+@item Mouse-3
+@c @kbd{Mouse-3} in a window's mode line deletes that window
+@c (@code{mouse-delete-window}), unless the frame has only one window, in
+@c which case it buries the current buffer instead and switches to another
+@c buffer.
+ウィンドウのモード行で@kbd{Mouse-3}をクリックすると、
+そのウィンドウを削除する
+（@code{mouse-delete-window}）。フレームにウィンドウが1個しかなければ，カレント
+バッファを他のバッファに切り替える．
+@end table
+
+@kindex C-x 0
+@findex delete-window
+@c   To delete a window, type @kbd{C-x 0} (@code{delete-window}).  (That is
+@c a zero.)  The space occupied by the deleted window is given to an
+@c adjacent window (but not the minibuffer window, even if that is active
+@c at the time).  Once a window is deleted, its attributes are forgotten;
+@c only restoring a window configuration can bring it back.  Deleting the
+@c window has no effect on the buffer it used to display; the buffer
+@c continues to exist, and you can select it in any window with @kbd{C-x
+@c b}.
+ウィンドウを削除するには、@kbd{C-x 0}（@code{delete-window}）と打ちます
+（これはゼロ）。
+削除されたウィンドウが占めていた場所は、隣接のウィンドウに与えられます。
+（ただし、ミニバッファのウィンドウを使っている場合でも、
+ミニバッファのウィンドウには与えない。）
+ウィンドウを一度削除すると、その属性は失われます。
+ウィンドウの構成情報を回復する以外にウィンドウをもとに戻す方法はありません。
+ウィンドウを削除しても、そこに表示していたバッファには何の影響もありません。
+バッファは存在し続け、どのウィンドウへでも@kbd{C-x b}で選択できます。
+
+@findex kill-buffer-and-window
+@kindex C-x 4 0
+@c   @kbd{C-x 4 0} (@code{kill-buffer-and-window}) is a stronger command
+@c than @kbd{C-x 0}; it kills the current buffer and then deletes the
+@c selected window.
+@kbd{C-x 4 0}（@code{kill-buffer-and-window}）は、
+@kbd{C-x 0}よりも強いコマンドです。
+これは、カレントバッファを削除し、そこで選択されていたウィンドウを削除します。
+
+@kindex C-x 1
+@findex delete-other-windows
+@c   @kbd{C-x 1} (@code{delete-other-windows}) is more powerful in a
+@c different way; it deletes all the windows except the selected one (and
+@c the minibuffer); the selected window expands to use the whole frame
+@c except for the echo area.
+@kbd{C-x 1}（@code{delete-other-windows}）は、
+別の意味でさらに強力です。
+選択されているウィンドウ（とミニバッファ）を除いて、
+すべてのウィンドウを削除します。
+選択されているウィンドウは、エコー領域を除いたフレーム全体を
+使うように広がります。
+
+@c   You can also delete a window by clicking on its mode line with
+@c @kbd{Mouse-2}, and delete all the windows in a frame except one window
+@c by clicking on that window's mode line with @kbd{Mouse-3}.
+モード行で@kbd{Mouse-2}をクリックしても、そのウィンドウを削除できます。
+モード行で@kbd{Mouse-3}をクリックすると、そのウィンドウを除いて、
+フレーム内のすべてのウィンドウを削除します。
+
+@c   The easiest way to adjust window heights is with a mouse.  If you
+@c press @kbd{Mouse-1} on a mode line, you can drag that mode line up or
+@c down, changing the heights of the windows above and below it.
+ウィンドウの高さを調節するもっとも簡単な方法は、マウスを使うことです。
+モード行で@kbd{Mouse-1}を押し下げてモード行を上下にドラッグすると、
+ウィンドウの高さを変更できます。
+
+@kindex C-x ^
+@findex enlarge-window
+@kindex C-x @}
+@findex enlarge-window-horizontally
+@vindex window-min-height
+@vindex window-min-width
+@c   To readjust the division of space among vertically adjacent windows,
+@c use @kbd{C-x ^} (@code{enlarge-window}).  It makes the currently
+@c selected window get one line bigger, or as many lines as is specified
+@c with a numeric argument.  With a negative argument, it makes the
+@c selected window smaller.  @kbd{C-x @}}
+@c (@code{enlarge-window-horizontally}) makes the selected window wider by
+@c the specified number of columns.  @kbd{C-x @{}
+@c (@code{shrink-window-horizontally}) makes the selected window narrower
+@c by the specified number of columns.
+上下に接しているウィンドウの分割を再調整するには、
+@kbd{C-x ^}（@code{enlarge-window}）を使います。
+このコマンドは、現在選択されているウィンドウを1行だけ、あるいは、
+数引数分の行数だけ大きくします。
+負の引数を指定すると、選択されているウィンドウは小さくなります。
+@kbd{C-x @}}（@code{enlarge-window-horizontally}）は、
+選択されているウィンドウを指定された桁数分だけ広くします。
+@kbd{C-x @{}（@code{shrink-window-horizontally}）は、
+選択されているウィンドウを指定された桁数分だけ狭くします。
+
+@c   When you make a window bigger, the space comes from one of its
+@c neighbors.  If this makes any window too small, it is deleted and its
+@c space is given to an adjacent window.  The minimum size is specified by
+@c the variables @code{window-min-height} and @code{window-min-width}.
+ウィンドウを大きくするとき、その場所は隣のウィンドウから取ります。
+その結果、ウィンドウが小さくなりすぎるとそのウィンドウは削除され、
+その場所を隣接するウィンドウに与えます。
+最小の大きさは変数@code{window-min-height}と
+@code{window-min-width}で指定します。
+
+@kindex C-x -
+@findex shrink-window-if-larger-than-buffer
+@c   The command @kbd{C-x -} (@code{shrink-window-if-larger-than-buffer})
+@c reduces the height of the selected window, if it is taller than
+@c necessary to show the whole text of the buffer it is displaying.  It
+@c gives the extra lines to other windows in the frame.
+コマンド@kbd{C-x -}（@code{shrink-window-if-larger-than-buffer}）は、
+選択されているウィンドウの高さが、表示しているバッファのテキスト全体を
+表示するために必要な高さよりも大きい場合には、
+その高さを縮めます。
+余った行はフレーム内の他のウィンドウに与えられます。
+
+@kindex C-x +
+@findex balance-windows
+@c   You can also use @kbd{C-x +} (@code{balance-windows}) to even out the
+@c heights of all the windows in the selected frame.
+選択されているフレーム内のすべてのウィンドウの高さをすべて同じにするには、
+@kbd{C-x +}（@code{balance-windows}）を使えます。
+
+@node Window Convenience
+@c @section Window Handling Convenience Features and Customization
+@section ウィンドウ関連の便利な機能とカスタマイズ @emph{(2004/03/23)}
+
+@findex winner-mode
+@cindex Winner mode
+@cindex mode, Winner
+@cindex undoing window configuration changes
+@cindex ウィンドウ変更のアンドゥ
+@cindex window configuration changes, undoing
+@c   @kbd{M-x winner-mode} is a global minor mode that records the
+@c changes in the window configuration (i.e. how the frames are
+@c partitioned into windows), so that you can ``undo'' them.  To undo,
+@c use @kbd{C-x left} (@code{winner-undo}).  If you change your mind
+@c while undoing, you can redo the changes you had undone using @kbd{C-x
+@c right} (@code{M-x winner-redo}).  Another way to enable Winner mode is
+@c by customizing the variable @code{winner-mode}.
+@kbd{M-x winner-mode} はグローバルマイナーモードで，ウィンドウの設定(つまり，フ
+レームがどのように分割されたかなどの情報)を記録します．このため，ウィンドウ分割
+などのアンドゥが可能になるのです．アンドゥを行うためには，@kbd{C-x left}
+(@code{winner-undo}) を実行します．アンドゥを取り消す(リドゥ)は @kbd{C-x right}
+(@code{M-x winner-redo}) で行います．@code{winner-mode} を有効にする他の方法とし
+て @code{winner-mode} をカスタマイズする方法もあります．
+
+@cindex Windmove package
+@cindex directional window selection
+@findex windmove-right
+@findex windmove-default-keybindings
+@c   The Windmove commands move directionally between neighboring windows in
+@c a frame.  @kbd{M-x windmove-right} selects the window immediately to the
+@c right of the currently selected one, and similarly for the ``left,'' ``up,''
+@c and ``down'' counterparts.  @kbd{M-x windmove-default-keybindings} binds
+@c these commands to @kbd{S-right} etc.  (Not all terminals support shifted
+@c arrow keys, however.)
+Windmove コマンドによりフレーム内で隣接するウィンドウ間を直接往き来できるように
+なります．例えば，@kbd{M-x windmove-right} は現在選択しているウィンドウの右にあ
+るウィンドウを選択できます．同様のコマンドとして``left''，``up''，``down''がそれ
+ぞれ用意されています．@kbd{M-x windmove-default-keybindings} を実行すると，これ
+らのコマンドが @kbd{S-right} のようなキーにバインドされます．(ただし，すべての端
+末で Shift を押しながらカーソルキーを入力するようなキーが有効になるとは限りませ
+ん)
+
+@c   Follow minor mode (@kbd{M-x follow-mode}) synchronizes several
+@c windows on the same buffer so that they always display adjacent
+@c sections of that buffer.  @xref{Follow Mode}.
+「Follow minor mode」(@kbd{M-x follow-mode}) は同じバッファを複数のウィンドウで
+同時に同期して表示させる機能です．このため，バッファの隣接したセクションが表示さ
+れることになります．@xref{Follow Mode}．
+
+@vindex scroll-all-mode
+@cindex scrolling windows together
+@cindex Scroll-all mode
+@cindex mode, Scroll-all
+@c   @kbd{M-x scroll-all-mode} provides commands to scroll all visible
+@c windows together.  You can also turn it on by customizing the variable
+@c @code{scroll-all-mode}.  The commands provided are @kbd{M-x
+@c scroll-all-scroll-down-all}, @kbd{M-x scroll-all-page-down-all} and
+@c their corresponding ``up'' equivalents.  To make this mode useful,
+@c you should bind these commands to appropriate keys.
+@kbd{M-x scroll-all-mode} は現在表示されているウィンドウをすべて同時にスクロール
+させる機能です．変数 @code{scroll-all-mode} をカスタマイズすることで有効にできま
+す．このモードは @kbd{M-x scroll-all-scroll-down-all}, @kbd{M-x
+scroll-all-page-down-all} と``up'' に対応するコマンドを提供します．このモードを
+便利にするために，これらのコマンドを適当なキーに割り当てておくといいでしょう．
+
+@ignore
+   arch-tag: 8bea7453-d4b1-49b1-9bf4-cfe4383e1113
+@end ignore

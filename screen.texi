@@ -1,0 +1,630 @@
+@c =============================================================
+@c = 元 翻 訳: 高汐一紀＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Screen, User Input, GNU Free Documentation License, Top
+@c @chapter The Organization of the Screen
+@chapter 画面構成
+@c @cindex screen
+@c @cindex parts of the screen
+@cindex 画面
+@cindex 画面要素
+@c
+
+@c   On a text-only terminal, the Emacs display occupies the whole screen.
+@c On the X Window System, Emacs creates its own X windows to use.  We use
+@c the term @dfn{frame} to mean an entire text-only screen or an entire X
+@c window used by Emacs.  Emacs uses both kinds of frames in the same way
+@c to display your editing.  Emacs normally starts out with just one frame,
+@c but you can create additional frames if you wish.  @xref{Frames}.
+文字端末の場合、Emacsは画面全体をその表示領域として使います。
+Xウィンドウシステム上では、Emacsは専用のXのウィンドウを作ります。
+以降、本書では、Emacsが使う文字画面全体やXのウィンドウ全体を指して、
+@dfn{フレーム}（frame）という用語を用います。
+Emacsが編集状況を表示するときのフレームの使い方は、
+どちらのフレームでも同じです。
+通常、1個のフレームだけで始まりますが、必要ならば新たにフレームを作れます。
+@xref{Frames}。
+
+@c   When you start Emacs, the entire frame except for the first and last
+@c lines is devoted to the text you are editing.  This area is called the
+@c @dfn{window}.  The first line is a @dfn{menu bar}, and the last line is
+@c a special @dfn{echo area} or @dfn{minibuffer window} where prompts
+@c appear and where you can enter responses.  See below for more
+@c information about these special lines.
+Emacsを起動すると、最初と最後の行を除いたフレーム全体は、
+編集しているテキストにあてられます。
+この領域を@dfn{ウィンドウ}（window）と呼びます。
+フレームの最初の行は@dfn{メニューバー}（menu bar）です。
+最後の行は、特別な@dfn{エコー領域}（echo area）や
+@dfn{ミニバッファウィンドウ}（minibuffer window）です。
+ミニバッファウィンドウでは、プロンプトが表示され、応答を入力できます。
+これらの特別な行の詳細については、以下で説明します。
+
+@c   You can subdivide the large text window horizontally or vertically
+@c into multiple text windows, each of which can be used for a different
+@c file (@pxref{Windows}).  In this manual, the word ``window'' always
+@c refers to the subdivisions of a frame within Emacs.
+大きなテキストウィンドウは、
+左右や上下に複数のテキストウィンドウに細分割できます。
+各ウィンドウは、それぞれ別のファイルに使えます（@pxref{Windows}）。
+本書では、『ウィンドウ』という単語は、
+Emacsのフレームを細分割したものをつねに指すこととします。
+
+@c   The window that the cursor is in is the @dfn{selected window}, in
+@c which editing takes place.  Most Emacs commands implicitly apply to the
+@c text in the selected window (though mouse commands generally operate on
+@c whatever window you click them in, whether selected or not).  The other
+@c windows display text for reference only, unless/until you select them.
+@c If you use multiple frames under the X Window System, then giving the
+@c input focus to a particular frame selects a window in that frame.
+カーソルが表示されているウィンドウは、@dfn{選択されたウィンドウ}
+（selected window）であり、その中で編集が行われます。
+ほとんどのEmacsコマンドは、選択されたウィンドウ内の
+テキストに暗黙に作用します（ただし、マウスコマンドでは、
+マウスをクリックしたウィンドウが選択されているかどうかに関わらず、
+クリックしたウィンドウに作用する）。
+選択されていない他のウィンドウには、それが選択されるまで、
+単に参照のためだけにテキストが表示されます。
+また、Xウィンドウシステム上で複数のフレームを使う場合、
+特定のフレームに入力フォーカスを与えると、
+そのフレーム内のウィンドウを選択します。
+
+@c   Each window's last line is a @dfn{mode line}, which describes what is
+@c going on in that window.  It appears in inverse video, if the terminal
+@c supports that, and its contents begin with @w{@samp{--:-- @ *scratch*}}
+@c when Emacs starts.  The mode line displays status information such as
+@c what buffer is being displayed above it in the window, what major and
+@c minor modes are in use, and whether the buffer contains unsaved changes.
+各ウィンドウの最後の行は@dfn{モード行}（mode line）です。
+このモード行は、そのウィンドウで何が行われているかを表示します。
+端末が反転表示を扱えれば、モード行は反転表示され、
+起動時の表示内容は@w{@samp{--:-- @ *scratch*}}で始まります。
+モード行は、ウィンドウ内でその上にどのバッファを表示しているのか、
+どのメジャーモードやマイナモードを使っているのか、
+バッファには未保存の変更があるかどうかなどの情報を示します。
+
+@menu
+* Point::	        The place in the text where editing commands operate.
+* Echo Area::           Short messages appear at the bottom of the screen.
+* Mode Line::	        Interpreting the mode line.
+* Menu Bar::            How to use the menu bar.
+@end menu
+
+@node Point
+@c @section Point
+@section ポイント
+@c @cindex point
+@c @cindex cursor
+@cindex ポイント
+@cindex カーソル
+
+@c   Within Emacs, the terminal's cursor shows the location at which
+@c editing commands will take effect.  This location is called @dfn{point}.
+@c Many Emacs commands move point through the text, so that you can edit at
+@c different places in it.  You can also place point by clicking mouse
+@c button 1.
+Emacsでは、端末のカーソルが編集コマンドの作用する位置を示します。
+この位置のことを@dfn{ポイント}（point）と呼びます。
+多くのEmacsコマンドはポイントをテキスト中で移動し、
+テキスト中のさまざまな箇所で編集できるようにします。
+マウスのボタン1をクリックしても、ポイントを置けます。
+
+@c   While the cursor appears to point @emph{at} a character, you should
+@c think of point as @emph{between} two characters; it points @emph{before}
+@c the character that appears under the cursor.  For example, if your text
+@c looks like @samp{frob} with the cursor over the @samp{b}, then point is
+@c between the @samp{o} and the @samp{b}.  If you insert the character
+@c @samp{!} at that position, the result is @samp{fro!b}, with point
+@c between the @samp{!} and the @samp{b}.  Thus, the cursor remains over
+@c the @samp{b}, as before.
+カーソルはある文字に@emph{重なって}表示されますが、
+ポイントは2つの文字の@emph{あいだ}にあると考えなければいけません。
+つまり、ポイントは、カーソルが重なっている文字の@emph{まえ}にあります。
+たとえば、@samp{frob}というテキストで、@samp{b}にカーソルがある場合、
+ポイントは@samp{o}と@samp{b}のあいだにあります。
+その位置に@samp{!}という文字を挿入すると、@samp{fro!b}という結果になり、
+ポイントは@samp{!}と@samp{b}のあいだにあります。
+つまり、カーソルは@samp{b}に重なったままで、実行前と同じです。
+
+@c   Sometimes people speak of ``the cursor'' when they mean ``point,'' or
+@c speak of commands that move point as ``cursor motion'' commands.
+『ポイント』を意味して『カーソル』といったり、
+ポイントを移動するコマンドのことを『カーソル移動』コマンドと
+いうこともあります。
+
+@c   Terminals have only one cursor, and when output is in progress it must
+@c appear where the typing is being done.  This does not mean that point is
+@c moving.  It is only that Emacs has no way to show you the location of point
+@c except when the terminal is idle.
+端末にはカーソルは1つしかなく、
+出力中は出力されている場所にカーソルが表示される必要があります。
+これはポイントが移動したということではありません。
+端末がアイドルでないと、Emacsにはポイント位置を示す方法がないだけです。
+
+@c   If you are editing several files in Emacs, each in its own buffer,
+@c each buffer has its own point location.  A buffer that is not currently
+@c displayed remembers where point is in case you display it again later.
+Emacsでいくつかのファイルを編集して、
+各ファイルをそれ専用のバッファに入れているとき、
+各バッファには独自のポイント位置があります。
+バッファが表示されていなくても、
+あとで表示されるときに備えてポイント位置を記録しています。
+
+@c   When there are multiple windows in a frame, each window has its own
+@c point location.  The cursor shows the location of point in the selected
+@c window.  This also is how you can tell which window is selected.  If the
+@c same buffer appears in more than one window, each window has its own
+@c position for point in that buffer.
+1つのフレームに複数のウィンドウがある場合、
+各ウィンドウには独自のポイント位置があります。
+カーソルは選択されたウィンドウのポイント位置を示します。
+これにより、どのウィンドウが選択されているかもわかります。
+複数のウィンドウに同じバッファが表示されている場合には、
+そのバッファのポイント位置は各ウィンドウごとに独立にあります。
+
+@c   When there are multiple frames, each frame can display one cursor.
+@c The cursor in the selected frame is solid; the cursor in other frames is
+@c a hollow box, and appears in the window that would be selected if you
+@c give the input focus to that frame.
+複数のフレームがある場合、各フレームでは1つのカーソルを表示できます。
+選択されているフレームの中のカーソルは塗り潰されます。
+他のフレームのカーソルは中抜きの箱で、フレームに
+入力フォーカスが与えられると選択されるウィンドウに表示されます。
+
+@c   The term `point' comes from the character @samp{.}, which was the
+@c command in TECO (the language in which the original Emacs was written)
+@c for accessing the value now called `point'.
+『ポイント』という用語は、文字@samp{.}に由来します。
+この文字は、現在『ポイント』と呼んでいる値を参照するための
+（オリジナルのEmacsを記述していた言語）TECOのコマンドです。
+
+@node Echo Area
+@c @section The Echo Area
+@section エコー領域
+@c @cindex echo area
+@cindex エコー領域
+@c 
+
+@c   The line at the bottom of the frame (below the mode line) is the
+@c @dfn{echo area}.  It is used to display small amounts of text for
+@c several purposes.
+フレームの1番下の行（モード行の下）は、@dfn{エコー領域}（echo area）です。
+ここは、いろいろな目的向けの少量のテキスト表示に使われます。
+
+@c   @dfn{Echoing} means displaying the characters that you type.  Outside
+@c Emacs, the operating system normally echoes all your input.  Emacs
+@c handles echoing differently.
+@dfn{エコー}とは、あなたが打った文字を表示することを意味します。
+Emacsの外部、オペレーティングシステムでは、
+ユーザーからのすべての入力を普通はエコーします。
+Emacsは、エコーをそれとは違ったように扱います。
+
+@c   Single-character commands do not echo in Emacs, and multi-character
+@c commands echo only if you pause while typing them.  As soon as you pause
+@c for more than a second in the middle of a command, Emacs echoes all the
+@c characters of the command so far.  This is to @dfn{prompt} you for the
+@c rest of the command.  Once echoing has started, the rest of the command
+@c echoes immediately as you type it.  This behavior is designed to give
+@c confident users fast response, while giving hesitant users maximum
+@c feedback.  You can change this behavior by setting a variable
+@c (@pxref{Display Vars}).
+Emacsでは、1文字コマンドをエコーすることはありません。
+また、複数文字のコマンドでも、打つ途中に間を置かなければエコーしません。
+コマンドの途中で1秒以上間を置くとすぐに、
+それまでに入力したコマンドの文字をすべてエコーします。
+これは、コマンドの残りの部分を@dfn{促す}ためです。
+いったんエコーが始まると、コマンドの残りは、
+打つと同時にただちにエコーされます。
+これは、打鍵に自信のあるユーザーには速い応答を提供し、
+一方で、自信のないユーザーには最大限のフィードバックを与えるための機能です。
+変数を設定すれば、このふるまいを変更できます（@pxref{Display Vars}）。
+
+@c @cindex error message in the echo area
+@cindex エコー領域のエラーメッセージ
+@c   If a command cannot be executed, it may print an @dfn{error message} in
+@c the echo area.  Error messages are accompanied by a beep or by flashing the
+@c screen.  Also, any input you have typed ahead is thrown away when an error
+@c happens.
+コマンドを実行できなければ、エコー領域に@dfn{エラーメッセージ}を表示します。
+エラーメッセージに伴って、ビープ音が鳴ったり、画面が点滅したりします。
+また、エラーが起きると、先打ちした入力は破棄されます。
+
+@c   Some commands print informative messages in the echo area.  These
+@c messages look much like error messages, but they are not announced with
+@c a beep and do not throw away input.  Sometimes the message tells you
+@c what the command has done, when this is not obvious from looking at the
+@c text being edited.  Sometimes the sole purpose of a command is to print
+@c a message giving you specific information---for example, @kbd{C-x =}
+@c prints a message describing the character position of point in the text
+@c and its current column in the window.  Commands that take a long time
+@c often display messages ending in @samp{...} while they are working, and
+@c add @samp{done} at the end when they are finished.
+エコー領域に有益なメッセージを表示するコマンドもあります。
+これらのメッセージはエラーメッセージによく似ていますが、
+ビープ音を伴わず、入力も破棄しません。
+編集中のテキストを見てもコマンドが何をしたか自明でない場合に、
+メッセージがそれを教えてくれることもあります。
+特定の情報を与えるメッセージを表示するだけのコマンドもあります。
+たとえば、コマンド@kbd{C-x =}は、テキスト中でのポイントの文字位置と、
+ウィンドウでの現在の桁位置を示すメッセージを表示します。
+処理に時間のかかるコマンドでは、
+実行中には@samp{...}で終わるメッセージをエコー領域に表示し、
+完了時には@samp{done}を最後に付け加えることもよくあります。
+
+@c @cindex @samp{*Messages*} buffer
+@c @cindex saved echo area messages
+@c @cindex messages saved from echo area
+@cindex @samp{*Messages*}バッファ
+@cindex 保存されたエコー領域メッセージ
+@cindex エコー領域から保存したメッセージ
+@c   Echo-area informative messages are saved in an editor buffer named
+@c @samp{*Messages*}.  (We have not explained buffers yet; see
+@c @ref{Buffers}, for more information about them.)  If you miss a message
+@c that appears briefly on the screen, you can switch to the
+@c @samp{*Messages*} buffer to see it again.  (Successive progress messages
+@c are often collapsed into one in that buffer.)
+エコー領域に表示される有益なメッセージは、
+@samp{*Messages*}と呼ばれるエディタバッファに保存されます。
+（まだバッファを説明していないが、詳細は@ref{Buffers}を参照。）
+画面上に短時間しか表示されないメッセージを見逃してしまった場合には、
+@samp{*Messages*}バッファに切り替えて、
+もう一度そのメッセージを見ることができます。
+（連続した同じメッセージは、しばしば、
+1つにまとめられてこのバッファに納められる。）
+
+@vindex message-log-max
+@c   The size of @samp{*Messages*} is limited to a certain number of lines.
+@c The variable @code{message-log-max} specifies how many lines.  Once the
+@c buffer has that many lines, each line added at the end deletes one line
+@c from the beginning.  @xref{Variables}, for how to set variables such as
+@c @code{message-log-max}.
+@samp{*Messages*}のサイズは、ある行数に制限されています。
+変数@code{message-log-max}は、その行数を指定します。
+いったんバッファがこの行数を超えると、最後に1行を付け加えるごとに
+先頭の1行を削除します。
+@code{message-log-max}のような変数の設定方法については、@xref{Variables}。
+
+@c   The echo area is also used to display the @dfn{minibuffer}, a window that
+@c is used for reading arguments to commands, such as the name of a file to be
+@c edited.  When the minibuffer is in use, the echo area begins with a prompt
+@c string that usually ends with a colon; also, the cursor appears in that line
+@c because it is the selected window.  You can always get out of the
+@c minibuffer by typing @kbd{C-g}.  @xref{Minibuffer}.
+エコー領域は@dfn{ミニバッファ}（minibuffer）の表示にも使われます。
+これは、編集しようとするファイル名のような、
+コマンドへの引数を読むのに使われるウィンドウです。
+ミニバッファが使われているときには、
+エコー領域は通常コロンで終わるプロンプトで始まります。
+また、エコー領域が選択されているウィンドウなので、
+カーソルもその行に表示されます。
+@kbd{C-g}を打つと、いつでもミニバッファから抜けられます。
+@xref{Minibuffer}。
+
+@node Mode Line
+@c @section The Mode Line
+@section モード行 
+@c @cindex mode line
+@c @cindex top level
+@cindex モード行
+@cindex トップレベル
+@c
+
+@c   Each text window's last line is a @dfn{mode line}, which describes what
+@c is going on in that window.  When there is only one text window, the
+@c mode line appears right above the echo area; it is the next-to-last line
+@c on the frame.  The mode line is in inverse video if the terminal
+@c supports that, and it starts and ends with dashes.
+テキストウィンドウの最後の行は@dfn{モード行}（mode line）で、
+そのウィンドウで何が進行しているか表示します。
+テキストウィンドウが1つしかない場合、
+モード行はエコー領域のすぐ上に表示されます。
+フレーム上では最後から2番目の行になります。
+端末に反転表示機能があれば、モード行は反転表示されます。
+モード行の表示内容は、ダッシュで始まりダッシュで終ります。
+
+@c   Normally, the mode line looks like this:
+通常、モード行はつぎのように表示されます。
+
+@example
+-@var{cs}:@var{ch}  @var{buf}      (@var{major} @var{minor})--@var{line}--@var{pos}------
+@end example
+
+@noindent
+@c This gives information about the buffer being displayed in the window: the
+@c buffer's name, what major and minor modes are in use, whether the buffer's
+@c text has been changed, and how far down the buffer you are currently
+@c looking.
+これから、ウィンドウに表示中のバッファに関する情報を得られます。
+バッファの名前、どのメジャーモードやマイナモードを使っているか、
+バッファのテキストが変更されたかどうか、
+バッファ全体のどのあたりを現在表示しているかです。
+
+@c   @var{ch} contains two stars @samp{**} if the text in the buffer has
+@c been edited (the buffer is ``modified''), or @samp{--} if the buffer has
+@c not been edited.  For a read-only buffer, it is @samp{%*} if the buffer
+@c is modified, and @samp{%%} otherwise.
+@var{ch}は、バッファのテキストが編集されている
+（つまりバッファが『変更』されている）場合には星印2個@samp{**}になり、
+バッファが編集されていない場合には@samp{--}になります。
+読み出し専用のバッファの場合には、
+バッファが編集されている場合には@samp{%*}になり、
+バッファが編集されていない場合には@samp{%%}となります。
+
+@c   @var{buf} is the name of the window's @dfn{buffer}.  In most cases
+@c this is the same as the name of a file you are editing.  @xref{Buffers}.
+@var{buf}は、ウィンドウに表示されている@dfn{バッファ}の名前です。
+ほとんどの場合、編集中のファイル名と同じです。
+@xref{Buffers}。
+
+@c   The buffer displayed in the selected window (the window that the
+@c cursor is in) is also Emacs's selected buffer, the one that editing
+@c takes place in.  When we speak of what some command does to ``the
+@c buffer,'' we are talking about the currently selected buffer.
+（カーソルがある）選択されたウィンドウに表示されたバッファは、
+Emacsの選択されたバッファでもあり、編集はこのバッファで行われます。
+コマンドが『バッファ』に何かを行うといったとき、
+現在選択されているバッファを指しています。
+
+@c   @var{line} is @samp{L} followed by the current line number of point.
+@c This is present when Line Number mode is enabled (which it normally is).
+@c You can optionally display the current column number too, by turning on
+@c Column Number mode (which is not enabled by default because it is
+@c somewhat slower).  @xref{Optional Mode Line}.
+@var{line}は、@samp{L}のあとに現在ポイントがある行の番号が続いたものです。
+これは、行番号（line-number）モードがオンである
+（通常はオン）場合に表示されます。
+なお、桁番号（column-number）モードをオンにすると、
+現在の桁番号も表示できます
+（多少時間がかかるので、このモードはデフォルトではオフ）。
+@xref{Optional Mode Line}。
+
+@c   @var{pos} tells you whether there is additional text above the top of
+@c the window, or below the bottom.  If your buffer is small and it is all
+@c visible in the window, @var{pos} is @samp{All}.  Otherwise, it is
+@c @samp{Top} if you are looking at the beginning of the buffer, @samp{Bot}
+@c if you are looking at the end of the buffer, or @samp{@var{nn}%}, where
+@c @var{nn} is the percentage of the buffer above the top of the
+@c window.@refill
+@var{pos}は、ウィンドウの最上部より上や最下部より下に
+さらにテキストがあるかどうかを示します。
+バッファが小さくて、すべてがウィンドウに収まっている場合には、
+@var{pos}は@samp{All}となります。
+そうでない場合、バッファの先頭が表示されていれば@samp{Top}、
+バッファの末尾が表示されていれば@samp{Bot}、
+あるいは、@samp{@var{nn}%}となります。
+ここで、@var{nn}はウィンドウの最上部より上にあるバッファの
+割合を百分率で示します。
+
+@c   @var{major} is the name of the @dfn{major mode} in effect in the
+@c buffer.  At any time, each buffer is in one and only one of the possible
+@c major modes.  The major modes available include Fundamental mode (the
+@c least specialized), Text mode, Lisp mode, C mode, Texinfo mode, and many
+@c others.  @xref{Major Modes}, for details of how the modes differ and how
+@c to select one.@refill
+@var{major}は、そのバッファの@dfn{メジャーモード}（major mode）の名前です。
+各バッファはつねに必ず1つのメジャーモードになっています。
+使用可能なメジャーモードには、
+基本（fundamental）モード（もっとも特殊化されていないモード）、
+テキスト（text）モード、Lisp モード、Cモード、
+texinfoモード、その他にも数多くあります。
+各モードの相違や選択方法についての詳細は、@xref{Major Modes}。
+
+@c   Some major modes display additional information after the major mode
+@c name.  For example, Rmail buffers display the current message number and
+@c the total number of messages.  Compilation buffers and Shell buffers
+@c display the status of the subprocess.
+メジャーモードには、
+メジャーモード名のあとに付加的な情報を表示するものもあります。
+たとえば、rmailバッファでは、現在のメッセージ番号とメッセージ総数を表示します。
+コンパイルバッファやシェルバッファでは、サブプロセスの状態を表示します。
+
+@c   @var{minor} is a list of some of the @dfn{minor modes} that are turned
+@c on at the moment in the window's chosen buffer.  For example,
+@c @samp{Fill} means that Auto Fill mode is on.  @samp{Abbrev} means that
+@c Word Abbrev mode is on.  @samp{Ovwrt} means that Overwrite mode is on.
+@c @xref{Minor Modes}, for more information.  @samp{Narrow} means that the
+@c buffer being displayed has editing restricted to only a portion of its
+@c text.  This is not really a minor mode, but is like one.
+@c @xref{Narrowing}.  @samp{Def} means that a keyboard macro is being
+@c defined.  @xref{Keyboard Macros}.
+@var{minor}は、ウィンドウの選択されたバッファにおいて、
+その時点でオンになっている@dfn{マイナモード}
+（minor mode）の一覧の一部を示します。
+たとえば、@samp{Fill}は、
+自動詰め込み（auto-fill）モードがオンであることを意味します。
+@samp{Abbrev}は、略語（abbrev）モードがオンであることを意味します。
+@samp{Ovwrt}は 、上書き（overwrite）モードがオンであることを意味します。
+詳しくは、@xref{Minor Modes}。
+@samp{Narrow}は、表示中のバッファが、
+そのテキストの一部のみを編集するように制限されていることを示します。
+これは、実際にはマイナモードではありませんが、そのようなものです。
+@xref{Narrowing}。
+@samp{Def}は、キーボードマクロを定義中であることを示します。
+@xref{Keyboard Macros}。
+
+@c   In addition, if Emacs is currently inside a recursive editing level,
+@c square brackets (@samp{[@dots{}]}) appear around the parentheses that
+@c surround the modes.  If Emacs is in one recursive editing level within
+@c another, double square brackets appear, and so on.  Since recursive
+@c editing levels affect Emacs globally, not just one buffer, the square
+@c brackets appear in every window's mode line or not in any of them.
+@c @xref{Recursive Edit}.@refill
+さらに、Emacsが、現在、再帰編集レベルにあるときには、
+モードを囲んでいる括弧の周りに角括弧（@samp{[@dots{}]}）が現れます。
+再帰編集レベルの中で別の再帰編集レベルに入っていると、
+角括弧は2重になるというふうになります。
+再帰編集レベルは、特定のバッファにだけ関係するものではなく、
+Emacs全体に影響するので、角括弧はすべてのウィンドウのモード行に表示される、
+あるいは、まったく表示されないのどちらかです。
+@xref{Recursive Edit}。
+
+@c   Non-windowing terminals can only show a single Emacs frame at a time
+@c (@pxref{Frames}).  On such terminals, the mode line displays the name of
+@c the selected frame, after @var{ch}.  The initial frame's name is
+@c @samp{F1}.
+ウィンドウを表示できない端末では、一度には、
+単一のEmacsフレームしか表示できません
+（@pxref{Frames}）。
+そのような端末では、モード行の@var{ch}のあとに、
+選択しているフレームの名前が表示されます。
+初期フレームの名前は、@samp{F1}です。
+
+@c   @var{cs} states the coding system used for the file you are editing.
+@c A dash indicates the default state of affairs: no code conversion,
+@c except for end-of-line translation if the file contents call for that.
+@c @samp{=} means no conversion whatsoever.  Nontrivial code conversions
+@c are represented by various letters---for example, @samp{1} refers to ISO
+@c Latin-1.  @xref{Coding Systems}, for more information.  If you are using
+@c an input method, a string of the form @samp{@var{i}>} is added to the
+@c beginning of @var{cs}; @var{i} identifies the input method.  (Some input
+@c methods show @samp{+} or @samp{@@} instead of @samp{>}.)  @xref{Input
+@c Methods}.
+@var{cs}は、編集中のファイルで使用しているコーディングシステムを表します。
+ダッシュ（@samp{-}）はデフォルトの状態、つまり、
+ファイルの内容に応じて行末変換は行うが、
+コード変換は行わないことを示します。
+@samp{=}の場合、コード変換をまったく行わないことを意味します。
+単純ではないコード変換をさまざま文字で示します。
+たとえば、@samp{1}は、ISO Latin-1を表します。
+詳しくは、@xref{Coding Systems}。
+入力方式を使っている場合には、
+@var{cs}の先頭に@samp{@var{i}>}の形式の文字列が付加されます。
+ここで、@var{i}は入力方式を表します。
+（@samp{>}のかわりに、@samp{+}や@samp{@@}を表示する入力方式もある。）
+@xref{Input Methods}。
+
+@c   When you are using a character-only terminal (not a window system),
+@c @var{cs} uses three characters to describe, respectively, the coding
+@c system for keyboard input, the coding system for terminal output, and
+@c the coding system used for the file you are editing.
+（ウィンドウシステムではなくて）文字端末を使っている場合、
+@var{cs}は3文字になり、それぞれ、
+キーボード入力のコーディングシステム、
+画面出力のコーディングシステム、
+編集中のファイルのコーディングシステムです。
+
+@c   When multibyte characters are not enabled, @var{cs} does not appear at
+@c all.  @xref{Enabling Multibyte}.
+マルチバイト文字が使用不可の場合、@var{cs}はまったく表示されません。
+@xref{Enabling Multibyte}。
+
+@c @cindex end-of-line conversion, mode-line indication
+@cindex 行末変換、モード行の表示
+@cindex モード行の表示、行末変換
+@c   The colon after @var{cs} can change to another string in certain
+@c circumstances.  Emacs uses newline to separate lines in the buffer.
+@c Some files use different conventions for separating lines: either
+@c carriage-return linefeed (the MS-DOS convention) or just carriage-return
+@c (the Macintosh convention).  If the buffer's file uses carriage-return
+@c linefeed, the colon changes to either a backslash (@samp{\}) or
+@c @samp{(DOS)}, depending on the operating system.  If the file uses just
+@c carriage-return, the colon indicator changes to either a forward slash
+@c (@samp{/}) or @samp{(Mac)}.  On some systems, Emacs displays
+@c @samp{(Unix)} instead of the colon even for files that use newline to
+@c separate lines.
+@var{cs}のあとのコロンは、特定の場面では別の文字列に変わることがあります。
+Emacsは、バッファ内の行区切りとして改行を使います。
+ファイルによっては、行区切りとして別の慣習を用いるものもあります。
+復帰改行（MS-DOSの慣習）、あるいは、復帰のみ（Macintoshの慣習）です。
+バッファのファイルが復帰改行を使っている場合には、
+オペレーティングシステムに依存して、
+コロンはバックスラッシュ（@samp{\}）か@samp{(DOS)}に変わります。
+ファイルが復帰のみを使っている場合には、
+コロンはスラッシュ（@samp{/}）か@samp{(Mac)}に変わります。
+システムによっては、行区切りとして改行を使っているファイルであっても、
+Emacsはコロンのかわりに@samp{(Unix)}を表示します。
+
+@vindex eol-mnemonic-unix
+@vindex eol-mnemonic-dos
+@vindex eol-mnemonic-mac
+@vindex eol-mnemonic-undecided
+@c   You can customize the mode line display for each of the end-of-line
+@c formats by setting each of the variables @code{eol-mnemonic-unix},
+@c @code{eol-mnemonic-dos}, @code{eol-mnemonic-mac}, and
+@c @code{eol-mnemonic-undecided} to any string you find appropriate.
+@c @xref{Variables}, for an explanation how to set variables.
+各種行末形式のモード行への表示は、
+各変数、@code{eol-mnemonic-unix}、@code{eol-mnemonic-dos}、
+@code{eol-mnemonic-mac}、@code{eol-mnemonic-undecided}に
+ユーザーにとって適切な任意の文字列を
+設定することでカスタマイズできます。
+変数の設定方法については、@xref{Variables}。
+
+@c   @xref{Optional Mode Line}, for features that add other handy
+@c information to the mode line, such as the current column number of
+@c point, the current time, and whether new mail for you has arrived.
+ポイント位置の桁番号、現在時刻、新着メイルの有無などの
+お手ごろ情報をモード行へ追加する機能については、
+@xref{Optional Mode Line}。
+
+@node Menu Bar
+@c @section The Menu Bar
+@section メニューバー
+@c @cindex menu bar
+@cindex メニューバー
+
+@c   Each Emacs frame normally has a @dfn{menu bar} at the top which you
+@c can use to perform certain common operations.  There's no need to list
+@c them here, as you can more easily see for yourself.
+各Emacsフレームには、通常、最上部に@dfn{メニューバー}（menu bar）があり、
+よく使われる操作を実行するのに使えます。
+読者自身で簡単に確かめられますから、
+ここではそれらを列挙する必要はないでしょう。
+
+@kindex M-`
+@kindex F10
+@findex tmm-menubar
+@c   When you are using a window system, you can use the mouse to choose a
+@c command from the menu bar.  An arrow pointing right, after the menu
+@c item, indicates that the item leads to a subsidiary menu; @samp{...} at
+@c the end means that the command will read arguments from the keyboard
+@c before it actually does anything.
+ウィンドウシステムを使っているのであれば、
+マウスを使ってメニューバーからコマンドを選べます。
+メニュー項目のあとにある右向き矢印は、
+その項目にサブメニューがあることを示します。
+項目の最後に@samp{...}がある場合は、コマンドを実際に実行するまえに、
+コマンドがキーボードから引数を読み取ることを意味します。
+
+@c   To view the full command name and documentation for a menu item, type
+@c @kbd{C-h k}, and then select the menu bar with the mouse in the usual
+@c way (@pxref{Key Help}).
+メニュー項目の完全なコマンド名や説明文を見るには、
+@kbd{C-h k}と打ってから、通常どおりにマウスでメニューバーを選択します
+（@pxref{Key Help}）。
+
+@c   On text-only terminals with no mouse, you can use the menu bar by
+@c typing @kbd{M-`} or @key{F10} (these run the command
+@c @code{tmm-menubar}).  This command enters a mode in which you can select
+@c a menu item from the keyboard.  A provisional choice appears in the echo
+@c area.  You can use the left and right arrow keys to move through the
+@c menu to different choices.  When you have found the choice you want,
+@c type @key{RET} to select it.
+マウスのない文字端末でも、
+@kbd{M-`}や@key{F10}（これらは@code{tmm-menubar}を起動する）を打てば、
+メニューバーを利用できます。
+このコマンドは、キーボードからメニュー項目を選択するモードに入ります。
+エコー領域には、仮の選択項目が表示されます。
+左矢印キーや右矢印キーでメニューの中を移動して別の項目を選べます。
+選択を確定するには@key{RET}キーを打ちます。
+
+@c   Each menu item also has an assigned letter or digit which designates
+@c that item; it is usually the initial of some word in the item's name.
+@c This letter or digit is separated from the item name by @samp{=>}.  You
+@c can type the item's letter or digit to select the item.
+各メニュー項目には、その項目を指定する1個の文字や数字も割り当てられています。
+通常、それらは項目名の単語の頭文字です。
+これらの文字や数字は、項目名と@samp{=>}で分離されています。
+項目の文字や数字を打てばその項目を選べます。
+
+@c   Some of the commands in the menu bar have ordinary key bindings as
+@c well; if so, the menu lists one equivalent key binding in parentheses
+@c after the item itself.
+メニューバーにあるコマンドの中には、
+キーバインディングを持つものもあります。
+その場合、項目自身のあとの括弧の中に等価なキーバインドを表示します。

@@ -1,0 +1,348 @@
+@c =============================================================
+@c = 元 翻 訳: 赤池英夫＠電気通信大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Indentation, Text, Major Modes, Top
+@c @chapter Indentation
+@chapter 字下げ
+@c @cindex indentation
+@cindex 字下げ
+@c @cindex columns (indentation)
+@cindex 桁（字下げ）
+@cindex コラム（字下げ）
+
+@c   This chapter describes the Emacs commands that add, remove, or
+@c adjust indentation.
+本章では、字下げ（indentation）を
+付加／削除／調整するEmacsコマンドについて説明します。
+
+@c WideCommands
+@table @kbd
+@item @key{TAB}
+@c Indent current line ``appropriately'' in a mode-dependent fashion.
+モードに固有の方法で、現在行を『適切に』字下げする。
+@item @kbd{C-j}
+@c Perform @key{RET} followed by @key{TAB} (@code{newline-and-indent}).
+@key{RET}に続けて@key{TAB}を実行する（@code{newline-and-indent}）。
+@item M-^
+@c Merge two lines (@code{delete-indentation}).  This would cancel out
+@c the effect of @kbd{C-j}.
+2つの行を連結して1つにする（@code{delete-indentation}）。
+@kbd{C-j}の効果を取り消す。
+@item C-M-o
+@c Split line at point; text on the line after point becomes a new line
+@c indented to the same column that it now starts in (@code{split-line}).
+ポイント位置で行を分割する。
+つまり、行内のポイント以降のテキストは新たな行になり、かつ、
+ポイント位置まで字下げする（@code{split-line}）。
+@item M-m
+@c Move (forward or back) to the first nonblank character on the current
+@c line (@code{back-to-indentation}).
+現在行の空白でない最初の文字までポイントを
+（行末か行頭へ向かって）移動する（@code{back-to-indentation}）。
+@item C-M-\
+@c Indent several lines to same column (@code{indent-region}).
+複数の行を同じ桁に字下げする（@code{indent-region}）。
+@item C-x @key{TAB}
+@c Shift block of lines rigidly right or left (@code{indent-rigidly}).
+複数の行の塊を（右か左に）同じ量だけきっちり移動する
+（@code{indent-rigidly}）。
+@item M-i
+@c Indent from point to the next prespecified tab stop column
+@c (@code{tab-to-tab-stop}).
+ポイント位置からあらかじめ設定したつぎのタブストップ位置まで字下げする
+（@code{tab-to-tab-stop}）。
+@item M-x indent-relative
+@c Indent from point to under an indentation point in the previous line.
+ポイント位置からまえの行の字下げ位置まで字下げする。
+@end table
+
+@c   Most programming languages have some indentation convention.  For Lisp
+@c code, lines are indented according to their nesting in parentheses.  The
+@c same general idea is used for C code, though many details are different.
+ほとんどのプログラム言語には、字下げの慣習があります。
+Lispコードでは、括弧の入れ子の深さに従って行を字下げします。
+細部はかなり異なりますが、概念的にはCコードでも同様の考え方で字下げします。
+
+@kindex TAB
+@c   Whatever the language, to indent a line, use the @key{TAB} command.  Each
+@c major mode defines this command to perform the sort of indentation
+@c appropriate for the particular language.  In Lisp mode, @key{TAB} aligns
+@c the line according to its depth in parentheses.  No matter where in the
+@c line you are when you type @key{TAB}, it aligns the line as a whole.  In C
+@c mode, @key{TAB} implements a subtle and sophisticated indentation style that
+@c knows about many aspects of C syntax.
+どんな言語であっても、行を字下げするには@key{TAB}コマンドを使います。
+各メジャーモードでは、特定の言語に適した字下げを行うように、
+このコマンドを定義します。
+Lispモードでは、@key{TAB}は括弧の深さに応じて行を整列します。
+行のどこで@key{TAB}を打鍵しても、その行全体を整列します。
+Cモードでは、@key{TAB}は、
+Cの構文上のさまざまな側面を考慮した巧みで洗練された
+字下げスタイルを実現しています。
+
+@c   In Text mode, @key{TAB} runs the command @code{tab-to-tab-stop}, which
+@c indents to the next tab stop column.  You can set the tab stops with
+@c @kbd{M-x edit-tab-stops}.
+テキスト（text）モードでは、
+@key{TAB}は@code{tab-to-tab-stop}コマンドを実行します。
+これは、つぎのタブストップ位置まで字下げを行います。
+タブストップ位置は@kbd{M-x edit-tab-stops}で設定できます。
+
+@menu
+* Indentation Commands::  Various commands and techniques for indentation.
+* Tab Stops::             You can set arbitrary "tab stops" and then
+                            indent to the next tab stop when you want to.
+* Just Spaces::           You can request indentation using just spaces.
+@end menu
+
+@node Indentation Commands, Tab Stops, Indentation, Indentation
+@c @section Indentation Commands and Techniques
+@section 字下げコマンドとその技巧
+
+@kindex M-m
+@findex back-to-indentation
+@c   To move over the indentation on a line, do @kbd{M-m}
+@c (@code{back-to-indentation}).  This command, given anywhere on a line,
+@c positions point at the first nonblank character on the line.
+行の字下げを飛び越えるには、@kbd{M-m}（@code{back-to-indentation}）を使います。
+行のどこで実行しても、その行の空白でない最初の文字位置にポイントを移動します。
+
+@c   To insert an indented line before the current line, do @kbd{C-a C-o
+@c @key{TAB}}.  To make an indented line after the current line, use
+@c @kbd{C-e C-j}.
+現在行のまえに字下げした行を挿入するには、
+@kbd{C-a C-o @key{TAB}}を使います。
+現在行のあとに字下げした行を挿入するには、@kbd{C-e C-j}を使います。
+
+@c   If you just want to insert a tab character in the buffer, you can type
+@c @kbd{C-q @key{TAB}}.
+単にタブ文字を挿入するには、@kbd{C-q @key{TAB}}と打ちます。
+
+@kindex C-M-o
+@findex split-line
+@c   @kbd{C-M-o} (@code{split-line}) moves the text from point to the end of
+@c the line vertically down, so that the current line becomes two lines.
+@c @kbd{C-M-o} first moves point forward over any spaces and tabs.  Then it
+@c inserts after point a newline and enough indentation to reach the same
+@c column point is on.  Point remains before the inserted newline; in this
+@c regard, @kbd{C-M-o} resembles @kbd{C-o}.
+@kbd{C-M-o}（@code{split-line}）は、
+ポイントから行末までのテキストを垂直に下ろします。
+その結果、現在行は2つの行に分割されます。
+@kbd{C-M-o}は、まず、ポイントの直後に空白やタブがある限りポイントを進めます。
+そして、ポイントの直後に、
+改行とポイント位置の桁までに必要な字下げを挿入します。
+ポイント自身は挿入した改行の直前に留まります。
+この点では、@kbd{C-M-o}は@kbd{C-o}に似ています。
+
+@kindex M-^
+@findex delete-indentation
+@c   To join two lines cleanly, use the @kbd{M-^}
+@c (@code{delete-indentation}) command.  It deletes the indentation at the
+@c front of the current line, and the line boundary as well, replacing them
+@c with a single space.  As a special case (useful for Lisp code) the
+@c single space is omitted if the characters to be joined are consecutive
+@c open parentheses or closing parentheses, or if the junction follows
+@c another newline.  To delete just the indentation of a line, go to the
+@c beginning of the line and use @kbd{M-\}
+@c (@code{delete-horizontal-space}), which deletes all spaces and tabs
+@c around the cursor.
+2つの行を連結するには、
+コマンド@kbd{M-^}（@code{delete-indentation}）を使います。
+このコマンドは、現在行の行頭の字下げと行区切り（改行文字）を
+削除して空白1個に置き換えます。
+ただし、この空白1個を省いてしまう（Lispコードには便利な）特別な場合があります。
+2つの行を繋げた結果、開き括弧や閉じ括弧が連続する場合、
+あるいは、さらに改行が続く場合です。
+現在行の字下げだけを削除するには、
+行頭に移動してから@kbd{M-\}（@code{delete-horizontal-space}）を使います。
+このコマンドは、カーソル（ポイント）の周りの空白とタブをすべて削除します。
+
+@c   If you have a fill prefix, @kbd{M-^} deletes the fill prefix if it
+@c appears after the newline that is deleted.  @xref{Fill Prefix}.
+詰め込み接頭辞がある場合、@kbd{M-^}は、
+削除される改行の直後に現れる詰め込み接頭辞を削除します。
+@xref{Fill Prefix}。
+
+@kindex C-M-\
+@kindex C-x TAB
+@findex indent-region
+@findex indent-rigidly
+@c   There are also commands for changing the indentation of several lines
+@c at once.  @kbd{C-M-\} (@code{indent-region}) applies to all the lines
+@c that begin in the region; it indents each line in the ``usual'' way, as
+@c if you had typed @key{TAB} at the beginning of the line.  A numeric
+@c argument specifies the column to indent to, and each line is shifted
+@c left or right so that its first nonblank character appears in that
+@c column.  @kbd{C-x @key{TAB}} (@code{indent-rigidly}) moves all of the
+@c lines in the region right by its argument (left, for negative
+@c arguments).  The whole group of lines moves rigidly sideways, which is
+@c how the command gets its name.@refill
+一度に複数の行の字下げを変更するコマンドもあります。
+@kbd{C-M-\}（@code{indent-region}）は、
+リージョン内で始まるすべての行に作用します。
+このコマンドは、行頭で@key{TAB}を打鍵したかのように
+『普通の』方法で各行を字下げします。
+数引数は字下げする桁位置を指定します。
+つまり、最初の空白でない文字がその桁位置にくるように
+行全体を右か左に水平移動します。
+@kbd{C-x @key{TAB}}（@code{indent-rigidly}）は、
+リージョン内のすべての行を、
+引数で指定した分だけ右に移動します（引数が負であれば左に移動）。
+複数の行全部をきちっと揃えて（rigidly）横に移動することから、
+コマンドにはこのような名前が付いています。
+
+@findex indent-relative
+@c   @kbd{M-x indent-relative} indents at point based on the previous line
+@c (actually, the last nonempty line).  It inserts whitespace at point, moving
+@c point, until it is underneath an indentation point in the previous line.
+@c An indentation point is the end of a sequence of whitespace or the end of
+@c the line.  If point is farther right than any indentation point in the
+@c previous line, the whitespace before point is deleted and the first
+@c indentation point then applicable is used.  If no indentation point is
+@c applicable even then, @code{indent-relative} runs @code{tab-to-tab-stop}
+@kbd{M-x indent-relative}は、先行する行（実際には空行でないいちばん近くの行）に
+基づいてポイント位置を字下げします。
+ポイント位置に空白を挿入してポイントを進めて、
+ポイントが先行する行の字下げ位置の真下にくるようにします。
+字下げ位置とは連続した白文字の末尾か行末のことです。
+ポイントが先行する行のどの字下げ位置よりも右にある場合には、
+ポイントのまえの白文字を削除してから、
+先行する行の適用可能な最初の字下げ位置まで字下げします。
+適用可能な字下げ位置がない場合には、
+@code{indent-relative}は@code{tab-to-tab-stop}を実行します
+@ifinfo
+@c (@pxref{Tab Stops}).
+（@pxref{Tab Stops}）。
+@end ifinfo
+@iftex
+@c (see next section).
+（次節を参照）。
+@end iftex
+
+@c   @code{indent-relative} is the definition of @key{TAB} in Indented Text
+@c mode.  @xref{Text}.
+字下げテキスト（indented text）モードでは、
+@key{TAB}は@code{indent-relative}と定義されます。
+@xref{Text}。
+
+@c   @xref{Format Indentation}, for another way of specifying the
+@c indentation for part of your text.
+テキストの一部を字下げする別の方法については@xref{Format Indentation}。
+
+@node Tab Stops, Just Spaces, Indentation Commands, Indentation
+@c @section Tab Stops
+@section タブストップ
+
+@c @cindex tab stops 
+@cindex タブストップ
+@c @cindex using tab stops in making tables
+@cindex 表作成時のタブストップ
+@c @cindex tables, indentation for
+@cindex 表のための字下げ
+@cindex 字下げ、表を作る
+@kindex M-i
+@findex tab-to-tab-stop
+@c   For typing in tables, you can use Text mode's definition of @key{TAB},
+@c @code{tab-to-tab-stop}.  This command inserts indentation before point,
+@c enough to reach the next tab stop column.  If you are not in Text mode,
+@c this command can be found on the key @kbd{M-i}.
+表を入力するには、テキスト（textモード）における@key{TAB}の定義、
+@code{tab-to-tab-stop}を利用できます。
+このコマンドは、ポイントがつぎのタブストップ位置に達するまで
+ポイントのまえに字下げを挿入します。
+テキスト（text）モードでなくても、@kbd{M-i}でこのコマンドを実行できます。
+
+@findex edit-tab-stops
+@findex edit-tab-stops-note-changes
+@c @kindex C-c C-c @r{(Edit Tab Stops)}
+@kindex C-c C-c @r{（タブストップの設定）}
+@vindex tab-stop-list
+@c   You can specify the tab stops used by @kbd{M-i}.  They are stored in a
+@c variable called @code{tab-stop-list}, as a list of column-numbers in
+@c increasing order.
+@kbd{M-i}が使用するタブストップは任意に設定できます。
+この設定は、昇順に並べた桁番号のリストとして
+@code{tab-stop-list}と呼ばれる変数に格納されます。
+
+@c   The convenient way to set the tab stops is with @kbd{M-x
+@c edit-tab-stops}, which creates and selects a buffer containing a
+@c description of the tab stop settings.  You can edit this buffer to
+@c specify different tab stops, and then type @kbd{C-c C-c} to make those
+@c new tab stops take effect.  @code{edit-tab-stops} records which buffer
+@c was current when you invoked it, and stores the tab stops back in that
+@c buffer; normally all buffers share the same tab stops and changing them
+@c in one buffer affects all, but if you happen to make
+@c @code{tab-stop-list} local in one buffer then @code{edit-tab-stops} in
+@c that buffer will edit the local settings.
+タブストップを設定する便利な方法は、
+@kbd{M-x edit-tab-stops}を使うことです。
+このコマンドは、タブストップの設定を記述したバッファを作成して選択します。
+このバッファを編集して今までとは異なるタブストップを指定し、
+@kbd{C-c C-c}と打ってその新たな設定を有効にします。
+@code{edit-tab-stops}は、呼ばれたときのカレントバッファをあらかじめ
+記録しておくので、そのバッファに新たなタブストップを設定します。
+通常、全バッファで同じタブストップを共有しているので、
+1つのバッファでタブストップを変更すると、すべてのバッファに影響をします。
+しかし、あるバッファで@code{tab-stop-list}をローカルにしておくと、
+そのバッファで@code{edit-tab-stops}を実行するとローカルな設定を編集します。
+
+@c   Here is what the text representing the tab stops looks like for ordinary
+@c tab stops every eight columns.
+一般的に使われる8桁ごとに設定されたタブストップの場合、
+設定用バッファの内容はつぎのようになります。
+
+@example
+        :       :       :       :       :       :
+0         1         2         3         4
+0123456789012345678901234567890123456789012345678
+To install changes, type C-c C-c
+@end example
+
+@c   The first line contains a colon at each tab stop.  The remaining lines
+@c are present just to help you see where the colons are and know what to do.
+1行目は、各タブストップ位置をコロンで表します。
+残りの行は、タブストップ位置を読み取りやすくためや使い方です。
+
+@c   Note that the tab stops that control @code{tab-to-tab-stop} have nothing
+@c to do with displaying tab characters in the buffer.  @xref{Display Vars},
+@c for more information on that.
+@code{tab-to-tab-stop}を制御するタブストップと、
+バッファ内でのタブ文字の表示とは、関係がないことに注意してください。
+詳細については@xref{Display Vars}。
+
+@node Just Spaces,, Tab Stops, Indentation
+@c @section Tabs vs. Spaces
+@section タブと空白
+
+@vindex indent-tabs-mode
+@c   Emacs normally uses both tabs and spaces to indent lines.  If you prefer,
+@c all indentation can be made from spaces only.  To request this, set
+@c @code{indent-tabs-mode} to @code{nil}.  This is a per-buffer variable;
+@c altering the variable affects only the current buffer, but there is a
+@c default value which you can change as well.  @xref{Locals}.
+Emacsでは、通常、行の字下げにはタブと空白の両方を使用します。
+しかし、空白だけを用いて字下げを行うことも可能です。
+そうするには、変数@code{indent-tabs-mode}に@code{nil}を設定します。
+この変数はバッファごとの変数です。
+変数を変更してもカレントバッファだけに影響しますが、
+デフォルト値を変更することもできます。
+@xref{Locals}。
+
+@findex tabify
+@findex untabify
+@c   There are also commands to convert tabs to spaces or vice versa, always
+@c preserving the columns of all nonblank text.  @kbd{M-x tabify} scans the
+@c region for sequences of spaces, and converts sequences of at least three
+@c spaces to tabs if that can be done without changing indentation.  @kbd{M-x
+@c untabify} changes all tabs in the region to appropriate numbers of spaces.
+空白以外のテキストの桁を保存したまま、タブを空白（あるいはその逆）に
+変換するコマンドもあります。
+@kbd{M-x tabify}は、リージョン内の連続する空白を探して、
+字下げを変えることがなければ少なくとも連続する3個の空白をタブに変換します。
+@kbd{M-x untabify}は、リージョン内のすべてのタブを
+適切な個数の空白に変換します。

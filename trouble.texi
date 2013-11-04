@@ -1,0 +1,1869 @@
+@c =============================================================
+@c = 元 翻 訳: 久野靖＠大塚.筑波大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/12
+@c = 20.6改訂: 大木敦雄＠大塚.筑波大学 = 2000/03/03
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,1997,2001 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@iftex
+@c @chapter Dealing with Common Problems
+@chapter よくある問題への対処 @emph{(2004/03/29)}
+
+@c   If you type an Emacs command you did not intend, the results are often
+@c mysterious.  This chapter tells what you can do to cancel your mistake or
+@c recover from a mysterious situation.  Emacs bugs and system crashes are
+@c also considered.
+意図してないEmacsコマンドを打つと、
+その結果はわけのわからないものになりがちです。
+本章では、まちがいを取り消したり、
+わけのわからない状況から復帰する手段について説明します。
+また、Emacsのバグやシステムクラッシュについても説明します。
+@end iftex
+
+@node Quitting, Command Arguments, Customization, Top
+@c @section Quitting and Aborting
+@c @cindex quitting
+@section 中断とアボート @emph{(2004/03/29)}
+@cindex 中断
+
+@table @kbd
+@item C-g
+@c @itemx C-@key{BREAK} @r{(MS-DOS only)}
+@itemx C-@key{BREAK} @r{(MS-DOS のみ)}
+Quit: cancel running or partially typed command.
+中断する。
+動作中のコマンドや打鍵途中のコマンドを取り消す。
+@item C-]
+@c Abort innermost recursive editing level and cancel the command which
+@c invoked it (@code{abort-recursive-edit}).
+アボートする。
+いちばん内側の再帰編集レベルを強制的に終了し、
+その再帰編集レベルを起動したコマンドを取り消す
+（@code{abort-recursive-edit}）。
+@item @key{ESC} @key{ESC} @key{ESC}
+@c Either quit or abort, whichever makes sense (@code{keyboard-escape-quit}).
+中断かアボートのいずれか意味のあるほうを実行する
+（@code{keyboard-escape-quit}）。
+@item M-x top-level
+@c Abort all recursive editing levels that are currently executing.
+現在実行中のすべての再帰編集レベルを強制的に終了する。
+@item C-x u
+@c Cancel a previously made change in the buffer contents (@code{undo}).
+バッファの内容に対して行った直前の変更を取り消す（@code{undo}）。
+@end table
+
+@c   There are two ways of canceling commands which are not finished
+@c executing: @dfn{quitting} with @kbd{C-g}, and @dfn{aborting} with
+@c @kbd{C-]} or @kbd{M-x top-level}.  Quitting cancels a partially typed
+@c command or one which is already running.  Aborting exits a recursive
+@c editing level and cancels the command that invoked the recursive edit.
+@c (@xref{Recursive Edit}.)
+実行を完了していないコマンドを取り消すには、2つの方法があります。 
+1つは@kbd{C-g}で@dfn{中断}すること、
+もう1つは@kbd{C-]}や@kbd{M-x top-level}で
+@dfn{アボート}することです。
+中断とは、打鍵途中のコマンドや動作中のコマンドを取り消すことをいいます。
+アボートとは、再帰編集レベルから抜け出し、かつ、
+その再帰編集レベルを起動したコマンドを取り消すことをいいます
+（@pxref{Recursive Edit}）。
+
+@c @cindex quitting
+@cindex 中断
+@kindex C-g
+@c   Quitting with @kbd{C-g} is used for getting rid of a partially typed
+@c command, or a numeric argument that you don't want.  It also stops a
+@c running command in the middle in a relatively safe way, so you can use
+@c it if you accidentally give a command which takes a long time.  In
+@c particular, it is safe to quit out of killing; either your text will
+@c @emph{all} still be in the buffer, or it will @emph{all} be in the kill
+@c ring (or maybe both).  Quitting an incremental search does special
+@c things documented under searching; in general, it may take two
+@c successive @kbd{C-g} characters to get out of a search
+@c (@pxref{Incremental Search}).
+@kbd{C-g}での中断は、打鍵途中のコマンドや
+不要な数引数を打ってしまったときにとりやめるのに使います。
+また、実行途中のコマンドを比較的安全な方法で止めますから、
+長時間かかるコマンドをうっかり始めてしまったときにも使えます。
+特に、キル操作を中断しても安全です。
+テキストは、まだ@emph{すべて}バッファ内にあるか、
+または、@emph{すべて}キルリングに入っている
+（あるいは、その両方に入っている）からです。
+なお、インクリメンタルサーチを中断する場合には、
+文字列探索のところで説明してあるように、特別な動作を行います。
+一般には、サーチから抜け出すには@kbd{C-g}を2回連打する必要があります
+（@pxref{Incremental Search}）。
+
+@c   On MS-DOS, the character @kbd{C-@key{BREAK}} serves as a quit character
+@c like @kbd{C-g}.  The reason is that it is not feasible, on MS-DOS, to
+@c recognize @kbd{C-g} while a command is running, between interactions
+@c with the user.  By contrast, it @emph{is} feasible to recognize
+@c @kbd{C-@key{BREAK}} at all times.  @xref{MS-DOS Input}.
+MS-DOSでは、@kbd{C-@key{BREAK}}は@kbd{C-g}と同様に中断として働きます。
+MS-DOSでは、コマンドの実行中にユーザーとのやりとりを行う状態にないときには、
+@kbd{C-g}を検出できないからです。
+これに対して、@kbd{C-@key{BREAK}}はつねに認識@emph{でき}ます。
+@xref{MS-DOS Input}。
+
+@findex keyboard-quit
+@c   @kbd{C-g} works by setting the variable @code{quit-flag} to @code{t}
+@c the instant @kbd{C-g} is typed; Emacs Lisp checks this variable
+@c frequently and quits if it is non-@code{nil}.  @kbd{C-g} is only
+@c actually executed as a command if you type it while Emacs is waiting for
+@c input.  In that case, the command it runs is @code{keyboard-quit}.
+@kbd{C-g}はつぎのように動作します。
+@kbd{C-g}が打鍵されると変数@code{quit-flag}に@code{t}が設定されます。
+Emacs Lispはこの変数を頻繁に調べ、値が@code{nil}以外だと中断処理を行います。
+@kbd{C-g}が実際にコマンドとして実行されるのは、
+Emacsが入力待ち状態にあるときに@kbd{C-g}を打った場合だけです。この場合，
+@code{keyboard-quit} が実行されます．
+
+@c   If you quit with @kbd{C-g} a second time before the first @kbd{C-g} is
+@c recognized, you activate the ``emergency escape'' feature and return to
+@c the shell.  @xref{Emergency Escape}.
+最初の@kbd{C-g}が認識されないうちに2つめの@kbd{C-g}を打って中断すると、
+『緊急脱出』機能を発動したことになりシェルに戻ります。
+@xref{Emergency Escape}。
+
+@c @cindex NFS and quitting
+@cindex NFSと中断
+@c   There may be times when you cannot quit.  When Emacs is waiting for
+@c the operating system to do something, quitting is impossible unless
+@c special pains are taken for the particular system call within Emacs
+@c where the waiting occurs.  We have done this for the system calls that
+@c users are likely to want to quit from, but it's possible you will find
+@c another.  In one very common case---waiting for file input or output
+@c using NFS---Emacs itself knows how to quit, but many NFS implementations
+@c simply do not allow user programs to stop waiting for NFS when the NFS
+@c server is hung.
+中断できない場合もありえます。
+Emacsがオペレーティングシステムに何かを頼んで待っているときには、
+待ち状態を起こしたシステムコールを使ったEmacs側で特別な手当てをしない限り
+中断できません。
+Emacsでは、ユーザーが中断しそうなシステムコールには
+手当てを施してありますが、手当てしていない場所を叩く可能性はあります。
+よくあるのは、NFS経由の入出力を待っているときです。
+Emacs側ではこれを中断する方法はわかっているのですが、
+多くのNFSの実装では、NFSサーバーが固まったときにユーザープログラムが
+NFSの待ちを中断することを許していないのです。
+
+@c @cindex aborting recursive edit
+@cindex 再帰編集をアボートする
+@findex abort-recursive-edit
+@kindex C-]
+@c   Aborting with @kbd{C-]} (@code{abort-recursive-edit}) is used to get
+@c out of a recursive editing level and cancel the command which invoked
+@c it.  Quitting with @kbd{C-g} does not do this, and could not do this,
+@c because it is used to cancel a partially typed command @emph{within} the
+@c recursive editing level.  Both operations are useful.  For example, if
+@c you are in a recursive edit and type @kbd{C-u 8} to enter a numeric
+@c argument, you can cancel that argument with @kbd{C-g} and remain in the
+@c recursive edit.
+@kbd{C-]}によるアボート（@code{abort-recursive-edit}）は、
+再帰編集レベルから脱出し、かつ、その再帰編集レベルを
+起動したコマンドを取り消すのに使います。
+@kbd{C-g}による中断はこのような目的には使えませんし、
+このようなことはできません。
+というのは、@kbd{C-g}は、ある再帰編集レベルの@emph{中で}
+打ちかけたコマンドを取り消すのに使うからです。
+どちらの操作も必要なものです。
+たとえば、再帰編集中に数引数を入力しようとして@kbd{C-u 8}と打鍵した場合、
+@kbd{C-g}で数引数を取り消しても再帰編集に留まったままです。
+
+@findex keyboard-escape-quit
+@kindex ESC ESC ESC
+@c   The command @kbd{@key{ESC} @key{ESC} @key{ESC}}
+@c (@code{keyboard-escape-quit}) can either quit or abort.  This key was
+@c defined because @key{ESC} is used to ``get out'' in many PC programs.
+@c It can cancel a prefix argument, clear a selected region, or get out of
+@c a Query Replace, like @kbd{C-g}.  It can get out of the minibuffer or a
+@c recursive edit, like @kbd{C-]}.  It can also get out of splitting the
+@c frame into multiple windows, like @kbd{C-x 1}.  One thing it cannot do,
+@c however, is stop a command that is running.  That's because it executes
+@c as an ordinary command, and Emacs doesn't notice it until it is ready
+@c for a command.
+コマンド@kbd{@key{ESC} @key{ESC} @key{ESC}}
+（@code{keyboard-escape-quit}）は、中断かアボートのいずれかを行います。
+このキーを使うのは、多くのPCのソフトで@key{ESC}が
+『抜け出す』の意味に使われているからです。
+@kbd{C-g}と同様に、数引数を取り消したり、
+選択したリージョンをクリアしたり、問い合わせ型置換操作から抜け出します。
+@kbd{C-]}と同様に、ミニバッファや再帰編集から抜け出します。
+また、@kbd{C-x 1}のように、フレームを複数ウィンドウに分割しているのを
+やめることもできます。
+しかしながら、実行中のコマンドを止めることはできません。
+なぜなら、このコマンドは普通のコマンドとして実行されるので、
+Emacsがコマンドを読み込む状態にならないとこのコマンドを認識しないからです。
+
+@findex top-level
+@c   The command @kbd{M-x top-level} is equivalent to ``enough'' @kbd{C-]}
+@c commands to get you out of all the levels of recursive edits that you
+@c are in.  @kbd{C-]} gets you out one level at a time, but @kbd{M-x
+@c top-level} goes out all levels at once.  Both @kbd{C-]} and @kbd{M-x
+@c top-level} are like all other commands, and unlike @kbd{C-g}, in that
+@c they take effect only when Emacs is ready for a command.  @kbd{C-]} is
+@c an ordinary key and has its meaning only because of its binding in the
+@c keymap.  @xref{Recursive Edit}.
+コマンド@kbd{M-x top-level}は、現在入っているすべての再帰編集レベルから
+抜け出すのに『十分な』数の@kbd{C-]}と同等です。
+@kbd{C-]}は一度に1レベルだけ抜け出すのに対し、
+@kbd{M-x top-level}はすべてのレベルを一気に抜け出します。
+@kbd{C-]}も@kbd{M-x top-level}も他のコマンドと同様の普通のコマンドですから、
+@kbd{C-g}とは違って、Emacsがコマンドを受け付ける状態のときだけ動作します。
+@kbd{C-]}は普通のキーであり、キーマップにそのバインディングがあるので
+そのように動作するのです。
+@xref{Recursive Edit}。
+
+@c   @kbd{C-x u} (@code{undo}) is not strictly speaking a way of canceling
+@c a command, but you can think of it as canceling a command that already
+@c finished executing.  @xref{Undo}, for more information
+@c about the undo facility.
+@kbd{C-x u}（@code{undo}）は、正確にいえばコマンドを
+取り消すわけではありませんが、
+動作を完了してしまったコマンドを取り消すものと考えることができます。
+詳しくは @xref{Undo} を参照してください。
+
+@node Lossage, Bugs, Quitting, Top
+@c @section Dealing with Emacs Trouble
+@section Emacsのトラブルに対する対処 @emph{(2004/03/29)}
+
+@c   This section describes various conditions in which Emacs fails to work
+@c normally, and how to recognize them and correct them.  For a list of
+@c additional problems you might encounter, see @ref{Bugs and problems, ,
+@c Bugs and problems, efaq, GNU Emacs FAQ}, and the file @file{etc/PROBLEMS}
+@c in the Emacs distribution.  Type @kbd{C-h F} to read the FAQ; type
+@c @kbd{C-h P} to read the @file{PROBLEMS} file.
+本節では、Emacsが正常に動作し損なうさまざまな条件と、それらの見分け方、
+直し方について説明します。発生しうる問題についてはEmacsに付属している @ref{Bugs and problems, ,
+Bugs and problems, efaq, GNU Emacs FAQ} やファイル @file{etc/PROBLEMS} を参照し
+てください．FAQは@kbd{C-h F}，@file{PROBLEMS}ファイルは@kbd{C-h P} で読むことが
+できます．
+
+@menu
+* DEL Does Not Delete::   What to do if @key{DEL} doesn't delete.
+* Stuck Recursive::       `[...]' in mode line around the parentheses.
+* Screen Garbled::        Garbage on the screen.
+* Text Garbled::          Garbage in the text.
+* Unasked-for Search::    Spontaneous entry to incremental search.
+* Memory Full::           How to cope when you run out of memory.
+* After a Crash::         Recovering editing in an Emacs session that crashed.
+* Emergency Escape::      Emergency escape---
+                            What to do if Emacs stops responding.
+* Total Frustration::     When you are at your wits' end.
+@end menu
+
+@node DEL Does Not Delete
+@c @subsection If @key{DEL} Fails to Delete
+@subsection @key{DEL}で削除できない @emph{(2004/03/29)}
+@cindex @key{DEL} vs @key{BACKSPACE}
+@cindex @key{BACKSPACE} vs @key{DEL}
+@cindex usual erasure key
+
+@c   Every keyboard has a large key, a little ways above the @key{RET} or
+@c @key{ENTER} key, which you normally use outside Emacs to erase the
+@c last character that you typed.  We call this key @dfn{the usual
+@c erasure key}.  In Emacs, it is supposed to be equivalent to @key{DEL},
+@c and when Emacs is properly configured for your terminal, it translates
+@c that key into the character @key{DEL}.
+大抵のキーボードにはEmacs外で最後に入力した文字を消すためのキーとして@key{RET} 
+や @key{ENTER} キーの上あたりにあるキーがあります．このキーを本書では @dfn{通常
+削除キー}(the usual erasure key) と呼びます．端末上のEmacsはそのキーを@key{DEL}
+キーと同じものとみなし，@key{DEL}に変換します．
+
+@c   When Emacs starts up using a window system, it determines
+@c automatically which key should be @key{DEL}.  In some unusual cases
+@c Emacs gets the wrong information from the system.  If the usual
+@c erasure key deletes forwards instead of backwards, that is probably
+@c what happened---Emacs ought to be treating the @key{DELETE} key as
+@c @key{DEL}, but it isn't.
+Emacs が起動する時にウィンドウシステムを利用していると，自動的に@key{DEL}として
+扱うべきキーを決定します．しかし，ある環境ではシステムから誤った情報を受け取って
+しまいます．通常削除キーが後ではなく前の文字を消すようであれば，@key{DELETE} キー
+を @key{DEL} として扱うように設定しなければなりません．
+
+@c   With a window system, if the usual erasure key is labeled
+@c @key{BACKSPACE} and there is a @key{DELETE} key elsewhere, but the
+@c @key{DELETE} key deletes backward instead of forward, that too
+@c suggests Emacs got the wrong information---but in the opposite sense.
+@c It ought to be treating the @key{BACKSPACE} key as @key{DEL}, and
+@c treating @key{DELETE} differently, but it isn't.
+ウィンドウシステムでは通常削除キーは@key{BACKSPACE}と印字されており，他に
+@key{DELETE}キーもあります．しかし，@key{DELETE}キーは前ではなく後の文字を削除し
+ます．もし逆の動作になっているようであれば，Emacsが判断を誤っています．
+@key{BACKSPACE} キーを @key{DEL}キーとして扱うようにしなければなりません．
+
+@c   On a text-only terminal, if you find the usual erasure key prompts
+@c for a Help command, like @kbd{Control-h}, instead of deleting a
+@c character, it means that key is actually sending the @key{BS}
+@c character.  Emacs ought to be treating @key{BS} as @key{DEL}, but it
+@c isn't.
+テキスト端末で，通常削除キーが文字を削除するかわりに，@kbd{Control-h}のようにヘ
+ルプを表示するようであれば，そのキーは実際には@key{BS}を送っていることになります．
+つまり，Emacsは@key{BS}を@key{DEL}として扱うべきなのです．
+
+@c   In all of those cases, the immediate remedy is the same: use the
+@c command @kbd{M-x normal-erase-is-backspace-mode}.  This toggles
+@c between the two modes that Emacs supports for handling @key{DEL}, so
+@c if Emacs starts in the wrong mode, it should switch to the right mode.
+@c On a text-only terminal, if you want to ask for help when @key{BS} is
+@c treated as @key{DEL}, use @key{F1}; @kbd{C-?} may also work, if it
+@c sends character code 127.
+こういった場合，当面の問題は同じです．そのため，@kbd{M-x
+normal-erase-is-backspace-mode} が利用できます．このコマンドは2つのモードを切り
+替えることができます．もしEmacsが誤ったモードで起動していれば，@key{DEL}を扱うモー
+ドにすることで，正しいモードに切り替えることができます．テキスト端末で，@key{BS}
+が @key{DEL} として扱われているかどうかを確認したければ， @key{F1} (@kbd{C-?} も
+動作するかもしれません)を利用して，127 になっていることを確認します．
+sends character code 127.
+
+@findex normal-erase-is-backspace-mode
+@c   To fix the problem automatically for every Emacs session, you can
+@c put one of the following lines into your @file{.emacs} file
+@c (@pxref{Init File}).  For the first case above, where @key{DELETE}
+@c deletes forwards instead of backwards, use this line to make
+@c @key{DELETE} act as @key{DEL} (resulting in behavior compatible
+@c with Emacs 20 and previous versions):
+Emacsを起動時に自動的に問題を修正するためには，以下の行を @file{.emacs}ファイル
+(@pxref{Init File}) に追加します．最初の例では@key{DELETE}が後ではなく前の文字を
+消す場合に@key{DELETE} を @key{DEL} として扱うようにします (Emacs20以前と同じ動
+作になります)．
+
+@lisp
+(normal-erase-is-backspace-mode 0)
+@end lisp
+
+@noindent
+@c For the other two cases, where @key{BACKSPACE} ought to act as
+@c @key{DEL}, use this line:
+他の2例では，@key{BACKSPACE}を@key{DEL}として扱うべきなため，以下を利用します．
+
+@lisp
+(normal-erase-is-backspace-mode 1)
+@end lisp
+
+@vindex normal-erase-is-backspace
+@c   Another way to fix the problem for every Emacs session is to
+@c customize the variable @code{normal-erase-is-backspace}: the value
+@c @code{t} specifies the mode where @key{BS} or @key{BACKSPACE} is
+@c @key{DEL}, and @code{nil} specifies the other mode.  @xref{Easy
+@c Customization}.
+Emacsを起動時に問題を修正する他の方法として，変数
+@code{normal-erase-is-backspace} をカスタマイズする方法があります．@code{t} であ
+れば，@key{BS} や @key{BACKSPACE} を @key{DEL}とみなし， @code{nil} であれば逆に
+なります．@xref{Easy Customization}．
+
+@c   With a window system, it can also happen that the usual erasure key
+@c is labeled @key{BACKSPACE}, there is a @key{DELETE} key elsewhere, and
+@c both keys delete forward.  This probably means that someone has
+@c redefined your @key{BACKSPACE} key as a @key{DELETE} key.  With X,
+@c this is typically done with a command to the @code{xmodmap} program
+@c when you start the server or log in.  The most likely motive for this
+@c customization was to support old versions of Emacs, so we recommend
+@c you simply remove it now.
+ウィンドウシステムでは@key{BACKSPACE}と印字されたキーが通常削除キーであり，他に
+@key{DELETE} キーも存在し，両方ともが前の文字を削除するということも起こります．
+これがおそらく誰(何)かが @key{BACKSPACE} キーを @key{DELETE} としちぇ再定義した
+ためです．Xウィンドウシステムではサーバを起動したりログインしたりすると，
+@code{xmodmap} によってなされます．この現象を引き起こしているのは古いバージョン
+のEmacsをサポートすることです．だから，古いバージョンは削除することをお勧めしま
+す．
+
+@node Stuck Recursive
+@c @subsection Recursive Editing Levels
+@subsection 再帰編集レベル
+
+@c   Recursive editing levels are important and useful features of Emacs, but
+@c they can seem like malfunctions to the user who does not understand them.
+再帰編集レベルはEmacsの重要で有用な機能ですが、
+それについて理解していない人にとっては、誤動作に見える可能性があります。
+
+@c   If the mode line has square brackets @samp{[@dots{}]} around the parentheses
+@c that contain the names of the major and minor modes, you have entered a
+@c recursive editing level.  If you did not do this on purpose, or if you
+@c don't understand what that means, you should just get out of the recursive
+@c editing level.  To do so, type @kbd{M-x top-level}.  This is called getting
+@c back to top level.  @xref{Recursive Edit}.
+モード行のメジャー／マイナモード名を囲む丸括弧の周囲に中括弧
+@samp{[@dots{}]}が表示されているときは、再帰編集レベルに入っています。
+意図してそうしたのでなかったり、
+再帰編集レベルの意味を理解していないのであれば、
+再帰編集レベルから抜け出すべきです。
+それには@kbd{M-x top-level}と打ちます。
+これをトップレベルへの抜け出しと呼びます。
+@xref{Recursive Edit}。
+
+@node Screen Garbled
+@c @subsection Garbage on the Screen
+@subsection 画面上のゴミ @emph{(2004/03/29)}
+
+@c   If the data on the screen looks wrong, the first thing to do is see
+@c whether the text is really wrong.  Type @kbd{C-l} to redisplay the
+@c entire screen.  If the screen appears correct after this, the problem
+@c was entirely in the previous screen update.  (Otherwise, see the following
+@c section.)
+画面上のデータがまちがっているように見えたら、まず最初にすべきことは、
+テキストが本当にまちがっているのかどうか調べることです。
+@kbd{C-l}と打って画面全体を再描画します。
+これで画面が正しそうになるのなら、問題は画面更新にあったのです。
+（そうでない場合は、後の章を参照してください）。
+
+@c   Display updating problems often result from an incorrect termcap entry
+@c for the terminal you are using.  The file @file{etc/TERMS} in the Emacs
+@c distribution gives the fixes for known problems of this sort.
+@c @file{INSTALL} contains general advice for these problems in one of its
+@c sections.  Very likely there is simply insufficient padding for certain
+@c display operations.  To investigate the possibility that you have this sort
+@c of problem, try Emacs on another terminal made by a different manufacturer.
+@c If problems happen frequently on one kind of terminal but not another kind,
+@c it is likely to be a bad termcap entry, though it could also be due to a
+@c bug in Emacs that appears for terminals that have or that lack specific
+@c features.
+画面更新の問題は、
+使っている端末に対応するtermcapの定義がまちがっている場合が多いです。
+Emacsの配布に含まれるファイル@file{etc/TERMS}には、
+この種の問題で既知のものに対する修正が入っています。
+ファイル@file{INSTALL}には、
+この種の問題に対する一般的なアドバイスの節があります。
+いちばんありがちなのは、
+ある種の画面操作に対するパディング
+@footnote{【訳注】端末にとっては無意味で無害な文字を、
+（動作が完了するまでの）時間稼ぎのために送出すること。}
+が不足している場合です。
+この種の問題があるかどうか調べるには、
+他のメーカ製の別の端末でEmacsを動かしてみてください。
+ある機種の端末では頻繁に問題が起きるのに別の機種の端末では問題がないなら、
+termcapの定義がまちがっている可能性があります。
+しかし、ある種の機能を有するか欠如している端末で現れる
+Emacsのバグである可能性もあります。
+
+@node Text Garbled
+@c @subsection Garbage in the Text
+@subsection テキスト内のゴミ
+
+@c   If @kbd{C-l} shows that the text is wrong, try undoing the changes to it
+@c using @kbd{C-x u} until it gets back to a state you consider correct.  Also
+@c try @kbd{C-h l} to find out what command you typed to produce the observed
+@c results.
+@kbd{C-l}を実行してもテキストが変ならば、
+正しいと思われる状態になるまで、
+@kbd{C-x u}を使って変更をもとに戻してみてください。
+また、どのコマンドで変になったのか調べるために、
+@kbd{C-h l}を試してみてください。
+
+@c   If a large portion of text appears to be missing at the beginning or
+@c end of the buffer, check for the word @samp{Narrow} in the mode line.
+@c If it appears, the text you don't see is probably still present, but
+@c temporarily off-limits.  To make it accessible again, type @kbd{C-x n
+@c w}.  @xref{Narrowing}.
+バッファの先頭や末尾で大量のテキストが失われているようなら、
+モード行に単語@samp{Narrow}が表示されていないか確認してください。
+もしそうなら、おそらくテキストは失われているのではなく、
+一時的に見えなくなっているのでしょう。
+見えるようにするには、@kbd{C-x n w}と打ってください。
+@xref{Narrowing}。
+
+@node Unasked-for Search
+@c @subsection Spontaneous Entry to Incremental Search
+@subsection 自発的なインクリメンタルサーチの開始
+
+@c   If Emacs spontaneously displays @samp{I-search:} at the bottom of the
+@c screen, it means that the terminal is sending @kbd{C-s} and @kbd{C-q}
+@c according to the poorly designed xon/xoff ``flow control'' protocol.
+Emacsが画面の最下行に自発的に@samp{I-search:}と表示するようなら、
+劣悪なxon/xoffの『フロー制御プロトコル』に従って
+端末が@kbd{C-s}と@kbd{C-q}を送っているためでしょう。
+
+@c   If this happens to you, your best recourse is to put the terminal in a
+@c mode where it will not use flow control, or give it so much padding that
+@c it will never send a @kbd{C-s}.  (One way to increase the amount of
+@c padding is to set the variable @code{baud-rate} to a larger value.  Its
+@c value is the terminal output speed, measured in the conventional units
+@c of baud.)
+もしこの状態が起きたら、もっともよいのは端末をフロー制御なしに設定するか、
+または、パディングを十分に増やして端末がけっして@kbd{C-s}を
+送らないようにすることです。
+（パディングを増やす1つの方法は、
+より大きい値を変数@code{baud-rate}に設定すること。
+この値はボーという単位で表した端末の出力速度。）
+
+@c @cindex flow control
+@cindex フロー制御
+@cindex xon-xoff
+@findex enable-flow-control
+@c   If you don't succeed in turning off flow control, the next best thing
+@c is to tell Emacs to cope with it.  To do this, call the function
+@c @code{enable-flow-control}.
+フロー制御を止められない場合の次善の策は、
+Emacsにフロー制御を処理させることです。
+それには、関数@code{enable-flow-control}を呼び出してください。
+
+@findex enable-flow-control-on
+@c   Typically there are particular terminal types with which you must use
+@c flow control.  You can conveniently ask for flow control on those
+@c terminal types only, using @code{enable-flow-control-on}.  For example,
+@c if you find you must use flow control on VT-100 and H19 terminals, put
+@c the following in your @file{.emacs} file:
+典型的な場合、
+ある種の端末タイプに限ってフロー制御を使う必要があります。
+@code{enable-flow-control-on}を使って、
+そのような種類の端末に限ってフロー制御を行うようにできます。
+たとえば、VT-100端末とH19端末にはフロー制御を行う必要があるのなら、
+ファイル@file{.emacs}につぎのものを入れます。
+
+@example
+(enable-flow-control-on "vt100" "h19")
+@end example
+
+@c   When flow control is enabled, you must type @kbd{C-\} to get the
+@c effect of a @kbd{C-s}, and type @kbd{C-^} to get the effect of a
+@c @kbd{C-q}.  (These aliases work by means of keyboard translations; see
+@c @ref{Keyboard Translations}.)
+フロー制御を使っている場合には、@kbd{C-s}のかわりに@kbd{C-\}、
+@kbd{C-q}のかわりに@kbd{C-^}を使う必要があります。
+（これらの割り当てはキーボード変換によって行われる。
+@pxref{Keyboard Translations}。）
+
+@node Memory Full
+@c @subsection Running out of Memory
+@c @cindex memory full
+@c @cindex out of memory
+@subsection メモリ不足 @emph{(2004/03/29)}
+@cindex メモリ不足
+
+@c   If you get the error message @samp{Virtual memory exceeded}, save your
+@c modified buffers with @kbd{C-x s}.  This method of saving them has the
+@c smallest need for additional memory.  Emacs keeps a reserve of memory
+@c which it makes available when this error happens; that should be enough
+@c to enable @kbd{C-x s} to complete its work.
+@samp{Virtual memory exceeded}というエラーメッセージが出たら、
+変更したバッファを@kbd{C-x s}で保存してください。
+この方法で保存する場合、必要なメモリは最小限ですみます。
+Emacsは上記のエラーが起きたときでも使える予備のメモリを確保していますから、
+@kbd{C-x s}を完了するのには十分なはずです。
+
+@c   Once you have saved your modified buffers, you can exit this Emacs job
+@c and start another, or you can use @kbd{M-x kill-some-buffers} to free
+@c space in the current Emacs job.  If you kill buffers containing a
+@c substantial amount of text, you can safely go on editing.  Emacs refills
+@c its memory reserve automatically when it sees sufficient free space
+@c available, in case you run out of memory another time.
+変更済みのバッファを保存したら、
+Emacsを終了して別のEmacsを起動してもよいですし、
+@kbd{M-x kill-some-buffer}を使って
+現在動いているEmacsのメモリを解放してもよいです。
+大量のテキストが入っているバッファを消せば、
+安全に編集を続行できます。
+空きメモリが十分な量になると予備のメモリを自動的に確保し直し、
+再度メモリ不足になったときに備えます。
+
+@c   Do not use @kbd{M-x buffer-menu} to save or kill buffers when you run
+@c out of memory, because the buffer menu needs a fair amount of memory
+@c itself, and the reserve supply may not be enough.
+メモリ不足になったときには、@kbd{M-x buffer-menu}を使って
+バッファを保存したり消したりしないでください。
+このコマンドはけっこうメモリを必要とするので、
+確保した予備のメモリだけでは十分でない可能性があるからです。
+
+@node After a Crash
+@c @subsection Recovery After a Crash
+@subsection クラッシュからの回復
+
+@c   If Emacs or the computer crashes, you can recover the files you were
+@c editing at the time of the crash from their auto-save files.  To do
+@c this, start Emacs again and type the command @kbd{M-x recover-session}.
+Emacsやコンピュータがクラッシュしても、
+クラッシュ時に編集していたファイルは自動保存ファイルから回復できます。
+それには、Emacsを再度起動してから、コマンド@kbd{M-x recover-session}を
+入力してください。
+
+@c   This command initially displays a buffer which lists interrupted
+@c session files, each with its date.  You must choose which session to
+@c recover from.  Typically the one you want is the most recent one.  Move
+@c point to the one you choose, and type @kbd{C-c C-c}.
+このコマンドは、まず、中断されたセッションファイルの一覧を日付とともに
+バッファに表示します。
+その中からどのセッションを回復するか選んでください。
+通常は、最新のセッションを選べばよいでしょう。
+望みのセッションの行にポイントを動かして、@kbd{C-c C-c}と打ちます。
+
+@c   Then @code{recover-session} asks about each of the files that you were
+@c editing during that session; it asks whether to recover that file.  If
+@c you answer @kbd{y} for a file, it shows the dates of that file and its
+@c auto-save file, then asks once again whether to recover that file.  For
+@c the second question, you must confirm with @kbd{yes}.  If you do, Emacs
+@c visits the file but gets the text from the auto-save file.
+すると、@code{recover-session}は、そのセッションで編集中だった
+各ファイルについて回復するかどうか問い合わせてきます。
+@kbd{y}と答えると、そのファイルと自動保存ファイルの日付を表示してから、
+回復するかどうか再度問い合わせてきます。
+再問い合わせに対しては@kbd{yes}で答える必要があります。
+そうすると、Emacsはそのファイルを訪れますが、
+テキストは自動保存ファイルから持ってきます。
+
+@c   When @code{recover-session} is done, the files you've chosen to
+@c recover are present in Emacs buffers.  You should then save them.  Only
+@c this---saving them---updates the files themselves.
+@code{recover-session}が完了すると、
+回復を指定したファイルはEmacsバッファに入っています。
+そうしたらこれらのバッファを保存してください。
+保存して始めてもとのファイルが更新されます。
+
+@node Emergency Escape
+@c @subsection Emergency Escape
+@subsection 緊急脱出
+
+@c   Because at times there have been bugs causing Emacs to loop without
+@c checking @code{quit-flag}, a special feature causes Emacs to be suspended
+@c immediately if you type a second @kbd{C-g} while the flag is already set,
+@c so you can always get out of GNU Emacs.  Normally Emacs recognizes and
+@c clears @code{quit-flag} (and quits!) quickly enough to prevent this from
+@c happening.  (On MS-DOS and compatible systems, type @kbd{C-@key{BREAK}}
+@c twice.)
+バグのために、Emacsが@code{quit-flag}を検査しないループに入ってしまうことも
+ありえます。
+このため、このフラグが設定されている状態で再度@kbd{C-g}が打たれると
+ただちに実行を休止する特別な機能がEmacsにはあり、
+いつでもGNU Emacsから抜け出すことができます。
+通常、Emacsはすみやかに@code{quit-flag}を認識し（中断し）ますから、
+この特別な機能が使われることはまずありません。
+（MS-DOSや互換システムでは、@kbd{C-@key{BREAK}}を2回連打する。）
+
+@c   When you resume Emacs after a suspension caused by multiple @kbd{C-g}, it
+@c asks two questions before going back to what it had been doing:
+@kbd{C-g}の連打によって休止したEmacsを再開すると、
+Emacsは休止直前に実行していた動作に戻るまえに、
+つぎの2つの質問をしてきます。
+
+@example
+Auto-save? (y or n)
+Abort (and dump core)? (y or n)
+@end example
+
+@noindent
+@c Answer each one with @kbd{y} or @kbd{n} followed by @key{RET}.
+それぞれの質問に対し、@kbd{y}か@kbd{n}に続けて@key{RET}で答えてください。
+
+@c   Saying @kbd{y} to @samp{Auto-save?} causes immediate auto-saving of all
+@c modified buffers in which auto-saving is enabled.
+@samp{Auto-save?}に@kbd{y}と答えると、
+自動保存を行う設定になっている変更されたバッファすべてに対して
+ただちに自動保存を実行します。
+
+@c   Saying @kbd{y} to @samp{Abort (and dump core)?} causes an illegal instruction to be
+@c executed, dumping core.  This is to enable a wizard to figure out why Emacs
+@c was failing to quit in the first place.  Execution does not continue
+@c after a core dump.  If you answer @kbd{n}, execution does continue.  With
+@c luck, GNU Emacs will ultimately check @code{quit-flag} and quit normally.
+@c If not, and you type another @kbd{C-g}, it is suspended again.
+@samp{Abort (and dump core)?}に@kbd{y}と答えると、
+Emacsは不正命令を実行してコアダンプを作ります。
+コアダンプがあると、Emacsが中断できなかった理由をウィザード
+@footnote{【訳注】「名人、熟練者、魔術師」の意味だが、
+特定のコンピュータや（特に）ソフトウェアに精通した人を指す。}
+が追究できます。
+コアダンプを作り終えるとEmacsの実行は終了します。
+@kbd{n}と答えると実行は継続します。
+運がよければ、Emacsが最終的には@code{quit-flag}を検査して
+正常に中断できるでしょう。
+運が悪ければ、またループに入ったままになりますから、
+再度@kbd{C-g}を打ってEmacsをまた休止します。
+
+@c   If Emacs is not really hung, just slow, you may invoke the double
+@c @kbd{C-g} feature without really meaning to.  Then just resume and answer
+@c @kbd{n} to both questions, and you will arrive at your former state.
+@c Presumably the quit you requested will happen soon.
+本当はEmacsが固まったのではなく単に遅いだけの場合には、
+意図せずに@kbd{C-g}を連打してしまうことがあります。
+その場合には、再開して2つの質問に@kbd{n}と答えればもとの状態に戻れます。
+中断要求はすぐに受け付けられるでしょう。
+
+@c   The double @kbd{C-g} feature is turned off when Emacs is running under
+@c the X Window System, since you can use the window manager to kill Emacs
+@c or to create another window and run another program.
+XウィンドウシステムのもとでEmacsが動作している場合には、
+@kbd{C-g}連打の機能は切ってあります。
+というのは、ウィンドウマネージャを使ってEmacsを終了させたり、
+別のウィンドウを開いて別のプログラムを動かせるからです。
+
+@c   On MS-DOS and compatible systems, the emergency escape feature is
+@c sometimes unavailable, even if you press @kbd{C-@key{BREAK}} twice, when
+@c some system call (MS-DOS or BIOS) hangs, or when Emacs is stuck in a
+@c very tight endless loop (in C code, @strong{not} in Lisp code).
+MS-DOSや互換システムでは、
+（MS-DOSやBIOSの）システムコールが固まっている場合や
+Emacsが非常にきつい（Lispコードでは@strong{なく}Cのコードで）
+無限ループに入っている場合には、
+@kbd{C-@key{BREAK}}を2回打っても緊急脱出の機能を使えない場合があります。
+
+@node Total Frustration
+@c @subsection Help for Total Frustration
+@subsection いらいらしたら…
+@cindex Eliza
+@cindex doctor
+
+@c   If using Emacs (or something else) becomes terribly frustrating and none
+@c of the techniques described above solve the problem, Emacs can still help
+@c you.
+Emacsを使うこと（や、その他のこと）がきわめて不愉快になったり、
+ここまでにあげたどの方法でも問題が解決しない場合でも、
+Emacsはまだ手助けができます。
+
+@c   First, if the Emacs you are using is not responding to commands, type
+@c @kbd{C-g C-g} to get out of it and then start a new one.
+まず、Emacsがコマンドに応答しないようなら、
+@kbd{C-g C-g}と打ってEmacsから抜け出し、
+新たに別のEmacsを起動してください。
+
+@findex doctor
+@c   Second, type @kbd{M-x doctor @key{RET}}.
+つぎに、@kbd{M-x doctor @key{RET}}と打ってください。
+
+@c   The doctor will help you feel better.  Each time you say something to
+@c the doctor, you must end it by typing @key{RET} @key{RET}.  This lets
+@c the doctor know you are finished.
+doctorプログラムがあなたのいらいらを鎮めてくれるでしょう。
+doctorに何かを話すときには、@key{RET} @key{RET}と打っていい終える
+必要があります。
+こうすると、doctorは患者が話し終えたことを認識します。
+
+@node Bugs, Contributing, Lossage, Top
+@c @section Reporting Bugs
+@section バグの報告 @emph{(2004/03/29)}
+
+@c @cindex bugs
+@cindex バグ
+@c   Sometimes you will encounter a bug in Emacs.  Although we cannot
+@c promise we can or will fix the bug, and we might not even agree that it
+@c is a bug, we want to hear about problems you encounter.  Often we agree
+@c they are bugs and want to fix them.
+Emacsのバグに出会うこともあるでしょう。
+バグを修正する／できるとは約束できませんし、
+そもそもバグだと認めないかもしれませんが、
+読者が遭遇した問題については知らせてほしいと考えています。
+たしかにそれをバグだと認めて修正しようということになる場合も多いのです。
+
+@c   To make it possible for us to fix a bug, you must report it.  In order
+@c to do so effectively, you must know when and how to do it.
+バグを修正するには、まず、報告してもらう必要があります。
+効果的に報告してもらうためには、報告の仕方を知っていただく必要があります。
+
+@c   Before reporting a bug, it is a good idea to see if it is already
+@c known.  You can find the list of known problems in the file
+@c @file{etc/PROBLEMS} in the Emacs distribution; type @kbd{C-h P} to read
+@c it.  Some additional user-level problems can be found in @ref{Bugs and
+@c problems, , Bugs and problems, efaq, GNU Emacs FAQ}.  Looking up your
+@c problem in these two documents might provide you with a solution or a
+@c work-around, or give you additional information about related issues.
+バグを報告する前にすでに報告されているかを確認することはいい考えです．Emacs に付
+属している @file{etc/PROBLEMS}ファイルに既知のバグのリストがあります．これは，
+@kbd{C-h P} で読むことができます．ユーザレベルでのバグの追加情報は @ref{Bugs and
+problems, , Bugs and problems, efaq, GNU Emacs FAQ}にあります．この2つの文書でバ
+グを調べれば，解決策が見つかるかもしれません．あるいは関連問題の情報が得られるか
+もしれません．
+
+@menu
+* Criteria:  Bug Criteria.	 Have you really found a bug?
+* Understanding Bug Reporting::	 How to report a bug effectively.
+* Checklist::			 Steps to follow for a good bug report.
+* Sending Patches::		 How to send a patch for GNU Emacs.
+@end menu
+
+@node Bug Criteria
+@c @subsection When Is There a Bug
+@subsection バグの発生時期 @emph{(2004/03/29)}
+
+@c   If Emacs executes an illegal instruction, or dies with an operating
+@c system error message that indicates a problem in the program (as opposed to
+@c something like ``disk full''), then it is certainly a bug.
+Emacsが不正命令を実行したり、
+（『ディスクが満杯』などの外部の問題ではなく）プログラムに問題が
+あるというオペレーティングシステムのメッセージを表示して止まった場合には、
+たしかにバグがあるといえます。
+
+@c   If Emacs updates the display in a way that does not correspond to what is
+@c in the buffer, then it is certainly a bug.  If a command seems to do the
+@c wrong thing but the problem corrects itself if you type @kbd{C-l}, it is a
+@c case of incorrect display updating.
+Emacsの画面の更新結果がバッファの内容に対応していないなら、
+それもたしかにバグです。
+コマンドの実行が思わしくなくても@kbd{C-l}で再表示させると正しくなる場合には、
+画面更新がまちがっているのです。
+
+@c   Taking forever to complete a command can be a bug, but you must make
+@c certain that it was really Emacs's fault.  Some commands simply take a
+@c long time.  Type @kbd{C-g} (@kbd{C-@key{BREAK}} on MS-DOS) and then @kbd{C-h l}
+@c to see whether the input Emacs received was what you intended to type;
+@c if the input was such that you @emph{know} it should have been processed
+@c quickly, report a bug.  If you don't know whether the command should
+@c take a long time, find out by looking in the manual or by asking for
+@c assistance.
+あるコマンドを実行するのに無限に時間がかかるというのはバグの可能性が
+ありますが、たしかにEmacsの責任かどうかを確認する必要があります。
+コマンドによってはとても時間がかかるものもあります。
+@kbd{C-g}（MS-DOSでは@kbd{C-@key{BREAK}}）を打ってから
+@kbd{C-h l}を打つことで、Emacsが受け付けた入力がたしかに
+読者が意図したものだったかどうか確認できます。
+すぐに処理されるコマンドだという@emph{確信}があるなら、
+バグを報告してください。
+そのコマンドがすごく時間のかかるものかどうかわからないなら、
+マニュアルで調べるか知っている人に聞いてください。
+
+@c   If a command you are familiar with causes an Emacs error message in a
+@c case where its usual definition ought to be reasonable, it is probably a
+@c bug.
+よく知っているコマンドであって、普通なら問題なく結果が得られるはずなのに、
+かわりにEmacsがエラーメッセージを出すようなら、恐らくそれはバグでしょう。
+
+@c   If a command does the wrong thing, that is a bug.  But be sure you know
+@c for certain what it ought to have done.  If you aren't familiar with the
+@c command, or don't know for certain how the command is supposed to work,
+@c then it might actually be working right.  Rather than jumping to
+@c conclusions, show the problem to someone who knows for certain.
+コマンドが正しくない動作をするのなら、それはバグです。
+ただし、コマンドが本当は何をするのが正しいか確認してください。
+そのコマンドに馴染みがないとか、
+そのコマンドがどう動作するはずなのか確信が持てない場合は、
+コマンドは実際には正しく動作しているのかもしれません。
+バグという結論に飛びつくまえに、よく知っている人に見てもらってください。
+
+@c   Finally, a command's intended definition may not be best for editing
+@c with.  This is a very important sort of problem, but it is also a matter of
+@c judgment.  Also, it is easy to come to such a conclusion out of ignorance
+@c of some of the existing features.  It is probably best not to complain
+@c about such a problem until you have checked the documentation in the usual
+@c ways, feel confident that you understand it, and know for certain that what
+@c you want is not available.  If you are not sure what the command is
+@c supposed to do after a careful reading of the manual, check the index and
+@c glossary for any terms that may be unclear.
+最後に、コマンドの意図された定義が編集操作に対して最良でない可能性があります。
+これは重要な問題ではありますが、ユーザーがどう判断するかの問題でもあります。
+既存の機能について無知なために、
+まちがっていると結論を出してしまうのも簡単です。
+まずドキュメントをひととおり調べて、十分に納得し、
+それでもなお自分にとって必要な機能がない、と断言できるまでは、
+コマンドの定義が悪いなどとはいわないほうがよいでしょう。
+マニュアルを熟読してもコマンドが何をするのかよくわからなければ、
+索引や用語集を活用してよくわからない単語について調べましょう。
+
+@c   If after careful rereading of the manual you still do not understand
+@c what the command should do, that indicates a bug in the manual, which
+@c you should report.  The manual's job is to make everything clear to
+@c people who are not Emacs experts---including you.  It is just as
+@c important to report documentation bugs as program bugs.
+十分熟読しても、なおコマンドが何をするのかわからないなら、
+それは「マニュアルのバグ」として報告すべきでしょう。
+マニュアルは、読者を含めて、Emacsの専門家でない人が読んでも
+すべてのことが明らかになるようなものであるべきです。
+ドキュメントのバグを報告することも、
+プログラムのバグを報告することと同じくらい重要なことです。
+
+@c   If the on-line documentation string of a function or variable disagrees
+@c with the manual, one of them must be wrong; that is a bug.
+関数や変数のオンラインの説明文がマニュアルと一致しない場合は、
+どちらかがまちがっていますから、これもバグです。
+
+@node Understanding Bug Reporting
+@c @subsection Understanding Bug Reporting
+@subsection バグの報告とは
+
+@findex emacs-version
+@c   When you decide that there is a bug, it is important to report it and to
+@c report it in a way which is useful.  What is most useful is an exact
+@c description of what commands you type, starting with the shell command to
+@c run Emacs, until the problem happens.
+バグがあると確信したら、それを報告すること、
+しかも、役立つ形で報告することが重要です。
+もっとも有用なのは、どのようなコマンドを打ち込んだかを、
+Emacsを起動するシェルのコマンドから始めて
+問題が起きるところまですべて正確に記述することです。
+
+@c   The most important principle in reporting a bug is to report
+@c @emph{facts}.  Hypotheses and verbal descriptions are no substitute for
+@c the detailed raw data.  Reporting the facts is straightforward, but many
+@c people strain to posit explanations and report them instead of the
+@c facts.  If the explanations are based on guesses about how Emacs is
+@c implemented, they will be useless; meanwhile, lacking the facts, we will
+@c have no real information about the bug.
+バグを報告するときもっとも重要なことは@emph{事実}を報告することです。
+仮説や口頭説明は、詳細な生データのかわりにはなりません。
+事実を報告することは単純なはずなのに、
+多くの人はかわりに説明をでっちあげてそれを報告したがります。
+その説明がEmacsの実装方式の想像に基づいたものであるならば、
+その説明はまったく役に立たないでしょう。
+事実が欠けていたらバグに関する真の情報を得られません。
+
+@c   For example, suppose that you type @kbd{C-x C-f /glorp/baz.ugh
+@c @key{RET}}, visiting a file which (you know) happens to be rather large,
+@c and Emacs displayed @samp{I feel pretty today}.  The best way to report
+@c the bug is with a sentence like the preceding one, because it gives all
+@c the facts.
+たとえば、ユーザーがとても大きなファイルを訪れるために
+@kbd{C-x C-f /glorp/baz.ugh @key{RET}}と打ち込んだら、
+Emacsが@samp{I feel pretty today}と表示したとしましょう。
+もっともよいバグレポートは、まさにこの文のように報告することです。
+すべての事実だけを報告できるからです。
+
+@c   A bad way would be to assume that the problem is due to the size of
+@c the file and say, ``I visited a large file, and Emacs displayed @samp{I
+@c feel pretty today}.''  This is what we mean by ``guessing
+@c explanations.''  The problem is just as likely to be due to the fact
+@c that there is a @samp{z} in the file name.  If this is so, then when we
+@c got your report, we would try out the problem with some ``large file,''
+@c probably with no @samp{z} in its name, and not see any problem.  There
+@c is no way in the world that we could guess that we should try visiting a
+@c file with a @samp{z} in its name.
+問題はファイルの大きさにあると仮定して、
+「大きなファイルを訪問したら、Emacsが@samp{I feel pretty today}と表示した」
+などと書いてはいけません。
+これが『説明をでっちあげた』報告です。
+問題はファイル名に@samp{z}が含まれていたために生じたのかもしれないのです。
+もしそうだとしたら、報告に基づいて適当な「大きなファイル」を訪問してみても、
+そのファイル名に@samp{z}が含まれていなければ何も悪いところが
+みつからないでしょう。
+報告の文面からは、名前に@samp{z}を含んだファイルを
+試しに訪問してみるべきだとはわかりません。
+
+@c   Alternatively, the problem might be due to the fact that the file starts
+@c with exactly 25 spaces.  For this reason, you should make sure that you
+@c inform us of the exact contents of any file that is needed to reproduce the
+@c bug.  What if the problem only occurs when you have typed the @kbd{C-x C-a}
+@c command previously?  This is why we ask you to give the exact sequence of
+@c characters you typed since starting the Emacs session.
+あるいは、ファイルがちょうど25個の空白文字で始まっているために
+問題が起きたのかもしれません。
+ですから、報告に際しては、そのバグを再現させるのに必要なファイルがあれば、
+それらのファイルの正確な内容も教えてください。
+その問題は、たまたま、@kbd{C-x C-a}と打った直後にのみ
+発生するのだとしたらどうでしょう？@code{ }
+ですから、Emacsを起動してから問題に遭遇するまでに
+打ち込んだものすべてを教えてほしいのです。
+
+@c   You should not even say ``visit a file'' instead of @kbd{C-x C-f} unless
+@c you @emph{know} that it makes no difference which visiting command is used.
+@c Similarly, rather than saying ``if I have three characters on the line,''
+@c say ``after I type @kbd{@key{RET} A B C @key{RET} C-p},'' if that is
+@c the way you entered the text.@refill
+どの訪問コマンドを使っても同じように問題が発生すると@emph{知っている}
+のでない限り、@kbd{C-x C-f}と打ったと報告するかわりに
+「ファイルを訪問した」というのさえいけません。
+同様に、「1行に3文字入っているとき」ではなく、
+「@kbd{@key{RET} A B C @key{RET} C-p}と打ち込んだあとで」のように、
+あなたがテキストを入れたやり方そのものを報告してください。
+
+@c   So please don't guess any explanations when you report a bug.  If you
+@c want to actually @emph{debug} the problem, and report explanations that
+@c are more than guesses, that is useful---but please include the facts as
+@c well.
+このように、バグを報告するときには、いかなる説明も推測しないでください。
+問題を実際に@emph{デバッグ}して憶測ではない説明を報告してもらえるなら、
+それは有益ですが、事実も含めてください。
+
+@node Checklist
+@c @subsection Checklist for Bug Reports
+@subsection バグレポートのチェックリスト @emph{(2004/03/29)}
+
+@c @cindex reporting bugs
+@cindex バグを報告する
+@c   The best way to send a bug report is to mail it electronically to the
+@c Emacs maintainers at @email{bug-gnu-emacs@@gnu.org}, or to
+@c @email{emacs-pretest-bug@@gnu.org} if you are pretesting an Emacs beta
+@c release.  (If you want to suggest a change as an improvement, use the
+@c same address.)
+バグレポートを送る最良の方法は、電子メイルでEmacs保守チーム
+@samp{bug-gnu-emacs@@gnu.org}かベータ版をテスト中であれば
+@email{emacs-pretest-bug@@gnu.org} に送ることです。
+（重要な改良の提案などもここに送ってください）。
+
+@c   If you'd like to read the bug reports, you can find them on the
+@c newsgroup @samp{gnu.emacs.bug}; keep in mind, however, that as a
+@c spectator you should not criticize anything about what you see there.
+@c The purpose of bug reports is to give information to the Emacs
+@c maintainers.  Spectators are welcome only as long as they do not
+@c interfere with this.  In particular, some bug reports contain fairly
+@c large amounts of data; spectators should not complain about this.
+他から出されたバグレポートが読みたければ、
+ニュースグループ@samp{gnu.emacs.bug}で読めます。
+ただし、傍観者として見る場合には、見たものについて批判するべきではない、
+ということを承知しておいてください。
+バグレポートの目的はEmacs保守チームに情報を提供することです。
+傍観者は、この目的に干渉しない限りは、歓迎します。
+特に、大量のデータが添付されているバグレポートもありますので、
+傍観者はそのことを非難すべきではありません。
+
+@c   Please do not post bug reports using netnews; mail is more reliable
+@c than netnews about reporting your correct address, which we may need
+@c in order to ask you for more information.  If your data is more than
+@c 500,000 bytes, please don't include it directly in the bug report;
+@c instead, offer to send it on request, or make it available by ftp and
+@c say where.
+ネットニュース経由でバグレポートを投稿しないでください。
+ネットニュースよりもメイルのほうが送り手のメイルアドレスが確実にわかり
+信頼できます。
+もっと情報が必要なときには、メイルで問い合わせる必要があるかも知れません。もし，
+データが500,000バイト以上ある場合には，バグレポートにそのデータは含めないように
+してください．かわりに，必要があれば送付する旨を付記したり，ftpなどで利用できる
+ようにしてください．
+
+@c   If you can't send electronic mail, then mail the bug report on paper
+@c or machine-readable media to this address:
+電子メイルを送れない場合には、
+紙や他の機械可読な媒体で下記へ送ってください。
+
+@format
+GNU Emacs Bugs
+Free Software Foundation
+59 Temple Place, Suite 330
+Boston, MA 02111-1307 USA
+@end format
+
+@c   We do not promise to fix the bug; but if the bug is serious,
+@c or ugly, or easy to fix, chances are we will want to.
+バグを修正するとは約束できません。
+しかし、重大なバグや、醜いバグや、簡単に直せるバグなら、直したいと思います。
+
+@findex report-emacs-bug
+@c   A convenient way to send a bug report for Emacs is to use the command
+@c @kbd{M-x report-emacs-bug}.  This sets up a mail buffer (@pxref{Sending
+@c Mail}) and automatically inserts @emph{some} of the essential
+@c information.  However, it cannot supply all the necessary information;
+@c you should still read and follow the guidelines below, so you can enter
+@c the other crucial information by hand before you send the message.
+Emacsのバグレポートを送るのに便利な方法の1つは、
+コマンド@kbd{M-x report-emacs-bugs}を使うことです。
+このコマンドはメイルバッファ（@pxref{Sending Mail}）を開いて、
+自動的に重要な情報@emph{の一部}を書き込みます。
+しかし、必要な情報をすべて入れられるわけではありませんから、
+以下の指針を読んでそれに従い、
+メッセージを送るまえに重要な情報を自分で打ち込んでください。
+
+@c   To enable maintainers to investigate a bug, your report
+@c should include all these things:
+保守チームがバグの調査を開始するためには、
+以下のすべてがバグレポートに含まれている必要があります。
+
+@itemize @bullet
+@item
+@c The version number of Emacs.  Without this, we won't know whether there
+@c is any point in looking for the bug in the current version of GNU
+@c Emacs.
+Emacsのバージョン番号。
+これがないと、GNU Emacsの最新版でバグを探すべきかどうか判断できない。
+
+@c You can get the version number by typing @kbd{M-x emacs-version
+@c @key{RET}}.  If that command does not work, you probably have something
+@c other than GNU Emacs, so you will have to report the bug somewhere
+@c else.
+バージョン番号を調べるには、@kbd{M-x emacs-version @key{RET}}と打つ。
+このコマンドが動作しないようなら、
+GNU Emacsではないエディタを使っているようなので、
+どこか別のところへバグを報告する。
+
+@item
+@c The type of machine you are using, and the operating system name and
+@c version number.  @kbd{M-x emacs-version @key{RET}} provides this
+@c information too.  Copy its output from the @samp{*Messages*} buffer, so
+@c that you get it all and get it accurately.
+使っているマシンの種類、オペレーティングシステムの名前とバージョン。
+@kbd{M-x emacs-version @key{RET}}でこれらの情報も表示される。
+@samp{*Messages*}バッファからその出力をコピーすれば、
+すべての情報をまちがいなく送れる。
+
+@item
+@c The operands given to the @code{configure} command when Emacs was
+@c installed.
+Emacsをインストールしたときの@code{configure}コマンドの引数。
+
+@item
+@c A complete list of any modifications you have made to the Emacs source.
+@c (We may not have time to investigate the bug unless it happens in an
+@c unmodified Emacs.  But if you've made modifications and you don't tell
+@c us, you are sending us on a wild goose chase.)
+Emacsソースに変更を加えた場合は、そのすべてのリスト。
+（ソースを修正したEmacsで起きたバグまでも調査する時間はない。
+しかし、修正を加えたのにそれを教えてくれなければ、
+厄介ごとを他人に押し付けているだけ。）
+
+@c Be precise about these changes.  A description in English is not
+@c enough---send a context diff for them.
+これらの変更については正確に記してほしい。
+英語での説明では不十分。
+ソースのコンテキストdiffを送ること。
+
+@c Adding files of your own, or porting to another machine, is a
+@c modification of the source.
+独自のファイルを追加したり、別のマシンに移植するのも、
+ソースの変更にあたる。
+
+@item
+@c Details of any other deviations from the standard procedure for installing
+@c GNU Emacs.
+その他、GNU Emacsの標準のインストール手順と違っているところがあれば、
+すべて詳しく記述する。
+
+@item
+@c The complete text of any files needed to reproduce the bug.
+そのバグを再現するために必要なすべてのファイルの内容。
+
+@c   If you can tell us a way to cause the problem without visiting any files,
+@c please do so.  This makes it much easier to debug.  If you do need files,
+@c make sure you arrange for us to see their exact contents.  For example, it
+@c can often matter whether there are spaces at the ends of lines, or a
+@c newline after the last line in the buffer (nothing ought to care whether
+@c the last line is terminated, but try telling the bugs that).
+ファイルをまったく訪問せずに問題が再現可能なら、ぜひ教えてほしい。
+そのほうがデバッグがずっと楽になる。
+どうしてもファイルが必要なら、必ずその内容が正確にわかるようにすること。
+たとえば、行末に空白文字が付いているかどうかとか、
+バッファの最終行に改行文字があるかどうかが
+問題になることは頻繁にある
+（最終行に改行があるかどうかで何か違いがあるべきではないのだが、
+もし違いが生じるようならそれもバグといえる）。
+
+@item
+@c The precise commands we need to type to reproduce the bug.
+バグを再現させるために打ち込む正確なコマンド列。
+
+@findex open-dribble-file
+@c @cindex dribble file
+@cindex ドリブルファイル
+@c   The easy way to record the input to Emacs precisely is to write a
+@c dribble file.  To start the file, execute the Lisp expression
+Emacsへの入力を正確に記録する簡単な方法は、
+ドリブルファイルに書くことである。
+ドリブルファイルを開始するには、
+Emacsを実行開始した直後に、@kbd{M-:}か
+バッファ@samp{*scratch*}でつぎのLisp式を実行する。
+
+@example
+(open-dribble-file "~/dribble")
+@end example
+
+@noindent
+@c using @kbd{M-:} or from the @samp{*scratch*} buffer just after
+@c starting Emacs.  From then on, Emacs copies all your input to the
+@c specified dribble file until the Emacs process is killed.
+それ以降はEmacsプロセスが終了するまで、
+Emacsはすべての入力をドリブルファイルにコピーする。
+
+@item
+@findex open-termscript
+@c @cindex termscript file
+@c @cindex @code{TERM} environment variable
+@cindex termscriptファイル
+@cindex 環境変数@code{TERM}
+@cindex @code{TERM}（環境変数）
+@c For possible display bugs, the terminal type (the value of environment
+@c variable @code{TERM}), the complete termcap entry for the terminal from
+@c @file{/etc/termcap} (since that file is not identical on all machines),
+@c and the output that Emacs actually sent to the terminal.
+表示に関するバグの可能性がある場合には、
+端末種別（環境変数@code{TERM}の値）、
+（すべてのマシンで同じとは限らないので）
+@file{/etc/termcap}ファイル中の当該端末のtermcapの定義すべて、
+および、Emacsが実際に端末に送った出力。
+
+@c The way to collect the terminal output is to execute the Lisp expression
+端末への出力を収集するには、Emacsを実行開始した直後に、@kbd{M-:}か
+バッファ@samp{*scratch*}でつぎのLisp式を実行する。
+
+@example
+(open-termscript "~/termscript")
+@end example
+
+@noindent
+@c using @kbd{M-:} or from the @samp{*scratch*} buffer just after
+@c starting Emacs.  From then on, Emacs copies all terminal output to the
+@c specified termscript file as well, until the Emacs process is killed.
+@c If the problem happens when Emacs starts up, put this expression into
+@c your @file{.emacs} file so that the termscript file will be open when
+@c Emacs displays the screen for the first time.
+それ以降、Emacsはプロセスが終了するまでのすべての端末出力の写しを
+指定されたtermscriptファイルに書き出す。
+Emacsが起動するときに問題が起きるのなら、
+上の式を@file{.emacs}ファイルに入れて、
+Emacsが最初に画面を開くときに一緒にtermscriptファイルも
+書き始めるようにする。
+
+@c Be warned: it is often difficult, and sometimes impossible, to fix a
+@c terminal-dependent bug without access to a terminal of the type that
+@c stimulates the bug.@refill
+ただし、端末に依存したバグは、
+そのバグの出る端末なしで直すことは難しいことが多く、
+ときとして不可能であることも承知しておいてほしい。
+
+@item
+@c A description of what behavior you observe that you believe is
+@c incorrect.  For example, ``The Emacs process gets a fatal signal,'' or,
+@c ``The resulting text is as follows, which I think is wrong.''
+正しくないと結論したことがどう正しくないのか記述する。
+たとえば、「Emacsプロセスが致命的なシグナルを受け取る」とか
+「最終的なテキストはつぎのようになるが、これは正しくない。」など。
+
+@c Of course, if the bug is that Emacs gets a fatal signal, then one can't
+@c miss it.  But if the bug is incorrect text, the maintainer might fail to
+@c notice what is wrong.  Why leave it to chance?
+もちろん、Emacsが致命的なシグナルを受け取るのなら、それは誰にでもわかる。
+しかし、バグが正しくないテキストだとすると、
+保守チームにはどこが正しくないのかわからない可能性がある。
+そういう可能性のある書き方はやめてほしい。
+
+@c Even if the problem you experience is a fatal signal, you should still
+@c say so explicitly.  Suppose something strange is going on, such as, your
+@c copy of the source is out of sync, or you have encountered a bug in the
+@c C library on your system.  (This has happened!)  Your copy might crash
+@c and the copy here might not.  If you @emph{said} to expect a crash, then
+@c when Emacs here fails to crash, we would know that the bug was not
+@c happening.  If you don't say to expect a crash, then we would not know
+@c whether the bug was happening---we would not be able to draw any
+@c conclusion from our observations.
+遭遇する問題が致命的なシグナルだとしても、はっきりとそう書くべきである。
+たとえば、Emacsのソースが一部違っている版だったとか、
+システムのCライブラリのバグに遭遇したといった
+奇妙なことに出会ったとしよう（実話！）。
+あなたが使っているEmacsはクラッシュするが、保守チームのほうでは何ともない。
+クラッシュすると@emph{いって}もらえれば、
+保守チームのほうで実行してクラッシュしなければバグが再現しないとわかる。
+しかしそういってもらえないと、
+バグが再現したのかどうかさえわからずに、
+試してみた結果からは何の結論も得られない。
+
+@item
+@c If the manifestation of the bug is an Emacs error message, it is
+@c important to report the precise text of the error message, and a
+@c backtrace showing how the Lisp program in Emacs arrived at the error.
+バグの結果がEmacsのエラーメッセージであれば、
+そのエラーメッセージの文面を正確に報告することと、
+Emacs中のLispプログラムがどうやってそのエラーの箇所に
+到達したかを示すバックトレースを報告することが重要。
+
+@c To get the error message text accurately, copy it from the
+@c @samp{*Messages*} buffer into the bug report.  Copy all of it, not just
+@c part.
+エラーメッセージの文面を正確に報告するには、
+@samp{*Message*}バッファからメッセージをバグレポートにコピーする。
+一部ではなく、全体をコピーしてほしい。
+
+@c To make a backtrace for the error, evaluate the Lisp expression
+@c @code{(setq @w{debug-on-error t})} before the error happens (that is to
+@c say, you must execute that expression and then make the bug happen).
+@c This causes the error to run the Lisp debugger, which shows you a
+@c backtrace.  Copy the text of the debugger's backtrace into the bug
+@c report.
+エラーのバックトレースを取得するには、エラーが発生するよりまえにLisp式
+@code{(setq @w{debug-on-error t})}を評価する
+（つまり、まずこのLisp式を実行して、それからエラーを再現させる）。
+すると、エラーが起きたときにLispデバッガが実行され、
+デバッガがバックトレースを表示する。
+このデバッガのバックトレース出力を、バグレポートにコピーする。
+
+@c This use of the debugger is possible only if you know how to make the
+@c bug happen again.  If you can't make it happen again, at least copy
+@c the whole error message.
+このやり方は、バグを再現できるときだけ使える。
+再現できない場合は、最低限、エラーメッセージだけでもすべてコピーする。
+
+@item
+@c Check whether any programs you have loaded into the Lisp world,
+@c including your @file{.emacs} file, set any variables that may affect the
+@c functioning of Emacs.  Also, see whether the problem happens in a
+@c freshly started Emacs without loading your @file{.emacs} file (start
+@c Emacs with the @code{-q} switch to prevent loading the init file).  If
+@c the problem does @emph{not} occur then, you must report the precise
+@c contents of any programs that you must load into the Lisp world in order
+@c to cause the problem to occur.
+個人のファイル@file{.emacs}を含めてロードしたLispコードのどれかが、
+Emacsの動作に影響するような変数設定を行っていないか確認する。
+また、（オプション@code{-q}を指定して初期化ファイルのロードを抑制して）
+個人のファイル@file{.emacs}をロードせずに起動したEmacsでも
+エラーが再現するかどうか調べる。
+これでエラーが再現@emph{しない}なら、
+エラーの再現に必要なので、ロードしたすべてのプログラムの内容を正確に報告する。
+
+@item
+@c If the problem does depend on an init file or other Lisp programs that
+@c are not part of the standard Emacs system, then you should make sure it
+@c is not a bug in those programs by complaining to their maintainers
+@c first.  After they verify that they are using Emacs in a way that is
+@c supposed to work, they should report the bug.
+問題が初期設定ファイルや標準のEmacsシステムに含まれないLispプログラムに
+依存するなら、まずそれらを保守している人に相談して、
+それらのプログラムの問題ではないことを確認する。
+その人たちが、そのコードはEmacsの正しい使い方をしていると確認したうえで、
+その人たちがバグを報告するべきである。
+
+@item
+@c If you wish to mention something in the GNU Emacs source, show the line
+@c of code with a few lines of context.  Don't just give a line number.
+GNU Emacsのソースに関して何かコメントしたいなら、
+その部分のコードを前後数行を含めて示したうえでコメントする。
+行番号だけ書くというのはやめてほしい。
+
+@c The line numbers in the development sources don't match those in your
+@c sources.  It would take extra work for the maintainers to determine what
+@c code is in your version at a given line number, and we could not be
+@c certain.
+開発中のソースの行番号とユーザーが入手するソースの行番号とは同じではない。
+あなたが使っているバージョンのソースの何行目が、
+開発中のソースの何行目に対応しているか調べるのは余分な手間であり、
+正確にはわからないかもしれない。
+
+@item
+@c Additional information from a C debugger such as GDB might enable
+@c someone to find a problem on a machine which he does not have available.
+@c If you don't know how to use GDB, please read the GDB manual---it is not
+@c very long, and using GDB is easy.  You can find the GDB distribution,
+@c including the GDB manual in online form, in most of the same places you
+@c can find the Emacs distribution.  To run Emacs under GDB, you should
+@c switch to the @file{src} subdirectory in which Emacs was compiled, then
+@c do @samp{gdb emacs}.  It is important for the directory @file{src} to be
+@c current so that GDB will read the @file{.gdbinit} file in this
+@c directory.
+GDBなどのC言語用のデバッガからの追加情報があると、
+保守チームの手元にないマシンでもバグの原因がわかることもある。
+もしGDBの使い方がわからないようなら、GDBのマニュアルをぜひ読んでほしい。
+たいして長くないし、GDBを使うのは簡単。
+GDBのオンライン形式のマニュアルを含むGDBの配布は、
+たいていはEmacsの配布と同じ場所に置いてある。
+GDBを用いてEmacsを実行するには、
+Emacsをコンパイルしたサブディレクトリ@file{src}に移動してから、
+@samp{gdb emacs}を行う必要がある。
+GDBがディレクトリ@file{src}にあるファイル@file{.gdbinit}を読めるように、
+このディレクトリがカレントディレクトリであることが重要。
+
+@c However, you need to think when you collect the additional information
+@c if you want it to show what causes the bug.
+ただし、バグの原因を示すために追加情報を集める場合には、
+追加情報をいつ集めるかをよく考える必要がある。
+
+@c @cindex backtrace for bug reports
+@cindex バグレポート用のバックトレース
+@c For example, many people send just a backtrace, but that is not very
+@c useful by itself.  A simple backtrace with arguments often conveys
+@c little about what is happening inside GNU Emacs, because most of the
+@c arguments listed in the backtrace are pointers to Lisp objects.  The
+@c numeric values of these pointers have no significance whatever; all that
+@c matters is the contents of the objects they point to (and most of the
+@c contents are themselves pointers).
+たとえば、多くの人はバックトレースだけを送ってくるが、
+それ単体ではあまり役に立たない。
+引数の記録つきの単純なバックトレースでは、
+GNU Emacsの内部で何が起きているかについての情報はほとんどない。
+というのは、バックトレースに表示される引数のほとんどは
+Lispオブジェクトへのポインタだから。
+それらのポインタの値そのものは、なんら重要ではない。
+重要なのは、ポインタが指している先のオブジェクトの内容
+（そしてその内容もまたポインタであることが多い）。
+
+@findex debug_print
+@c To provide useful information, you need to show the values of Lisp
+@c objects in Lisp notation.  Do this for each variable which is a Lisp
+@c object, in several stack frames near the bottom of the stack.  Look at
+@c the source to see which variables are Lisp objects, because the debugger
+@c thinks of them as integers.
+役に立つ情報を提供するには、
+Lispオブジェクトの値をLispの記法で示す必要がある。
+スタックの底付近にある数個のフレームについて、
+Lispオブジェクトであるような各変数に対してこれを行ってほしい。
+デバッガは単なる整数だと思うので、
+どの変数がLispオブジェクトであるかはソースを見てほしい。
+
+@c To show a variable's value in Lisp syntax, first print its value, then
+@c use the user-defined GDB command @code{pr} to print the Lisp object in
+@c Lisp syntax.  (If you must use another debugger, call the function
+@c @code{debug_print} with the object as an argument.)  The @code{pr}
+@c command is defined by the file @file{.gdbinit}, and it works only if you
+@c are debugging a running process (not with a core dump).
+変数の値をLispの記法で示すには、まず、その値をプリントしてから、
+GDBのユーザー定義コマンド@code{pr}を使ってLispオブジェクトをLispの記法で
+表示させる。
+（別のデバッガを使わなければならない場合は、
+オブジェクトを引数として関数@code{debug_print}を呼び出す）。
+コマンド@code{pr}は、ファイル@file{.gdbinit}で定義されており、
+（コアダンプではなく）実行中のプロセスをデバッグするときだけ使える。
+
+@c To make Lisp errors stop Emacs and return to GDB, put a breakpoint at
+@c @code{Fsignal}.
+Lispでエラーが発生したときにEmacsを中断してGDBに戻るようにするには、
+@code{Fsignal}にブレークポイントを設定する。
+
+@c For a short listing of Lisp functions running, type the GDB
+@c command @code{xbacktrace}.  
+実行中のLisp関数の簡素な一覧を表示するには、
+GDBのコマンド@code{xbacktrace}を打つ。
+
+@c If you want to examine Lisp function arguments, move up the stack, and
+@c each time you get to a frame for the function @code{Ffuncall}, type
+@c these GDB commands:
+Lisp関数の引数を調べたい場合には、
+スタック上を上に移動していき関数@code{Ffuncall}のフレームに到達するごとに、
+つぎのようなGDBコマンドを打つ。
+
+@example
+p *args
+pr
+@end example
+
+@noindent
+@c To print the first argument that the function received, use these
+@c commands:
+関数が受け取った最初の引数を出力するには、つぎのようにする。
+
+@example
+p args[1]
+pr
+@end example
+
+@noindent
+@c You can print the other arguments likewise.  The argument @code{nargs}
+@c of @code{Ffuncall} says how many arguments @code{Ffuncall} received;
+@c these include the Lisp function itself and the arguments for that
+@c function.
+2番目以降の引数でも同様に出力できる。
+@code{Ffuncall}の引数@code{nargs}は、
+@code{Ffuncall}が受け取った引数の個数を表す。
+この個数は、Lisp関数自身とその関数に対する引数とを合わせた数。
+
+@c The file @file{.gdbinit} defines several other commands that are useful
+@c for examining the data types and contents of Lisp objects.  Their names
+@c begin with @samp{x}.  These commands work at a lower level than
+@c @code{pr}, and are less convenient, but they may work even when
+@c @code{pr} does not, such as when debugging a core dump or when Emacs has
+@c had a fatal signal.
+ファイル@file{.gdbinit}は、
+データタイプやLispオブジェクトの中身を調べるのに役立つコマンド類を定義する。
+それらのコマンドの名前は@samp{x}で始まる。
+これらのコマンドは@code{pr}より下位のレベルで動作し使い難いが、
+コアダンプをデバックしたり、
+Emacsが致命的なシグナルを受理したときのように
+@code{pr}がうまく動かないときでも使える。
+
+@item
+@c If the symptom of the bug is that Emacs fails to respond, don't assume
+@c Emacs is ``hung''---it may instead be in an infinite loop.  To find out
+@c which, make the problem happen under GDB and stop Emacs once it is not
+@c responding.  (If Emacs is using X Windows directly, you can stop Emacs
+@c by typing @kbd{C-z} at the GDB job.)  Then try stepping with
+@c @samp{step}.  If Emacs is hung, the @samp{step} command won't return.
+@c If it is looping, @samp{step} will return.
+バグの症状がEmacsが応答しなくなるというものでも、
+Emacsが『ハング』した（固まった）と考えてはいけない。
+無限ループに入っているのかもしれない。
+どちらであるかを調べるには、
+GDBのもとでバグを再現させ、応答しなくなったところでEmacsを止める。
+（EmacsがXウィンドウシステムを直接使っている場合は、
+GDBのジョブに対して@kbd{C-z}を打てばEmacsを止められる）。
+そして、コマンド@samp{step}で1ステップずつ実行を試みる。
+固まっているのならコマンド@samp{step}から戻ってこない。
+ループしているなら@samp{step}から戻ってくる。
+
+@c If this shows Emacs is hung in a system call, stop it again and examine
+@c the arguments of the call.  In your bug report, state exactly where in
+@c the source the system call is, and what the arguments are.
+こうして調べた結果、Emacsがシステムコールの中で固まっているとわかったら、
+Emacsを再度止めて、システムコールの引数を調べる。
+そしてバグレポートには、ソース中でのシステムコールの正確な位置と、
+引数が何だったかを正確に記入する。
+
+@c If Emacs is in an infinite loop, please determine where the loop starts
+@c and ends.  The easiest way to do this is to use the GDB command
+@c @samp{finish}.  Each time you use it, Emacs resumes execution until it
+@c exits one stack frame.  Keep typing @samp{finish} until it doesn't
+@c return---that means the infinite loop is in the stack frame which you
+@c just tried to finish.
+Emacsが無限ループしているのなら、ループの始まりと終りを調べる。
+もっとも簡単にこれを調べるには、GDBのコマンド@samp{finish}を使う。
+このコマンドを使うたびに、1つのスタックフレームから抜けるまで
+Emacsは実行を継続する。
+戻ってこなくなるまで、繰り返し@samp{finish}を打つ。
+戻ってこないのは、そのフレームで無限ループが起こっているからである。
+
+@c Stop Emacs again, and use @samp{finish} repeatedly again until you get
+@c @emph{back to} that frame.  Then use @samp{next} to step through that
+@c frame.  By stepping, you will see where the loop starts and ends.  Also
+@c please examine the data being used in the loop and try to determine why
+@c the loop does not exit when it should.  Include all of this information
+@c in your bug report.
+ここでEmacsを再度停止し、
+戻ってこなくなったフレームに@emph{ちょうど戻る}まで、
+繰り返し@samp{finish}を使う。
+つぎに、@samp{next}を使ってそのフレーム内で1ステップずつ実行する。
+こうすれば、ループがどこで始まりどこで終るかわかる。
+さらに、ループ内で使われているデータを調べて、
+ループが終るべきところでなぜ終らないかを追求してみてほしい。
+これらの情報すべてを、バグレポートに含める。
+@end itemize
+
+@c Here are some things that are not necessary in a bug report:
+以下には、バグレポートに必要ないものをあげておきます。
+
+@itemize @bullet
+@item
+@c A description of the envelope of the bug---this is not necessary for a
+@c reproducible bug.
+バグの生起条件に関する記述。
+再現可能なバグに対しては不要。
+
+@c Often people who encounter a bug spend a lot of time investigating
+@c which changes to the input file will make the bug go away and which
+@c changes will not affect it.
+バグに出会った人はしばしば、入力をどう変えるとバグが出なくなるとか、
+あるいは、相変わらず出るといったことを探求するのに時間をかける。
+
+@c This is often time-consuming and not very useful, because the way we
+@c will find the bug is by running a single example under the debugger with
+@c breakpoints, not by pure deduction from a series of examples.  You might
+@c as well save time by not searching for additional examples.
+これは時間がかかるわりには、役に立たない。
+というのは、保守チームがデバッグを行うときには、
+デバッガのもとでブレークポイントを設定しながらバグの出る1つの例を
+実行するのであって、何通りもの例から帰納的に推論するわけではない。
+だから、別の例を探すのに時間をかけたりしないでほしい。
+
+@c Of course, if you can find a simpler example to report @emph{instead} of
+@c the original one, that is a convenience.  Errors in the output will be
+@c easier to spot, running under the debugger will take less time, etc.
+もちろん、もとの例の@emph{かわりに}使えるもっと簡単な例がみつかれば、
+それは役に立つ。
+簡単な例なら、出力中のエラーもみつけやすくなり、
+デバッガを使って実行するにも短い時間ですむ。
+
+@c However, simplification is not vital; if you can't do this or don't have
+@c time to try, please report the bug with your original test case.
+ただし、単純化は必須ではない。
+もし単純化できなかったり、単純化する時間がなければ、
+もとの例のままでよいので、バグレポートを出してほしい。
+
+@item
+@c A system-call trace of Emacs execution.
+Emacs実行のシステムコールトレース
+
+@c System-call traces are very useful for certain special kinds of
+@c debugging, but in most cases they give little useful information.  It is
+@c therefore strange that many people seem to think that @emph{the} way to
+@c report information about a crash is to send a system-call trace.  Perhaps
+@c this is a habit formed from experience debugging programs that don't
+@c have source code or debugging symbols.
+ある特別な種類のバグについては、システムコールトレースは非常に役立つが、
+多くの場合はほとんど有用な情報は得られない。
+したがって、多くの人がシステムコールのトレースこそクラッシュに
+関する情報を報告するのに欠かせないものだと思っているらしいのは、
+不思議である。
+これはたぶん、ソースコードやデバッグ用シンボルのないプログラムを
+デバッグした経験から生まれた習慣だろう。
+
+@c In most programs, a backtrace is normally far, far more informative than
+@c a system-call trace.  Even in Emacs, a simple backtrace is generally
+@c more informative, though to give full information you should supplement
+@c the backtrace by displaying variable values and printing them as Lisp
+@c objects with @code{pr} (see above).
+ほとんどのプログラムでは、システムコールのトレースより、
+バックトレースのほうがずっとずっと役に立つ。
+Emacsでさえ、単純なバックトレースのほうが有用である。
+しかし、十分な情報を提供するには、バックトレースの補記として、
+変数の値を表示し@code{pr}でLispオブジェクトとしても表示する（上記参照）。
+
+@item
+@c A patch for the bug.
+バグに対する修正。
+
+@c A patch for the bug is useful if it is a good one.  But don't omit the
+@c other information that a bug report needs, such as the test case, on the
+@c assumption that a patch is sufficient.  We might see problems with your
+@c patch and decide to fix the problem another way, or we might not
+@c understand it at all.  And if we can't understand what bug you are
+@c trying to fix, or why your patch should be an improvement, we mustn't
+@c install it.
+バグに対する修正は、よい品質のものなら有用である。
+しかし、修正が正しいことを示すテスト例などの
+バグレポートに必要な情報を省かないでほしい。
+修正に問題があるとわかって別のやり方でバグをつぶすかもしれないし、
+報告された修正がまったく理解できないこともありえる。
+そして、どんなバグを修正しようとしているのかわからない、あるいは、
+その修正がなぜ改良になるのかわからなければ、
+その修正を採用するわけにいかない。
+
+@ifinfo
+@c @xref{Sending Patches}, for guidelines on how to make it easy for us to
+@c understand and install your patches.
+我々にとって、読者のパッチが理解しやすく、
+インストールしやすくするための指針については、
+@pxref{Sending Patches}。
+@end ifinfo
+
+@item
+@c A guess about what the bug is or what it depends on.
+バグが何であるか、また何に依存しているかについての予想。
+
+@c Such guesses are usually wrong.  Even experts can't guess right about
+@c such things without first using the debugger to find the facts.
+こういう予想は、たいていはまちがっている。
+専門家でさえ、まずデバッガで事実を調べない限り、正しい予想はできない。
+@end itemize
+
+@node Sending Patches
+@c @subsection Sending Patches for GNU Emacs
+@subsection GNU Emacsに対する修正を送る
+
+@c @cindex sending patches for GNU Emacs
+@c @cindex patches, sending
+@cindex GNU Emacsに対する修正を送る
+@cindex 修正を送る
+@c   If you would like to write bug fixes or improvements for GNU Emacs,
+@c that is very helpful.  When you send your changes, please follow these
+@c guidelines to make it easy for the maintainers to use them.  If you
+@c don't follow these guidelines, your information might still be useful,
+@c but using it will take extra work.  Maintaining GNU Emacs is a lot of
+@c work in the best of circumstances, and we can't keep up unless you do
+@c your best to help.
+GNU Emacsに対する改良や虫取りのための修正を送ろうということであれば、
+おおいに助かります。
+修正を送るにあたっては、保守チームがそれを役立てやすいように、
+以下の指針に従ってください。
+さもないと、送られた情報は有用であっても、
+役立てるには余分な作業が必要になります。
+GNU Emacsの保守は最善の環境でやっても手間のかかる仕事ですから、
+手助けしていただくにしても十分な配慮が必要なのです。
+
+@itemize @bullet
+@item
+@c Send an explanation with your changes of what problem they fix or what
+@c improvement they bring about.  For a bug fix, just include a copy of the
+@c bug report, and explain why the change fixes the bug.
+その修正がどのような問題を解決するものか、
+またはどのような改善をもたらすものなのかの説明を送ってほしい。
+バグに対する修正の場合は、バグレポートのコピーと、
+なぜこの修正でバグが取れるのかの説明を含める。
+
+@c (Referring to a bug report is not as good as including it, because then
+@c we will have to look it up, and we have probably already deleted it if
+@c we've already fixed the bug.)
+（バグレポートへのポインタを示すよりも、
+バグレポートのコピーを含めるほうが望ましい。
+というのは、ポインタだとバグレポートを探す必要があるし、
+そのバグを直し終えていると、バグレポートを消してしまっているかもしれない。）
+
+@item
+@c Always include a proper bug report for the problem you think you have
+@c fixed.  We need to convince ourselves that the change is right before
+@c installing it.  Even if it is correct, we might have trouble
+@c understanding it if we don't have a way to reproduce the problem.
+修正したと思う問題に対応した適切なバグレポート全体をつねに含めてほしい。
+保守チームのほうでも修正を適用するまえにその変更が適切なものであることを
+確信する必要がある。
+たとえ修正が正しいものであっても、もとの問題を再現する方法がないと、
+修正内容を正しく理解できないかもしれない。
+
+@item
+@c Include all the comments that are appropriate to help people reading the
+@c source in the future understand why this change was needed.
+将来そのソースを読むすべての人に、その変更がなぜ必要だったか
+理解するのを助けるに足るだけのコメントをソースに入れる。
+
+@item
+@c Don't mix together changes made for different reasons.
+@c Send them @emph{individually}.
+異なる理由に基づく変更を混ぜない。
+あくまでも@emph{別々に}送る。
+
+@c If you make two changes for separate reasons, then we might not want to
+@c install them both.  We might want to install just one.  If you send them
+@c all jumbled together in a single set of diffs, we have to do extra work
+@c to disentangle them---to figure out which parts of the change serve
+@c which purpose.  If we don't have time for this, we might have to ignore
+@c your changes entirely.
+異なる理由に基づいて2つの変更を行った場合、
+その両方を採用することはないだろう。
+どちらか一方だけを採用するかもしれない。
+もしそれらをいっしょくたに1つのdiffにしてしまうと、
+それを分離するために余計な作業が必要になる。
+どの部分の変更がどちらの目的に対応しているのか調べる必要がある。
+その時間を割けないと、その変更をまったく
+採用しないということにもなりかねない。
+
+@c If you send each change as soon as you have written it, with its own
+@c explanation, then two changes never get tangled up, and we can consider
+@c each one properly without any extra work to disentangle them.
+それぞれの変更を行ってすぐに、別個に、説明を付けて送ってもらえれば、
+2つの変更が一緒になるなどということはないし、
+それぞれの変更を分離するなどの余計な作業をせずに適切に考慮できる。
+
+@item
+@c Send each change as soon as that change is finished.  Sometimes people
+@c think they are helping us by accumulating many changes to send them all
+@c together.  As explained above, this is absolutely the worst thing you
+@c could do.
+それぞれの変更は完成したらすぐに送ってほしい。
+ときどき、多くの変更を溜めておいてまとめて送ったほうが
+いいと思っている人に出会う。
+上で説明したように、それは最悪のやり方。
+
+@c Since you should send each change separately, you might as well send it
+@c right away.  That gives us the option of installing it immediately if it
+@c is important.
+それぞれの変更は別個に送るべきなので、変更を行ったらすぐに送れるはず。
+そうすれば、保守チームのほうでその変更が重要なものだと
+判断したらすぐ取り入れることができる。
+
+@item
+@c Use @samp{diff -c} to make your diffs.  Diffs without context are hard
+@c to install reliably.  More than that, they are hard to study; we must
+@c always study a patch to decide whether we want to install it.  Unidiff
+@c format is better than contextless diffs, but not as easy to read as
+@c @samp{-c} format.
+diffファイルを作るときには、@samp{diff -c}を使う。
+コンテキストdiffでないdiffファイルは正しく適用するのが難しい。
+それ以上に、調べるのもたいへん。
+必ず保守チームの人間が修正を適用するかどうか検討する。
+@samp{-u}形式は行番号だけのdiffよりはましだが、
+いちばん読みやすいのは@samp{-c}形式。
+
+@c If you have GNU diff, use @samp{diff -c -F'^[_a-zA-Z0-9$]+ *('} when
+@c making diffs of C code.  This shows the name of the function that each
+@c change occurs in.
+もしGNU diffを使っているのなら、Cのコードのdiffを作るときには
+@samp{diff -c -F'^[_a-zA-Z0-9$]+ *('}を使う。
+こうすると、変更される各関数の名前が一緒に表示される。
+
+@item
+@c Avoid any ambiguity as to which is the old version and which is the new.
+@c Please make the old version the first argument to diff, and the new
+@c version the second argument.  And please give one version or the other a
+@c name that indicates whether it is the old version or your new changed
+@c one.
+どっちが古い版でどっちが新しい版か曖昧さがないようにする。
+diffコマンドの第1引数に古いファイル、第2引数に新しいファイルを指定して
+diffファイルを作成する。
+そして、それぞれのファイル名を見ればどっちが古い版でどっちが
+新しい版かわかるようにファイル名を付ける。
+
+@item
+@c Write the change log entries for your changes.  This is both to save us
+@c the extra work of writing them, and to help explain your changes so we
+@c can understand them.
+変更に対する変更記録を書く。
+そうしてあれば、保守チームのほうで書く時間が節約でき、
+保守チームが変更内容を理解する手助けにもなる。
+
+@c The purpose of the change log is to show people where to find what was
+@c changed.  So you need to be specific about what functions you changed;
+@c in large functions, it's often helpful to indicate where within the
+@c function the change was.
+変更記録の目的は、人が読んでどこが変わったかわかるようにすること。
+だから、どの関数を変更したか具体的に書く。
+大きい関数の場合は、関数の中のどの箇所を変更したかも書いてあると助かる。
+
+@c On the other hand, once you have shown people where to find the change,
+@c you need not explain its purpose in the change log.  Thus, if you add a
+@c new function, all you need to say about it is that it is new.  If you
+@c feel that the purpose needs explaining, it probably does---but put the
+@c explanation in comments in the code.  It will be more useful there.
+その反面、どこが変更されたかわかるようにさえなっていれば、
+変更の目的は変更記録で説明する必要はない。
+たとえば、新しい関数を追加したのであれば、
+その関数が新しいということだけを書けば十分。
+目的を説明したほうがよいと感じるなら、たぶんそのとおりだろう。
+しかし、説明はコード中のコメントに書く。
+そのほうが役に立つ。
+
+@c Please read the @file{ChangeLog} files in the @file{src} and @file{lisp}
+@c directories to see what sorts of information to put in, and to learn the
+@c style that we use.  If you would like your name to appear in the header
+@c line, showing who made the change, send us the header line.
+@c @xref{Change Log}.
+ディレクトリ@file{src}とディレクトリ@file{lisp}の
+ファイル@file{ChangeLog}を眺めて、どのような情報を入れるかとか、
+どのようなスタイルで書くかの参考にしてほしい。
+誰が変更したかわかるように自分の名前をヘッダの行に記録したいなら、
+ヘッダ行も送ること。
+
+@item
+@c When you write the fix, keep in mind that we can't install a change that
+@c would break other systems.  Please think about what effect your change
+@c will have if compiled on another type of system.
+修正を行うにあたっては、他のシステムで動かなくなるような変更は
+採用できないということを承知しておいてほしい。
+自分が行う変更が、他の種類のシステムにおいては
+どのような影響をもたらすかについて熟慮してほしい。
+
+@c Sometimes people send fixes that @emph{might} be an improvement in
+@c general---but it is hard to be sure of this.  It's hard to install
+@c such changes because we have to study them very carefully.  Of course,
+@c a good explanation of the reasoning by which you concluded the change
+@c was correct can help convince us.
+ときどき、おおむね改良になる@emph{かも}しれないが、
+はっきり改良だとはいいがたいような変更を送ってくる人がいる。
+そのような変更は、きわめて慎重に検討しなければならないので、
+採用するのは難しい。
+もちろん、あなたがどのような理由でその変更が正しいのかよい説明を
+書いてくれれば、保守チームがそれを理解する助けになる。
+
+@c The safest changes are changes to the configuration files for a
+@c particular machine.  These are safe because they can't create new bugs
+@c on other machines.
+もっとも安全な変更は、特定のマシンの構成ファイルに対する変更。
+それが安全だという理由は、
+その変更が他のマシンにおいて問題を引き起こすことはありえないから。
+
+@c Please help us keep up with the workload by designing the patch in a
+@c form that is clearly safe to install.
+修正を採用しても安全だとはっきりわかる形に設計することで、
+保守チームの労力を軽減できる。
+@end itemize
+
+@node Contributing, Service, Bugs, Top
+@c @section Contributing to Emacs Development
+@section Emacsの開発に貢献するには
+
+@c If you would like to help pretest Emacs releases to assure they work
+@c well, or if you would like to work on improving Emacs, please contact
+@c the maintainers at @code{bug-gnu-emacs@@gnu.org}.  A pretester
+@c should be prepared to investigate bugs as well as report them.  If you'd
+@c like to work on improving Emacs, please ask for suggested projects or
+@c suggest your own ideas.
+Emacsのプレテスト版が正しく動作することの確認を手助けしたかったり、
+Emacsの改良作業に加わりたければ、
+@code{bug-gun-emacs@@gnu.org}の保守チームに連絡してください。
+プレテスト参加者は、バグを報告するだけでなく、バグを探すことも要求されます。
+Emacsの改良に加わりたければ、保守チームにプロジェクトの示唆を求めるか、
+あなたのアイデアを提案してください。
+
+@c If you have already written an improvement, please tell us about it.  If
+@c you have not yet started work, it is useful to contact
+@c @code{bug-gnu-emacs@@gnu.org} before you start; it might be
+@c possible to suggest ways to make your extension fit in better with the
+@c rest of Emacs.
+すでに改良したコードを書いてしまったのなら、それについて教えてください。
+まだ作業を始めていないのなら、始めるまえに
+@code{bug-gnu-emacs@@gnu.org}に連絡したほうがよいです。
+そうすれば、Emacsの残りの部分とよく適合する形で
+拡張を行うにはどうしたらよいかのヒントがもらえるでしょう。
+
+@node Service, Command Arguments, Contributing, Top
+@c @section How To Get Help with GNU Emacs
+@section GNU Emacsに関する助言を得るには
+
+@c If you need help installing, using or changing GNU Emacs, there are two
+@c ways to find it:
+GNU Emacsをインストールしたり、使ったり、変更したりするうえで手助けが必要なら、
+2つの方法があります。
+
+@itemize @bullet
+@item
+@c Send a message to the mailing list
+@c @code{help-gnu-emacs@@gnu.org}, or post your request on
+@c newsgroup @code{gnu.emacs.help}.  (This mailing list and newsgroup
+@c interconnect, so it does not matter which one you use.)
+メイリングリスト@code{help-gnu-emacs@@gnu.org}にメッセージを送るか、
+ニュースグループ@code{gnu.emacs.help}に投稿する。
+（これらのメイリングリストとニュースグループは相互乗り入れしているので、
+どちらを使ってもかまわない。）
+
+@item
+@c Look in the service directory for someone who might help you for a fee.
+@c The service directory is found in the file named @file{etc/SERVICE} in the
+@c Emacs distribution.
+サービスディレクトリで、有償で手助けしてくれるような人を探す。
+サービスディレクトリは、Emacs配布物の中の
+ファイル@file{etc/SERVICE}にある。
+@end itemize

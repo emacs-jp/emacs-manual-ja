@@ -1,0 +1,394 @@
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985,86,87,93,94,95,97,2000,2001,2002,2003
+@c  Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Keyboard Macros, Files, Fixit, Top
+@c @chapter Keyboard Macros
+@chapter キーボードマクロ @emph{(2004/01/12)}
+@cindex defining keyboard macros
+@cindex キーボードマクロの定義
+@cindex keyboard macro
+@cindex キーボードマクロ
+
+@c   In this chapter we describe how a sequence of editing commands can
+@c be recorded and repeated multiple times.
+この章では，編集作業を記録し，何度も繰り返す方法について紹介します．
+
+@c   A @dfn{keyboard macro} is a command defined by the user to stand for
+@c another sequence of keys.  For example, if you discover that you are
+@c about to type @kbd{C-n C-d} forty times, you can speed your work by
+@c defining a keyboard macro to do @kbd{C-n C-d} and calling it with a
+@c repeat count of forty.
+@dfn{キーボードマクロ(keyboard macro)} はある一連のキー入力を表すもので，ユーザ
+によって定義されます．たとえば，@kbd{C-n C-d}を40回も入力していることに気付いた
+としましょう．その時，@kbd{C-n C-d} を40回呼び出すようなキーボードマクロを定義す
+れば，作業効率を高めることができます．
+
+@c @cindex defining keyboard macros
+@c @cindex keyboard macro
+@cindex キーボードマクロの定義
+@cindex キーボードマクロ
+@c   A @dfn{keyboard macro} is a command defined by the user to stand for
+@c another sequence of keys.  For example, if you discover that you are
+@c about to type @kbd{C-n C-d} forty times, you can speed your work by
+@c defining a keyboard macro to do @kbd{C-n C-d} and calling it with a
+@c repeat count of forty.
+@dfn{キーボードマクロ}は、
+ユーザーが一連のキー操作に基づいて定義したコマンドです。
+たとえば、@kbd{C-n C-d}という打鍵を40回繰り返す必要があるとわかったら、
+@kbd{C-n C-d}を実行するキーボードマクロを定義し、
+それを40回繰り返す指定をして呼び出すと迅速に作業できます。
+
+@c widecommands
+@table @kbd
+@item C-x (
+@c Start defining a keyboard macro (@code{start-kbd-macro}).
+キーボードマクロの定義を開始する
+（@code{start-kbd-macro}）。
+@item C-x )
+@c End the definition of a keyboard macro (@code{end-kbd-macro}).
+キーボードマクロの定義を終了する
+（@code{end-kbd-macro}）。
+@item C-x e
+@c Execute the most recent keyboard macro (@code{call-last-kbd-macro}).
+もっとも最近のキーボードマクロを実行する
+（@code{call-last-kbd-macro}）。
+@item C-u C-x (
+@c Re-execute last keyboard macro, then add more keys to its definition.
+もっとも最近のキーボードマクロを再実行したうえで、
+その定義にキーを追加する。
+@item C-x q
+@c When this point is reached during macro execution, ask for confirmation
+@c (@code{kbd-macro-query}).
+キーボードマクロの実行中にこの場所に到達したら、
+実行の確認を求める
+（@code{kbd-macro-query}）。
+@item M-x name-last-kbd-macro
+@c Give a command name (for the duration of the session) to the most
+@c recently defined keyboard macro.
+もっとも最近に定義したキーボードマクロに（現在のEmacsセッションだけで有効な）
+コマンド名を与える。
+@item M-x insert-kbd-macro
+@c Insert in the buffer a keyboard macro's definition, as Lisp code.
+キーボードマクロの定義をLispコードとしてバッファに挿入する。
+@item C-x C-k
+@c Edit a previously defined keyboard macro (@code{edit-kbd-macro}).
+まえに定義したキーボードマクロを編集する
+（@code{edit-kbd-macro}）。
+@item M-x apply-macro-to-region-lines
+@c Run the last keyboard macro on each complete line in the region.
+リージョン内の各行に対して、最後に定義したキーボードマクロを実行する。
+@end table
+
+@c   Keyboard macros differ from ordinary Emacs commands in that they are
+@c written in the Emacs command language rather than in Lisp.  This makes it
+@c easier for the novice to write them, and makes them more convenient as
+@c temporary hacks.  However, the Emacs command language is not powerful
+@c enough as a programming language to be useful for writing anything
+@c intelligent or general.  For such things, Lisp must be used.
+キーボードマクロは、それがLispではなくEmacsのコマンド言語で
+記述されているという点で、通常のEmacsコマンドとは違っています。
+このため、キーボードマクロは初心者でも簡単に作れ、
+間に合わせとして定義するのにも向いています。
+しかし、Emacsのコマンド言語は、
+プログラム言語として知的で汎用的な動作を記述できるほど強力ではありません。
+そういう場合には、Lispを使ってください。
+
+@c   You define a keyboard macro while executing the commands which are the
+@c definition.  Put differently, as you define a keyboard macro, the
+@c definition is being executed for the first time.  This way, you can see
+@c what the effects of your commands are, so that you don't have to figure
+@c them out in your head.  When you are finished, the keyboard macro is
+@c defined and also has been, in effect, executed once.  You can then do the
+@c whole thing over again by invoking the macro.
+キーボードマクロは、定義内容のコマンド列を実際に実行しながら定義できます。
+いいかえれば、キーボードマクロを定義しているときに、
+その定義の第1回目の実行が行われることになります。
+ですから、コマンドがどのように動作するかを目で見ながら確認でき、
+頭の中だけで動作を考えるよりも楽に定義できます。
+コマンド列の最後まできてキーボードマクロを定義し終ると、
+第1回目の実行も終ったことになります。
+そのあとは、マクロを呼び出すことで何回でもそのコマンド列全体を実行できます。
+
+@menu
+* Basic Kbd Macro::     Defining and running keyboard macros.
+* Save Kbd Macro::      Giving keyboard macros names; saving them in files.
+* Kbd Macro Query::     Making keyboard macros do different things each time.
+@end menu
+
+@node Basic Kbd Macro
+@c @subsection Basic Use
+@subsection 基本的な使い方
+
+@kindex C-x (
+@kindex C-x )
+@kindex C-x e
+@findex start-kbd-macro
+@findex end-kbd-macro
+@findex call-last-kbd-macro
+@c   To start defining a keyboard macro, type the @kbd{C-x (} command
+@c (@code{start-kbd-macro}).  From then on, your keys continue to be
+@c executed, but also become part of the definition of the macro.  @samp{Def}
+@c appears in the mode line to remind you of what is going on.  When you are
+@c finished, the @kbd{C-x )} command (@code{end-kbd-macro}) terminates the
+@c definition (without becoming part of it!).  For example,
+キーボードマクロの定義を開始するには、@kbd{C-x (}コマンド
+（@code{start-kbd-macro}）を打ってください。
+それ以降打鍵するものは通常どおり実行されますが、
+それと同時にキーボードマクロの定義として取り込まれます。
+モード行にもそのことを表す@samp{Def}という表示が現れます。
+定義の終りまできたら、@kbd{C-x )}（@code{end-kbd-macro}）を打ち込むと
+キーボードマクロの定義が完了します
+（@kbd{C-x )}はマクロの内容には含まれません！）。
+たとえば、
+
+@example
+C-x ( M-f foo C-x )
+@end example
+
+@noindent
+@c defines a macro to move forward a word and then insert @samp{foo}.
+のように打鍵すると、
+1単語分ポイントを前進させ文字列@samp{foo}をバッファに挿入する、
+キーボードマクロを定義できます。
+
+@c   The macro thus defined can be invoked again with the @kbd{C-x e}
+@c command (@code{call-last-kbd-macro}), which may be given a repeat count
+@c as a numeric argument to execute the macro many times.  @kbd{C-x )} can
+@c also be given a repeat count as an argument, in which case it repeats
+@c the macro that many times right after defining it, but defining the
+@c macro counts as the first repetition (since it is executed as you define
+@c it).  Therefore, giving @kbd{C-x )} an argument of 4 executes the macro
+@c immediately 3 additional times.  An argument of zero to @kbd{C-x e} or
+@c @kbd{C-x )} means repeat the macro indefinitely (until it gets an error
+@c or you type @kbd{C-g} or, on MS-DOS, @kbd{C-@key{BREAK}}).
+定義し終えたキーボードマクロは、
+コマンド@kbd{C-x e}（@code{call-last-kbd-macro}）で再実行できますし、
+数引数として反復回数を指定することで多数回実行することもできます。
+@kbd{C-x )}にも引数として反復回数を指定でき、
+その場合は定義完了とともにただちに指定した回数だけ
+キーボードマクロを実行しますが、
+定義しているとき（実行しているので）を1回目の実行として数えます。
+ですから、@kbd{C-u 4 C-x )}と打つと、キーボードマクロをただちに3回実行します。
+@kbd{C-x e}や@kbd{C-x )}に反復回数0を指定すると、
+キーボードマクロを無限回、つまり、エラーが発生するか、
+@kbd{C-g}（MS-DOSでは@kbd{C-@key{BREAK}}）が打鍵されるまで、
+繰り返し実行します。
+
+@c   If you wish to repeat an operation at regularly spaced places in the
+@c text, define a macro and include as part of the macro the commands to move
+@c to the next place you want to use it.  For example, if you want to change
+@c each line, you should position point at the start of a line, and define a
+@c macro to change that line and leave point at the start of the next line.
+@c Then repeating the macro will operate on successive lines.
+テキスト上の規則的にとびとびの位置に対して操作を行いたい場合には、
+キーボードマクロを定義するときに、つぎに適用したい位置までポイントを
+移動するコマンドを含めておきます。
+たとえば、各行について変更を行いたければ、
+ポイントを行頭に置いてからキーボードマクロを定義し始め、
+最後にポイントをつぎの行の行頭に置いたところで定義を終えます。
+キーボードマクロを繰り返し実行すると、
+次々と連続する行に対して操作を実行できます。
+
+@c   After you have terminated the definition of a keyboard macro, you can add
+@c to the end of its definition by typing @kbd{C-u C-x (}.  This is equivalent
+@c to plain @kbd{C-x (} followed by retyping the whole definition so far.  As
+@c a consequence it re-executes the macro as previously defined.
+キーボードマクロの定義を完了してしまったあとでも、
+@kbd{C-u C-x (}を打ち込めば、その定義の末尾に内容を追加できます。
+このコマンドは、@kbd{C-x (}に続いて現在のキーボードマクロの
+定義内容全体を打鍵したのと同じ効果を持ちます。
+その結果、定義されたとおりにマクロを再実行します。
+
+@c   You can use function keys in a keyboard macro, just like keyboard
+@c keys.  You can even use mouse events, but be careful about that: when
+@c the macro replays the mouse event, it uses the original mouse position
+@c of that event, the position that the mouse had while you were defining
+@c the macro.  The effect of this may be hard to predict.  (Using the
+@c current mouse position would be even less predictable.)
+キーボードマクロの中で、通常のキーと同様にファンクションキーを
+使うこともできます。
+マウスイベントを使うことさえできますが、その場合は注意してください。
+キーボードマクロはマウスイベントを再現しますが、
+マウス位置としては最初にキーボードマクロを定義したときの位置が
+そのまま使われます。
+その結果は予想し難いものになります。
+（現在のマウス位置を使っても、結果はさらに予想し難いものになる。）
+
+@c   One thing that doesn't always work well in a keyboard macro is the
+@c command @kbd{C-M-c} (@code{exit-recursive-edit}).  When this command
+@c exits a recursive edit that started within the macro, it works as you'd
+@c expect.  But if it exits a recursive edit that started before you
+@c invoked the keyboard macro, it also necessarily exits the keyboard macro
+@c as part of the process.
+キーボードマクロの中で必ずうまくいくとは限らないことの1つに、
+@kbd{C-M-c}（@code{exit-recursive-edit}）コマンドがあります。
+このコマンドがマクロの中で開始させた再帰編集を終らせる場合には、
+期待どおりに動くでしょう。
+しかし、このコマンドがキーボードマクロを起動するまえに入っていた再帰編集を
+終らせるとすると、
+その終了処理の過程でキーボードマクロの実行も終らせてしまいます。
+
+@findex edit-kbd-macro
+@kindex C-x C-k
+@c   You can edit a keyboard macro already defined by typing @kbd{C-x C-k}
+@c (@code{edit-kbd-macro}).  Follow that with the keyboard input that you
+@c would use to invoke the macro---@kbd{C-x e} or @kbd{M-x @var{name}} or
+@c some other key sequence.  This formats the macro definition in a buffer
+@c and enters a specialized major mode for editing it.  Type @kbd{C-h m}
+@c once in that buffer to display details of how to edit the macro.  When
+@c you are finished editing, type @kbd{C-c C-c}.
+定義済みのキーボードマクロを編集するには、
+@kbd{C-x C-k}（@code{edit-kbd-macro}）と打ちます。
+このコマンドに続けてマクロを起動する打鍵、つまり、
+@kbd{C-x e}や@kbd{M-x @var{name}}などのキー列を入れます。
+すると、キー列に対応するキーボードマクロの内容が整形されて
+特別な編集用メジャーモードのバッファに入ります。
+そのバッファ中で@kbd{C-h m}と打つと編集方法が表示されます。
+編集し終えたら@kbd{C-c C-c}と打ちます。
+
+@findex apply-macro-to-region-lines
+@c   The command @kbd{M-x apply-macro-to-region-lines} repeats the last
+@c defined keyboard macro on each complete line within the current region.
+@c It does this line by line, by moving point to the beginning of the line
+@c and then executing the macro.
+コマンド@kbd{M-x apply-macro-to-region-lines}は最後に定義された
+キーボードマクロを現在のリージョンの各行に対して実行します。
+つまり、各行について、行頭にポイントを置いてからキーボードマクロを実行します。
+
+@node Save Kbd Macro
+@c @subsection Naming and Saving Keyboard Macros
+@subsection キーボードマクロの命名と保存
+
+@c @cindex saving keyboard macros
+@cindex キーボードマクロの保存
+@findex name-last-kbd-macro
+@c   If you wish to save a keyboard macro for longer than until you define the
+@c next one, you must give it a name using @kbd{M-x name-last-kbd-macro}.
+@c This reads a name as an argument using the minibuffer and defines that name
+@c to execute the macro.  The macro name is a Lisp symbol, and defining it in
+@c this way makes it a valid command name for calling with @kbd{M-x} or for
+@c binding a key to with @code{global-set-key} (@pxref{Keymaps}).  If you
+@c specify a name that has a prior definition other than another keyboard
+@c macro, an error message is printed and nothing is changed.
+新たにつぎのキーボードマクロを定義したあとでも
+現在のキーボードマクロを使いたいなら、
+@kbd{M-x name-last-kbd-macro}でキーボードマクロに名前を
+付けておく必要があります。
+このコマンドは、ミニバッファで名前を読み取り、
+その名前でキーボードマクロを実行できるように定義します。
+マクロ名はLispシンボルであり、このように定義されているので、
+@kbd{M-x}で呼び出したり@code{global-set-key}
+（@pxref{Keymaps}）でキーに対応付けたりできる有効なコマンド名になります。
+その名前にキーボードマクロ以外のものがすでに定義されていると、
+エラーメッセージが表示され何の変更も起こりません。
+
+@findex insert-kbd-macro
+@c   Once a macro has a command name, you can save its definition in a file.
+@c Then it can be used in another editing session.  First, visit the file
+@c you want to save the definition in.  Then use this command:
+キーボードマクロにコマンド名を付けると、その定義をファイルに保存できます。
+そうすると、別の編集セッションで使えるようになります。
+まず、定義を保存したいファイルを訪問してから、
+つぎのコマンドを使ってください。
+
+@example
+M-x insert-kbd-macro @key{RET} @var{macroname} @key{RET}
+@end example
+
+@noindent
+@c This inserts some Lisp code that, when executed later, will define the
+@c same macro with the same definition it has now.  (You need not
+@c understand Lisp code to do this, because @code{insert-kbd-macro} writes
+@c the Lisp code for you.)  Then save the file.  You can load the file
+@c later with @code{load-file} (@pxref{Lisp Libraries}).  If the file you
+@c save in is your init file @file{~/.emacs} (@pxref{Init File}) then the
+@c macro will be defined each time you run Emacs.
+このコマンドは、実行するとそのキーボードマクロと
+同じ動作を行うLispコードをバッファに挿入します。
+（@code{insert-kbd-macro}がLispコードの生成を代行するので、
+Lispコードを理解する必要はない。）
+そうしたら、このファイルを保存します。
+@code{load-file}（@pxref{Lisp Libraries}）でファイルをロードできます。
+保存するファイルとして@file{~/.emacs}（@pxref{Init File}）を使えば、
+Emacsを起動するとつねにそのマクロが定義されます。
+
+@c   If you give @code{insert-kbd-macro} a numeric argument, it makes
+@c additional Lisp code to record the keys (if any) that you have bound to the
+@c keyboard macro, so that the macro will be reassigned the same keys when you
+@c load the file.
+@code{insert-kbd-macro}に数引数を指定すると、
+さらに（もしあれば）キーボードマクロに割り当てたキーを
+記録するLispコードが追加されるので、
+ファイルをロードしたときに同じキーがマクロに割り当てられます。
+
+@node Kbd Macro Query
+@c @subsection Executing Macros with Variations
+@subsection 変化のあるマクロの実行
+
+@kindex C-x q
+@findex kbd-macro-query
+@c   Using @kbd{C-x q} (@code{kbd-macro-query}), you can get an effect
+@c similar to that of @code{query-replace}, where the macro asks you each
+@c time around whether to make a change.  While defining the macro,
+@c type @kbd{C-x q} at the point where you want the query to occur.  During
+@c macro definition, the @kbd{C-x q} does nothing, but when you run the
+@c macro later, @kbd{C-x q} asks you interactively whether to continue.
+@kbd{C-x q}（@code{kbd-macro-query}）を使うと、
+@code{query-replace}と同様に変更するかどうか尋ねてくる
+キーボードマクロを作れます。
+キーボードマクロを定義しているときに、問い合わせが起きてほしい箇所で
+@kbd{C-x q}を打ちます。
+マクロの定義中は@kbd{C-x q}は何の動作もしませんが、
+あとでマクロを実行させたときには@kbd{C-x q}の箇所で処理を
+続けるかどうか尋ねてくるようになります。
+
+@c   The valid responses when @kbd{C-x q} asks are @key{SPC} (or @kbd{y}),
+@c @key{DEL} (or @kbd{n}), @key{RET} (or @kbd{q}), @kbd{C-l} and @kbd{C-r}.
+@c The answers are the same as in @code{query-replace}, though not all of
+@c the @code{query-replace} options are meaningful.
+@kbd{C-x q}の問い合わせに対する有効な応答は、@key{SPC}（または@kbd{y}）、
+@key{DEL}（または@kbd{n}）、@key{RET}（または@kbd{q}）、@kbd{C-l}、
+@kbd{C-r}です。
+これらの意味は@code{query-replace}と同じですが、
+@code{query-replace}のすべての応答が意味を持つとは限りません。
+
+@c   These responses include @key{SPC} to continue, and @key{DEL} to skip
+@c the remainder of this repetition of the macro and start right away with
+@c the next repetition.  @key{RET} means to skip the remainder of this
+@c repetition and cancel further repetitions.  @kbd{C-l} redraws the screen
+@c and asks you again for a character to say what to do.
+@key{SPC}は続行、@key{DEL}はこの回の反復の残りを飛ばしてただちにつぎの
+反復に進むという意味になります。
+@key{RET}ではこの回の反復の残りも以後の反復もすべて取り消します。
+@kbd{C-l}は画面を再描画し、再度どうするかを問い合わせてきます。
+
+@c   @kbd{C-r} enters a recursive editing level, in which you can perform
+@c editing which is not part of the macro.  When you exit the recursive
+@c edit using @kbd{C-M-c}, you are asked again how to continue with the
+@c keyboard macro.  If you type a @key{SPC} at this time, the rest of the
+@c macro definition is executed.  It is up to you to leave point and the
+@c text in a state such that the rest of the macro will do what you
+@c want.@refill
+@kbd{C-r}で再帰編集レベルに入るので、そこでキーボードマクロにはない
+編集を行えます。
+@kbd{C-M-c}で再帰編集から抜けると、再度どうするかを聞いてきます。
+ここで@key{SPC}を打つと、キーボードマクロの残りの部分が実行されます。
+キーボードマクロの残りの部分が望みどおりの動作をする状態に
+ポイントやテキストを保っておくのは、ユーザーの責任です。
+
+@c   @kbd{C-u C-x q}, which is @kbd{C-x q} with a numeric argument,
+@c performs a completely different function.  It enters a recursive edit
+@c reading input from the keyboard, both when you type it during the
+@c definition of the macro, and when it is executed from the macro.  During
+@c definition, the editing you do inside the recursive edit does not become
+@c part of the macro.  During macro execution, the recursive edit gives you
+@c a chance to do some particularized editing on each repetition.
+@c @xref{Recursive Edit}.
+@kbd{C-u C-x q}、つまり、数引数を指定した@kbd{C-x q}は、
+まったく違った動作をします。
+キーボードマクロの定義中でも実行中でも、
+キーボードから入力を受け付ける再帰編集に入ります。
+定義中の場合、再帰編集の中で行った操作はマクロの一部にはなりません。
+実行中の場合、再帰編集の中で各反復ごとに個別の編集を行う機会が得られます。
+@xref{Recursive Edit}。

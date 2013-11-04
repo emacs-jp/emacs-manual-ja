@@ -1,0 +1,775 @@
+@c =============================================================
+@c = 元 翻 訳: 粕川正充＠お茶の水女子大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Abbrevs, Picture, Maintaining, Top
+@c @chapter Abbrevs
+@chapter 略語の利用法 @emph{(2004/01/12)}
+@c @cindex abbrevs
+@cindex 略語
+@c @cindex expansion (of abbrevs)
+@cindex 略語展開
+
+@c   A defined @dfn{abbrev} is a word which @dfn{expands}, if you insert
+@c it, into some different text.  Abbrevs are defined by the user to expand
+@c in specific ways.  For example, you might define @samp{foo} as an abbrev
+@c expanding to @samp{find outer otter}.  Then you would be able to insert
+@c @samp{find outer otter } into the buffer by typing @kbd{f o o
+@c @key{SPC}}.
+定義済みの略語（abbrev）とは、
+挿入時に別のテキストに展開される単語のことです。
+略語を定義するときに、それをどう展開するか指定します。
+たとえば、@samp{foo}を略語として、
+@samp{find outer otter}に展開すると定義したとします。
+すると、@kbd{f o o @key{SPC}}と打鍵すれば
+バッファには@samp{find outer otter }
+@footnote{【訳注】
+展開を引き起こした@key{SPC}も挿入されることに注意。}
+が挿入されます。
+
+@c   A second kind of abbreviation facility is called @dfn{dynamic abbrev
+@c expansion}.  You use dynamic abbrev expansion with an explicit command
+@c to expand the letters in the buffer before point by looking for other
+@c words in the buffer that start with those letters.  @xref{Dynamic
+@c Abbrevs}.
+略語の別な形に、@dfn{動的略語展開}（dynamic abbrev expansion）があります。
+動的略語展開とは、バッファ中のポイントのまえにある文字列を
+バッファ内にあるその文字列で始まる既存の単語に展開することで、
+陽にコマンドを実行して行います。
+@xref{Dynamic Abbrevs}。
+
+@c ``Hippie'' expansion generalizes abbreviation expansion.  @xref{Hippie
+@c Expand, , Hippie Expansion, autotype, Features for Automatic
+@c Typing}.
+『Hippie』 による展開は略称展開を汎用化したものです．
+@uref{http://www.bookshelf.jp/texi/emacs-man/21-3/jp/autotype.html,Features for
+Automatic Typing} を参照．
+
+@menu
+* Abbrev Concepts::             Fundamentals of defined abbrevs.
+* Defining Abbrevs::            Defining an abbrev, so it will expand when typed.
+* Expanding Abbrevs::           Controlling expansion: prefixes, canceling expansion.
+* Editing Abbrevs::             Viewing or editing the entire list of defined abbrevs.
+* Saving Abbrevs::              Saving the entire list of abbrevs for another session.
+* Dynamic Abbrevs::             Abbreviations for words already in the buffer.
+* Dabbrev Customization::       What is a word, for dynamic abbrevs.  Case handling.
+@end menu
+
+@node Abbrev Concepts, Defining Abbrevs, Abbrevs, Abbrevs
+@c @section Abbrev Concepts
+@section 略語の考え方
+
+@c   An @dfn{abbrev} is a word which has been defined to @dfn{expand} into
+@c a specified @dfn{expansion}.  When you insert a word-separator character
+@c following the abbrev, that expands the abbrev---replacing the abbrev
+@c with its expansion.  For example, if @samp{foo} is defined as an abbrev
+@c expanding to @samp{find outer otter}, then you can insert @samp{find
+@c outer otter.} into the buffer by typing @kbd{f o o .}.
+略語とは、あらかじめどう@dfn{展開}するか定義された単語のことです。
+略語に続けて、空白、タブ、ピリオドなどの単語の区切り文字を入力すると、
+略語は展開されて展開形に置き換わります。
+たとえば、略語@samp{foo}を展開形@samp{find outer otter}に展開するように
+定義しておけば、@kbd{f o o .}と打鍵すると
+@samp{find outer otter.}をバッファに挿入できます。
+
+@findex abbrev-mode
+@vindex abbrev-mode
+@c @cindex Abbrev mode
+@cindex 略語モード（Abbrev mode）
+@c @cindex mode, Abbrev
+@cindex モード、Abbrev
+@c   Abbrevs expand only when Abbrev mode (a minor mode) is enabled.
+@c Disabling Abbrev mode does not cause abbrev definitions to be forgotten,
+@c but they do not expand until Abbrev mode is enabled again.  The command
+@c @kbd{M-x abbrev-mode} toggles Abbrev mode; with a numeric argument, it
+@c turns Abbrev mode on if the argument is positive, off otherwise.
+@c @xref{Minor Modes}.  @code{abbrev-mode} is also a variable; Abbrev mode is
+@c on when the variable is non-@code{nil}.  The variable @code{abbrev-mode}
+@c automatically becomes local to the current buffer when it is set.
+略語は、略語（abbrev）モード（マイナモード）がオンのときにだけ展開されます。
+略語（abbrev）モードをオフにしても定義した略語が消えてしまうわけではなく、
+つぎにオンにしたときに同じ定義をふたたび使えます。
+コマンド@kbd{M-x abbrev-mode}でこのモードのオン／オフをトグル（切り替えが）
+できます。
+また、数引数を指定した場合、
+引数が正のときには略語（abbrev）モードはオンになり、
+それ以外のときにはオフになります。
+@xref{Minor Modes}。
+@code{abbrev-mode}は変数でもあります。
+この変数が@code{nil}以外のときには略語（abbrev）モードはオンです。
+この変数に値を設定すると、自動的にカレントバッファに
+ローカルな変数になります。
+
+@c   Abbrev definitions can be @dfn{mode-specific}---active only in one major
+@c mode.  Abbrevs can also have @dfn{global} definitions that are active in
+@c all major modes.  The same abbrev can have a global definition and various
+@c mode-specific definitions for different major modes.  A mode-specific
+@c definition for the current major mode overrides a global definition.
+略語定義は@dfn{モードに固有}にできます。
+つまり、あるメジャーモードのときにだけ働くように定義できます。
+略語は@dfn{グローバル}にも定義でき、
+そのときはすべてのメジャーモードで使えます。
+同じ略語に、グローバルな定義と、さまざまなメジャーモードに固有な定義とを
+持たせることができます。
+あるメジャーモードに固有な定義は、グローバルな定義に優先します。
+
+@c   Abbrevs can be defined interactively during the editing session.  Lists
+@c of abbrev definitions can also be saved in files and reloaded in later
+@c sessions.  Some users keep extensive lists of abbrevs that they load in
+@c every session.
+略語は、編集作業中に対話的に定義できます。
+略語の定義一覧を、あとで使うためにファイルに保存することもできます。
+大量の略語定義をセッションごとにロードする人もいます。
+
+@node Defining Abbrevs, Expanding Abbrevs, Abbrev Concepts, Abbrevs
+@c @section Defining Abbrevs
+@section 略語の定義方法 @emph{(2004/01/12)}
+
+@table @kbd
+@item C-x a g
+@c Define an abbrev, using one or more words before point as its expansion
+@c (@code{add-global-abbrev}).
+ポイントのまえの単語を展開形として、略語を定義する。
+（@code{add-global-abbrev}）。
+@item C-x a l
+@c Similar, but define an abbrev specific to the current major mode
+@c (@code{add-mode-abbrev}).
+上と同様。
+ただし、現在のメジャーモードに固有な略語を定義する。
+（@code{add-mode-abbrev}）。
+@item C-x a i g
+@c Define a word in the buffer as an abbrev (@code{inverse-add-global-abbrev}).
+バッファ中の1単語を略語として定義する。
+（@code{inverse-add-global-abbrev}）。
+@item C-x a i l
+@c Define a word in the buffer as a mode-specific abbrev
+@c (@code{inverse-add-mode-abbrev}).
+バッファ中の1単語をモードに固有な略語として定義する。
+（@code{inverse-add-mode-abbrev}）。
+@c @item M-x define-global-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+@c Define @var{abbrev} as an abbrev expanding into @var{exp}.
+@c @item M-x define-mode-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+@c Define @var{abbrev} as a mode-specific abbrev expanding into @var{exp}.
+@item M-x define-global-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+@var{abbrev} を @var{exp}の略称として定義する (全モードで有効)
+@item M-x define-mode-abbrev @key{RET} @var{abbrev} @key{RET} @var{exp} @key{RET}
+@var{abbrev} を現在のモードのみで有効な @var{exp}の略称として定義する．
+@item M-x kill-all-abbrevs
+@c This command discards all abbrev definitions currently in effect,
+@c leaving a blank slate.
+このコマンドは現在有効なすべての略語定義を抹消し空にする。
+@end table
+
+@kindex C-x a g
+@findex add-global-abbrev
+@c   The usual way to define an abbrev is to enter the text you want the
+@c abbrev to expand to, position point after it, and type @kbd{C-x a g}
+@c (@code{add-global-abbrev}).  This reads the abbrev itself using the
+@c minibuffer, and then defines it as an abbrev for one or more words before
+@c point.  Use a numeric argument to say how many words before point should be
+@c taken as the expansion.  For example, to define the abbrev @samp{foo} as
+@c mentioned above, insert the text @samp{find outer otter} and then type
+@c @kbd{C-u 3 C-x a g f o o @key{RET}}.
+略語を定義する普通の方法は、
+まず、略語に置き換わってほしい展開形のテキストを入力し、
+つぎにその直後にポイントをもっていき、
+@kbd{C-x a g}（@code{add-global-abbrev}）と打鍵します。
+すると、ミニバッファを用いて略語を読み取り、
+ポイントの直前の単語（群）に対する略語として登録します。
+展開形として用いる単語の個数は、数引数で指定します。
+たとえば、略語@samp{foo}をまえのように定義するには、
+テキスト@samp{find outer otter}を挿入し、
+続いて@kbd{C-u 3 C-x a g f o o @key{RET}}と打鍵します。
+
+@c   An argument of zero to @kbd{C-x a g} means to use the contents of the
+@c region as the expansion of the abbrev being defined.
+@kbd{C-x a g}に数引数として0を指定すると、
+展開形はリージョンの内容になります。
+
+@kindex C-x a l
+@findex add-mode-abbrev
+@c   The command @kbd{C-x a l} (@code{add-mode-abbrev}) is similar, but
+@c defines a mode-specific abbrev.  Mode-specific abbrevs are active only in a
+@c particular major mode.  @kbd{C-x a l} defines an abbrev for the major mode
+@c in effect at the time @kbd{C-x a l} is typed.  The arguments work the same
+@c as for @kbd{C-x a g}.
+コマンド@kbd{C-x a l}（@code{add-mode-abbrev}）も同様ですが、
+特定のモードに固有な定義になります。
+モードに固有な略語は、特定のメジャーモードの中だけで有効です。
+@kbd{C-x a l}は、@kbd{C-x a l}と打鍵したときのメジャーモードに対する
+略語を定義します。
+引数の意味は@kbd{C-x a g}と同じです。
+
+@kindex C-x a i g
+@findex inverse-add-global-abbrev
+@kindex C-x a i l
+@findex inverse-add-mode-abbrev
+@c   If the text already in the buffer is the abbrev, rather than its
+@c expansion, use command @kbd{C-x a i g}
+@c (@code{inverse-add-global-abbrev}) instead of @kbd{C-x a g}, or use
+@c @kbd{C-x a i l} (@code{inverse-add-mode-abbrev}) instead of @kbd{C-x a
+@c l}.  These commands are called ``inverse'' because they invert the
+@c meaning of the two text strings they use (one from the buffer and one
+@c read with the minibuffer).
+すでにバッファ内にあるテキストを略語として使いたい場合には、
+@kbd{C-x a g}のかわりにコマンド@kbd{C-x a i g}
+（@code{inverse-add-global-abbrev}）、あるいは、
+@kbd{C-x a l}のかわりにコマンド@kbd{C-x a i l}
+（@code{inverse-add-mode-abbrev}）を使います。
+これらは『逆さ』（inverse）コマンドと呼ばれます。
+というのは、これらのコマンドで使う
+（バッファにあるものとミニバッファから読むものの）2つの文字列
+の用途が逆さだからです。
+
+@c @findex define-mode-abbrev
+@c @findex define-global-abbrev
+@c   You can define an abbrev without inserting either the abbrev or its
+@c expansion in the buffer using the command @code{define-global-abbrev}.
+@c It reads two arguments--the abbrev, and its expansion.  The command
+@c @code{define-mode-abbrev} does likewise for a mode-specific abbrev.
+@findex define-mode-abbrev
+@findex define-global-abbrev
+@code{define-global-abbrev} を使うと，バッファに略称や展開される文字を入力せずに
+略称を定義できます．このコマンドを実行すると略称と展開される文字を引数として取り
+ます(コメント：M-x で呼ぶと略称と展開される文字をミニバッファで入力することがで
+きます)．この略称はすべてのモードで有効になりますが，@code{define-mode-abbrev}
+は現在のモードでのみ有効な略称を定義します．
+
+@c   To change the definition of an abbrev, just define a new definition.
+@c When the abbrev has a prior definition, the abbrev definition commands
+@c ask for confirmation before replacing it.
+略語の定義を変更するには、単に新たに定義してください。
+略語がすでに定義されていると、
+略語定義コマンドは置き換える前によいかどうかを確認してきます。
+
+@c   To remove an abbrev definition, give a negative argument to the abbrev
+@c definition command: @kbd{C-u - C-x a g} or @kbd{C-u - C-x a l}.  The
+@c former removes a global definition, while the latter removes a
+@c mode-specific definition.
+略語の定義を削除するには、略語定義コマンドに負の数引数を指定します。
+@kbd{C-u - C-x a g}や@kbd{C-u - C-x a l}のようにします。
+前者はグローバルな定義を、後者はモードに固有な定義を削除します。
+
+@findex kill-all-abbrevs
+@c   @kbd{M-x kill-all-abbrevs} removes all the abbrev definitions there
+@c are, both global and local.
+@kbd{M-x kill-all-abbrevs} は、グローバルとローカルのすべての略語定義を
+削除します。
+
+@node Expanding Abbrevs, Editing Abbrevs, Defining Abbrevs, Abbrevs
+@c @section Controlling Abbrev Expansion
+@section 略語展開の制御
+
+@c   An abbrev expands whenever it is present in the buffer just before
+@c point and you type a self-inserting whitespace or punctuation character
+@c (@key{SPC}, comma, etc.@:).  More precisely, any character that is not a
+@c word constituent expands an abbrev, and any word-constituent character
+@c can be part of an abbrev.  The most common way to use an abbrev is to
+@c insert it and then insert a punctuation character to expand it.
+ポイントの直前に略語があるときに白文字や区切り文字（@key{SPC}、コンマなど）
+を打鍵すると、略語はつねに展開されます。
+より正確には、英単語の構成文字以外のどんな文字でも略語展開は起こり、
+英単語の構成文字の任意の組み合わせを略語に使用できます。
+略語の通常の使い方は、略語を入力してから区切り文字を入力して
+展開を行わせるという方法です。
+
+@vindex abbrev-all-caps
+@c   Abbrev expansion preserves case; thus, @samp{foo} expands into @samp{find
+@c outer otter}; @samp{Foo} into @samp{Find outer otter}, and @samp{FOO} into
+@c @samp{FIND OUTER OTTER} or @samp{Find Outer Otter} according to the
+@c variable @code{abbrev-all-caps} (a non-@code{nil} value chooses the first
+@c of the two expansions).
+略語展開では大文字小文字を保存します。
+したがって、
+@samp{foo}は@samp{find outer otter}に、
+@samp{Foo}は@samp{Find outer otter}に展開されます。
+また、変数@code{abbrev-all-caps}に応じて、@samp{FOO}は
+（変数の値が@code{nil}以外のときは）
+@samp{FIND OUTER OTTER}、あるいは、@samp{Find Outer Otter}に展開されます
+
+@c   These commands are used to control abbrev expansion:
+以下は略語展開を制御するために使うコマンドです。
+
+@table @kbd
+@item M-'
+@c Separate a prefix from a following abbrev to be expanded
+@c (@code{abbrev-prefix-mark}).
+これまで入力した部分を
+これから入力する略語から分離する。
+@item C-x a e
+@findex expand-abbrev
+@c Expand the abbrev before point (@code{expand-abbrev}).
+@c This is effective even when Abbrev mode is not enabled.
+ポイントの直前の略語を展開する（@code{expand-abbrev}）。
+このコマンドは略語（abbrev）モードがオンでなくても働く。
+@item M-x expand-region-abbrevs
+@c Expand some or all abbrevs found in the region.
+リージョン中のいくつかの、あるいはすべての略語を展開する。
+@end table
+
+@kindex M-'
+@findex abbrev-prefix-mark
+@c   You may wish to expand an abbrev with a prefix attached; for example,
+@c if @samp{cnst} expands into @samp{construction}, you might want to use
+@c it to enter @samp{reconstruction}.  It does not work to type
+@c @kbd{recnst}, because that is not necessarily a defined abbrev.  What
+@c you can do is use the command @kbd{M-'} (@code{abbrev-prefix-mark}) in
+@c between the prefix @samp{re} and the abbrev @samp{cnst}.  First, insert
+@c @samp{re}.  Then type @kbd{M-'}; this inserts a hyphen in the buffer to
+@c indicate that it has done its work.  Then insert the abbrev @samp{cnst};
+@c the buffer now contains @samp{re-cnst}.  Now insert a non-word character
+@c to expand the abbrev @samp{cnst} into @samp{construction}.  This
+@c expansion step also deletes the hyphen that indicated @kbd{M-'} had been
+@c used.  The result is the desired @samp{reconstruction}.
+接頭辞が付いた略語を展開したい場合もあるでしょう。
+略語@samp{cnst}は@samp{construction}に展開されるとして、
+@samp{reconstruction}と入力するためにこの略語を使いたいとします。
+@samp{recnst}と打鍵してもだめです。
+というのは、@samp{recnst}は定義済みの略語ではないからです。
+ではどうすればよいかというと、
+接頭辞@samp{re}と略語@samp{cnst}のあいだでコマンド@kbd{M-'}
+（@code{abbrev-prefix-mark}）を使うのです。
+まず@samp{re}と打ち込みます。
+続いて@kbd{M-'}と打鍵します。
+するとバッファにハイフン（@kbd{-}）が挿入され、切れ目が入ったことを示します。
+それから略語@samp{cnst}を入力します。
+バッファには@samp{re-cnst}と入っています。
+ここで単語構成文字以外の文字を打ち込めば、
+略語@samp{cnst}が@samp{construction}に展開されます。
+展開時には@kbd{M-'}が挿入したハイフン（@kbd{-}）は削除されます。
+結果は、望みどおりの@samp{reconstruction}です。
+
+@c   If you actually want the text of the abbrev in the buffer, rather than
+@c its expansion, you can accomplish this by inserting the following
+@c punctuation with @kbd{C-q}.  Thus, @kbd{foo C-q ,} leaves @samp{foo,} in
+@c the buffer.
+もし、略語を展開しないでそのまま残しておきたい場合には、
+@kbd{C-q}に続けて区切り文字を入れます。
+つまり、@kbd{foo C-q ,}とすると、バッファには@samp{foo,}のまま残ります。
+
+@findex unexpand-abbrev
+@c   If you expand an abbrev by mistake, you can undo the expansion and
+@c bring back the abbrev itself by typing @kbd{C-_} to undo (@pxref{Undo}).
+@c This also undoes the insertion of the non-word character that expanded
+@c the abbrev.  If the result you want is the terminating non-word
+@c character plus the unexpanded abbrev, you must reinsert the terminating
+@c character, quoting it with @kbd{C-q}.  You can also use the command
+@c @kbd{M-x unexpand-abbrev} to cancel the last expansion without
+@c deleting the terminating character.
+まちがって略語を展開してしまった場合には、
+@kbd{C-_}（@pxref{Undo}）と打鍵すれば、展開をアンドゥし略語に戻せます。
+このとき略語展開を引き起こした区切り文字も削除されます。
+略語を展開せずに区切り文字とともに入力したいならば、
+区切り文字を@kbd{C-q}でクォートして挿入します。
+区切り文字を削除せずに直前に展開したものを略語に戻すには、
+コマンド@kbd{M-x unexpand-abbrev}を使うこともできます。
+
+@findex expand-region-abbrevs
+@c   @kbd{M-x expand-region-abbrevs} searches through the region for defined
+@c abbrevs, and for each one found offers to replace it with its expansion.
+@c This command is useful if you have typed in text using abbrevs but forgot
+@c to turn on Abbrev mode first.  It may also be useful together with a
+@c special set of abbrev definitions for making several global replacements at
+@c once.  This command is effective even if Abbrev mode is not enabled.
+@kbd{M-x expand-region-abbrevs} は、リージョン全体にわたって定義済みの略語を
+探し、みつかったそれぞれについてそれを展開するかを聞いてきます。
+このコマンドは、略語（abbrev）モードをオンにし忘れて略語を用いた
+テキストを入力してしまったときに便利です。
+あるいは、特別な略語定義一式を用いて
+一度に全体を置き換えるときにも便利です。
+このコマンドは略語（abbrev）モードがオンでなくても使えます。
+
+@c   Expanding an abbrev runs the hook @code{pre-abbrev-expand-hook}
+@c (@pxref{Hooks}).
+略語を展開するときには、フック@code{pre-abbrev-expand-hook}
+（@pxref{Hooks}）が実行されます。
+
+@need 1500
+@node Editing Abbrevs, Saving Abbrevs, Expanding Abbrevs, Abbrevs
+@c @section Examining and Editing Abbrevs
+@section 略語の表示と編集 @emph{(2004/01/12)}
+
+@table @kbd
+@item M-x list-abbrevs
+@c Display a list of all abbrev definitions.  With a numeric argument, list
+@c only local abbrevs.
+すべての略語定義を表示する。
+数引数があれば，現在のモードのローカル略称のみを表示する．
+@item M-x edit-abbrevs
+@c Edit a list of abbrevs; you can add, alter or remove definitions.
+略語の一覧を編集する。
+定義を追加、変更、削除できる。
+@end table
+
+@findex list-abbrevs
+@c   The output from @kbd{M-x list-abbrevs} looks like this:
+@kbd{M-x list-abbrevs}の出力はつぎのようになります。
+
+@example
+(lisp-mode-abbrev-table)
+"dk"	       0    "define-key"
+(global-abbrev-table)
+"dfn"	       0    "definition"
+@end example
+
+@noindent
+@c (Some blank lines of no semantic significance, and some other abbrev
+@c tables, have been omitted.)
+（空行には意味はない。
+また、いくつかのモードの略語表は省略した。）
+
+@c   A line containing a name in parentheses is the header for abbrevs in a
+@c particular abbrev table; @code{global-abbrev-table} contains all the global
+@c abbrevs, and the other abbrev tables that are named after major modes
+@c contain the mode-specific abbrevs.
+括弧で括られた名前から成る行は、特定モードの略語表のヘッダです。
+@code{global-abbrev-table}には、グローバルな略語定義が入っています。
+また、メジャーモード名からとったそれ以外の名前の略語表には、
+モードに固有な略語が入っています。
+
+@c   Within each abbrev table, each nonblank line defines one abbrev.  The
+@c word at the beginning of the line is the abbrev.  The number that
+@c follows is the number of times the abbrev has been expanded.  Emacs
+@c keeps track of this to help you see which abbrevs you actually use, so
+@c that you can eliminate those that you don't use often.  The string at
+@c the end of the line is the expansion.
+各略語表では、空でない各行が1つの略語を定義します。
+行の先頭の単語は略語です。
+つぎに続く数字はこの略語を展開した回数です。
+Emacsは、略語が実際にどれだけ使われているか数えていて、
+あまり使わない定義を削除できるようにしています。
+行の最後の文字列が展開形です。
+
+@findex edit-abbrevs
+@c @kindex C-c C-c @r{(Edit Abbrevs)}
+@kindex C-c C-c @r{（略語編集）}
+@c   @kbd{M-x edit-abbrevs} allows you to add, change or kill abbrev
+@c definitions by editing a list of them in an Emacs buffer.  The list has
+@c the same format described above.  The buffer of abbrevs is called
+@c @samp{*Abbrevs*}, and is in Edit-Abbrevs mode.  Type @kbd{C-c C-c} in
+@c this buffer to install the abbrev definitions as specified in the
+@c buffer---and delete any abbrev definitions not listed.
+@kbd{M-x edit-abbrevs}により、Emacsバッファ内の略語一覧を編集することで
+略語定義の追加、変更、削除を行えます。
+一覧の形式は上で述べたものと同じです。
+このバッファは@samp{*Abbrevs*}と呼ばれ、
+略語編集（edit-abbrevs）モードになっています。
+このバッファで@kbd{C-c C-c}と打鍵すると、
+バッファで指定したように略語定義が登録され、
+バッファにない略語定義は削除されます。
+
+@c   The command @code{edit-abbrevs} is actually the same as
+@c @code{list-abbrevs} except that it selects the buffer @samp{*Abbrevs*}
+@c whereas @code{list-abbrevs} merely displays it in another window.
+コマンド@code{edit-abbrevs}は実際には@code{list-abbrevs}と同ですが、
+前者はバッファ@samp{*Abbrevs*}を選択するのに対し、
+後者はバッファを別のウィンドウに表示するだけです。
+
+@node Saving Abbrevs, Dynamic Abbrevs, Editing Abbrevs, Abbrevs
+@c @section Saving Abbrevs
+@section 略語の保存
+
+@c   These commands allow you to keep abbrev definitions between editing
+@c sessions.
+以下のコマンドは、編集セッション間で略語定義を保存するためのものです。
+
+@table @kbd
+@item M-x write-abbrev-file @key{RET} @var{file} @key{RET}
+@c Write a file @var{file} describing all defined abbrevs.
+ファイル@var{file}にすべての略語定義を書き出す。
+@item M-x read-abbrev-file @key{RET} @var{file} @key{RET}
+@c Read the file @var{file} and define abbrevs as specified therein.
+ファイル@var{file}から略語定義を読み込み、その指定どおりに定義する。
+@item M-x quietly-read-abbrev-file @key{RET} @var{file} @key{RET}
+@c Similar but do not display a message about what is going on.
+上と同様だが、処理経過を表示しない。
+@item M-x define-abbrevs
+@c Define abbrevs from definitions in current buffer.
+カレントバッファ内の定義で略語を定義する。
+@item M-x insert-abbrevs
+@c Insert all abbrevs and their expansions into current buffer.
+すべての略語とその展開形をカレントバッファに挿入する。
+@end table
+
+@findex write-abbrev-file
+@c   @kbd{M-x write-abbrev-file} reads a file name using the minibuffer and
+@c then writes a description of all current abbrev definitions into that
+@c file.  This is used to save abbrev definitions for use in a later
+@c session.  The text stored in the file is a series of Lisp expressions
+@c that, when executed, define the same abbrevs that you currently have.
+@kbd{M-x write-abbrev-file}は、ミニバッファからファイル名を読み取り、
+そのファイルにすべての略語定義情報を書き出します。
+このコマンドは、
+以後のセッションで使うために略語定義を保存するために使います。
+ファイルに保存されるテキストは一連のLisp式であり、
+これらの式を実行すると、現状と同じ略語が定義されます。
+
+@findex read-abbrev-file
+@findex quietly-read-abbrev-file
+@vindex abbrev-file-name
+@c   @kbd{M-x read-abbrev-file} reads a file name using the minibuffer
+@c and then reads the file, defining abbrevs according to the contents of
+@c the file.  The function @code{quietly-read-abbrev-file} is similar
+@c except that it does not display a message in the echo area; you cannot
+@c invoke it interactively, and it is used primarily in the @file{.emacs}
+@c file.  If either of these functions is called with @code{nil} as the
+@c argument, it uses the file name specified in the variable
+@c @code{abbrev-file-name}, which is by default @code{"~/.abbrev_defs"}.
+@kbd{M-x read-abbrev-file}は、ミニバッファからファイル名を読み取り、
+そのファイルを読み込んでファイルの内容に従って略語を定義します。
+@kbd{M-x quietly-read-abbrev-file}も似ていますが、
+現在何が進行しているかをエコー領域に表示しませんし，M-x で呼ぶこともできません．
+このコマンドは、@file{.emacs}ファイルで使うことに主眼があります。
+どちらのコマンドも、引数としに@code{nil}を指定すると
+変数@code{abbrev-file-name}に指定したファイル名を使います。
+この変数のデフォルトは@code{"~/.abbrev_defs"}です。
+@c That file is your standard abbrev definition file, and Emacs loads
+@c abbrevs from it automatically when it starts up.
+そのファイルは略称を定義するファイルであり，Emacsは起動時にそのファイルを自動的
+に読み込みます．
+
+@vindex save-abbrevs
+@c   Emacs will offer to save abbrevs automatically if you have changed
+@c any of them, whenever it offers to save all files (for @kbd{C-x s} or
+@c @kbd{C-x C-c}).  It saves them in the file specified by
+@c @code{abbrev-file-name}.  This feature can be inhibited by setting the
+@c variable @code{save-abbrevs} to @code{nil}.
+Emacsは、略語定義を変更してあると自動的に略語定義を保存するかどうか、
+（@kbd{C-x s}や@kbd{C-x C-c}などで）すべてのファイルを保存するかどうか
+問い合わせるときに同時に聞いてきます。これは@code{abbrev-file-name}で決められた
+ファイルに略語定義を保存します．
+この機能は、変数@code{save-abbrevs}の値を@code{nil}にすると禁止できます。
+
+@findex insert-abbrevs
+@findex define-abbrevs
+@c   The commands @kbd{M-x insert-abbrevs} and @kbd{M-x define-abbrevs} are
+@c similar to the previous commands but work on text in an Emacs buffer.
+@c @kbd{M-x insert-abbrevs} inserts text into the current buffer after point,
+@c describing all current abbrev definitions; @kbd{M-x define-abbrevs} parses
+@c the entire current buffer and defines abbrevs accordingly.@refill
+コマンド@kbd{M-x insert-abbrevs}と@kbd{M-x define-abbrevs}は、
+上で述べたコマンドと同様ですが、
+Emacsバッファ内のテキストに作用します。
+@kbd{M-x insert-abbrevs}は、カレントバッファのポイントの後に
+すべての略語定義を記述したテキストを挿入します。
+@kbd{M-x define-abbrevs}は、
+カレントバッファ全体を解析し、その内容に従って略語を定義します。
+
+@node Dynamic Abbrevs, Dabbrev Customization, Saving Abbrevs, Abbrevs
+@c @section Dynamic Abbrev Expansion
+@section 動的略語展開
+
+@c   The abbrev facility described above operates automatically as you insert
+@c text, but all abbrevs must be defined explicitly.  By contrast,
+@c @dfn{dynamic abbrevs} allow the meanings of abbrevs to be determined
+@c automatically from the contents of the buffer, but dynamic abbrev expansion
+@c happens only when you request it explicitly.
+これまでに述べてきた略語の機能は、テキストを挿入するときに自動的に働きますが、
+すべての略語を陽に登録しておく必要があります。
+一方、@dfn{動的略語}（dynamic abbrevs）は、
+バッファの内容に基づいて略語の展開形を自動的に決定することができます。
+ただし、陽に指示したときだけ、動的略語展開を行います。
+
+@kindex M-/
+@kindex C-M-/
+@findex dabbrev-expand
+@findex dabbrev-completion
+@table @kbd
+@item M-/
+@c Expand the word in the buffer before point as a @dfn{dynamic abbrev},
+@c by searching in the buffer for words starting with that abbreviation
+@c (@code{dabbrev-expand}).
+バッファのポイントの直前の単語を@dfn{動的略語}（dynamic abbrev）として、
+その略語で始まる単語をバッファ内から探索し展開する
+（@code{dabbrev-expand}）。
+
+@item C-M-/
+@c Complete the word before point as a dynamic abbrev
+@c (@code{dabbrev-completion}).
+ポイントの直前の単語を動的略語として補完する
+（@code{dabbrev-completion}）。
+@end table
+
+@vindex dabbrev-limit
+@c   For example, if the buffer contains @samp{does this follow } and you
+@c type @kbd{f o M-/}, the effect is to insert @samp{follow} because that
+@c is the last word in the buffer that starts with @samp{fo}.  A numeric
+@c argument to @kbd{M-/} says to take the second, third, etc.@: distinct
+@c expansion found looking backward from point.  Repeating @kbd{M-/}
+@c searches for an alternative expansion by looking farther back.  After
+@c scanning all the text before point, it searches the text after point.
+@c The variable @code{dabbrev-limit}, if non-@code{nil}, specifies how far
+@c in the buffer to search for an expansion.
+たとえば、バッファ内に@samp{does this follow }があるときに
+@kbd{f o M-/}と打鍵すると、バッファ内で@samp{fo}で始まる近くにある単語が
+@samp{follow}なので@samp{follow}が挿入されます。
+@kbd{M-/}に数引数を指定すると、ポイントから先頭に向かって探して、2番目のもの、
+3番目のものというように異なる展開形に展開できます。
+@kbd{M-/}を繰り返すことにより、
+次々にさらに先頭へ向かって探して別の候補に展開します。
+ポイントよりまえのすべてのテキストを探し終えた場合には、
+ポイントよりうしろのテキストを探します。
+変数@code{dabbrev-limit}が@code{nil}以外
+@footnote{【訳注】文字数を指定する。}
+ならば、バッファ内のどの範囲まで展開候補を探すかを指定します。
+
+@vindex dabbrev-check-all-buffers
+@c   After scanning the current buffer, @kbd{M-/} normally searches other
+@c buffers, unless you have set @code{dabbrev-check-all-buffers} to
+@c @code{nil}.
+カレントバッファを探し終ると、
+変数@code{dabbrev-check-all-buffers}を@code{nil}に設定していない限り、
+@kbd{M-/}は他のバッファも探します。
+
+@c @vindex dabbrev-ignored-buffer-regexps
+@c   For finer control over which buffers to scan, customize the variable
+@c @code{dabbrev-ignored-buffer-regexps}.  Its value is a list of regular
+@c expressions.  If a buffer's name matches any of these regular
+@c expressions, dynamic abbrev expansion skips that buffer.
+@vindex dabbrev-ignored-buffer-regexps
+変数 @code{dabbrev-ignored-buffer-regexps} はどのバッファを探すかを制御します．
+値は正規表現のリストです．もしバッファ名がこの変数の正規表現リストの1個に一致す
+れば，動的略語展開はそのバッファから探しません．
+
+@c   A negative argument to @kbd{M-/}, as in @kbd{C-u - M-/}, says to
+@c search first for expansions after point, then other buffers, and
+@c consider expansions before point only as a last resort.
+@kbd{C-u - M-/}のように@kbd{M-/}に負の数引数を指定すると、
+まずポイントのうしろから展開候補を探し、
+それから他のバッファを探します．ポイントのまえについては最後の手段としてだけ展開
+候補を探します。
+@kbd{M-/}を繰り返して別の展開候補を探す場合には、引数を指定しません。
+これにより、ポイントよりうしろのすべての展開候補を試してから、
+つぎにポイントよりまえのすべての展開候補を試せます。
+
+@c   After you have expanded a dynamic abbrev, you can copy additional
+@c words that follow the expansion in its original context.  Simply type
+@c @kbd{@key{SPC} M-/} for each word you want to copy.  The spacing and
+@c punctuation between words is copied along with the words.
+動的略語を展開したあとでは、展開形のもともとの場所でつぎに続く単語（群）を
+コピーすることができます。
+コピーしたい単語ごとに単に@kbd{@key{SPC} M-/}と打鍵します。
+単語のあいだの空白や句読点も単語とともにコピーされます。
+
+@c   The command @kbd{C-M-/} (@code{dabbrev-completion}) performs
+@c completion of a dynamic abbreviation.  Instead of trying the possible
+@c expansions one by one, it finds all of them, then inserts the text that
+@c they have in common.  If they have nothing in common, @kbd{C-M-/}
+@c displays a list of completions, from which you can select a choice in
+@c the usual manner.  @xref{Completion}.
+コマンド@kbd{C-M-/}（@code{dabbrev-completion}）は、
+動的略語の補完を行います。
+展開候補を1つずつ試すかわりに、すべての候補を全部探して
+それらに共通するテキストを挿入します。
+それらに共通部分がなければ、@kbd{C-M-/}は候補一覧を表示するので
+普通の方法でその中から1つ選びます。
+@xref{Completion}。
+
+@c   Dynamic abbrev expansion is completely independent of Abbrev mode; the
+@c expansion of a word with @kbd{M-/} is completely independent of whether
+@c it has a definition as an ordinary abbrev.
+動的略語展開は略語（abbrev）モードと完全に独立しています。
+@kbd{M-/}による単語の展開は、
+略語（abbrev）モードで定義済みかどうかとは完全に独立しています。
+
+@node Dabbrev Customization,  , Dynamic Abbrevs, Abbrevs
+@c @section Customizing Dynamic Abbreviation
+@section 動的略語のカスタマイズ方法
+
+@c   Normally, dynamic abbrev expansion ignores case when searching for
+@c expansions.  That is, the expansion need not agree in case with the word
+@c you are expanding.
+通常、動的略語展開では大文字小文字を区別しないで候補を探します。
+つまり、展開候補と略語の大文字小文字が一致する必要はありません。
+
+@vindex dabbrev-case-fold-search
+@c   This feature is controlled by the variable
+@c @code{dabbrev-case-fold-search}.  If it is @code{t}, case is ignored in
+@c this search; if it is @code{nil}, the word and the expansion must match
+@c case.  If the value of @code{dabbrev-case-fold-search} is
+@c @code{case-fold-search}, which is true by default, then the variable
+@c @code{case-fold-search} controls whether to ignore case while searching
+@c for expansions.
+この機能は変数@code{dabbrev-case-fold-search}で制御できます。
+値が@code{t}のときは、候補を探すときに大文字小文字を区別しません。
+値が@code{nil}のときは、候補と略語の大文字小文字が一致する必要があります。
+変数@code{dabbrev-case-fold-search}の値は、
+デフォルトでは真である@code{case-fold-search}です。
+したがって、変数@code{case-fold-search}が
+展開候補を探すときの大文字小文字の区別を制御します。
+
+@vindex dabbrev-case-replace
+@c   Normally, dynamic abbrev expansion preserves the case pattern @emph{of
+@c the abbrev you have typed}, by converting the expansion to that case
+@c pattern.
+通常、動的略語展開は@emph{打ち込んだ略語の}大文字小文字のパターンを保存します。
+つまり、略語の大文字小文字のパターンに合うように
+展開形の大文字小文字を変換します。
+
+@vindex dabbrev-case-fold-search
+@c   The variable @code{dabbrev-case-replace} controls whether to preserve
+@c the case pattern of the abbrev.  If it is @code{t}, the abbrev's case
+@c pattern is preserved in most cases; if it is @code{nil}, the expansion is
+@c always copied verbatim.  If the value of @code{dabbrev-case-replace} is
+@c @code{case-replace}, which is true by default, then the variable
+@c @code{case-replace} controls whether to copy the expansion verbatim.
+変数@code{dabbrev-case-replace}は、略語の大文字小文字のパターンを
+保存するかどうかを制御します。
+値が@code{t}のときは、たいていの場合、パターンを保存します。
+@code{nil}のときは、つねに展開形をそのままコピーします。
+@code{dabbrev-case-replace}の値は、
+デフォルトでは真である@code{case-replace}です。
+したがって、変数@code{case-replace}が
+展開形をそのままコピーするかどうかを制御します。
+
+@c   However, if the expansion contains a complex mixed case pattern, and
+@c the abbrev matches this pattern as far as it goes, then the expansion is
+@c always copied verbatim, regardless of those variables.  Thus, for
+@c example, if the buffer contains @code{variableWithSillyCasePattern}, and
+@c you type @kbd{v a M-/}, it copies the expansion verbatim including its
+@c case pattern.
+しかしながら、展開形の大文字小文字のパターンが複雑であるとき、
+略語の始めから終りまでがそのパターンに一致する場合、
+これらの変数に関わらず展開形をそのままコピーします。
+たとえば、バッファに@code{variableWithSillyCasePattern}とあって
+@kbd{v a M-/}と打鍵すると、
+大文字小文字のパターンを含め展開形をそのままコピーします。
+
+@vindex dabbrev-abbrev-char-regexp
+@c   The variable @code{dabbrev-abbrev-char-regexp}, if non-@code{nil},
+@c controls which characters are considered part of a word, for dynamic expansion
+@c purposes.  The regular expression must match just one character, never
+@c two or more.  The same regular expression also determines which
+@c characters are part of an expansion.  The value @code{nil} has a special
+@c meaning: abbreviations are made of word characters, but expansions are
+@c made of word and symbol characters.
+変数@code{dabbrev-abbrev-char-regexp}が@code{nil}以外の場合、
+動的展開においてどんな文字を単語構成文字とみなすかを制御します。
+これに指定する正規表現は1文字のみに一致するものである必要があり、
+2文字以上に一致してはいけません。
+同じ正規表現は、どの文字が展開形を構成するかも指定します。
+値として@code{nil}を指定すると特別な意味があり、
+略語は単語の構成文字だけから成り、
+展開形は単語と記号文字から成るという意味になります。
+
+@vindex dabbrev-abbrev-skip-leading-regexp
+@c   In shell scripts and makefiles, a variable name is sometimes prefixed
+@c with @samp{$} and sometimes not.  Major modes for this kind of text can
+@c customize dynamic abbreviation to handle optional prefixes by setting
+@c the variable @code{dabbrev-abbrev-skip-leading-regexp}.  Its value
+@c should be a regular expression that matches the optional prefix that
+@c dynamic abbreviation should ignore.
+シェルスクリプトやmakefileなどでは、
+変数名には接頭辞@samp{$}があったりなかったりします。
+これらのテキスト用のメジャーモードでは、
+変数@code{dabbrev-abbrev-skip-leading-regexp}を設定して
+余分な接頭辞を扱えるように動的展開をカスタマイズできます。
+この変数には、動的略語展開で無視すべき余分な接頭辞に一致する
+正規表現を指定します。
+
+@ignore
+   arch-tag: 638e0079-9540-48ec-9166-414083e16445
+@end ignore

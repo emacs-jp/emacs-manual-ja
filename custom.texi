@@ -1,0 +1,3467 @@
+@c =============================================================
+@c = 元 翻 訳: 久野靖＠大塚.筑波大学
+@c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
+@c = 20.4改訂: 大木敦雄＠大塚.筑波大学 = 1999/09/13
+@c =           ref 修正                = 2000/02/13
+@c =============================================================
+@c This is part of the Emacs manual.
+@c Copyright (C) 1985, 86, 87, 93, 94, 95, 1997 Free Software Foundation, Inc.
+@c See file emacs.texi for copying conditions.
+@node Customization, Quitting, Gnus, Top
+@c @chapter Customization
+@c @cindex customization
+@chapter カスタマイズ
+@cindex カスタマイズ
+
+@c   This chapter talks about various topics relevant to adapting the
+@c behavior of Emacs in minor ways.  See @cite{The Emacs Lisp Reference
+@c Manual} for how to make more far-reaching changes.
+本章では、Emacsの動作を（あまり大幅でなく）カスタマイズする方法に
+ついて説明します。
+もっと大幅な変更を行いたい場合には
+@cite{The Emacs Lisp Reference Manual}を参照してください。
+
+@c   All kinds of customization affect only the particular Emacs session
+@c that you do them in.  They are completely lost when you kill the Emacs
+@c session, and have no effect on other Emacs sessions you may run at the
+@c same time or later.  The only way an Emacs session can affect anything
+@c outside of it is by writing a file; in particular, the only way to make
+@c a customization ``permanent'' is to put something in your @file{.emacs}
+@c file or other appropriate file to do the customization in each session.
+@c @xref{Init File}.
+カスタマイズは、Emacsの1つのセッションの中だけで効果を持ちます。
+Emacsを終了するとカスタマイズの効果は失われますし、
+同時にあるいはあとで別のEmacsを立ち上げた場合にも何の影響も及ぼしません。
+あるEmacsのセッションがセッションを超えて影響するためには、
+ファイルに書くしかありません。
+特に、カスタマイズを『恒久化』したい場合には、
+個人の@file{.emacs}ファイルや
+その他の関連するファイルに適切な内容を書き込んでおき、
+セッションごとにカスタマイズが行われるようにします。
+@xref{Init File}。
+
+@menu
+* Minor Modes::		Each minor mode is one feature you can turn on
+			  independently of any others.
+* Variables::		Many Emacs commands examine Emacs variables
+			  to decide what to do; by setting variables,
+			  you can control their functioning.
+* Keyboard Macros::	A keyboard macro records a sequence of
+			  keystrokes to be replayed with a single
+			  command. 
+* Key Bindings::	The keymaps say what command each key runs.
+			  By changing them, you can "redefine keys".
+* Keyboard Translations::
+                        If your keyboard passes an undesired code
+			   for a key, you can tell Emacs to
+			   substitute another code. 
+* Syntax::		The syntax table controls how words and
+			   expressions are parsed.
+* Init File::		How to write common customizations in the
+			  @file{.emacs} file. 
+@end menu
+
+@node Minor Modes
+@c @section Minor Modes
+@c @cindex minor modes
+@c @cindex mode, minor
+@section マイナモード（minor mode）
+@cindex マイナモード（minor mode）
+@cindex モード、マイナ
+
+@c   Minor modes are optional features which you can turn on or off.  For
+@c example, Auto Fill mode is a minor mode in which @key{SPC} breaks lines
+@c between words as you type.  All the minor modes are independent of each
+@c other and of the selected major mode.  Most minor modes say in the mode
+@c line when they are on; for example, @samp{Fill} in the mode line means
+@c that Auto Fill mode is on.
+マイナモードは、個別にオン／オフ可能な機能です。
+たとえば、マイナモードである自動詰め込み（auto-fill）モードをオンにすると、
+@key{SPC}で自動的に（単語の切れ目で）行分けします。
+すべてのマイナモードは互いに独立ですし、
+どのメジャーモードとも独立です。
+ほとんどのマイナモードは、それがオンであることをモード行に表示します。
+たとえば、モード行に@samp{Fill}と表示されていれば、
+自動詰め込み（auto-fill）モードがオンであることを意味します。
+
+@c   Append @code{-mode} to the name of a minor mode to get the name of a
+@c command function that turns the mode on or off.  Thus, the command to
+@c enable or disable Auto Fill mode is called @kbd{M-x auto-fill-mode}.  These
+@c commands are usually invoked with @kbd{M-x}, but you can bind keys to them
+@c if you wish.  With no argument, the function turns the mode on if it was
+@c off and off if it was on.  This is known as @dfn{toggling}.  A positive
+@c argument always turns the mode on, and an explicit zero argument or a
+@c negative argument always turns it off.
+マイナモード名のうしろに@code{-mode}を付け加えると、
+そのモードをオン／オフするコマンド関数の名前になります。
+したがって、自動詰め込み（auto-fill）モードをオン／オフするコマンドは
+@kbd{M-x auto-fill-mode}ということになります。
+これらのコマンドは通常@kbd{M-x}を使って起動しますが、
+どれかのキーにバインドすることもできます。
+引数を指定しないと、これらのコマンドはモードがオフのときはオンに、
+オンのときはオフに切り替えます。
+これを@dfn{トグルする}と呼びます。
+これに対し、正の引数を指定するとつねにモードをオンにしますし、
+明示的に0の引数を指定するか、または負の引数を指定すると
+つねにモードをオフにします。
+
+@c   Enabling or disabling some minor modes applies only to the current
+@c buffer; each buffer is independent of the other buffers.  Therefore, you
+@c can enable the mode in particular buffers and disable it in others.  The
+@c per-buffer minor modes include Abbrev mode, Auto Fill mode, Auto Save
+@c mode, Font-Lock mode, Hscroll mode, ISO Accents mode, Outline minor
+@c mode, Overwrite mode, and Binary Overwrite mode.
+いくつかのマイナモードのオン／オフは、カレントバッファに対してのみ適用され、
+他のバッファには影響しません。
+つまり、あるバッファであるモードをオンにし、
+別のバッファではそのモードをオフにできるわけです。
+このような、バッファごとにオン／オフできるマイナモードとしては、
+略語（abbrev）モード、自動詰め込み（auto-fill）モード、
+自動保存（auto-save）モード、フォントロック（font-lock）モード、
+ISOアクセント（iso-sccents）モード、アウトライン（outline）マイナモード、
+上書き（overwrite）モード、バイナリ上書き（binary-overwrite）モードがあります。
+
+@c   Abbrev mode allows you to define abbreviations that automatically expand
+@c as you type them.  For example, @samp{amd} might expand to @samp{abbrev
+@c mode}.  @xref{Abbrevs}, for full information.
+略語（abbrev）モードでは、
+略語を打ち込むと自動的に展開されるような略語を定義できます。
+たとえば、@samp{amd}を@samp{abbrev mode}と展開させます。
+詳しくは、@xref{Abbrevs}。
+
+@c   Auto Fill mode allows you to enter filled text without breaking lines
+@c explicitly.  Emacs inserts newlines as necessary to prevent lines from
+@c becoming too long.  @xref{Filling}.
+自動詰め込み（auto-fill）モードでは、いちいち改行で行分けしなくても
+テキストを詰め込んで入力できます。
+行が長くなりすぎないようにEmacsが適宜改行を挿入します。
+@xref{Filling}。
+
+@c   Auto Save mode causes the contents of a buffer to be saved
+@c periodically to reduce the amount of work you can lose in case of a
+@c system crash.  @xref{Auto Save}.
+自動保存（auto-save）モードはバッファの内容を定期的に保存することで、
+システムクラッシュが起きたとき紛失してしまう作業の量を少なくします。
+@xref{Auto Save}。
+
+@c   Enriched mode enables editing and saving of formatted text.
+@c @xref{Formatted Text}.
+エンリッチ（enriched）モードは、整形済みテキストの編集を可能にします。
+@xref{Formatted Text}。
+
+@c   Flyspell mode automatically highlights misspelled words.
+@c @xref{Spelling}.
+フライスペル（flyspell）モードは、
+綴りに誤りのある単語を自動的に強調表示します。
+
+@c   Font-Lock mode automatically highlights certain textual units found in
+@c programs, such as comments, strings, and function names being defined.
+@c This requires a window system that can display multiple fonts.
+@c @xref{Faces}.
+フォントロック（font-lock）モードは、コメント、文字列、定義中の関数名などの
+プログラム中の決まった単位を自動的に強調表示します。
+これには、複数のフォントを表示できるウィンドウシステムが必要です。
+@xref{Faces}。
+
+@c   Hscroll mode performs horizontal scrolling automatically
+@c to keep point on the screen.  @xref{Horizontal Scrolling}.
+水平スクロール（hscroll）モードは、ポイントが画面内に留まるように、
+自動的に水平スクロールを行います。
+@xref{Horizontal Scrolling}。
+
+@c   ISO Accents mode makes the characters @samp{`}, @samp{'}, @samp{"},
+@c @samp{^}, @samp{/} and @samp{~} combine with the following letter, to
+@c produce an accented letter in the ISO Latin-1 character set.
+@c @xref{Single-Byte European Support}.
+ISOアクセント（iso-accents）モードは、@samp{`}、@samp{'}、 @samp{"}、
+@samp{^}、@samp{/}、@samp{~}とこれらに続くつぎの文字を結合して、
+ISO Latin-1文字集合のアクセント付き文字を作り出します。
+@xref{Single-Byte European Support}。
+
+@c   Outline minor mode provides the same facilities as the major mode
+@c called Outline mode; but since it is a minor mode instead, you can
+@c combine it with any major mode.  @xref{Outline Mode}.
+アウトラインマイナ（outline-minor）モードは、メジャーモードである
+アウトライン（outline）モードと同じ機能を提供します。
+しかし、マイナモードなので任意のメジャーモードと一緒に使えます。
+@xref{Outline Mode}。
+
+@c @cindex Overwrite mode
+@c @cindex mode, Overwrite
+@cindex 上書きモード（Overwrite mode）
+@cindex モード、Overwrite
+@findex overwrite-mode
+@findex binary-overwrite-mode
+@c   Overwrite mode causes ordinary printing characters to replace existing
+@c text instead of shoving it to the right.  For example, if point is in
+@c front of the @samp{B} in @samp{FOOBAR}, then in Overwrite mode typing a
+@c @kbd{G} changes it to @samp{FOOGAR}, instead of producing @samp{FOOGBAR}
+@c as usual.  In Overwrite mode, the command @kbd{C-q} inserts the next
+@c character whatever it may be, even if it is a digit---this gives you a
+@c way to insert a character instead of replacing an existing character.
+上書き（overwrite）モードでは、入力された図形文字は既存の文字を右に押しやる
+かわりにその文字を置き換えます。
+たとえば、ポイントが@samp{FOOBAR}の@samp{B}のまえにあるときに
+@kbd{G}を打つと@samp{FOOGAR}となります。
+通常のモードであれば@samp{FOOGBAR}となります。
+上書き（overwrite）モードでコマンド@kbd{C-q}を打つと、
+そのつぎの文字が何であっても（数字であっても）その文字を挿入します。
+つまり、上書き（overwrite）モードの中で文字を挿入するには
+この方法を使います。
+
+@c   Binary Overwrite mode is a variant of Overwrite mode for editing
+@c binary files; it treats newlines and tabs like other characters, so that
+@c they overwrite other characters and can be overwritten by them.
+バイナリ上書き（binary-overwrite）モードは上書き（overwrite）モードの変形で、
+バイナリファイル編集用です。
+このモードでは、改行やタブも他の文字と同じに扱われるので、
+他の文字をこれらの文字で上書きすることも、
+これらの文字を他の文字で上書きすることもできます。
+
+@c   The following minor modes normally apply to all buffers at once.
+@c Since each is enabled or disabled by the value of a variable, you
+@c @emph{can} set them differently for particular buffers, by explicitly
+@c making the corresponding variables local in those buffers.
+@c @xref{Locals}.
+以下で説明するマイナモードは、すべてのバッファに一斉に適用されます。
+ただし、これらは変数の値に応じてオン／オフされますから、
+その変数をバッファにローカルな変数にすれば、
+バッファごとに独立にオン／オフすることも可能です。
+@xref{Locals}。
+
+@c   Icomplete mode displays an indication of available completions when
+@c you are in the minibuffer and completion is active.  @xref{Completion
+@c Options}.
+補完示唆（icomplete）モードは、ミニバッファで入力中に補完機能が働いているとき、
+どのような補完候補があるかを表示します。
+@xref{Completion Options}。
+
+@c   Line Number mode enables continuous display in the mode line of the
+@c line number of point.  @xref{Mode Line}.
+行番号（line-number）モードは、
+ポイントのある行の行番号を絶えずモード行に表示します。
+@xref{Mode Line}。
+
+@c   Resize-Minibuffer mode makes the minibuffer expand as necessary to
+@c hold the text that you put in it.  @xref{Minibuffer Edit}.
+ミニバッファリサイズ（resize-minibuffer）モードは、
+打ち込んだテキスト量に応じて自動的にミニバッファを広げます。
+@xref{Minibuffer Edit}。
+
+@c   Scroll Bar mode gives each window a scroll bar (@pxref{Scroll Bars}).
+@c Menu Bar mode gives each frame a menu bar (@pxref{Menu Bars}).  Both of
+@c these modes are enabled by default when you use the X Window System.
+スクロールバー（scroll-bar）モードは、各ウィンドウにスクロールバーを付けます
+（@pxref{Scroll Bars}）。
+メニューバー（menu-bar）モードは、各フレームにメニューバーを付けます
+（@pxref{Menu Bars}）。
+どちらのモードも、Xウィンドウシステムを使っているときは
+デフォルトでオンになっています。
+
+@c   In Transient Mark mode, every change in the buffer contents
+@c ``deactivates'' the mark, so that commands that operate on the region
+@c will get an error.  This means you must either set the mark, or
+@c explicitly ``reactivate'' it, before each command that uses the region.
+@c The advantage of Transient Mark mode is that Emacs can display the
+@c region highlighted (currently only when using X).  @xref{Setting Mark}.
+暫定マーク（transient-mark）モードでは、
+バッファの内容を変更するとマークは『不活性』になるので、
+そのあとでリージョンを対象とするコマンドを使うとエラーになります。
+つまり、リージョンを対象とするコマンドを使うまえに、
+改めてマークを設定するか、不活性になったマークを『再度活性』にします。
+暫定マーク（transient-mark）モードの利点は、
+（今のところXウィンドウシステムを使っているときのみ）
+Emacsがリージョンを強調表示することです。
+@xref{Setting Mark}。
+
+@c   For most minor modes, the command name is also the name of a variable
+@c which directly controls the mode.  The mode is enabled whenever this
+@c variable's value is non-@code{nil}, and the minor-mode command works by
+@c setting the variable.  For example, the command
+@c @code{outline-minor-mode} works by setting the value of
+@c @code{outline-minor-mode} as a variable; it is this variable that
+@c directly turns Outline minor mode on and off.  To check whether a given
+@c minor mode works this way, use @kbd{C-h v} to ask for documentation on
+@c the variable name.
+ほとんどのマイナモードには、コマンド名と同じ名前の変数があり、
+その変数でモードを直接制御しています。
+つまり、その変数の値が@code{nil}以外ならモードはオンであり、
+各マイナモードコマンドは変数の値を設定する動作をします。
+たとえば、コマンド@code{outline-minor-mode}は、
+変数@code{outline-minor-mode}の値を設定する動作を行います。
+つまり、この変数が、直接、上書き（overwrite）モードをオン／オフしているのです。
+あるマイナモードがこのように動作するかどうかは、
+@kbd{C-h v}を使ってその変数の説明文字列を参照してください。
+
+@c   These minor-mode variables provide a good way for Lisp programs to turn
+@c minor modes on and off; they are also useful in a file's local variables
+@c list.  But please think twice before setting minor modes with a local
+@c variables list, because most minor modes are matter of user
+@c preference---other users editing the same file might not want the same
+@c minor modes you prefer.
+これらのマイナモード変数は、Lispプログラムからモードを
+オン／オフするのに有用です。
+また、ファイルのローカル変数リストとして指定するのも便利です。
+ただし、ローカル変数リストで設定する場合には、よく考えてください。
+というのは、ほとんどのマイナモードはユーザーの好みの問題であり、
+同じファイルを編集する別のユーザーは好みが違うかもしれません。
+
+@node Variables
+@c @section Variables
+@c @cindex variable
+@c @cindex option, user
+@c @cindex user option
+@section 変数
+@cindex 変数
+@cindex ユーザーオプション
+
+@c   A @dfn{variable} is a Lisp symbol which has a value.  The symbol's
+@c name is also called the name of the variable.  A variable name can
+@c contain any characters that can appear in a file, but conventionally
+@c variable names consist of words separated by hyphens.  A variable can
+@c have a documentation string which describes what kind of value it should
+@c have and how the value will be used.
+@dfn{変数}は値を持つLispシンボル（記号）です。
+そのシンボルの名前のことを、変数名とも呼びます。
+変数名はファイルに入れられるどのような文字でも含むことができますが、
+習慣的には、変数名は英単語をハイフンでつなげたものです。
+変数には、その変数がどのような値を持ち、
+どのように使われるかを記述した説明文字列を持たせることができます。
+
+@c   Lisp allows any variable to have any kind of value, but most variables
+@c that Emacs uses require a value of a certain type.  Often the value should
+@c always be a string, or should always be a number.  Sometimes we say that a
+@c certain feature is turned on if a variable is ``non-@code{nil},'' meaning
+@c that if the variable's value is @code{nil}, the feature is off, but the
+@c feature is on for @emph{any} other value.  The conventional value to use to
+@c turn on the feature---since you have to pick one particular value when you
+@c set the variable---is @code{t}.
+Lispではどの変数にどのような値でも格納できますが、
+Emacsの中ではほとんどの変数はどのような値を持つかが決まっています。
+たとえば、ある変数はつねに文字列である、別の変数は数値であるといった具合です。
+また、「これこれの機能はこの変数が@code{nil}以外のときにオンになる」
+といういい方もします。
+その場合は、その変数に@code{nil}が格納されているときはその機能はオフですが、
+それ以外の@emph{どんな}値が格納されているときでもその機能はオンになります。
+ですが、ある機能をオンにするために使う値として
+何か選ばなければなりませんから、@code{t}という値を使うのが習慣です。
+
+@c   Emacs uses many Lisp variables for internal record keeping, as any
+@c Lisp program must, but the most interesting variables for you are the
+@c ones that exist for the sake of customization.  Emacs does not (usually)
+@c change the values of these variables; instead, you set the values, and
+@c thereby alter and control the behavior of certain Emacs commands.  These
+@c variables are called @dfn{user options}.  Most user options are
+@c documented in this manual, and appear in the Variable Index
+@c (@pxref{Variable Index}).
+Emacsは一般のLispプログラムと同様、
+内部で情報を保持するために数多くの変数を使いますが、
+ユーザーにとって特に興味深い変数というのは、
+もっぱらカスタマイズ向けに用意された変数だといえます。
+Emacsは（通常は）そのような変数の値を変更しません。
+かわりに、ユーザーが値を設定すると、
+その値に応じてさまざまなEmacsコマンドのふるまいを
+変更したり制御したりできるのです。
+これらの変数のことを@dfn{ユーザーオプション}といいます。
+ほとんどのユーザーオプションはこのマニュアルに記載してありますし、
+変数索引（@pxref{Variable Index}）にも記載してあります。
+
+@c   One example of a variable which is a user option is @code{fill-column}, which
+@c specifies the position of the right margin (as a number of characters from
+@c the left margin) to be used by the fill commands (@pxref{Filling}).
+ユーザーオプションであるような変数の例として@code{fill-column}があります。
+この変数は、詰め込みコマンド（@pxref{Filling}）が使う
+右端の桁位置を（左端から何文字右かを表す数値として）保持します。
+
+@menu
+* Examining::	        Examining or setting one variable's value.
+* Easy Customization::
+                        Convenient and easy customization of variables.
+* Hooks::	        Hook variables let you specify programs for parts
+		          of Emacs to run on particular occasions.
+* Locals::	        Per-buffer values of variables.
+* File Variables::      How files can specify variable values.
+@end menu
+
+@node Examining
+@c @subsection Examining and Setting Variables
+@c @cindex setting variables
+@subsection 変数の設定と参照
+@cindex 変数の設定
+
+@table @kbd
+@item C-h v @var{var} @key{RET}
+@c Display the value and documentation of variable @var{var}
+@c (@code{describe-variable}).
+変数@var{var}の値と説明文字列を表示する
+（@code{describe-variable}）。
+@item M-x set-variable @key{RET} @var{var} @key{RET} @var{value} @key{RET}
+@c Change the value of variable @var{var} to @var{value}.
+変数@var{var}の値を@var{value}に変更する。
+@end table
+
+@c   To examine the value of a single variable, use @kbd{C-h v}
+@c (@code{describe-variable}), which reads a variable name using the
+@c minibuffer, with completion.  It displays both the value and the
+@c documentation of the variable.  For example,
+特定の変数の値を見るには、@kbd{C-h v}（@code{describe-variables}）を使います。
+このコマンドは、ミニバッファで補完機能付きで変数名を読み取ります。
+変数の値と説明文字列の双方を表示します。
+たとえば、
+
+@example
+C-h v fill-column @key{RET}
+@end example
+
+@noindent
+@c displays something like this:
+とすると、つぎのように表示されます。
+
+@smallexample
+fill-column's value is 75
+
+Documentation:
+*Column beyond which automatic line-wrapping should happen.
+Automatically becomes buffer-local when set in any fashion.
+@end smallexample
+
+@noindent
+@c The star at the beginning of the documentation indicates that this
+@c variable is a user option.  @kbd{C-h v} is not restricted to user
+@c options; it allows any variable name.
+説明文の先頭にある@kbd{*}は、
+この変数がユーザーオプションであることを示します。
+@kbd{C-h v}は、ユーザーオプションに限らず任意の変数を扱えます。
+
+@findex set-variable
+@c   The most convenient way to set a specific user option is with @kbd{M-x
+@c set-variable}.  This reads the variable name with the minibuffer (with
+@c completion), and then reads a Lisp expression for the new value using
+@c the minibuffer a second time.  For example,
+ユーザーオプションを設定するいちばん簡単な方法は@kbd{M-x set-variable}を
+使うことです。
+このコマンドは、まずミニバッファで（補完機能付きで）変数名を読み取り、
+つぎにミニバッファで変数に設定するLisp式を読み取ります。
+たとえば、
+
+@example
+M-x set-variable @key{RET} fill-column @key{RET} 75 @key{RET}
+@end example
+
+@noindent
+@c sets @code{fill-column} to 75.
+とすると、@code{fill-column}に75を設定します。
+
+@c  @kbd{M-x set-variable} is limited to user option variables, but you can
+@c set any variable with a Lisp expression, using the function @code{setq}.
+@c Here is a @code{setq} expression to set @code{fill-column}:
+@kbd{M-x set-variable}はユーザーオプションに対してだけ使えます。
+これに対し、@code{setq}を使えばどの変数にでも値が設定できます。
+たとえば、@code{setq}を使って@code{fill-column}に
+設定するにはつぎのようにします。
+
+@example
+(setq fill-column 75)
+@end example
+
+@c   To execute an expression like this one, go to the @samp{*scratch*}
+@c buffer, type in the expression, and then type @kbd{C-j}.  @xref{Lisp
+@c Interaction}.
+このような式を実行するには、@samp{*scratch*}バッファにいき、
+式を打ち込んでから@kbd{C-j}を打ちます。
+@xref{Lisp Interaction}。
+
+@c   Setting variables, like all means of customizing Emacs except where
+@c otherwise stated, affects only the current Emacs session.
+変数を設定することは、特記していない限り、
+他のカスタマイズ方法と同様に、現在のEmacsセッションだけに影響します。
+
+@node Easy Customization
+@c @subsection Easy Customization Interface
+@subsection 簡便なカスタマイズ方法
+
+@findex customize
+@c @cindex customization buffer
+@cindex カスタマイズバッファ
+@c   A convenient way to find the user option variables that you want to
+@c change, and then change them, is with @kbd{M-x customize}.  This command
+@c creates a @dfn{customization buffer} with which you can browse through
+@c the Emacs user options in a logically organized structure, then edit and
+@c set their values.  You can also use the customization buffer to save
+@c settings permanently.  (Not all Emacs user options are included in this
+@c structure as of yet, but we are adding the rest.)
+変更したいユーザーオプション変数をみつけて値を変更する便利な方法は、
+@kbd{M-x customize}を使うことです。
+このコマンドは@dfn{カスタマイズバッファ}を作成し、
+そのバッファ内では論理的な順序に並べたEmacsのユーザーオプションを
+眺めてまわることができますし、さらに値を編集して設定できます。
+また、カスタマイズバッファを使えば設定を恒久的なものとして
+保存もできます。
+（まだこの機能で扱えないユーザーオプションもあるが、
+それらも扱えるように現在作業中。）
+
+@menu
+* Groups: Customization Groups.
+                             How options are classified in a structure.
+* Changing an Option::       How to edit a value and set an option.
+* Face Customization::       How to edit the attributes of a face.
+* Specific Customization::   Making a customization buffer for specific
+                                options, faces, or groups.
+@end menu
+
+@node Customization Groups
+@c @subsubsection Customization Groups
+@c @cindex customization groups
+@subsubsection カスタマイズグループ
+@cindex カスタマイズグループ
+
+@c   For customization purposes, user options are organized into
+@c @dfn{groups} to help you find them.  Groups are collected into bigger
+@c groups, all the way up to a master group called @code{Emacs}.
+カスタマイズのために、ユーザーオプションを@dfn{グループ}に
+まとめてみつけやすくしてあります。
+グループはさらに大きなグループにまとめられていて、
+いちばん大きな（すべてのグループを含む）グループは
+@code{Emacs}という名前です。
+
+@c   @kbd{M-x customize} creates a customization buffer that shows the
+@c top-level @code{Emacs} group and the second-level groups immediately
+@c under it.  It looks like this, in part:
+@kbd{M-x customize}は、トップレベルの@code{Emacs}グループ
+およびその直下の（第2レベルの）グループを表示した
+カスタマイズバッファを作成します。
+その表示はつぎのようになります。
+
+@smallexample
+/- Emacs group: ---------------------------------------------------\
+      [State]: visible group members are all at standard settings.
+   Customization of the One True Editor.
+   See also [Manual].
+
+Editing group: [Go to Group] 
+Basic text editing facilities.
+
+External group: [Go to Group] 
+Interfacing to external utilities.
+
+@var{more second-level groups}
+
+\- Emacs group end ------------------------------------------------/
+
+@end smallexample
+
+@noindent
+@c This says that the buffer displays the contents of the @code{Emacs}
+@c group.  The other groups are listed because they are its contents.  But
+@c they are listed differently, without indentation and dashes, because
+@c @emph{their} contents are not included.  Each group has a single-line
+@c documentation string; the @code{Emacs} group also has a @samp{[State]}
+@c line.
+この表示の先頭部分は、
+このバッファが@code{Emacs}グループの内容を表示していることを記しています。
+残りのグループが表示されるのは、
+それらが@code{Emacs}グループに含まれているからです。
+ただし、それらは字下げや「-」なしで表示されていて、
+表示にはそれらのグループの内容が含まれては@emph{いない}ことを示しています。
+各グループの表示には1行の説明文字列が付随しています。
+また、@code{Emacs}グループについては@samp{[State]}行が付随しています。
+
+@c @cindex editable fields (customization buffer)
+@c @cindex active fields (customization buffer)
+@cindex 編集可能フィールド（カスタマイズバッファ）
+@cindex アクティブフィールド（カスタマイズバッファ）
+@c   Most of the text in the customization buffer is read-only, but it
+@c typically includes some @dfn{editable fields} that you can edit.  There
+@c are also @dfn{active fields}; this means a field that does something
+@c when you @dfn{invoke} it.  To invoke an active field, either click on it
+@c with @kbd{Mouse-1}, or move point to it and type @key{RET}.
+カスタマイズバッファ内のテキストのほとんどは変更できませんが、
+一部分は@dfn{編集可能フィールド}になっていて、変更できます。
+また、@dfn{アクティブフィールド}という、
+その場所を@dfn{起動}するとなんらかの動作を行うような場所もあります。
+アクティブフィールドを起動するには、
+@kbd{Mouse-1}でそこをクリックするか、
+またはそこにポイントを持っていって@key{RET}を打ちます。
+
+@c   For example, the phrase @samp{[Go to Group]} that appears in a
+@c second-level group is an active field.  Invoking the @samp{[Go to
+@c Group]} field for a group creates a new customization buffer, which
+@c shows that group and its contents.  This field is a kind of hypertext
+@c link to another group.
+たとえば、第2レベルグループ中の@samp{[Go to Group]}と記された部分は
+アクティブフィールドです。
+@samp{[Go to Group]}のフィールドを起動すると、
+そのグループとそのグループの内容を表示する
+新しいカスタマイズバッファが作られ、
+そのグループと中身が表示されます。
+このフィールドは他のグループへのハイパーテキストリンクの一種です。
+
+@c   The @code{Emacs} group does not include any user options itself, but
+@c other groups do.  By examining various groups, you will eventually find
+@c the options and faces that belong to the feature you are interested in
+@c customizing.  Then you can use the customization buffer to set them.
+@code{Emacs}グループそのものはユーザーオプションを1つも含んでいませんが、
+他のグループにはあります。
+さまざまなグループを眺めてみると、
+興味を持ってカスタマイズしてみようと思うような機能に属する
+オプションやフェイスをみつけることができるでしょう。
+
+@findex customize-browse
+@c   You can view the structure of customization groups on a larger scale
+@c with @kbd{M-x customize-browse}.  This command creates a special kind of
+@c customization buffer which shows only the names of the groups (and
+@c options and faces), and their structure.
+カスタマイズグループ群の構造を概観するには、
+@kbd{M-x customize-browse}を使います。
+このコマンドは、グループ名（とオプションやフェイス）と
+それらの構造だけを表示する特別なカスタマイズバッファを作ります。
+
+@c   In this buffer, you can show the contents of a group by invoking
+@c @samp{[+]}.  When the group contents are visible, this button changes to
+@c @samp{[-]}; invoking that hides the group contents.
+このバッファ中では、グループの中身を見るには@samp{[+]}のところを起動します。
+グループの中身が見えるようになると、このボタンは@samp{[-]}に変わります。
+これを起動すると中身を（もとどおり）隠します。
+
+@c   Each group, option or face name in this buffer has an active field
+@c which says @samp{[Group]}, @samp{[Option]} or @samp{[Face]}.  Invoking
+@c that active field creates an ordinary customization buffer showing just
+@c that group and its contents, just that option, or just that face.
+@c This is the way to set values in it.
+各グループ、オプション、フェイスにはそれぞれ@samp{[Group]}、
+@samp{[Option]}、@samp{[Face]}と記されたアクティブフィールドがあります。
+それらを起動すると、そのグループ／オプション／フェイスのみを表示した
+通常のカスタマイズバッファが作成されます。
+そのバッファで値を設定します。
+
+@node Changing an Option
+@c @subsubsection Changing an Option
+@subsubsection オプションの変更
+
+@c   Here is an example of what a user option looks like in the
+@c customization buffer:
+カスタマイズバッファでユーザーオプションがどのように見えるか、
+例をあげましょう。
+
+@smallexample
+Kill Ring Max: [Hide] 30
+   [State]: this option is unchanged from its standard setting.
+Maximum length of kill ring before oldest elements are thrown away.
+@end smallexample
+
+@c   The text following @samp{[Hide]}, @samp{30} in this case, indicates
+@c the current value of the option.  If you see @samp{[Show]} instead of
+@c @samp{[Hide]}, it means that the value is hidden; the customization
+@c buffer initially hides values that take up several lines.  Invoke
+@c @samp{[Show]} to show the value.
+@samp{[Hide]}に続くテキスト、つまり、@samp{30}がオプションの現在の値を
+示しています。
+@samp{[Hide]}ではなく@samp{[Show]}と表示されていれば、
+値は隠されています。
+カスタマイズバッファでは、複数行にわたるような値は最初は隠されていて、
+@samp{[Show]}を起動すると表示されます。
+
+@c   The line after the option name indicates the @dfn{customization state}
+@c of the option: in the example above, it says you have not changed the
+@c option yet.  The word @samp{[State]} at the beginning of this line is
+@c active; you can get a menu of various operations by invoking it with
+@c @kbd{Mouse-1} or @key{RET}.  These operations are essential for
+@c customizing the variable.
+オプション名に続く行はオプションの@dfn{カスタマイズ状態}を示しています。
+上の例では、まだ変更していないと表示されています。
+行頭の@samp{[State]}のところがアクティブフィールドで、
+ここを@kbd{Mouse-1}か@key{RET}で起動するとさまざまな操作を
+示すメニューが表示されます。
+これらの操作は変数をカスタマイズするうえでとても重要です。
+
+@c   The line after the @samp{[State]} line displays the beginning of the
+@c option's documentation string.  If there are more lines of
+@c documentation, this line ends with @samp{[More]}; invoke this to show
+@c the full documentation string.
+@samp{[State]}のつぎの行には、
+そのオプションの説明文字列の先頭部分が表示されます。
+1行に収まらない場合には、行末に@samp{[More]}と表示されます。
+これを起動すると説明文字列全体が表示されます。
+
+@c   To enter a new value for @samp{Kill Ring Max}, move point to the value
+@c and edit it textually.  For example, you can type @kbd{M-d}, then insert
+@c another number.
+@samp{Kill Ring Max}に新しい値を設定するには、
+ポイントを値の位置へ持っていって直接文字列を変更します。
+たとえば、@kbd{M-d}で現在の値を削除してから、
+設定する数値を打ち込めばよいのです。
+
+@c   When you begin to alter the text, you will see the @samp{[State]} line
+@c change to say that you have edited the value:
+文字列を変更し始めると、@samp{[State]}行の表示が変わって、
+値が編集されていることを示すようになります。
+
+@smallexample
+[State]: you have edited the value as text, but not set the option.
+@end smallexample
+
+@c @cindex setting option value
+@c   Editing the value does not actually set the option variable.  To do
+@c that, you must @dfn{set} the option.  To do this, invoke the word
+@c @samp{[State]} and choose @samp{Set for Current Session}.
+@cindex オプションの値の設定
+文字列を変更しただけでは、まだオプション変数の値は設定されません。
+値を@dfn{設定する}には、@samp{[State]}のところを起動して、
+@samp{Set for Current Session}を選択します。
+
+@c   The state of the option changes visibly when you set it:
+値を設定すると、オプションの状態表示も対応して変わります。
+
+@smallexample
+[State]: you have set this option, but not saved it for future sessions.
+@end smallexample
+
+@c    You don't have to worry about specifying a value that is not valid;
+@c setting the option checks for validity and will not really install an
+@c unacceptable value.
+正しくない値を設定してしまう心配はありません。
+というのは、オプションの設定時には、値の正しさを検査して、
+正しくない値は設定できないようになっています。
+
+@c @kindex M-TAB @r{(customization buffer)}
+@kindex M-TAB @r{（カスタマイズバッファ）}
+@findex widget-complete
+@c   While editing a value or field that is a file name, directory name,
+@c command name, or anything else for which completion is defined, you can
+@c type @kbd{M-@key{TAB}} (@code{widget-complete}) to do completion.
+ディレクトリ名、ファイル名、コマンド名である値やフィールドを編集するとき、
+および、その他何であれ補完が定義されているものを編集するときは、
+@kbd{M-@key{TAB}}（@code{widget-complete}）を打てば補完できます。
+
+@c   Some options have a small fixed set of possible legitimate values.
+@c These options don't let you edit the value textually.  Instead, an
+@c active field @samp{[Value Menu]} appears before the value; invoke this
+@c field to edit the value.  For a boolean ``on or off'' value, the active
+@c field says @samp{[Toggle]}, and it changes to the other value.
+@c @samp{[Value Menu]} and @samp{[Toggle]} edit the buffer; the changes
+@c take effect when you use the @samp{Set for Current Session} operation.
+いくつかのオプションでは、正しい値としては決まった少数のものだけを使えます。
+そのようなオプションは、テキストとしては編集できません。
+かわりに@samp{[Value Menu]}というアクティブフィールドが値のまえに現れます。
+『オンかオフ』だけの真偽値を持つオプションでは、
+アクティブフィールドは@samp{[Toggle]}と表示されていて、
+そこを起動するたびに値を反転できます。
+@samp{[Value Menu]}も@samp{[Toggle]}もバッファを変更するだけです。
+値が実際に設定されるのは@samp{Set for Current Session}を起動したときです。
+
+@c   Some options have values with complex structure.  For example, the
+@c value of @code{load-path} is a list of directories.  Here is how it
+@c appears in the customization buffer:
+いくつかのオプションは、込み入った構造の値を持ちます。
+たとえば、@code{load-path}は値としてディレクトリのリストを持ちます。
+これをカスタマイズバッファに表示すると、つぎのようになります。
+
+@smallexample
+Load Path:
+[INS] [DEL] [Current dir?]: /usr/local/share/emacs/20.3/site-lisp
+[INS] [DEL] [Current dir?]: /usr/local/share/emacs/site-lisp
+[INS] [DEL] [Current dir?]: /usr/local/share/emacs/20.3/leim
+[INS] [DEL] [Current dir?]: /usr/local/share/emacs/20.3/lisp
+[INS] [DEL] [Current dir?]: /build/emacs/e20/lisp
+[INS] [DEL] [Current dir?]: /build/emacs/e20/lisp/gnus
+[INS]
+   [State]: this item has been changed outside the customization buffer.
+List of directories to search for files to load....
+@end smallexample
+
+@noindent
+@c Each directory in the list appears on a separate line, and each line has
+@c several editable or active fields.
+リスト中の各ディレクトリがそれぞれ別の行に表示され、
+各行にはいくつかの編集可能／アクティブフィールドがあります。
+
+@c   You can edit any of the directory names.  To delete a directory from
+@c the list, invoke @samp{[DEL]} on that line.  To insert a new directory in
+@c the list, invoke @samp{[INS]} at the point where you want to insert it.
+どのディレクトリ名も直接編集できます。
+リストからディレクトリを削除するには、
+その行の@samp{[DEL]}を起動します。
+リストに新しいディレクトリを追加するには、
+挿入したい箇所の@samp{[INS]}を起動します。
+
+@c   You can also invoke @samp{[Current dir?]} to switch between including
+@c a specific named directory in the path, and including @code{nil} in the
+@c path.  (@code{nil} in a search path means ``try the current
+@c directory.'')
+@samp{[Current dir?]}を起動すると、パスに特定のディレクトリを含めるのか、
+または、@code{nil}を含めるのかを切り替えられます。
+（探索パスにおける@code{nil}は、
+『カレントディレクトリを探せ』という意味。）
+
+@c @kindex TAB @r{(customization buffer)}
+@c @kindex S-TAB @r{(customization buffer)}
+@kindex TAB @r{（カスタマイズバッファ）}
+@kindex S-TAB @r{（カスタマイズバッファ）}
+@findex widget-forward
+@findex widget-backward
+@c   Two special commands, @key{TAB} and @kbd{S-@key{TAB}}, are useful for
+@c moving through the customization buffer.  @key{TAB}
+@c (@code{widget-forward}) moves forward to the next active or editable
+@c field; @kbd{S-@key{TAB}} (@code{widget-backward}) moves backward to the
+@c previous active or editable field.
+2つの特別なコマンド、@key{TAB}と@kbd{S-@key{TAB}}は、
+カスタマイズバッファ内での移動に役立ちます。
+@key{TAB}（@code{widget-forward}）はつぎの
+アクティブ／編集可能フィールドへ移動します。
+@kbd{S-@key{TAB}}（@code{widget-backward}）は、
+1つまえのアクティブ／編集可能フィールドへ移動します。
+
+@c   Typing @key{RET} on an editable field also moves forward, just like
+@c @key{TAB}.  The reason for this is that people have a tendency to type
+@c @key{RET} when they are finished editing a field.  If you have occasion
+@c to insert a newline in an editable field, use @kbd{C-o} or @kbd{C-q
+@c C-j}.
+編集可能フィールドで@key{RET}を打つと、
+@key{TAB}と同様につぎのフィールドへ進みます。
+なぜそうなっているかというと、編集可能フィールドを
+編集し終えると最後に@key{RET}を打つ人が多いからです。
+編集可能フィールドに改行文字を入るには、
+@kbd{C-o}か@kbd{C-q C-j}と打ちます。
+
+@c @cindex saving option value
+@c   Setting the option changes its value in the current Emacs session;
+@c @dfn{saving} the value changes it for future sessions as well.  This
+@c works by writing code into your @file{~/.emacs} file so as to set the
+@c option variable again each time you start Emacs.  To save the option,
+@c invoke @samp{[State]} and select the @samp{Save for Future Sessions}
+@c operation.
+@cindex オプションの値の保存
+オプションを設定すると、その値は現在のEmacsセッションだけに有効です。
+その値を@dfn{保存}すると、将来のセッションでも有効になります。
+保存を行うと、個人の@file{~/.emacs}ファイルにコードが追加されて、
+つぎにEmacsを起動したときにオプション変数の値を設定するようになります。
+オプションを保存するには、@samp{[State]}を起動して
+@samp{Save for Future Sessions}を選びます。
+
+@c   You can also restore the option to its standard value by invoking
+@c @samp{[State]} and selecting the @samp{Reset to Standard Settings}
+@c operation.  There are actually three reset operations:
+オプションを標準値に戻したければ、@samp{[State]}を起動して
+@samp{Reset to Standard Settings}を選びます。
+実際にはつぎの3種類のリセット操作があります。
+
+@table @samp
+@item Reset
+@c If you have made some modifications and not yet set the option,
+@c this restores the text in the customization buffer to match
+@c the actual value.
+なんらかの修正を行ったが、まだオプションを設定していなければ、
+この操作により、カスタマイズバッファ上のテキストを
+オプションの現在値と一致させられる。
+
+@item Reset to Saved
+@c This restores the value of the option to the last saved value,
+@c and updates the text accordingly.
+この操作では、オプションの値を最後に保存した値に戻し、
+カスタマイズバッファ上のテキストもその値に合わせる。
+
+@item Reset to Standard Settings
+@c This sets the option to its standard value, and updates the text
+@c accordingly.  This also eliminates any saved value for the option,
+@c so that you will get the standard value in future Emacs sessions.
+この操作では、オプションを標準値に設定し、
+カスタマイズバッファ上のテキストもその値に合わせる。
+さらに、以前にそのオプションについて保存した値もすべてもとに戻されるので、
+将来のEmacsセッションでもすべて標準値が使われるようになる。
+@end table
+
+@c   The state of a group indicates whether anything in that group has been
+@c edited, set or saved.  You can select @samp{Set for Current Session},
+@c @samp{Save for Future Sessions} and the various kinds of @samp{Reset}
+@c operation for the group; these operations on the group apply to all
+@c options in the group and its subgroups.
+グループの@samp{[State]}はそのグループに属するもののどれかが
+編集された／設定された／保存されたことを示します。
+@samp{Set for Current Session}、@samp{Save for Future Sessions}、
+および各種の@samp{Reset}をグループ全体に対して適用できます。
+これらの操作はグループおよびそのサブグループに属するすべての
+オプションに対して適用されます。
+
+@c   Near the top of the customization buffer there are two lines
+@c containing several active fields:
+カスタマイズバッファの先頭付近には、
+いくつかのアクティブフィールドを含んだつぎのような行があります。
+
+@smallexample
+ [Set for Current Session] [Save for Future Sessions]
+ [Reset] [Reset to Saved] [Reset to Standard]   [Bury Buffer]
+@end smallexample
+
+@noindent
+@c Invoking @samp{[Bury Buffer]} buries this customization buffer.  Each of
+@c the other fields performs an operation---set, save or reset---on each of
+@c the items in the buffer that could meaningfully be set, saved or reset.
+@samp{[Bury Buffer]}を起動すると、カスタマイズバッファを消します。
+他のフィールドは、そのバッファに含まれている項目それぞれについてそれぞれ、
+設定、保存、リセットを（それらの操作が適用可能なら）実行します。
+
+@node Face Customization
+@c @subsubsection Customizing Faces
+@subsubsection フェイスのカスタマイズ
+@c @cindex customizing faces
+@c @cindex bold font
+@c @cindex italic font
+@c @cindex fonts and faces
+@cindex フェイスのカスタマイズ
+@cindex ボールドフォント
+@cindex イタリックフォント
+@cindex フォントとフェイス
+
+@c   In addition to user options, some customization groups also include
+@c faces.  When you show the contents of a group, both the user options and
+@c the faces in the group appear in the customization buffer.  Here is an
+@c example of how a face looks:
+いくつかのカスタマイズグループは、
+ユーザーオプションに加えてフェイスも含みます。
+グループの内容を表示したとき、
+オプションとフェイスの両方がカスタマイズバッファに現れます。
+フェイスの見え方は、たとえばつぎのようになります。
+
+@smallexample
+Custom Changed Face: (sample)
+   [State]: this face is unchanged from its standard setting.
+Face used when the customize item has been changed.
+Attributes: [ ] Bold: [toggle] off
+            [X] Italic: [toggle] on
+            [ ] Underline: [toggle] off
+            [ ] Inverse-Video: [toggle] on
+            [ ] Foreground: black (sample)
+            [ ] Background: white (sample)
+            [ ] Stipple:  
+@end smallexample
+
+@c   Each face attribute has its own line.  The @samp{[@var{x}]} field
+@c before the attribute name indicates whether the attribute is
+@c @dfn{enabled}; @samp{X} means that it is.  You can enable or disable the
+@c attribute by invoking that field.  When the attribute is enabled, you
+@c can change the attribute value in the usual ways.
+フェイスの各属性はそれぞれが1行を占めます。
+属性のまえの@samp{[@var{x}]}というフィールドは、
+その属性が@dfn{オンになっている}かどうかを表示しています。
+@samp{X}が表示されていればオンになっています。
+そのフィールドを起動することでオン／オフを反転できます。
+属性がオンになっている場合は、
+その属性の値をオプションと同様にして変更できす。
+
+@c   On a black-and-white display, the colors you can use for the
+@c background are @samp{black}, @samp{white}, @samp{gray}, @samp{gray1},
+@c and @samp{gray3}.  Emacs supports these shades of gray by using
+@c background stipple patterns instead of a color.
+白黒ディスプレイでは、背景に設定可能な表示色は@samp{black}、
+@samp{white}、@samp{gray}、@samp{gray1}、@samp{gray3}のいずれかです。
+Emacsは表示色のかわりにドットパターンで灰色の階調を表します。
+
+@c   Setting, saving and resetting a face work like the same operations for
+@c options (@pxref{Changing an Option}).
+フェイスを設定／保存／リセットするのは、オプションと同様にしてできます
+（@pxref{Changing an Option}）。
+
+@c   A face can specify different appearances for different types of
+@c display.  For example, a face can make text red on a color display, but
+@c use a bold font on a monochrome display.  To specify multiple
+@c appearances for a face, select @samp{Show Display Types} in the menu you
+@c get from invoking @samp{[State]}.
+フェイスでは、ディスプレイの種別ごとに異なる見え方を指定できます。
+たとえば、あるフェイスをカラーディスプレイでは赤で表示し、
+白黒ディスプレイではかわりにボールド体で表示するようにできます。
+あるフェイスに複数の見え方を指定するには、
+@samp{[State]}メニューを表示させて@samp{Show Display Types}を選びます。
+
+@findex modify-face
+@c   Another more basic way to set the attributes of a specific face is
+@c with @kbd{M-x modify-face}.  This command reads the name of a face, then
+@c reads the attributes one by one.  For the color and stipple attributes,
+@c the attribute's current value is the default---type just @key{RET} if
+@c you don't want to change that attribute.  Type @samp{none} if you want
+@c to clear out the attribute.
+フェイスの属性を設定するもっと基本的な方法は、
+@kbd{M-x modify-face}を使うことです。
+このコマンドは、まずフェイスの名前を聞いてきて、
+続いて属性を1つずつ順に聞いてきます。
+表示色やパターンの属性では、その属性の現在の値がデフォルトになっています。
+これらを変更したくなければ、単に、@key{RET}を打てばよいのです。
+属性を空にしたければ@samp{none}と打ちます。
+
+@node Specific Customization
+@c @subsubsection Customizing Specific Items
+@subsubsection 特定項目のカスタマイズ
+
+@c   Instead of finding the options you want to change by moving down
+@c through the structure of groups, you can specify the particular option,
+@c face or group that you want to customize.
+グループ構造を1段ずつ降りていって目指すオプションを探すかわりに、
+カスタマイズしたいオプション／フェイス／グループの名前を
+直接に指定することもできます。
+
+@table @kbd
+@item M-x customize-option @key{RET} @var{option} @key{RET}
+@c Set up a customization buffer with just one option, @var{option}.
+指定したオプション@var{option}だけを含むカスタマイズバッファを開く。
+@item M-x customize-face @key{RET} @var{face} @key{RET}
+@c Set up a customization buffer with just one face, @var{face}.
+指定したフェイス@var{face}だけを含むカスタマイズバッファを開く。
+@item M-x customize-group @key{RET} @var{group} @key{RET}
+@c Set up a customization buffer with just one group, @var{group}.
+指定したグループ@var{group}だけを含むカスタマイズバッファを開く。
+@item M-x customize-apropos @key{RET} @var{regexp} @key{RET}
+@c Set up a customization buffer with all the options, faces and groups
+@c that match @var{regexp}.
+指定した正規表現@var{regexp}に一致するすべての
+オプション／フェイス／グループを含むカスタマイズバッファを開く。
+@item M-x customize-changed-options @key{RET} @var{version} @key{RET}
+@c Set up a customization buffer with all the options, faces and groups
+@c whose meaning has changed since Emacs version @var{version}.
+Emacsのバージョン@var{version}以降に意味が変更されたすべての
+オプション／フェイス／グループを含むカスタマイズバッファを開く。
+@item M-x customize-saved 
+@c Set up a customization buffer containing all options and faces that you
+@c have saved with customization buffers.
+カスタマイズバッファで保存したすべてのオプションとフェイスを含む
+カスタマイズバッファを開く。
+@item M-x customize-customized
+@c Set up a customization buffer containing all options and faces that you
+@c have customized but not saved.
+カスタマイズしたが、まだ保存していないすべてのオプションとフェイスを含む
+カスタマイズバッファを開く。
+@end table
+
+@findex customize-option
+@c   If you want to alter a particular user option variable with the
+@c customization buffer, and you know its name, you can use the command
+@c @kbd{M-x customize-option} and specify the option name.  This sets up
+@c the customization buffer with just one option---the one that you asked
+@c for.  Editing, setting and saving the value work as described above, but
+@c only for the specified option.
+名前のわかっているオプション変数をカスタマイズバッファで変更したい場合は、
+コマンド@kbd{M-x customize-option}で直接名前を指定します。
+これにより、そのオプションだけを含むカスタマイズバッファが現れます。
+編集／設定／保存はこれまで説明したとおりに行いますが、
+設定の対象になるのは指定したオプションだけです。
+
+@findex customize-face
+@c   Likewise, you can modify a specific face, chosen by name, using
+@c @kbd{M-x customize-face}.
+同様にして、@kbd{M-x customize-face}ではフェイス名を指定して変更できます。
+
+@findex customize-group
+@c   You can also set up the customization buffer with a specific group,
+@c using @kbd{M-x customize-group}.  The immediate contents of the chosen
+@c group, including option variables, faces, and other groups, all appear
+@c as well.  However, these subgroups' own contents start out hidden.  You
+@c can show their contents in the usual way, by invoking @samp{[Show]}.
+同様に、@kbd{M-x customize-group}ではグループ名を指定して
+カスタマイズバッファを開くことができます。
+そのカスタマイズバッファには、指定したグループに直接含まれているオプション、
+フェイス、他の（下位の）グループが現れます。
+ただし、サブグループの内容は最初は隠されています。
+それらを表示したい場合は、通常どおり@samp{[Show]}を起動します。
+
+@findex customize-apropos
+@c   To control more precisely what to customize, you can use @kbd{M-x
+@c customize-apropos}.  You specify a regular expression as argument; then
+@c all options, faces and groups whose names match this regular expression
+@c are set up in the customization buffer.  If you specify an empty regular
+@c expression, this includes @emph{all} groups, options and faces in the
+@c customization buffer (but that takes a long time).
+@kbd{M-x customize-apropos}を使うと、
+カスタマイズするものをもっと細かく制御できます。
+このコマンドでは引数として正規表現を指定し、
+それに一致するすべてのオプション／フェイス／グループを
+含んだカスタマイズバッファが現れます。
+空の正規表現を指定すると、@emph{すべての}オプション／フェイス／グループを
+含むカスタマイズバッファができます
+（ただしすごく時間がかかる）。
+
+@findex customize-changed-options
+@c   When you upgrade to a new Emacs version, you might want to customize
+@c new options and options whose meanings or default values have changed.
+@c To do this, use @kbd{M-x customize-changed-options} and specify a
+@c previous Emacs version number using the minibuffer.  It creates a
+@c customization buffer which shows all the options (and groups) whose
+@c definitions have been changed since the specified version.
+Emacsの新版へ更新したときには、新しいオプション、
+意味やデフォルト値が変更されたオプションをカスタマイズしたいはずです。
+それには、@kbd{M-x customize-changed-options}を使い、
+ミニバッファで以前の版のEmacsのバージョン番号を指定します。
+すると、指定したバージョン以降に定義が変更された
+すべてのオプション（とグループ）を含んだカスタマイズバッファを作ります。
+
+@findex customize-saved
+@findex customize-customized
+@c   If you change option values and then decide the change was a mistake,
+@c you can use two special commands to revisit your previous changes.  Use
+@c @kbd{customize-saved} to look at the options and faces that you have
+@c saved.  Use @kbd{M-x customize-customized} to look at the options and
+@c faces that you have set but not saved.
+オプションを変更したあとでまちがったと気づいたときは、
+変更したものを再検討するために2つのコマンドが使えます。
+保存してしまったオプションについては@kbd{customize-saved}を、
+変更したけれどまだ保存していないオプションについては
+@kbd{M-x customize-customized}を使います。
+
+@node Hooks
+@c @subsection Hooks
+@subsection フック
+@c @cindex hook
+@cindex フック
+
+@c   A @dfn{hook} is a variable where you can store a function or functions
+@c to be called on a particular occasion by an existing program.  Emacs
+@c provides a number of hooks for the sake of customization.
+@dfn{フック}とはある特定の状況で既存のプログラムから呼び出される
+関数／関数群を格納しておく変数をいいます。
+Emacsには、カスタマイズ用のフックが数多くあります。
+
+@c   Most of the hooks in Emacs are @dfn{normal hooks}.  These variables
+@c contain lists of functions to be called with no arguments.  The reason
+@c most hooks are normal hooks is so that you can use them in a uniform
+@c way.  Every variable in Emacs whose name ends in @samp{-hook} is a
+@c normal hook.
+Emacs中のほとんどのフックは@dfn{ノーマルフック}です。
+これらの変数は、引数なしで呼び出される関数のリストを保持します。
+ほとんどのフックがノーマルフックなのは、それらを統一的に扱えるからです。
+Emacsでは、@samp{-hook}で終わる名前の変数はすべてノーマルフックです。
+
+@c   Most major modes run hooks as the last step of initialization.  This
+@c makes it easy for a user to customize the behavior of the mode, by
+@c overriding the local variable assignments already made by the mode.  But
+@c hooks may also be used in other contexts.  For example, the hook
+@c @code{suspend-hook} runs just before Emacs suspends itself
+@c (@pxref{Exiting}).
+ほとんどのメジャーモードは初期設定の最終段階でフックを実行します。
+モードが設定したローカル変数をフックで変更すればよいので、
+モードのふるまいをユーザーがカスタマイズすることが容易になります。
+しかし、フックはそれ以外の場面でも使われます。
+たとえば、@code{suspend-hook}は、Emacsが休止する直前に実行されます
+（@pxref{Exiting}）。
+
+@c   The recommended way to add a hook function to a normal hook is by
+@c calling @code{add-hook}.  You can use any valid Lisp function as the
+@c hook function.  For example, here's how to set up a hook to turn on Auto
+@c Fill mode when entering Text mode and other modes based on Text mode:
+ノーマルフックにフック関数を追加するお勧めのやり方は、
+@code{add-hook}を呼ぶことです。
+フック関数としては任意のLisp関数を使えます。
+たとえば、テキスト（text）モードやテキスト（text）モードを
+基にしているモードにおいて、
+自動的に自動詰め込み（auto-fill）モードをオンにするにはつぎのようにします
+
+@example
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+@end example
+
+@c   The next example shows how to use a hook to customize the indentation
+@c of C code.  (People often have strong personal preferences for one
+@c format compared to another.)  Here the hook function is an anonymous
+@c lambda expression.
+つぎの例は、Cコードの字下げをカスタマイズするのにフックを
+使う方法を示します。
+（誰でも字下げには独自の好みがある）。
+ここでは、フック関数は名前のないラムダ式です。
+
+@example
+@group
+(setq my-c-style
+  '((c-comment-only-line-offset . 4)
+@end group
+@group
+    (c-cleanup-list . (scope-operator
+		       empty-defun-braces
+		       defun-close-semi))
+@end group
+@group
+    (c-offsets-alist . ((arglist-close . c-lineup-arglist)
+			(substatement-open . 0)))))
+@end group
+
+@group
+(add-hook 'c-mode-common-hook
+  (function (lambda ()
+    (c-add-style "my-style" my-c-style t))))
+@end group
+@end example
+
+@c   It is best to design your hook functions so that the order in which
+@c they are executed does not matter.  Any dependence on the order is
+@c ``asking for trouble.''  However, the order is predictable: the most
+@c recently added hook functions are executed first.
+どの順番で実行されても大丈夫なようにフック関数を設計するのが最良です。
+実行順序に依存するのは、『事故を呼び込む』ようなものです。
+しかし、順番は予測できます。
+もっとも最近に追加したフック関数ほど先に実行されます。
+
+@node Locals
+@c @subsection Local Variables
+@subsection ローカル変数
+
+@table @kbd
+@item M-x make-local-variable @key{RET} @var{var} @key{RET}
+@c Make variable @var{var} have a local value in the current buffer.
+変数@var{var}がカレントバッファでローカルに値を持つようにする。
+@item M-x kill-local-variable @key{RET} @var{var} @key{RET}
+@c Make variable @var{var} use its global value in the current buffer.
+変数@var{var}がカレントバッファではグローバル値を使うようにする。
+@item M-x make-variable-buffer-local @key{RET} @var{var} @key{RET}
+@c Mark variable @var{var} so that setting it will make it local to the
+@c buffer that is current at that time.
+変数@var{var}を、値を設定したときにその時点のカレントバッファでローカル
+に値を持つようにする。
+@end table
+
+@c @cindex local variables
+@cindex ローカル変数
+@c   Almost any variable can be made @dfn{local} to a specific Emacs
+@c buffer.  This means that its value in that buffer is independent of its
+@c value in other buffers.  A few variables are always local in every
+@c buffer.  Every other Emacs variable has a @dfn{global} value which is in
+@c effect in all buffers that have not made the variable local.
+ほとんどの変数はEmacsバッファに対して@dfn{ローカル}にできます。
+つまり、その変数のバッファ中での値は他のバッファでの値とは
+独立になります。
+いくつかの変数はつねにすべてのバッファにおいてローカルです。
+それ以外の変数はすべて、@dfn{グローバル}な値、
+つまりその変数をローカルにしていないすべてのバッファにおいて
+共有される値を持ちます。
+
+@findex make-local-variable
+@c   @kbd{M-x make-local-variable} reads the name of a variable and makes it
+@c local to the current buffer.  Further changes in this buffer will not
+@c affect others, and further changes in the global value will not affect this
+@c buffer.
+@kbd{M-x make-local-variable}は変数名を受け取り、
+その変数をカレントバッファにおいてローカルにします。
+それ以降、このバッファ内でその変数を変更しても
+他のバッファには影響しませんし、
+その変数のグローバルな値を変更してもこのバッファ内での値には影響しません。
+
+@findex make-variable-buffer-local
+@c @cindex per-buffer variables
+@cindex バッファごとの変数
+@c   @kbd{M-x make-variable-buffer-local} reads the name of a variable and
+@c changes the future behavior of the variable so that it will become local
+@c automatically when it is set.  More precisely, once a variable has been
+@c marked in this way, the usual ways of setting the variable automatically
+@c do @code{make-local-variable} first.  We call such variables
+@c @dfn{per-buffer} variables.
+@kbd{M-x make-variable-buffer-local}は、変数名を受け取り、
+値が設定されるとその変数が自動的にローカルになるようにします。
+もっと正確にいえば、このように特別な印を変数に付けておくと、
+通常の方法で変数に値を設定するときにはつねにまず
+@code{make-local-variable}が実行されるようになるのです。
+このような変数を@dfn{バッファごとの変数}と呼びます。
+
+@c   Major modes (@pxref{Major Modes}) always make variables local to the
+@c buffer before setting the variables.  This is why changing major modes
+@c in one buffer has no effect on other buffers.  Minor modes also work by
+@c setting variables---normally, each minor mode has one controlling
+@c variable which is non-@code{nil} when the mode is enabled (@pxref{Minor
+@c Modes}).  For most minor modes, the controlling variable is per buffer.
+メジャーモード（@pxref{Major Modes}）では、
+変数を設定するまえにつねにローカルにします。
+このため、あるバッファでメジャーモードを変更しても
+他のバッファには影響が及びません。
+マイナモード（@pxref{Minor Modes}）も同様で、通常、
+マイナモードごとにオン／オフを制御する変数があり、
+その変数が@code{nil}以外のときにそのマイナモードはオンになります。
+ほとんどのマイナモードでは、その制御用変数はバッファごとの変数です。
+
+@c   Emacs contains a number of variables that are always per-buffer.
+@c These include @code{abbrev-mode}, @code{auto-fill-function},
+@c @code{case-fold-search}, @code{comment-column}, @code{ctl-arrow},
+@c @code{fill-column}, @code{fill-prefix}, @code{indent-tabs-mode},
+@c @code{left-margin}, @code{mode-line-format}, @code{overwrite-mode},
+@c @code{selective-display-ellipses}, @code{selective-display},
+@c @code{tab-width}, and @code{truncate-lines}.  Some other variables are
+@c always local in every buffer, but they are used for internal
+@c purposes.@refill
+Emacsには、つねにバッファごとの変数であるような変数が数多くあります。
+@code{abbrev-mode}、@code{auto-fill-function}、@code{case-fold-search}、
+@code{comment-column}、@code{ctl-arrow}、@code{fill-column}、
+@code{fill-prefix}、@code{indent-tabs-mode}、@code{left-margin}、
+@code{mode-line-format}、@code{overwrite-mode}、
+@code{selective-display-ellipses}、@code{selective-display}、
+@code{tab-width}、@code{truncate-lines}がそのような変数です。
+これ以外にもつねに各バッファでローカルな変数はありますが、
+それらは内部作業用の変数です。
+
+@c   A few variables cannot be local to a buffer because they are always
+@c local to each display instead (@pxref{Multiple Displays}).  If you try to
+@c make one of these variables buffer-local, you'll get an error message.
+いくつかの変数はディスプレイに対してローカルになっているため、
+バッファに対してローカルにはできません
+（@pxref{Multiple Displays}）。
+これらの変数をバッファにローカルにしようとすると、
+エラーメッセージが表示されます。
+
+@findex kill-local-variable
+@c   @kbd{M-x kill-local-variable} reads the name of a variable and makes
+@c it cease to be local to the current buffer.  The global value of the
+@c variable henceforth is in effect in this buffer.  Setting the major mode
+@c kills all the local variables of the buffer except for a few variables
+@c specially marked as @dfn{permanent locals}.
+@kbd{M-x kill-local-variable}は、変数名を受け取り、
+その変数をカレントバッファに対してローカルでなくします。
+それ以降そのバッファでは、その変数のグローバルな値が使われます。
+メジャーモードを設定すると、@dfn{つねにローカル}と印が付いた少数の特別な
+変数を除いて、そのバッファにローカルなすべての変数をローカルでなくします。
+
+@findex setq-default
+@c   To set the global value of a variable, regardless of whether the
+@c variable has a local value in the current buffer, you can use the Lisp
+@c construct @code{setq-default}.  This construct is used just like
+@c @code{setq}, but it sets variables' global values instead of their local
+@c values (if any).  When the current buffer does have a local value, the
+@c new global value may not be visible until you switch to another buffer.
+@c Here is an example:
+ある変数がカレントバッファでローカルか否かに係わらず
+その変数のグローバルな値を設定したければ、@code{setq-default}を使います。
+これは@code{setq}のように使われますが、
+（たとえローカルな値があったとしても）つねにグローバルな値のほうを設定します。
+その変数がローカルな値を持っている場合、
+新たに設定したグローバルな値は別のバッファに切り替えるまでは参照できません。
+以下に例をあげます。
+
+@example
+(setq-default fill-column 75)
+@end example
+
+@noindent
+@c @code{setq-default} is the only way to set the global value of a variable
+@c that has been marked with @code{make-variable-buffer-local}.
+@code{setq-default}は、
+@code{make-variable-buffer-local}で印を付けた変数の
+グローバルな値を設定する唯一の方法です。
+
+@findex default-value
+@c   Lisp programs can use @code{default-value} to look at a variable's
+@c default value.  This function takes a symbol as argument and returns its
+@c default value.  The argument is evaluated; usually you must quote it
+@c explicitly.  For example, here's how to obtain the default value of
+@c @code{fill-column}:
+Lispプログラム中では、変数のデフォルト値を参照するためには
+@code{default-value}を使えます。
+この関数はシンボルを引数とし、その変数のデフォルト値を返します。
+引数は評価されるので、普通は引数をクォートします。
+たとえば、@code{fill-column}のデフォルト値を取得するにはつぎのようにします。
+
+@example
+(default-value 'fill-column)
+@end example
+
+@node File Variables
+@c @subsection Local Variables in Files
+@subsection ファイルにローカルな変数
+@c @cindex local variables in files
+@c @cindex file local variables
+@cindex ファイル中のローカル変数
+@cindex ファイルにローカルな変数
+
+@c   A file can specify local variable values for use when you edit the
+@c file with Emacs.  Visiting the file checks for local variable
+@c specifications; it automatically makes these variables local to the
+@c buffer, and sets them to the values specified in the file.
+Emacsでファイルを編集する際に、そのファイルに対応したローカル変数と
+その値を指定することができます。
+Emacsはファイルを訪問すると、ローカル変数指定の有無を検査し、
+あれば指定された変数を自動的にバッファにローカルにして、
+その値をファイルで指定された値に設定します。
+
+@c   There are two ways to specify local variable values: in the first
+@c line, or with a local variables list.  Here's how to specify them in the
+@c first line:
+ローカル変数とその値を設定するには2つの方法があります。
+1つはファイルの先頭行に書くことで、
+もう1つはローカル変数リストを書くことです。
+先頭行に書く場合は、たとえばつぎのようにします。
+
+@example
+-*- mode: @var{modename}; @var{var}: @var{value}; @dots{} -*-
+@end example
+
+@noindent
+@c You can specify any number of variables/value pairs in this way, each
+@c pair with a colon and semicolon as shown above.  @code{mode:
+@c @var{modename};} specifies the major mode; this should come first in the
+@c line.  The @var{value}s are not evaluated; they are used literally.
+@c Here is an example that specifies Lisp mode and sets two variables with
+@c numeric values:
+変数とその値を「:」で区切った対を「;」で区切って並べ、
+いくつでも指定できます。
+@code{mode: @var{modename};}はメジャーモードを指定するもので、
+行の最初にある必要があります。
+@var{value}は評価されずに書かれているとおりのまま使われます。
+以下は、Lispモードで2つの変数に数値を設定する例です。
+
+@smallexample
+;; -*-mode: Lisp; fill-column: 75; comment-column: 50; -*-
+@end smallexample
+
+@c   You can also specify the coding system for a file in this way: just
+@c specify a value for the ``variable'' named @code{coding}.  The ``value''
+@c must be a coding system name that Emacs recognizes.  @xref{Coding
+@c Systems}.
+この方法では、ファイルのコーディングシステムも指定できます。
+つまり、@code{coding}という名前の『変数』に値を指定すればよいのです。
+『値』は、Emacsが認識できるコーディングシステム名である必要があります。
+@xref{Coding Systems}。
+
+@c   A @dfn{local variables list} goes near the end of the file, in the
+@c last page.  (It is often best to put it on a page by itself.)  The local
+@c variables list starts with a line containing the string @samp{Local
+@c Variables:}, and ends with a line containing the string @samp{End:}.  In
+@c between come the variable names and values, one set per line, as
+@c @samp{@var{variable}:@: @var{value}}.  The @var{value}s are not
+@c evaluated; they are used literally.  If a file has both a local
+@c variables list and a @samp{-*-} line, Emacs processes @emph{everything}
+@c in the @samp{-*-} line first, and @emph{everything} in the local
+@c variables list afterward.
+一方、@dfn{ローカル変数リスト}はファイルの末尾（最後のページ）に置きます。
+（最後のページにはローカル変数リストだけを置くというのを勧めます。）
+ローカル変数リストは@samp{Local Variables:}という内容を含む行で始まり、
+@samp{End:}という内容を含む行で終ります。
+これらの行のあいだに、1つの変数につき1行ずつ、
+@samp{@var{variable}:@: @var{value}}という形で変数の名前と値を指定します。
+@var{value}は評価されずにファイルに書かれたとおりにそのまま使われます。
+ファイルにローカル変数リストと@samp{-*-}の行が両方含まれていた場合には、
+Emacsはまず@samp{-*-}の行を@emph{すべて}処理してから、
+続いてローカル変数リストの内容を@emph{すべて}処理します。
+
+@c Here is an example of a local variables list:
+以下にローカル変数リストの例を示します：
+
+@example
+;;; Local Variables: ***
+;;; mode:lisp ***
+;;; comment-column:0 ***
+;;; comment-start: ";;; "  ***
+;;; comment-end:"***" ***
+;;; End: ***
+@end example
+
+@c   As you see, each line starts with the prefix @samp{;;; } and each line
+@c ends with the suffix @samp{ ***}.  Emacs recognizes these as the prefix
+@c and suffix based on the first line of the list, by finding them
+@c surrounding the magic string @samp{Local Variables:}; then it
+@c automatically discards them from the other lines of the list.
+上の例では、各行は@samp{;;;}で始まり@samp{***}で終っています。
+Emacsはこれらの接頭辞と接尾辞をリストの最初の内容に基づいて認識します。
+つまり、特別な文字列@samp{Local Variables:}の前後の文字列を、
+それぞれ、接頭辞、接尾辞とみなし、
+それ以降の行についてはこの接頭辞と接尾辞を無視します。
+
+@c   The usual reason for using a prefix and/or suffix is to embed the
+@c local variables list in a comment, so it won't confuse other programs
+@c that the file is intended as input for.  The example above is for a
+@c language where comment lines start with @samp{;;; } and end with
+@c @samp{***}; the local values for @code{comment-start} and
+@c @code{comment-end} customize the rest of Emacs for this unusual syntax.
+@c Don't use a prefix (or a suffix) if you don't need one.
+接頭辞と接尾辞を使う主な理由は、
+ローカル変数リストをコメントの中に入れることで、
+そのファイルを読み込む他のプログラムを困惑させないようにすることです。
+上の例では、コメントが@samp{;;;}で始まり@samp{***}で終るような言語を
+想定しています。
+変数@code{comment-start}と@code{comment-end}のローカルな値で、
+このような変な構文に対処するようにEmacsをカスタマイズするのです。
+必要ないのであれば、接頭辞（と接尾辞）は使わないでください。
+
+@c   Two ``variable names'' have special meanings in a local variables
+@c list: a value for the variable @code{mode} really sets the major mode,
+@c and a value for the variable @code{eval} is simply evaluated as an
+@c expression and the value is ignored.  @code{mode} and @code{eval} are
+@c not real variables; setting variables named @code{mode} and @code{eval}
+@c in any other context has no special meaning.  If @code{mode} is used to
+@c set a major mode, it should be the first ``variable'' in the list.
+ローカル変数リストにおいては、2つの変数名が特別な意味を持ちます。
+変数@code{mode}に対する値は、実際にはメジャーモードを設定します。
+変数@code{eval}に対する値は、式として評価されますが、
+その結果は捨てられます。
+@code{mode}と@code{eval}は本当の変数ではなく、他の状況で
+これらの名前の変数に値を設定してもなんら特別な意味を持ちません。
+メジャーモードを設定するために@code{mode}を指定する場合は、
+ローカル変数リストの先頭に書く必要があります。
+
+@c   You can use the @code{mode} ``variable'' to set minor modes as well as
+@c major modes; in fact, you can use it more than once, first to set the
+@c major mode and then to set minor modes which are specific to particular
+@c buffers.  But most minor modes should not be specified in the file in
+@c any fashion, because they represent user preferences.
+仮想的な『変数』@code{mode}は、メジャーモードだけでなくマイナモードを
+設定するのにも使えます。
+実は、この指定は2回以上使うことができて、
+最初はメジャーモードを設定し、
+それ以降は（それぞれ）マイナモードを設定します。
+しかし、マイナモードはユーザーの好みに応じて選ぶものですから、
+普通はファイルでマイナモードを指定するべきではないでしょう。
+
+@c   For example, you may be tempted to try to turn on Auto Fill mode with
+@c a local variable list.  That is a mistake.  The choice of Auto Fill mode
+@c or not is a matter of individual taste, not a matter of the contents of
+@c particular files.  If you want to use Auto Fill, set up major mode hooks
+@c with your @file{.emacs} file to turn it on (when appropriate) for you
+@c alone (@pxref{Init File}).  Don't use a local variable list to impose
+@c your taste on everyone.
+たとえば、ローカル変数リストで自動詰め込み（auto-fill）モードをオンにしたいと
+思うかもしれませんが、それはまちがいです。
+自動詰め込みにするかどうかは、個人の好みの問題であり、
+ファイルの中身によって決まるものではないからです。
+ある種別のファイルでいつも自動詰め込みにしたければ、
+個人の@file{.emacs}ファイルで（状況に応じて）自動詰め込み（auto-fill）モードを
+オンにするようなメジャーモードのフックを設定してください
+（@pxref{Init File}）。
+ローカル変数リストで他人に好みを押し付けてはいけません。
+
+@c   The start of the local variables list must be no more than 3000
+@c characters from the end of the file, and must be in the last page if the
+@c file is divided into pages.  Otherwise, Emacs will not notice it is
+@c there.  The purpose of this rule is so that a stray @samp{Local
+@c Variables:}@: not in the last page does not confuse Emacs, and so that
+@c visiting a long file that is all one page and has no local variables
+@c list need not take the time to search the whole file.
+ローカル変数リストは、ファイルの末尾から3000文字以内にある必要があり、
+ファイルがページに分かれている場合には最後のページにある必要があります。
+これらが守られていないと、
+Emacsはローカル変数リストがあることを認識しません。
+これらの規則の目的は、最後ではないページに偶然
+@samp{Local Variables:}があってもEmacsが誤認しないようにすることと、
+全体が1ページでローカル変数リストを持たない長いファイルを訪問するときでも
+ファイル全体を探さなくてもすむようにするためです。
+
+@c   Use the command @code{normal-mode} to reset the local variables and
+@c major mode of a buffer according to the file name and contents,
+@c including the local variables list if any.  @xref{Choosing Modes}.
+バッファのローカル変数やメジャーモードを、
+ローカル変数リストがあるときにはそれによる指定も含めて、
+ファイル名とファイルの内容に基づいたものにリセットしたければ、
+@code{normal-mode}コマンドを使ってください。
+@xref{Choosing Modes}。
+
+@findex enable-local-variables
+@c   The variable @code{enable-local-variables} controls whether to process
+@c local variables in files, and thus gives you a chance to override them.
+@c Its default value is @code{t}, which means do process local variables in
+@c files.  If you set the value to @code{nil}, Emacs simply ignores local
+@c variables in files.  Any other value says to query you about each file
+@c that has local variables, showing you the local variable specifications
+@c so you can judge.
+変数@code{enable-local-variables}は、
+ファイル中のローカル変数指定を処理するか否かを制御します。
+つまり、ローカル変数指定を無視するようにもできます。
+デフォルトは@code{t}で、ファイル中のローカル変数指定を処理します。
+値を@code{nil}にすると、ファイル中のローカル変数指定を無視します。
+これら以外の値の場合は、ファイル中にローカル変数指定があると、
+その内容を表示して処理するかどうか問い合わせます。
+
+@findex enable-local-eval
+@c   The @code{eval} ``variable,'' and certain actual variables, create a
+@c special risk; when you visit someone else's file, local variable
+@c specifications for these could affect your Emacs in arbitrary ways.
+@c Therefore, the option @code{enable-local-eval} controls whether Emacs
+@c processes @code{eval} variables, as well variables with names that end
+@c in @samp{-hook}, @samp{-hooks}, @samp{-function} or @samp{-functions},
+@c and certain other variables.  The three possibilities for the option's
+@c value are @code{t}, @code{nil}, and anything else, just as for
+@c @code{enable-local-variables}.  The default is @code{maybe}, which is
+@c neither @code{t} nor @code{nil}, so normally Emacs does ask for
+@c confirmation about file settings for these variables.
+仮想的な『変数』@code{eval}といくつかの（実在する）変数に対する指定は、
+ある種の危険性をもたらします。
+他人のファイルを訪問したとき、そこに書かれているローカル変数指定に
+よってあなたが使っているEmacsのふるまいがどのようにでも変更できるからです。
+このため、オプション@code{enable-local-eval}により、
+変数@code{eval}、さらに、@samp{-hook}、@samp{-hooks}、@samp{-function}、
+@samp{-functions}という名前で終る変数、および、他のいくつかの変数に
+対するローカル変数指定を処理するかどうか制御できるようになっています。
+@code{enable-local-variables}と同じように指定できる値は3種類あって、
+@code{t}、@code{nil}、これら以外です。
+デフォルトは@code{maybe}で、これは@code{t}でも@code{nil}でもありませんから、
+Emacsはこれらのローカル変数指定があるときは確認を求めてきます。
+
+@node Key Bindings
+@c @section Customizing Key Bindings
+@section キーバインディングのカスタマイズ
+@c @cindex key bindings
+@cindex キーバインディング
+
+@c   This section describes @dfn{key bindings}, which map keys to commands,
+@c and @dfn{keymaps}, which record key bindings.  It also explains how
+@c to customize key bindings.
+本節では、コマンドをキーに対応付ける@dfn{キーバインディング}と、
+キーバインディングを記録する@dfn{キーマップ}について説明します。
+また、キーバインディングをカスタマイズする方法についても説明します。
+
+@c   Recall that a command is a Lisp function whose definition provides for
+@c interactive use.  Like every Lisp function, a command has a function
+@c name which usually consists of lower-case letters and hyphens.
+コマンドとは、対話利用向けに定義されたLisp関数で
+あることを思い出してください。
+コマンドには、他のLisp関数と同様、通常、英小文字とハイフンから成る
+関数名前が付いています。
+
+@menu
+* Keymaps::             Generalities.  The global keymap.
+* Prefix Keymaps::      Keymaps for prefix keys.
+* Local Keymaps::       Major and minor modes have their own keymaps.
+* Minibuffer Maps::     The minibuffer uses its own local keymaps.
+* Rebinding::           How to redefine one key's meaning conveniently.
+* Init Rebinding::      Rebinding keys with your init file, @file{.emacs}.
+* Function Keys::       Rebinding terminal function keys.
+* Named ASCII Chars::   Distinguishing @key{TAB} from @kbd{C-i}, and so on.
+* Non-ASCII Rebinding:: Rebinding non-ASCII characters such as Latin-1.
+* Mouse Buttons::       Rebinding mouse buttons in Emacs.
+* Disabling::           Disabling a command means confirmation is required
+                          before it can be executed.  This is done to protect
+                          beginners from surprises.
+@end menu
+
+@node Keymaps
+@c @subsection Keymaps
+@subsection キーマップ
+@c @cindex keymap
+@cindex キーマップ
+
+@c   The bindings between key sequences and command functions are recorded
+@c in data structures called @dfn{keymaps}.  Emacs has many of these, each
+@c used on particular occasions.
+キー列とコマンド関数との対応は@dfn{キーマップ}と呼ばれる
+データ構造に保持されています。
+Emacsには数多くのキーマップがあり、それぞれが特定の場面で使われます。
+
+@c   Recall that a @dfn{key sequence} (@dfn{key}, for short) is a sequence
+@c of @dfn{input events} that have a meaning as a unit.  Input events
+@c include characters, function keys and mouse buttons---all the inputs
+@c that you can send to the computer with your terminal.  A key sequence
+@c gets its meaning from its @dfn{binding}, which says what command it
+@c runs.  The function of keymaps is to record these bindings.
+@dfn{キー列}（または単に@dfn{キー}）とは、
+ひとまとまりの意味を持つ@dfn{入力イベント}の並びをいいます。
+入力イベントは、文字、ファンクションキー、マウスボタン、
+つまり、端末から計算機に送ることができるすべての入力から成ります。
+キー列の意味付けは、どのコマンドを実行するかを表す
+@dfn{バインディング}によって決まります。
+キーマップの役割は、これらのバインディングを保持することです。
+
+@c @cindex global keymap
+@cindex グローバルキーマップ
+@c   The @dfn{global} keymap is the most important keymap because it is
+@c always in effect.  The global keymap defines keys for Fundamental mode;
+@c most of these definitions are common to most or all major modes.  Each
+@c major or minor mode can have its own keymap which overrides the global
+@c definitions of some keys.
+@dfn{グローバル}キーマップはもっとも重要なキーマップですが、
+それはグローバルキーマップがつねに有効だからです。
+グローバルキーマップは基本（fundamental）モードのキーを定義します。
+つまり、そこに含まれる定義の大部分は、ほとんどまたはすべての
+メジャーモードに共通のものです。
+各メジャー／マイナモードは、グローバルキーマップの定義の一部を
+置き換えるような独自のキーマップを持つことができます。
+
+@c   For example, a self-inserting character such as @kbd{g} is
+@c self-inserting because the global keymap binds it to the command
+@c @code{self-insert-command}.  The standard Emacs editing characters such
+@c as @kbd{C-a} also get their standard meanings from the global keymap.
+@c Commands to rebind keys, such as @kbd{M-x global-set-key}, actually work
+@c by storing the new binding in the proper place in the global map.
+@c @xref{Rebinding}.
+たとえば、@kbd{g}のような自己挿入文字を打つとその文字がバッファに
+挿入されるのは、グローバルキーマップでこれらのキーが
+@code{self-insert-command}に対応付けられているからです。
+また、@kbd{C-a}のような標準の編集コマンドも、
+その意味付けはグローバルキーマップに書かれています。
+@kbd{M-x global-set-key}のようなバインディングを変更するコマンド群は、
+グローバルキーマップの適切な箇所に新しいバインディングを書き込みます。
+
+@c    Meta characters work differently; Emacs translates each Meta
+@c character into a pair of characters starting with @key{ESC}.  When you
+@c type the character @kbd{M-a} in a key sequence, Emacs replaces it with
+@c @kbd{@key{ESC} a}.  A meta key comes in as a single input event, but
+@c becomes two events for purposes of key bindings.  The reason for this is
+@c historical, and we might change it someday.
+メタ文字はやや違った動作になります。
+Emacsでは、メタ文字は@key{ESC}で始まる文字列に変換されます。
+ですから、@kbd{M-a}という入力はつねにEmacsの中では
+@kbd{@key{ESC} a}に置き換えられて処理されます。
+つまり、メタ文字は単一の入力イベントですが、
+キーバインディングの観点では2つのイベントとして扱われます。
+こうなっている理由は歴史的なもので、将来は変わる可能性もあります。
+
+@c @cindex function key
+@cindex ファンクションキー
+@c   Most modern keyboards have function keys as well as character keys.
+@c Function keys send input events just as character keys do, and keymaps
+@c can have bindings for them.
+最近のほとんどのキーボードには、
+文字キーの他にファンクションキーがあります。
+ファンクションキーは文字キーと同様に入力イベントを送出し、
+キーマップはそれに対応するバインディングを保持することができます。
+
+@c   On many terminals, typing a function key actually sends the computer a
+@c sequence of characters; the precise details of the sequence depends on
+@c which function key and on the model of terminal you are using.  (Often
+@c the sequence starts with @kbd{@key{ESC} [}.)  If Emacs understands your
+@c terminal type properly, it recognizes the character sequences forming
+@c function keys wherever they occur in a key sequence (not just at the
+@c beginning).  Thus, for most purposes, you can pretend the function keys
+@c reach Emacs directly and ignore their encoding as character sequences.
+多くの端末では、ファンクションキーを打つとコンピュータには
+一連の文字列が送られます。
+具体的にどのファンクションキーが
+どんな文字列を送るかは端末によってまちまちです。
+（多くの場合、文字列は@kbd{@key{ESC} [}で始まる。）
+Emacsが使用中の端末種別を正しく認識していれば、
+キー列（の先頭でだけでなく）に現れるファンクションキーに対応した
+文字列を正しく判別できます。
+ですから、多くの場合、ファンクションキーの打鍵も
+1つの入力イベントとして直接Emacsに送られているとみなして、
+文字列としての表現形式は無視してかまいません。
+
+@c @cindex mouse
+@cindex マウス
+@c   Mouse buttons also produce input events.  These events come with other
+@c data---the window and position where you pressed or released the button,
+@c and a time stamp.  But only the choice of button matters for key
+@c bindings; the other data matters only if a command looks at it.
+@c (Commands designed for mouse invocation usually do look at the other
+@c data.)
+マウスボタンも入力イベントを発生させます。
+これらのイベントには、追加データ、つまり、
+ボタンを押したり放したりしたときのウィンドウとその中での位置、時刻
+が付属しています。
+ただし、キーバインディングに関しては、
+どのボタンが使われたかだけが問題となります。
+残りの情報は、コマンドがこれらの情報を参照する場合だけ意味を持ちます。
+（通常、マウスから起動できるコマンドは、これらの情報を参照する。）
+
+@c   A keymap records definitions for single events.  Interpreting a key
+@c sequence of multiple events involves a chain of keymaps.  The first
+@c keymap gives a definition for the first event; this definition is
+@c another keymap, which is used to look up the second event in the
+@c sequence, and so on.
+キーマップは1つのイベントに対する定義のみを保持します。
+複数キーの列から成る複数のイベントの解釈には、
+キーマップの連鎖が使われます。
+最初のキーマップが最初のイベントの定義を保持し、
+その定義がつぎのキーマップになっていて、
+2番目のイベントの定義を保持し、というようになっています。
+
+@c   Key sequences can mix function keys and characters.  For example,
+@c @kbd{C-x @key{SELECT}} is meaningful.  If you make @key{SELECT} a prefix
+@c key, then @kbd{@key{SELECT} C-n} makes sense.  You can even mix mouse
+@c events with keyboard events, but we recommend against it, because such
+@c sequences are inconvenient to type in.
+キー列にはファンクションキーと文字キーとが混ざっていてもかまいません。
+たとえば、@kbd{C-x @key{SELECT}}というのも許されます。
+@key{SELECT}をプレフィックスキーとして定義しておけば、
+@kbd{@key{SELECT} C-n}というのも許されます。
+マウスイベントとキーボードイベントを混ぜることさえ可能ですが、
+そうすると打ち込むのが面倒ですからお勧めしません。
+
+@c   As a user, you can redefine any key; but it might be best to stick to
+@c key sequences that consist of @kbd{C-c} followed by a letter.  These
+@c keys are ``reserved for users,'' so they won't conflict with any
+@c properly designed Emacs extension.  The function keys @key{F5} through
+@c @key{F9} are also reserved for users.  If you redefine some other key,
+@c your definition may be overridden by certain extensions or major modes
+@c which redefine the same key.
+ユーザーはどんなキー列でも再定義して利用できますが、
+@kbd{C-c}に続けて1文字というキー列だけを使うのが最善です。
+このキー列は『ユーザー定義のために予約』されていて、
+正しく設計されたEmacsの各種拡張とは衝突しないようになっているからです。
+@key{F5}から@key{F9}までのファンクションキーも
+ユーザー定義のために予約してあります。
+これ以外のキー列を再定義すると、
+同じキーを再定義する拡張やメジャーモードによって
+あなたの定義が上書きされてしまう可能性があります。
+
+@node Prefix Keymaps
+@c @subsection Prefix Keymaps
+@subsection プレフィックスキーマップ
+
+@c   A prefix key such as @kbd{C-x} or @key{ESC} has its own keymap,
+@c which holds the definition for the event that immediately follows
+@c that prefix.
+@kbd{C-x}や@key{ESC}のようなプレフィックスキーは
+それぞれ専用のキーマップを持っていて、
+そこにはそのプレフィックスキーに続くイベントの定義が保持されています。
+
+@c   The definition of a prefix key is usually the keymap to use for
+@c looking up the following event.  The definition can also be a Lisp
+@c symbol whose function definition is the following keymap; the effect is
+@c the same, but it provides a command name for the prefix key that can be
+@c used as a description of what the prefix key is for.  Thus, the binding
+@c of @kbd{C-x} is the symbol @code{Ctl-X-Prefix}, whose function
+@c definition is the keymap for @kbd{C-x} commands.  The definitions of
+@c @kbd{C-c}, @kbd{C-x}, @kbd{C-h} and @key{ESC} as prefix keys appear in
+@c the global map, so these prefix keys are always available.
+プレフィックスキーの定義は、通常、それに続くイベントの定義を検索するための
+キーマップです。
+あるいは、プレフィックスキーの定義がLispシンボルであって、
+その関数の定義がキーマップというのもあります。
+どちらでも効果は同じですが、
+後者では、プレフィックスキーにコマンド名を与えてその用途を示すことができます。
+このため、@kbd{C-x}にバインドされているのは
+シンボル@code{Ctl-X-Prefix}であり、
+その関数定義は@kbd{C-x}コマンド群に対応するキーマップです。
+@kbd{C-c}、@kbd{C-x}、@kbd{C-h}、@key{ESC}は
+グローバルマップでプレフィックスキーとして定義されていますから、
+これらはつねにプレフィックスキーとして使用できます。
+
+@c   Aside from ordinary prefix keys, there is a fictitious ``prefix key''
+@c which represents the menu bar; see @ref{Menu Bar,,,elisp, The Emacs Lisp
+@c Reference Manual}, for special information about menu bar key bindings.
+@c Mouse button events that invoke pop-up menus are also prefix keys; see
+@c @ref{Menu Keymaps,,,elisp, The Emacs Lisp Reference Manual}, for more
+@c details.
+通常のプレフィックスキーに加えて、
+メニューバーを表す『仮想的なプレフィックスキー』があります。
+メニューバーのキーバインディングに関する特別な点については
+@ref{Menu Bar,, メニューバー, elisp,
+Emacs Lisp リファレンスマニュアル}を参照してください。
+ポップアップメニューを表示させるマウスボタンイベントもまた、
+プレフィックスキーです。
+こちらの詳細については
+@ref{Menu Keymaps,, メニューキーマップ, elisp,
+Emacs Lisp リファレンスマニュアル}を参照してください。
+
+@c   Some prefix keymaps are stored in variables with names:
+決まった変数に格納されているプレフィックスキーマップもあります。
+
+@itemize @bullet
+@item
+@vindex ctl-x-map
+@c @code{ctl-x-map} is the variable name for the map used for characters that
+@c follow @kbd{C-x}.
+@code{ctl-x-map}は@kbd{C-x}に続くキーを探すためのマップを納めた変数名。
+@item
+@vindex help-map
+@c @code{help-map} is for characters that follow @kbd{C-h}.
+@code{help-map}は@kbd{C-h}に続くキーを探すためのマップを納めた変数名。
+@item
+@vindex esc-map
+@c @code{esc-map} is for characters that follow @key{ESC}.  Thus, all Meta
+@c characters are actually defined by this map.
+@code{esc-map}は@key{ESC}に続くキーを探すためのマップを納めた変数名。
+つまり、すべてのメタ文字は実際にはこのマップで定義されている。
+@item
+@vindex ctl-x-4-map
+@c @code{ctl-x-4-map} is for characters that follow @kbd{C-x 4}.
+@code{ctl-x-4-map}は@kbd{C-x 4}に続くキーを探すためのマップを納めた変数名。
+@item
+@vindex mode-specific-map
+@c @code{mode-specific-map} is for characters that follow @kbd{C-c}.
+@code{mode-specific-map}は@kbd{C-c}に続くキーを探すためのマップを納めた変数名。
+@end itemize
+
+@node Local Keymaps
+@c @subsection Local Keymaps
+@subsection ローカルキーマップ
+
+@c @cindex local keymap
+@cindex ローカルキーマップ
+@c   So far we have explained the ins and outs of the global map.  Major
+@c modes customize Emacs by providing their own key bindings in @dfn{local
+@c keymaps}.  For example, C mode overrides @key{TAB} to make it indent the
+@c current line for C code.  Portions of text in the buffer can specify
+@c their own keymaps to substitute for the keymap of the buffer's major
+@c mode.
+これまではグローバルキーマップの諸側面について説明しました。
+メジャーモード固有のキーバインディングを
+@dfn{ローカルキーマップ}に定義することで、
+各メジャーモードはEmacsの動作を変更します。
+たとえば、Cモードでは、
+@key{TAB}をCのコードの現在行を字下げする機能に差し替えます。
+バッファ内の一部のテキストで、
+そのバッファのメジャーモードのかわりとなる固有のキーマップを
+指定することもできます。
+
+@c @cindex minor mode keymap
+@cindex マイナモードキーマップ
+@c   Minor modes can also have local keymaps.  Whenever a minor mode is
+@c in effect, the definitions in its keymap override both the major
+@c mode's local keymap and the global keymap.
+マイナモードもローカルキーマップを持てます。
+その場合、マイナモードが生きているときには、
+そのキーマップがメジャーモードのローカルキーマップ
+やグローバルキーマップに優先します。
+
+@vindex c-mode-map
+@vindex lisp-mode-map
+@c   The local keymaps for Lisp mode and several other major modes always
+@c exist even when not in use.  These are kept in variables named
+@c @code{lisp-mode-map} and so on.  For major modes less often used, the
+@c local keymap is normally constructed only when the mode is used for the
+@c first time in a session.  This is to save space.  If you wish to change
+@c one of these keymaps, you must use the major mode's @dfn{mode
+@c hook}---see below.
+Lispモードおよびその他のいくつかのメジャーモードの
+ローカルキーマップは、そのモードを使っていないときでもつねに存在します。
+これらのキーマップは、@code{lisp-mode-map}などの変数に格納されています。
+さほど頻繁に使われないメジャーモードの場合は、
+そのモードがセッションの中で初めて起動されたときに
+ローカルキーマップが作られます。
+これは、メモリを節約するためです。
+このようなモードのキーマップを変更したい場合には、
+当該メジャーモードの@dfn{モードフック}を使う必要があります（以下を参照）。
+
+@c   All minor mode keymaps are created in advance.  There is no way to
+@c defer their creation until the first time the minor mode is enabled.
+すべてのマイナモードのキーマップは、あらかじめ作られています。
+マイナモードのキーマップ作成を
+そのマイナモードが最初に起動されるまで遅延させる方法はありません。
+
+@c   A local keymap can locally redefine a key as a prefix key by defining
+@c it as a prefix keymap.  If the key is also defined globally as a prefix,
+@c then its local and global definitions (both keymaps) effectively
+@c combine: both of them are used to look up the event that follows the
+@c prefix key.  Thus, if the mode's local keymap defines @kbd{C-c} as
+@c another keymap, and that keymap defines @kbd{C-z} as a command, this
+@c provides a local meaning for @kbd{C-c C-z}.  This does not affect other
+@c sequences that start with @kbd{C-c}; if those sequences don't have their
+@c own local bindings, their global bindings remain in effect.
+ローカルキーマップでは、その中のあるキーの定義をプレフィックスキーマップと
+することで、そのキーをローカルなプレフィックスキーとして再定義できます。
+そのキーがグローバルにもプレフィックスキーであると定義されているなら、
+ローカルキーマップとグローバルキーマップの内容は実質的に統合され、
+プレフィックスキーに続くイベントは両方のキーマップで検索されます。
+したがって、あるモードのローカルキーマップが@kbd{C-c}を
+別のキーマップとして定義し、
+そのキーマップでは@kbd{C-z}をコマンドとして定義すると、
+これらによって@kbd{C-c C-z}のローカルな意味が与えられます。
+しかし、これは@kbd{C-c}で始まる他のキー列には影響しません。
+あるキー列が独自のローカルなバインディングを持たなければ、
+グローバルなバインディングが意味を持つからです。
+
+@c   Another way to think of this is that Emacs handles a multi-event key
+@c sequence by looking in several keymaps, one by one, for a binding of the
+@c whole key sequence.  First it checks the minor mode keymaps for minor
+@c modes that are enabled, then it checks the major mode's keymap, and then
+@c it checks the global keymap.  This is not precisely how key lookup
+@c works, but it's good enough for understanding ordinary circumstances.
+いいかえれば、Emacsが複数イベントから成るキー列を扱う方法は、
+複数のキーマップから1つずつ、キー列全体に一致するバインディングを探すのです。
+まず、マイナモードが生きていればそのキーマップを検索し、
+つぎにメジャーモードのキーマップを検索し、
+最後にグローバルキーマップを検索します。
+これは厳密にはキーの検索動作とは違いますが、
+通常の状況でどうなるか理解するには十分です。
+
+@c @cindex rebinding major mode keys
+@cindex メジャーモードのキーのバイディング変更
+@c   To change the local bindings of a major mode, you must change the
+@c mode's local keymap.  Normally you must wait until the first time the
+@c mode is used, because most major modes don't create their keymaps until
+@c then.  If you want to specify something in your @file{~/.emacs} file to
+@c change a major mode's bindings, you must use the mode's mode hook to
+@c delay the change until the mode is first used.
+メジャーモードのローカルバインディングを変更するには、
+そのモードのローカルキーマップを変更する必要があります。
+通常、そのためにはそのモードが最初に使われるまで待つ必要があります。
+というのは、ほどんどのメジャーモードは
+使われるまでキーマップを作成しないからです。
+ですから、個人の@file{~/.emacs}ファイルで
+メジャーモードのバインディングを変更したければ、
+そのモードのモードフックを使ってそのモードが最初に使われるまで
+（変更を）遅らせる必要があります。
+
+@c   For example, the command @code{texinfo-mode} to select Texinfo mode
+@c runs the hook @code{texinfo-mode-hook}.  Here's how you can use the hook
+@c to add local bindings (not very useful, we admit) for @kbd{C-c n} and
+@c @kbd{C-c p} in Texinfo mode:
+たとえば、texinfoモードを選択する@code{texinfo-mode}コマンドは
+フック@code{texinfo-mode-hook}を実行します。
+このフックを使って@kbd{C-c n}と@kbd{C-c p}に対する
+（有益ではないですが）ローカルバインディングを
+texinfoモードに追加するには、つぎのようにします。
+
+@example
+(add-hook 'texinfo-mode-hook
+          '(lambda ()
+             (define-key texinfo-mode-map
+                         "\C-cp"
+                         'backward-paragraph)
+             (define-key texinfo-mode-map
+                         "\C-cn"
+                         'forward-paragraph)
+             ))
+@end example
+
+@c   @xref{Hooks}.
+@xref{Hooks}。
+
+@node Minibuffer Maps
+@c @subsection Minibuffer Keymaps
+@subsection ミニバッファのキーマップ
+
+@c @cindex minibuffer keymaps
+@cindex ミニバッファキーマップ
+@vindex minibuffer-local-map
+@vindex minibuffer-local-ns-map
+@vindex minibuffer-local-completion-map
+@vindex minibuffer-local-must-match-map
+@c   The minibuffer has its own set of local keymaps; they contain various
+@c completion and exit commands.
+ミニバッファも一群の専用ローカルキーマップを持っています。
+それらには各種の補完や脱出コマンドが定義されています。
+
+@c = 補完の種類: 強い／慎重／弱い ？
+@itemize @bullet
+@item
+@c @code{minibuffer-local-map} is used for ordinary input (no completion).
+@code{minibuffer-local-map}は通常の入力に使われる（補完なし）。
+@item
+@c @code{minibuffer-local-ns-map} is similar, except that @key{SPC} exits
+@c just like @key{RET}.  This is used mainly for Mocklisp compatibility.
+@code{minibuffer-local-ns-map}も同様。
+ただし、@key{SPC}は、@key{RET}と同様に、脱出動作である。
+これは主にMocklispとの互換性のために使われる。
+@item
+@c @code{minibuffer-local-completion-map} is for permissive completion.
+@code{minibuffer-local-completion-map}は弱い補完に使われる。
+@item
+@c @code{minibuffer-local-must-match-map} is for strict completion and
+@c for cautious completion.
+@code{minibuffer-local-must-match-map}は強い補完と慎重な補完に使われる。
+@end itemize
+
+@node Rebinding
+@c @subsection Changing Key Bindings Interactively
+@subsection キーバインディングの対話的な変更
+@c @cindex key rebinding, this session
+@c @cindex rebinding keys, this session
+@cindex キーバインディングの変更、 セッション内
+
+@c   The way to redefine an Emacs key is to change its entry in a keymap.
+@c You can change the global keymap, in which case the change is effective in
+@c all major modes (except those that have their own overriding local
+@c definitions for the same key).  Or you can change the current buffer's
+@c local map, which affects all buffers using the same major mode.
+Emacsのキーを再定義するには、キーマップの対応する項目を
+変更すればよいのです。
+グローバルキーマップを変更すると、その変更は
+（同じキーに対して独自のローカルな定義をしているメジャーモードを除く）
+すべてのメジャーモードに影響します。
+あるいは、カレントバッファのローカルマップを変更すると、
+同じメジャーモードを使っているすべてバッファに影響が及びます。
+
+@findex global-set-key
+@findex local-set-key
+@findex global-unset-key
+@findex local-unset-key
+@table @kbd
+@item M-x global-set-key @key{RET} @var{key} @var{cmd} @key{RET}
+@c Define @var{key} globally to run @var{cmd}.
+@var{cmd}を実行するように@var{key}をグローバルに定義する。
+@item M-x local-set-key @key{RET} @var{key} @var{cmd} @key{RET}
+@c Define @var{key} locally (in the major mode now in effect) to run
+@c @var{cmd}.
+@var{cmd}を実行するように@var{key}を（現在のメジャーモードで）
+ローカルに定義する。
+@item M-x global-unset-key @key{RET} @var{key}
+@c Make @var{key} undefined in the global map.
+@var{key}をグローバルマップで未定義にする。
+@item M-x local-unset-key @key{RET} @var{key}
+@c Make @var{key} undefined locally (in the major mode now in effect).
+@var{key}を（現在のメジャーモードで）ローカルに未定義にする。
+@end table
+
+@c   For example, suppose you like to execute commands in a subshell within
+@c an Emacs buffer, instead of suspending Emacs and executing commands in
+@c your login shell.  Normally, @kbd{C-z} is bound to the function
+@c @code{suspend-emacs} (when not using the X Window System), but you can
+@c change @kbd{C-z} to invoke an interactive subshell within Emacs, by
+@c binding it to @code{shell} as follows:
+たとえば、Emacsを休止してログインシェルでコマンドを実行するかわりに、
+Emacsバッファ内のサブシェルでコマンドを実行したいとします。
+通常、（Xウィンドウシステムを使っていない場合）@kbd{C-z}は
+関数@code{suspend-emacs}にバインドされていますが、
+つぎのようにこのキーを@code{shell}にバインドすれば、
+このキーでEmacs内の対話的サブシェルを起動するように変更できます。
+
+@example
+M-x global-set-key @key{RET} C-z shell @key{RET}
+@end example
+
+@noindent
+@c @code{global-set-key} reads the command name after the key.   After you
+@c press the key, a message like this appears so that you can confirm that
+@c you are binding the key you want:
+@code{global-set-key}はキー列に続けてコマンド名を読み取ります。
+使いたいキーを打鍵すると、どのキーをバインドしたいのかを
+確認するつぎのようなメッセージが表示されます。
+
+@example
+Set key C-z to command: 
+@end example
+
+@c   You can redefine function keys and mouse events in the same way; just
+@c type the function key or click the mouse when it's time to specify the
+@c key to rebind.
+同じ手順で、ファンクションキーやマウスイベントを再定義できます。
+バインドすべきキーを指定するときに、
+キーのかわりにファンクションキーを押したりマウスボタンをクリックしてください。
+
+@c   You can rebind a key that contains more than one event in the same
+@c way.  Emacs keeps reading the key to rebind until it is a complete key
+@c (that is, not a prefix key).  Thus, if you type @kbd{C-f} for
+@c @var{key}, that's the end; the minibuffer is entered immediately to
+@c read @var{cmd}.  But if you type @kbd{C-x}, another character is read;
+@c if that is @kbd{4}, another character is read, and so on.  For
+@c example,
+複数イベントから成るキーも単一イベントのキーと同様にして再定義できます。
+Emacsは再定義すべきキー列が完成するまで（つまりプレフィックスキーではない
+キーが出てくるまで）イベントを読み続けます。
+たとえば、@var{key}として@kbd{C-f}を打てばそれで終りですから、
+ミニバッファはただちに@var{cmd}を読む状態になります。
+一方、@kbd{C-x}を打つとさらにその先のキーを読みます。
+そこで@kbd{4}を打つと、さらにその先のキーが読まれる、というようになります。
+たとえば、
+
+@example
+M-x global-set-key @key{RET} C-x 4 $ spell-other-window @key{RET}
+@end example
+
+@noindent
+@c redefines @kbd{C-x 4 $} to run the (fictitious) command
+@c @code{spell-other-window}.
+では、@kbd{C-x 4 $}を（実在しない）コマンド@code{spell-other-window}に
+バインドします。
+
+@c   The two-character keys consisting of @kbd{C-c} followed by a letter
+@c are reserved for user customizations.  Lisp programs are not supposed to
+@c define these keys, so the bindings you make for them will be available
+@c in all major modes and will never get in the way of anything.
+@kbd{C-c}に続けて英字という2文字のキー列は、
+ユーザーのカスタマイズ用に予約されています。
+Lispプログラムはこれらのキー列を定義しないことになっていますから、
+これらのキー列のバインディングはどのメジャーモードでも使え、
+いかなる機能とも干渉しないはずです。
+
+@c   You can remove the global definition of a key with
+@c @code{global-unset-key}.  This makes the key @dfn{undefined}; if you
+@c type it, Emacs will just beep.  Similarly, @code{local-unset-key} makes
+@c a key undefined in the current major mode keymap, which makes the global
+@c definition (or lack of one) come back into effect in that major mode.
+@code{global-unset-key}でキーのグローバルな定義を取り除けます。
+そのキーは@dfn{未定義}になります。
+未定義のキーを打つと、Emacsはベルを鳴らします。
+同様に、@code{local-unset-key}は現在のメジャーモードでキーを
+未定義にしますから、グローバルな定義（あるいはグローバルでの未定義状態）が
+現在のメジャーモードでふたたび有効になります。
+
+@c   If you have redefined (or undefined) a key and you subsequently wish
+@c to retract the change, undefining the key will not do the job---you need
+@c to redefine the key with its standard definition.  To find the name of
+@c the standard definition of a key, go to a Fundamental mode buffer and
+@c use @kbd{C-h c}.  The documentation of keys in this manual also lists
+@c their command names.
+キーを再定義（または未定義に）して、あとでもとに戻したいと思った場合、
+キーを未定義にしてももとには戻りません。
+キーの標準定義を設定し直す必要があります。
+キーの標準定義を調べるには、基本（fundamental）モードのバッファに
+いって@kbd{C-h c}を使います。
+本書のキーの説明にもコマンド名を掲載してあります。
+
+@c   If you want to prevent yourself from invoking a command by mistake, it
+@c is better to disable the command than to undefine the key.  A disabled
+@c command is less work to invoke when you really want to.
+@c @xref{Disabling}.
+まちがって、あるコマンドを実行することを防ぎたければ、
+キーを未定義にするのでなく、コマンドを使用禁止にするのがよいでしょう。
+必要になったときに使用禁止コマンドを起動するのは造作もありません。
+
+@node Init Rebinding
+@c @subsection Rebinding Keys in Your Init File
+@subsection 初期化ファイルでのキーの変更
+
+@findex define-key
+@findex substitute-key-definition
+@c   If you have a set of key bindings that you like to use all the time,
+@c you can specify them in your @file{.emacs} file by using their Lisp
+@c syntax.
+いつでもあるキーバインディングを設定しておきたければ、
+その指定を個人の@file{.emacs}ファイルにLispのコードとして書いておきます。
+
+@c   The simplest method for doing this works for ASCII characters and
+@c Meta-modified ASCII characters only.  This method uses a string to
+@c represent the key sequence you want to rebind.  For example, here's how
+@c to bind @kbd{C-z} to @code{shell}:
+これを行うもっとも簡単な方法は、
+ASCII文字とメタ修飾付きのASCII文字に対してのみ使えます。
+たとえば、@kbd{C-z}を@code{shell}にバインドするにはつぎのようにします。
+
+@example
+(global-set-key "\C-z" 'shell)
+@end example
+
+@noindent
+@c This example uses a string constant containing one character, @kbd{C-z}.
+@c The single-quote before the command name, @code{shell}, marks it as a
+@c constant symbol rather than a variable.  If you omit the quote, Emacs
+@c would try to evaluate @code{shell} immediately as a variable.  This
+@c probably causes an error; it certainly isn't what you want.
+この例では1つの文字@kbd{C-z}から成る文字列定数を指定しています。
+コマンド名@code{shell}のまえのクォート「'」は、
+@code{shell}を変数ではなく定数シンボルとして扱う印です。
+クォートがないと、Emacsは@code{shell}を変数として
+その値をただちに評価しようとします。
+すると、望んでいることではなく、エラーになります。
+
+@c   Here is another example that binds a key sequence two characters long:
+つぎは、2文字のキー列をバインドする例です。
+
+@example
+(global-set-key "\C-xl" 'make-symbolic-link)
+@end example
+
+@c   When the key sequence includes function keys or mouse button events,
+@c or non-ASCII characters such as @code{C-=} or @code{H-a}, you must use
+@c the more general method of rebinding, which uses a vector to specify the
+@c key sequence.
+キー列にファンクションキーやマウスボタンイベントが含まれていたり、
+@code{C-=}や@code{H-a}などの非ASCII文字が含まれているなら、
+文字列よりもっと一般的な指定方法であるベクタを使った指定を使う必要があります。
+
+@c   The way to write a vector in Emacs Lisp is with square brackets around
+@c the vector elements.  Use spaces to separate the elements.  If an
+@c element is a symbol, simply write the symbol's name---no other
+@c delimiters or punctuation are needed.  If a vector element is a
+@c character, write it as a Lisp character constant: @samp{?} followed by
+@c the character as it would appear in a string.
+Emacs Lispでのベクタの書き方は、その要素を中括弧（@samp{[@dots{}]}）で
+囲みます。
+要素は空白で区切ります。
+要素がシンボルであれば、単にその名前だけを書けばよく、
+区切り記号などは不要です。
+要素が文字であれば、Lispの文字定数として、
+つまり@samp{?}に続けてその文字が文字列中に現れるのと同じ書き方で、
+書いてください。
+
+@c   Here are examples of using vectors to rebind @kbd{C-=} (a control
+@c character outside of ASCII), @kbd{H-a} (a Hyper character; ASCII doesn't
+@c have Hyper at all), @key{F7} (a function key), and @kbd{C-Mouse-1} (a
+@c keyboard-modified mouse button):
+ベクタを使って@kbd{C-=}（ASCIIの範囲にないコントロール文字）、
+@kbd{H-a}（ハイパー文字。ASCIIにはハイパー文字は含まれない）、
+@key{F7}（ファンクションキー）、
+@kbd{C-Mouse-1}（キーボード修飾付きのマウスボタン）を
+バインドする例を示します。
+
+@example
+(global-set-key [?\C-=] 'make-symbolic-link)
+(global-set-key [?\H-a] 'make-symbolic-link)
+(global-set-key [f7] 'make-symbolic-link)
+(global-set-key [C-mouse-1] 'make-symbolic-link)
+@end example
+
+@c   You can use a vector for the simple cases too.  Here's how to rewrite
+@c the first two examples, above, to use vectors:
+単純な（文字列ですむ）場合にベクタを使ってもかまいません。
+先の2つの例をベクタを使うように書き直すとつぎのようになります。
+
+@example
+(global-set-key [?\C-z] 'shell)
+
+(global-set-key [?\C-x ?l] 'make-symbolic-link)
+@end example
+
+@node Function Keys
+@c @subsection Rebinding Function Keys
+@subsection ファンクションキーの再定義
+
+@c   Key sequences can contain function keys as well as ordinary
+@c characters.  Just as Lisp characters (actually integers) represent
+@c keyboard characters, Lisp symbols represent function keys.  If the
+@c function key has a word as its label, then that word is also the name of
+@c the corresponding Lisp symbol.  Here are the conventional Lisp names for
+@c common function keys:
+キー列には通常の文字以外にもファンクションキーを含めることができます。
+キーボードの文字がLispの文字（実は整数です）で表されるのに対し、
+ファンクションキーはLispシンボルで表されます。
+ファンクションキーに単語のラベルが付いているなら、
+その単語が対応するLispシンボルの名前になります。
+たとえば普通に見られるファンクションキーとLispシンボルの対応はつぎのとおりです。
+
+@table @asis
+@item @code{left}, @code{up}, @code{right}, @code{down}
+@c Cursor arrow keys.
+カーソル矢印キー。
+
+@item @code{begin}, @code{end}, @code{home}, @code{next}, @code{prior}
+@c Other cursor repositioning keys.
+その他のカーソル移動キー。
+
+@item @code{select}, @code{print}, @code{execute}, @code{backtab}
+@itemx @code{insert}, @code{undo}, @code{redo}, @code{clearline}
+@itemx @code{insertline}, @code{deleteline}, @code{insertchar}, @code{deletechar}
+@c Miscellaneous function keys.
+その他のファンクションキー。
+
+@item @code{f1}, @code{f2}, @dots{} @code{f35}
+@c Numbered function keys (across the top of the keyboard).
+（キーボードの上端に並んでいる）番号の付いたファンクションキー。
+
+@item @code{kp-add}, @code{kp-subtract}, @code{kp-multiply}, @code{kp-divide}
+@itemx @code{kp-backtab}, @code{kp-space}, @code{kp-tab}, @code{kp-enter}
+@itemx @code{kp-separator}, @code{kp-decimal}, @code{kp-equal}
+@c Keypad keys (to the right of the regular keyboard), with names or punctuation.
+（普通のキーボードの右側にまとまっている）キーパッドのキーで、
+名前や句読点が印字されているもの。
+
+@item @code{kp-0}, @code{kp-1}, @dots{} @code{kp-9}
+@c Keypad keys with digits.
+キーパッドの数字キー
+
+@item @code{kp-f1}, @code{kp-f2}, @code{kp-f3}, @code{kp-f4}
+@c Keypad PF keys.
+キーパッドのPFキー。
+@end table
+
+@c   These names are conventional, but some systems (especially when using
+@c X windows) may use different names.  To make certain what symbol is used
+@c for a given function key on your terminal, type @kbd{C-h c} followed by
+@c that key.
+これらの名前は習慣的なものですが、システムによっては
+（とりわけXウィンドウシステムを使っている場合は）、
+別の名前になっている場合があります。
+あるファンクションキーにどのシンボルが対応しているか調べるには、
+@kbd{C-h c}に続いてそのキーを打鍵してください。
+
+@c   A key sequence which contains function key symbols (or anything but
+@c ASCII characters) must be a vector rather than a string.  The vector
+@c syntax uses spaces between the elements, and square brackets around the
+@c whole vector.  Thus, to bind function key @samp{f1} to the command
+@c @code{rmail}, write the following:
+ファンクションキーのシンボルを含むキー列（あるいは、
+ASCII以外の文字を含むもの）は文字列ではなくベクタで指定してください。
+ベクタの構文では要素と要素のあいだは空白で区切り、
+全体を中括弧@samp{@samp{[@dots{}]}}で囲みます。
+たとえば、ファンクションキー@samp{f1}をコマンド@code{rmail}にバインドするには、
+つぎのようにします。
+
+@example
+(global-set-key [f1] 'rmail)
+@end example
+
+@noindent
+@c To bind the right-arrow key to the command @code{forward-char}, you can
+@c use this expression:
+右矢印キーをコマンド@code{fowared-char}にバインドするには、
+つぎのようにします。
+
+@example
+(global-set-key [right] 'forward-char)
+@end example
+
+@noindent
+@c This uses the Lisp syntax for a vector containing the symbol
+@c @code{right}.  (This binding is present in Emacs by default.)
+これは、シンボル@code{right}を要素とするベクタのLisp構文です。
+（このバインディングはEmacsのデフォルト設定に入っている。）
+
+@c   @xref{Init Rebinding}, for more information about using vectors for
+@c rebinding.
+ベクタを用いたキーの再定義ついてより詳しくは、@xref{Init Rebinding}。
+
+@c   You can mix function keys and characters in a key sequence.  This
+@c example binds @kbd{C-x @key{NEXT}} to the command @code{forward-page}.
+キー列の中でファンクションキーと文字を混ぜることができます。
+以下の例は、
+@kbd{C-x @key{NEXT}}をコマンド@code{forward-page}にバインドしています。
+
+@example
+(global-set-key [?\C-x next] 'forward-page)
+@end example
+
+@noindent
+@c where @code{?\C-x} is the Lisp character constant for the character
+@c @kbd{C-x}.  The vector element @code{next} is a symbol and therefore
+@c does not take a question mark.
+ここで、@code{?\C-x}はLispの文字定数で、文字@kbd{C-x}を表します。
+ベクタのもう1つの要素である@code{next}は、シンボルですから@samp{?}は不要です。
+
+@c   You can use the modifier keys @key{CTRL}, @key{META}, @key{HYPER},
+@c @key{SUPER}, @key{ALT} and @key{SHIFT} with function keys.  To represent
+@c these modifiers, add the strings @samp{C-}, @samp{M-}, @samp{H-},
+@c @samp{s-}, @samp{A-} and @samp{S-} at the front of the symbol name.
+@c Thus, here is how to make @kbd{Hyper-Meta-@key{RIGHT}} move forward a
+@c word:
+ファンクションキーに対して、修飾キー@key{CTRL}、@key{META}、@key{HYPER}、
+@key{SUPER}、@key{ALT}、@key{SHIFT}を指定できます。
+これらの修飾キーを指定するには、シンボル名のまえに@samp{C-}、
+@samp{M-}、@samp{H-}、@samp{s-}、@samp{A-}、@samp{S-}を付けてください。
+たとえば、@kbd{Hyper-Meta-@key{RIGHT}}で
+1語先へ移動するにはつぎのように指定します。
+
+@example
+(global-set-key [H-M-right] 'forward-word)
+@end example
+
+@node Named ASCII Chars
+@c @subsection Named ASCII Control Characters
+@subsection 名前の付いたASCIIコントロール文字
+
+@c   @key{TAB}, @key{RET}, @key{BS}, @key{LFD}, @key{ESC} and @key{DEL}
+@c started out as names for certain ASCII control characters, used so often
+@c that they have special keys of their own.  Later, users found it
+@c convenient to distinguish in Emacs between these keys and the ``same''
+@c control characters typed with the @key{CTRL} key.
+@key{TAB}、@key{RET}、@key{BS}、@key{LFD}、@key{ESC}、@key{DEL}は
+もともとASCIIの特定のコントロール文字に対応していたのですが、
+よく使われるため別にそれ専用のキーを持つようになりました。
+のちに人々はEmacsでこれらのキーとそれらと『同じ』文字を
+@key{CTRL}キーと組み合わせて打鍵した場合とを区別できると
+便利だと気がつきました。
+
+@c   Emacs distinguishes these two kinds of input, when used with the X
+@c Window System.  It treats the ``special'' keys as function keys named
+@c @code{tab}, @code{return}, @code{backspace}, @code{linefeed},
+@c @code{escape}, and @code{delete}.  These function keys translate
+@c automatically into the corresponding ASCII characters @emph{if} they
+@c have no bindings of their own.  As a result, neither users nor Lisp
+@c programs need to pay attention to the distinction unless they care to.
+EmacsではXウィンドウシステムを使っている場合、
+これら2種類の入力を区別します。
+つまり、キーボード上の特殊キーの方は@code{tab}、@code{return}、
+@code{backspace}、@code{linefeed}、@code{escape}、
+@code{delete}という名前のファンクションキーとして扱うのです。
+これらのファンクションキーは、@emph{もし}それ固有のバインディングが
+指定されていなければ、自動的に対応するASCII文字に変換されます。
+その結果、特にこの2種類を区別したいと思わない限りは、
+ユーザーもLispプログラムもこれらの区分について気にする必要はありません。
+
+@c   If you do not want to distinguish between (for example) @key{TAB} and
+@c @kbd{C-i}, make just one binding, for the ASCII character @key{TAB}
+@c (octal code 011).  If you do want to distinguish, make one binding for
+@c this ASCII character, and another for the ``function key'' @code{tab}.
+（たとえば）@key{TAB}と@kbd{C-i}を区別したくないなら、
+ASCII文字@key{TAB}（8進コード011）に対応するバインディング1つだけを
+指定してください。
+区別したいのなら、このASCII文字に対するバインディングに加えて、
+『ファンクションキー』@code{tab}に対するバインディングも指定します。
+
+@c   With an ordinary ASCII terminal, there is no way to distinguish
+@c between @key{TAB} and @kbd{C-i} (and likewise for other such pairs),
+@c because the terminal sends the same character in both cases.
+通常のASCII端末では、@key{TAB}と@kbd{C-i}
+（および上記の対応する組のそれぞれ）を区別する方法はありません。
+というのは、端末はどちらが押されても同じ文字を送出するからです。
+
+@node Non-ASCII Rebinding
+@c @subsection Non-ASCII Characters on the Keyboard
+@subsection キーボード上の非ASCII文字
+
+@c If your keyboard has keys that send non-ASCII characters, such as
+@c accented letters, rebinding these keys is a bit tricky.  There are
+@c two solutions you can use.  One is to specify a keyboard coding system,
+@c using @code{set-keyboard-coding-system} (@pxref{Specify Coding}).
+@c Then you can bind these keys in the usual way, but writing
+アクセント付き文字などの非ASCII文字を送出するキーがあるキーボードでは、
+それらのキーの再定義には、少々トリックが必要です。
+2つの解決方法があります。
+1つめは、@code{set-keyboard-coding-system}（@pxref{Specify Coding}）を
+使って、キーボードのコーディングシステムを指定することです。
+そうすれば、つぎのように書いて、
+通常の方法でそれらのキーを再定義できます。
+
+@example
+(global-set-key [?@var{char}] 'some-function)
+@end example
+
+@noindent
+@c and typing the key you want to bind to insert @var{char}.
+ただし、@var{char}を挿入するには、定義したいキーを打ちます。
+
+@c If you don't specify the keyboard coding system, that approach won't
+@c work.  Instead, you need to find out the actual code that the terminal
+@c sends.  The easiest way to do this in Emacs is to create an empty buffer
+@c with @kbd{C-x b temp @key{RET}}, make it unibyte with @kbd{M-x
+@c toggle-enable-multibyte-characters @key{RET}}, then type the key to
+@c insert the character into this buffer.
+キーボードのコーディングシステムを指定しないと、
+上のようにはできません。
+そのかわりに、端末が実際に送出するコードを調べる必要があります。
+Emacsでこれを簡単に行うには、
+@kbd{C-x b temp @key{RET}}で空バッファを作成し、
+@kbd{M-x toggle-enable-multibyte-characters @key{RET}}でユニバイトに
+してから、このバッファに文字を挿入するキーを打ちます。
+
+@c Move point before the character, then type @kbd{C-b C-x =}.  This
+@c displays a message in the minibuffer, showing the character code in
+@c three ways, octal, decimal and hexadecimal, all within a set of
+@c parentheses.  Use the second of the three numbers, the decimal one,
+@c inside the vector to bind:
+文字のまえにポイントを移動して、@kbd{C-b C-x =}と打ちます。
+8進数、10進数、16進数の3通りで表した文字コードを括弧で括った
+メッセージがミニバッファに表示されます。
+定義するには、3つの数字の2番目、つまり、10進数を
+ベクタの中に書きます。
+
+@example
+(global-set-key [@var{decimal-code}] 'some-function)
+@end example
+
+@node Mouse Buttons
+@c @subsection Rebinding Mouse Buttons
+@subsection マウスボタンの再定義
+@c @cindex mouse button events
+@c @cindex rebinding mouse buttons
+@c @cindex click events
+@c @cindex drag events
+@c @cindex down events
+@c @cindex button down events
+@cindex マウスボタンイベント
+@cindex マウスボタンの再定義
+@cindex クリックイベント
+@cindex ドラッグイベント
+@cindex 押し下げイベント
+@cindex ボタン押し下げイベント
+
+@c   Emacs uses Lisp symbols to designate mouse buttons, too.  The ordinary
+@c mouse events in Emacs are @dfn{click} events; these happen when you
+@c press a button and release it without moving the mouse.  You can also
+@c get @dfn{drag} events, when you move the mouse while holding the button
+@c down.  Drag events happen when you finally let go of the button.
+Emacsではマウスボタンを表すのにもLispシンボルを使います。
+Emacsのもっとも一般的なマウスイベントは@dfn{クリック}（click）イベントです。
+これはマウスボタンを押して、マウスを移動せずにボタンを放したときに発生します。
+ボタンを押した状態でマウスを移動すると
+@dfn{ドラッグ}（drag）イベントになります。
+そして最後にマウスボタンを放したときにも、
+やはり@dfn{ドラッグ}イベントが発生します。
+
+@c   The symbols for basic click events are @code{mouse-1} for the leftmost
+@c button, @code{mouse-2} for the next, and so on.  Here is how you can
+@c redefine the second mouse button to split the current window:
+基本的なクリックイベントに対応するシンボルは、
+左ボタンに対しては@code{mouse-1}、
+左から2番目のボタンに対しては@code{mouse-2}、などとなっています。
+2番目のボタンをクリックしたときカレントウィンドウを分割するには、
+つぎのように設定します。
+
+@example
+(global-set-key [mouse-2] 'split-window-vertically)
+@end example
+
+@c   The symbols for drag events are similar, but have the prefix
+@c @samp{drag-} before the word @samp{mouse}.  For example, dragging the
+@c first button generates a @code{drag-mouse-1} event.
+ドラッグイベントについても同様ですが、
+イベント名の@samp{mouse}のまえに@samp{drag-}が付きます。
+たとえば、第1ボタンを押したままドラッグすると
+@code{drag-mouse-1}イベントが発生します。
+
+@c   You can also define bindings for events that occur when a mouse button
+@c is pressed down.  These events start with @samp{down-} instead of
+@c @samp{drag-}.  Such events are generated only if they have key bindings.
+@c When you get a button-down event, a corresponding click or drag event
+@c will always follow.
+マウスボタンが押されたときに発生するイベントに対して
+バインディングを指定することもできます。
+これらのイベントは@samp{drag-}のかわりに@samp{down-}で始まります。
+これらのイベントはキーバインディングが定義されているときだけ生成されます。
+@samp{down-}イベントのあとには、必ず、
+対応するクリック／ドラグッイベントが発生します。
+
+@c @cindex double clicks
+@c @cindex triple clicks
+@cindex ダブルクリック
+@cindex トリプルクリック
+@c   If you wish, you can distinguish single, double, and triple clicks.  A
+@c double click means clicking a mouse button twice in approximately the
+@c same place.  The first click generates an ordinary click event.  The
+@c second click, if it comes soon enough, generates a double-click event
+@c instead.  The event type for a double-click event starts with
+@c @samp{double-}: for example, @code{double-mouse-3}.
+必要ならば、シングルクリック／ダブルクリック／トリプルクリックを
+区別することもできます。
+ダブルクリックとは、ほぼ同じ位置でマウスボタンを2回クリックすることです。
+最初のクリックで通常のクリックイベントが発生します。
+最初のクリックから十分短い時間内に2回目のクリックが起こると、
+クリックイベントではなくダブルクリックイベントが発生します。
+ダブルクリックイベントは、@samp{double-}で始まります。
+たとえば、@code{double-mouse-3}です。
+
+@c   This means that you can give a special meaning to the second click at
+@c the same place, but it must act on the assumption that the ordinary
+@c single click definition has run when the first click was received.
+つまり、同じ場所で2回クリックがあったとき、
+2回目のクリックに特別な意味を与えることはできますが、
+ただし最初のクリックで発生する通常のシングルクリックに
+対して定義された動作も実行されることを前提としなければなりません。
+
+@c   This constrains what you can do with double clicks, but user interface
+@c designers say that this constraint ought to be followed in any case.  A
+@c double click should do something similar to the single click, only
+@c ``more so.''  The command for the double-click event should perform the
+@c extra work for the double click.
+このような制限のため、ダブルクリックで行えることが制約されますが、
+ユーザーインターフェイスデザイナは、よいユーザーインターフェイスが
+つねにそのような制約に従うべきだとの考えを述べています。
+つまり、ダブルクリックはシングルクリックと類似した動作をすべきであり、
+『それよりいくらか多く』の動作をするのがよい、ということです。
+そして、ダブルクリックイベントに対応するコマンドがその
+「いくらか多く」のぶんの動作を行うべきだということです。
+
+@c   If a double-click event has no binding, it changes to the
+@c corresponding single-click event.  Thus, if you don't define a
+@c particular double click specially, it executes the single-click command
+@c twice.
+ダブルクリックイベントに対してバインディングが定義されていなければ、
+ダブルクリックは2つのシングルクリックとして扱われます。
+その結果、シングルクリックに対応するコマンドが2回実行されることになります。
+
+@c   Emacs also supports triple-click events whose names start with
+@c @samp{triple-}.  Emacs does not distinguish quadruple clicks as event
+@c types; clicks beyond the third generate additional triple-click events.
+@c However, the full number of clicks is recorded in the event list, so you
+@c can distinguish if you really want to.  We don't recommend distinct
+@c meanings for more than three clicks, but sometimes it is useful for
+@c subsequent clicks to cycle through the same set of three meanings, so
+@c that four clicks are equivalent to one click, five are equivalent to
+@c two, and six are equivalent to three.
+Emacsではさらにトリプルクリックイベントも使えます
+（その場合、名前は@samp{triple-}で始まる）。
+しかし4重クリックをイベントタイプとして区別しません。
+ですから、3回目以降の連続したクリックは、
+すべてトリプルクリックイベントとして報告されます。
+ただし、連続したクリックの回数はイベントリストに記録されていますから、
+本当に4重以上のクリックを区別したければそうすることもできます。
+4重以上のクリックに特別な意味を与えるのはお勧めできませんが、
+4回だと1回と同じ、5回だと2回と同じというように3つの選択肢のあいだで
+巡回できるようにするのは場合によっては有効かもしれません。
+
+@c   Emacs also records multiple presses in drag and button-down events.
+@c For example, when you press a button twice, then move the mouse while
+@c holding the button, Emacs gets a @samp{double-drag-} event.  And at the
+@c moment when you press it down for the second time, Emacs gets a
+@c @samp{double-down-} event (which is ignored, like all button-down
+@c events, if it has no binding).
+Emacsはまた、ドラッグやボタンイベントでも複数回の押し下げを記録します。
+たとえば、ボタンを2回押してからそのままマウスを移動した場合、
+Emacsは@samp{double-drag-}で始まるイベントを生成します。
+ドラッグでなくボタンを押し下げただけの場合は同様に、
+@samp{double-down-}で始まるイベントを生成します
+（ただし、他のボタンイベントと同様に、そのイベントに対する
+バインディングがなければ無視される）。
+
+@vindex double-click-time
+@c   The variable @code{double-click-time} specifies how long may elapse
+@c between clicks that are recognized as a pair.  Its value is measured
+@c in milliseconds.  If the value is @code{nil}, double clicks are not
+@c detected at all.  If the value is @code{t}, then there is no time
+@c limit.
+変数@code{double-click-time}は、どれくらいの時間間隔内であれば
+2つの隣接するクリックをダブルクリックとみなすかを指定します。
+単位はミリ秒です。
+値が@code{nil}であれば、ダブルクリックを検出しません。
+値が@code{t}であれば、時間間隔の上限はないものとして扱います。
+
+@c   The symbols for mouse events also indicate the status of the modifier
+@c keys, with the usual prefixes @samp{C-}, @samp{M-}, @samp{H-},
+@c @samp{s-}, @samp{A-} and @samp{S-}.  These always precede @samp{double-}
+@c or @samp{triple-}, which always precede @samp{drag-} or @samp{down-}.
+マウスイベントに対応するシンボルにはさらに、
+@samp{C-}、@samp{M-}、@samp{H-}、@samp{s-}、@samp{A-}、
+@samp{S-}の各プレフィックスで、修飾キーの情報も組み込めます。
+順番は、プレフィックスに続いて@samp{double-}や@samp{triple-}があり、
+そのあとが@samp{drag-}や@samp{down-}ということになります。
+
+@c   A frame includes areas that don't show text from the buffer, such as
+@c the mode line and the scroll bar.  You can tell whether a mouse button
+@c comes from a special area of the screen by means of dummy ``prefix
+@c keys.''  For example, if you click the mouse in the mode line, you get
+@c the prefix key @code{mode-line} before the ordinary mouse-button symbol.
+@c Thus, here is how to define the command for clicking the first button in
+@c a mode line to run @code{scroll-up}:
+フレームには、モード行やスクロールバーなどの
+バッファ中のテキストを表示する以外の部分もあります。
+マウスイベントがこれらの特別な部分で発生したものかどうかを調べるために、
+ダミーの「プレフィックスキー」があります。
+たとえば、マウスがモード行でクリックされた場合、
+まず@code{mode-line}というプレフィックスキーが送られ、
+続いて通常のマウスボタンに対応したイベントが送られます。
+ですから、モード行で第1ボタンがクリックされたときに
+@code{scroll-up}を実行するにはつぎのようにします。
+
+@example
+(global-set-key [mode-line mouse-1] 'scroll-up)
+@end example
+
+@c   Here is the complete list of these dummy prefix keys and their
+@c meanings:
+ダミーのプレフィックスキーとその意味はつぎのとおりです。
+
+@table @code
+@item mode-line
+@c The mouse was in the mode line of a window.
+マウスがウィンドウのモード行にある。
+@item vertical-line
+@c The mouse was in the vertical line separating side-by-side windows.  (If
+@c you use scroll bars, they appear in place of these vertical lines.)
+マウスが横に隣接するウィンドウ間の境界線上にある。
+（スクロールバーを表示させると、
+境界線のかわりにスクロールバーが現れる。）
+@item vertical-scroll-bar
+@c The mouse was in a vertical scroll bar.  (This is the only kind of
+@c scroll bar Emacs currently supports.)
+マウスが縦スクロールバー上にある。
+（Emacsで使えるスクロールバーは、現在のところ縦スクロールバーのみ。）
+@ignore
+@item horizontal-scroll-bar
+The mouse was in a horizontal scroll bar.  Horizontal scroll bars do
+horizontal scrolling, and people don't use them often.
+@end ignore
+@end table
+
+@c   You can put more than one mouse button in a key sequence, but it isn't
+@c usual to do so.
+1つのキー列の中に2つ以上のマウスボタンイベントを含めることもできますが、
+普通はあまりしないでしょう。
+
+@node Disabling
+@c @subsection Disabling Commands
+@subsection 使用禁止コマンド
+@c @cindex disabled command
+@cindex 使用禁止コマンド
+
+@c   Disabling a command marks the command as requiring confirmation before it
+@c can be executed.  The purpose of disabling a command is to prevent
+@c beginning users from executing it by accident and being confused.
+コマンドを使用禁止にすると、コマンドの実行にはユーザーの確認が必要になります。
+コマンドを使用禁止にする目的は、
+初心者がそのコマンドをまちがって実行してしまい、混乱するのを防ぐためです。
+
+@c   An attempt to invoke a disabled command interactively in Emacs
+@c displays a window containing the command's name, its documentation, and
+@c some instructions on what to do immediately; then Emacs asks for input
+@c saying whether to execute the command as requested, enable it and
+@c execute it, or cancel.  If you decide to enable the command, you are
+@c asked whether to do this permanently or just for the current session.
+@c Enabling permanently works by automatically editing your @file{.emacs}
+@c file.
+Emacs上で使用禁止コマンドを対話的に実行しようとすると、
+コマンド名、説明文、とりあえずどうすべきかの指示を
+表示したウィンドウが現れます。
+つぎにEmacsはコマンドを実行するか、使用禁止を解除してから実行するか、
+実行を取り消すかを問い合わせてきます。
+コマンドの使用禁止を解除することを選ぶと、
+Emacsさらに、以後恒久的にそうするのか、
+または現在のセッション内だけそうするのかも問い合わせてきます。
+恒久的に使えるようにすると、
+自動的に個人の@file{.emacs}ファイルを編集します。
+
+@c   The direct mechanism for disabling a command is to put a
+@c non-@code{nil} @code{disabled} property on the Lisp symbol for the
+@c command.  Here is the Lisp program to do this:
+コマンドを使用禁止にする機構は、
+コマンドに対応するLispシンボルの属性@code{disabled}に
+@code{nil}以外の値を設定することです。
+これを行うLispプログラムはつぎのようになります。
+
+@example
+(put 'delete-region 'disabled t)
+@end example
+
+@c   If the value of the @code{disabled} property is a string, that string
+@c is included in the message printed when the command is used:
+属性@code{disabled}の値が文字列であれば、
+コマンドを使用しようとしたときに表示される
+メッセージにその文字列も含まれるようになります。
+
+@example
+(put 'delete-region 'disabled
+     "It's better to use `kill-region' instead.\n")
+@end example
+
+@findex disable-command
+@findex enable-command
+@c   You can make a command disabled either by editing the @file{.emacs}
+@c file directly or with the command @kbd{M-x disable-command}, which edits
+@c the @file{.emacs} file for you.  Likewise, @kbd{M-x enable-command}
+@c edits @file{.emacs} to enable a command permanently.  @xref{Init File}.
+コマンドを使用禁止にするには、@file{.emacs}ファイルを直接編集するか、
+かわってこのファイルを編集するコマンド@kbd{M-x disable-command}を使います。
+同様に、コマンド@kbd{M-x enable-command}は、
+@file{.emacs}ファイルを編集してコマンドを恒久的に使える状態にします。
+@xref{Init File}。
+
+@c   Whether a command is disabled is independent of what key is used to
+@c invoke it; disabling also applies if the command is invoked using
+@c @kbd{M-x}.  Disabling a command has no effect on calling it as a
+@c function from Lisp programs.
+コマンドが使用禁止であるかどうかは、
+そのコマンドを起動するキー列には無関係です。
+したがって、@kbd{M-x}でそのコマンドを起動しても
+Emacsはその可否を問い合わせてきます。
+Lispプログラムからコマンドを関数として呼び出す場合には
+使用禁止にしても何の効果もありません。
+
+@node Keyboard Translations
+@c @section Keyboard Translations
+@section キーボード変換
+
+@c   Some keyboards do not make it convenient to send all the special
+@c characters that Emacs uses.  The most common problem case is the
+@c @key{DEL} character.  Some keyboards provide no convenient way to type
+@c this very important character---usually because they were designed to
+@c expect the character @kbd{C-h} to be used for deletion.  On these
+@c keyboards, if you press the key normally used for deletion, Emacs handles
+@c the @kbd{C-h} as a prefix character and offers you a list of help
+@c options, which is not what you want.
+キーボードの機種によっては、Emacsが使用するすべての特殊文字を
+送ってくれないものがあります。
+もっともよくある問題は、@key{DEL}文字に関するものです。
+いくつかのキーボードでは、
+このきわめて重要な文字を簡単に打ち込む手段がありません。
+それは、削除には@kbd{C-h}を使うことを前提としているからです。
+そのようなキーボードで削除のためのキーを打つと、
+Emacsはそれをプレフィックス文字@kbd{C-h}として解釈し、
+どのヘルプ機能を使うか問い合わせてきてしまいます。
+それはユーザーがしたかったことではありません。
+
+@c @cindex keyboard translations
+@cindex キーボード変換
+@findex keyboard-translate
+@c   You can work around this problem within Emacs by setting up keyboard
+@c translations to turn @kbd{C-h} into @key{DEL} and @key{DEL} into
+@c @kbd{C-h}, as follows:
+Emacs内でこの問題を回避するには、@kbd{C-h}を@key{DEL}に、
+@key{DEL}を@kbd{C-h}に変換するキーボード変換を
+以下のように
+設定することで回避できます。
+
+@example
+@c ;; @r{Translate @kbd{C-h} to @key{DEL}.}
+;; @r{@kbd{C-h}を@key{DEL}に変換する。}
+(keyboard-translate ?\C-h ?\C-?)
+
+@need 3000
+@c ;; @r{Translate @key{DEL} to @kbd{C-h}.}
+;; @r{@key{DEL}を@kbd{C-h}に変換する。}
+(keyboard-translate ?\C-? ?\C-h)
+@end example
+
+@c   Keyboard translations are not the same as key bindings in keymaps
+@c (@pxref{Keymaps}).  Emacs contains numerous keymaps that apply in
+@c different situations, but there is only one set of keyboard
+@c translations, and it applies to every character that Emacs reads from
+@c the terminal.  Keyboard translations take place at the lowest level of
+@c input processing; the keys that are looked up in keymaps contain the
+@c characters that result from keyboard translation.
+キーボード変換はキーマップによるキーバインディング（@pxref{Keymaps}）と
+同じではありません。
+Emacsには状況ごとに使い分けられる多数のキーマップがあるのに対し、
+キーボード変換は一式だけしかなく、
+Emacsが端末から読むすべての文字に対してその変換が適用されます。
+キーボード変換は入力処理のいちばん下位のレベルで行われ、
+キーマップ上の検索はキーボード変換を施した結果に対して行われます。
+
+@c   Under X, the keyboard key named @key{DELETE} is a function key and is
+@c distinct from the ASCII character named @key{DEL}.  @xref{Named ASCII
+@c Chars}.  Keyboard translations affect only ASCII character input, not
+@c function keys; thus, the above example used under X does not affect the
+@c @key{DELETE} key.  However, the translation above isn't necessary under
+@c X, because Emacs can also distinguish between the @key{BACKSPACE} key
+@c and @kbd{C-h}; and it normally treats @key{BACKSPACE} as @key{DEL}.
+Xウィンドウシステムでは@key{DELETE}というキーはファンクションキーであり、
+ASCII文字@key{DEL}とは別ものです。
+@xref{Named ASCII Chars}。
+キーボード変換はASCII文字入力だけに適用され、
+ファンクションキーとは無関係ですから、
+Xウィンドウシステムでは上の例は@key{DELETE}キーに対して効果をもたらしません。
+しかし、Xウィンドウシステムでは上のようなキーボード変換そのものが不要です。
+というのは、EmacsはXウィンドウシステムでは
+@key{BACKSPACE}キーと@kbd{C-h}も区別でき、
+通常、@key{BAKSPACE}を@key{DEL}として扱うからです。
+
+@c   For full information about how to use keyboard translations, see
+@c @ref{Translating Input,,,elisp, The Emacs Lisp Reference Manual}.
+キーボード変換の使い方に関する詳しい情報は、
+@ref{Translating Input,, 入力イベントの変換, elisp,
+Emacs Lisp リファレンスマニュアル}を
+参照してください。
+
+@node Syntax
+@c @section The Syntax Table
+@section 構文テーブル
+@c @cindex syntax table
+@cindex 構文テーブル
+
+@c   All the Emacs commands which parse words or balance parentheses are
+@c controlled by the @dfn{syntax table}.  The syntax table says which
+@c characters are opening delimiters, which are parts of words, which are
+@c string quotes, and so on.  Each major mode has its own syntax table
+@c (though sometimes related major modes use the same one) which it
+@c installs in each buffer that uses that major mode.  The syntax table
+@c installed in the current buffer is the one that all commands use, so we
+@c call it ``the'' syntax table.  A syntax table is a Lisp object, a
+@c char-table, whose elements are numbers.
+単語や対応した括弧の対を認識するEmacsコマンドはすべて、
+@dfn{構文テーブル}（syntax table）によって制御されます。
+構文テーブルは、どの文字が開き括弧で、どの文字が単語の中身で、
+どの文字がシングルクォートかといったことを記述しています。
+各メジャーモードにはそれぞれ専用の構文テーブルがあり
+（ただし、互いに関係のあるメジャーモードが
+1つの構文テーブルを共用することはある）、
+各バッファごとにそのときのメジャーモードの構文テーブルが使われます。
+カレントバッファに設定されている構文テーブルはすべてのコマンドが使うので、
+以下ではこれを『現在の』構文テーブルと呼びます。
+構文テーブルは文字テーブル（char-table）型のLispオブジェクトであり、
+その要素は数値です。
+
+@kindex C-h s
+@findex describe-syntax
+@c   To display a description of the contents of the current syntax table,
+@c type @kbd{C-h s} (@code{describe-syntax}).  The description of each
+@c character includes both the string you would have to give to
+@c @code{modify-syntax-entry} to set up that character's current syntax,
+@c and some English to explain that string if necessary.
+現在の構文テーブルの内容に関する記述を表示するには、
+@kbd{C-h s}（@code{descirbe-syntax}）を使います。
+記述の表示には各文字ごとに、
+その文字の現在の構文を設定するために@code{modify-syntax-entry}に
+渡すべき文字列、および、その文字列の英語での説明が含まれます。
+
+@c   For full information on the syntax table, see @ref{Syntax Tables,,
+@c Syntax Tables, elisp, The Emacs Lisp Reference Manual}.
+構文テーブルに関する詳しい情報については、
+@ref{Syntax Tables,, 構文テーブル, elisp,
+Emacs Lisp リファレンスマニュアル}を
+参照してください。
+
+@node Init File
+@c @section The Init File, @file{~/.emacs}
+@section 初期化ファイル@file{~/.emacs}
+@c @cindex init file
+@c @cindex Emacs initialization file
+@c @cindex key rebinding, permanent
+@c @cindex rebinding keys, permanently
+@c @cindex startup (init file)
+@cindex 初期化ファイル
+@cindex Emacs初期化ファイル
+@cindex キーバインディングの恒久的な変更
+@cindex 実行開始（初期化ファイル）
+
+@c   When Emacs is started, it normally loads a Lisp program from the file
+@c @file{.emacs} or @file{.emacs.el} in your home directory.  We call this
+@c file your @dfn{init file} because it specifies how to initialize Emacs
+@c for you.  You can use the command line switch @samp{-q} to prevent
+@c loading your init file, and @samp{-u} (or @samp{--user}) to specify a
+@c different user's init file (@pxref{Entering Emacs}).
+Emacsが実行を開始するとき、通常はユーザーのホームディレクトリにある
+ファイル@file{.emacs}や@file{.emacs.el}からLispプログラムをロードします。
+このファイルがEmacsの初期化の仕方を指定するので、
+このファイルのことを@dfn{初期化ファイル}（init file）と呼びます。
+コマンド行オプション@samp{-q}で、
+Emacsに初期化ファイルを読まないことを指示したり、
+@samp{-u}（あるいは@samp{--user}）で、
+別のユーザーの初期化ファイルを指定できます
+（@pxref{Entering Emacs}）。
+
+@c   There can also be a @dfn{default init file}, which is the library
+@c named @file{default.el}, found via the standard search path for
+@c libraries.  The Emacs distribution contains no such library; your site
+@c may create one for local customizations.  If this library exists, it is
+@c loaded whenever you start Emacs (except when you specify @samp{-q}).
+@c But your init file, if any, is loaded first; if it sets
+@c @code{inhibit-default-init} non-@code{nil}, then @file{default} is not
+@c loaded.
+@dfn{デフォルトの初期化ファイル}もあります。
+これは@file{default.el}という名前のライブラリファイルで、
+Emacsはライブラリ探索パスをとおしてその場所を探します。
+Emacsの配布には@file{default.el}は含まれていません。
+ローカルなカスタマイズのためにサイトで@file{default.el}を
+用意することもあります。
+このファイルがあれば（@samp{-q}を指定したときを除いて）
+Emacsを開始するときつねにロードされます。
+しかし、あるならば個人の初期化ファイルが最初にロードされます。
+その中で@code{inhibit-default-init}に@code{nil}以外の値を設定すると、
+@file{default.el}はロードされません。
+
+@c   Your site may also have a @dfn{site startup file}; this is named
+@c @file{site-start.el}, if it exists.  Emacs loads this library before it
+@c loads your init file.  To inhibit loading of this library, use the
+@c option @samp{-no-site-file}.
+各サイトには@dfn{サイトスタートアップファイル}があるかもしれません。
+あるならば、このファイルの名前は@file{site-start.el}です。
+Emacsはユーザーの初期化ファイルを読むまえにこのファイルもロードします。
+このファイルのロードを抑止するには、
+オプション@samp{-no-site-file}を指定します。
+
+@c   If you have a large amount of code in your @file{.emacs} file, you
+@c should rename it to @file{~/.emacs.el}, and byte-compile it.  @xref{Byte
+@c Compilation,, Byte Compilation, elisp, the Emacs Lisp Reference Manual},
+@c for more information about compiling Emacs Lisp programs.
+@file{.emacs}に大量のコードがある場合には、
+@file{~/.emacs.el}と改名してバイトコンパイルしておくべきです。
+Emacs Lispプログラムのコンパイルについてより詳しくは、
+@xref{Byte Compilation,, バイトコンパイル, elisp,
+Emacs Lisp リファレンスマニュアル}。
+
+@c   If you are going to write actual Emacs Lisp programs that go beyond
+@c minor customization, you should read the @cite{Emacs Lisp Reference Manual}.
+単なるカスタマイズを超えるような実際のEmacsプログラムを書くのであれば、
+@cite{The Emacs Lisp Reference Manual}@footnote{【訳注】日本語訳：
+『Emacs Lispリファレンスマニュアル』、アスキー出版局、ISBN4-7561-3414-9
+}を読むべきです。
+@ifinfo
+@c @xref{Top, Emacs Lisp, Emacs Lisp, elisp, the Emacs Lisp Reference
+@c Manual}.
+@xref{Top, Emacs Lisp, Emacs Lisp, elisp, The Emacs Lisp Reference Manual}。
+@end ifinfo
+
+@menu
+* Init Syntax::	        Syntax of constants in Emacs Lisp.
+* Init Examples::       How to do some things with an init file.
+* Terminal Init::       Each terminal type can have an init file.
+* Find Init::	        How Emacs finds the init file.
+@end menu
+
+@node Init Syntax
+@c @subsection Init File Syntax
+@subsection 初期化ファイルの構文
+
+@c   The @file{.emacs} file contains one or more Lisp function call
+@c expressions.  Each of these consists of a function name followed by
+@c arguments, all surrounded by parentheses.  For example, @code{(setq
+@c fill-column 60)} calls the function @code{setq} to set the variable
+@c @code{fill-column} (@pxref{Filling}) to 60.
+ファイル@file{.emacs}にはLispの関数呼び出し式を書きます。
+関数呼び出しは、関数名に続けて引数リストを並べ、全体を括弧で囲みます。
+たとえば、@code{(setq fill-column 60)}は、
+関数@code{setq}によって、変数@code{fill-column}（@pxref{Filling}）に
+60を設定します。
+
+@c   The second argument to @code{setq} is an expression for the new value of
+@c the variable.  This can be a constant, a variable, or a function call
+@c expression.  In @file{.emacs}, constants are used most of the time.  They can be:
+@code{setq}の2番目の引数は変数の新しい値を表す式です。
+これは、定数でも、変数でも、関数呼び出し式でもかまいません。
+@file{.emacs}ファイルでは定数を使うことがもっとも多いでしょう。
+定数にはつぎのものがあります。
+
+@table @asis
+@c @item Numbers:
+@item 数値：
+@c Numbers are written in decimal, with an optional initial minus sign.
+数値は10進表記し、先頭にマイナス符号があってもよい。
+
+@c @item Strings:
+@c @cindex Lisp string syntax
+@c @cindex string syntax
+@item 文字列：
+@cindex Lispの文字列の構文
+@cindex 文字列の構文
+@c Lisp string syntax is the same as C string syntax with a few extra
+@c features.  Use a double-quote character to begin and end a string constant.
+Lispの文字列の構文はCの文字列の構文とほぼ同じだが、多少違うところもある。
+文字列定数の始まりと終りにはダブルクォートを使う。
+
+@c In a string, you can include newlines and special characters literally.
+@c But often it is cleaner to use backslash sequences for them: @samp{\n}
+@c for newline, @samp{\b} for backspace, @samp{\r} for carriage return,
+@c @samp{\t} for tab, @samp{\f} for formfeed (control-L), @samp{\e} for
+@c escape, @samp{\\} for a backslash, @samp{\"} for a double-quote, or
+@c @samp{\@var{ooo}} for the character whose octal code is @var{ooo}.
+@c Backslash and double-quote are the only characters for which backslash
+@c sequences are mandatory.
+文字列の中には、改行や特殊文字をそのまま入れることができる。
+しかし、バックスラッシュで始まる形式、つまり、
+改行は@samp{\n}、バックスペースは@samp{\b}、
+復帰は@samp{\r}、タブは@samp{\t}、ページ送りは@samp{\f}（コントロールL）、
+エスケープは@samp{\e}、バックスラッシュは@samp{\\}、
+ダブルクォートは@samp{\"}、8進コード@var{ooo}の文字は@samp{\@var{ooo}}で
+表すことができ、そのほうが読みやすい。
+バックスラッシュとダブルクォートの2つだけは、
+文字列に含めるのに必ずこのような形で書き表す必要がある。
+
+@c @samp{\C-} can be used as a prefix for a control character, as in
+@c @samp{\C-s} for ASCII control-S, and @samp{\M-} can be used as a prefix for
+@c a Meta character, as in @samp{\M-a} for @kbd{Meta-A} or @samp{\M-\C-a} for
+@c @kbd{Control-Meta-A}.@refill
+@samp{\C-}はコントロール文字を表すプレフィックスとして使用できる。
+たとえば、@samp{\C-s}でASCIIのコントロールSを表す。
+同様に、@samp{\M-}はメタ文字を表すプレフィックスとして使用できる。
+たとえば、@samp{\M-a}で@kbd{Meta-A}、
+@samp{\M-\C-a}で@kbd{Control-Meta-A}を表す。
+
+@c @item Characters:
+@item 文字：
+@c Lisp character constant syntax consists of a @samp{?} followed by
+@c either a character or an escape sequence starting with @samp{\}.
+@c Examples: @code{?x}, @code{?\n}, @code{?\"}, @code{?\)}.  Note that
+@c strings and characters are not interchangeable in Lisp; some contexts
+@c require one and some contexts require the other.
+Lispの文字定数は、@samp{?}に続けて文字または@samp{\}で始まる
+エスケープシーケンスを書いたもの。
+たとえば、@code{?x}、@code{?\n}、@code{?\)}などは文字定数。
+Lispでは文字と文字列は別ものなので注意すること。
+ある場面では文字列が必要であり、別の場面では文字が必要である。
+
+@c @item True:
+@item 真：
+@c @code{t} stands for `true'.
+@code{t}は「真」を表す。
+
+@c @item False:
+@item 偽：
+@c @code{nil} stands for `false'.
+@code{nil}は「偽」を表す。
+
+@c @item Other Lisp objects:
+@item その他のLispオブジェクト：
+@c Write a single-quote (') followed by the Lisp object you want.
+シングルクォートに続けてそのLispオブジェクトを書く。
+@end table
+
+@node Init Examples
+@c @subsection Init File Examples
+@subsection 初期化ファイルの例
+
+@c   Here are some examples of doing certain commonly desired things with
+@c Lisp expressions:
+以下にはよく使われるLispの式の例をあげておきます。
+
+@itemize @bullet
+@item
+@c Make @key{TAB} in C mode just insert a tab if point is in the middle of a
+@c line.
+Cモードにおいて、行の途中で@key{TAB}が押されたときには
+タブ文字を挿入するように設定する。
+
+@example
+(setq c-tab-always-indent nil)
+@end example
+
+@c Here we have a variable whose value is normally @code{t} for `true'
+@c and the alternative is @code{nil} for `false'.
+変数の値を「真」にするには@code{t}を設定し、
+逆に「偽」にするには@code{nil}を設定する。
+
+@item
+@c Make searches case sensitive by default (in all buffers that do not
+@c override this).
+探索をデフォルトで大文字小文字を区別するように設定する
+（ただし、違う設定に変更しているバッファは除く）。
+
+@example
+(setq-default case-fold-search nil)
+@end example
+
+@c This sets the default value, which is effective in all buffers that do
+@c not have local values for the variable.  Setting @code{case-fold-search}
+@c with @code{setq} affects only the current buffer's local value, which
+@c is not what you probably want to do in an init file.
+ここでは@code{setq-default}で変数のデフォルト値を設定し、
+その変数に対してローカルな値を設定していないすべてのバッファで有効である。
+@code{setq}で@code{case-fold-search}に値を設定すると、
+カレントバッファのローカルな値だけに影響し、
+初期化ファイルで記述したいこととは異なるだろう。
+
+@item
+@vindex user-mail-address
+@c Specify your own email address, if Emacs can't figure it out correctly.
+Emacsが自動的にメイルアドレスを割り出せない場合に備え、
+この変数に自分のメイルアドレスを指定する。
+
+@example
+(setq user-mail-address "coon@@yoyodyne.com")
+@end example
+
+@c Various Emacs packages that need your own email address use the value of
+@c @code{user-mail-address}.
+メイルアドレスを必要とする多くのEmacsパッケージは、
+@code{user-mail-address}の値を使う。
+
+@item
+@c Make Text mode the default mode for new buffers.
+新たに作ったバッファのデフォルトのモードをテキストモードにする。
+
+@example
+(setq default-major-mode 'text-mode)
+@end example
+
+@c Note that @code{text-mode} is used because it is the command for
+@c entering Text mode.  The single-quote before it makes the symbol a
+@c constant; otherwise, @code{text-mode} would be treated as a variable
+@c name.
+@code{text-mode}を指定しているのは、
+これがテキストモードに入るためのコマンドだから。
+コマンド名のまえのシングルクォートは、シンボルを定数として扱うため。
+さもないと@code{text-mode}という変数を参照することになってしまう。
+
+@need 1500
+@item
+@c Set up defaults for the Latin-1 character set
+@c which supports most of the languages of Western Europe.
+西ヨーロッパのほとんどの言語を扱えるLatin-1文字集合をデフォルトとする
+@footnote{【訳注】日本語環境を設定するには、
+@example
+(set-language-environment "Japanese")
+@end example
+とする。}。
+
+@example
+(set-language-environment "Latin-1")
+@end example
+
+@need 1500
+@item
+@c Turn on Auto Fill mode automatically in Text mode and related modes.
+テキストモードやそれに関連するモードでは、自動詰め込みモードをオンにする。
+
+@example
+(add-hook 'text-mode-hook
+  '(lambda () (auto-fill-mode 1)))
+@end example
+
+@c This shows how to add a hook function to a normal hook variable
+@c (@pxref{Hooks}).  The function we supply is a list starting with
+@c @code{lambda}, with a single-quote in front of it to make it a list
+@c constant rather than an expression.
+これはノーマルフック変数（@pxref{Hooks}）にフック関数を追加する例。
+ここでは関数として@code{lambda}で始まるリストを指定し、
+シングルクォートを前置して式ではなく定数として扱わせる。
+
+@c It's beyond the scope of this manual to explain Lisp functions, but for
+@c this example it is enough to know that the effect is to execute
+@c @code{(auto-fill-mode 1)} when Text mode is entered.  You can replace
+@c that with any other expression that you like, or with several
+@c expressions in a row.
+Lispの関数について説明するのは本書の範囲外だが、
+この例を理解するには、テキストモードに入るときに
+@code{(auto-fill-mode 1)}が実行されるのだと考えておけば十分。
+この式を別の式に変えたり、式を複数並べてもかまわない。
+
+@c Emacs comes with a function named @code{turn-on-auto-fill} whose
+@c definition is @code{(lambda () (auto-fill-mode 1))}.  Thus, a simpler
+@c way to write the above example is as follows:
+Emacsには@code{turn-on-auto-fill}という関数が用意されており、
+その定義は@code{(lambda () (auto-fill-mode 1))}になっている。
+したがって、上の例をもっと簡単に書くとつぎのようになる。
+
+@example
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+@end example
+
+@item
+@c Load the installed Lisp library named @file{foo} (actually a file
+@c @file{foo.elc} or @file{foo.el} in a standard Emacs directory).
+あらかじめ用意してあるLispライブラリ@file{foo}
+（実際には標準Emacsディレクトリに置かれたファイル@file{foo.elc}
+または@file{foo.el}）をロードする。
+
+@example
+(load "foo")
+@end example
+
+@c When the argument to @code{load} is a relative file name, not starting
+@c with @samp{/} or @samp{~}, @code{load} searches the directories in
+@c @code{load-path} (@pxref{Lisp Libraries}).
+@code{load}に渡す引数が相対ファイル名、つまり、
+@samp{/}や@samp{~}で始まらない場合には、
+@code{load}は@code{load-path}（@pxref{Lisp Libraries}）の
+ディレクトリ群を順に探索する。
+
+@item
+@c Load the compiled Lisp file @file{foo.elc} from your home directory.
+自分のホームディレクトリにあるコンパイル済みのLispファイル@file{foo.elc}を
+ロードする。
+
+@example
+(load "~/foo.elc")
+@end example
+
+@c Here an absolute file name is used, so no searching is done.
+ここでは絶対ファイル名が使われているので、探索は行わない。
+
+@item
+@c Rebind the key @kbd{C-x l} to run the function @code{make-symbolic-link}.
+キー@kbd{C-x l}で関数@code{make-symbolic-link}が実行されるように
+バインディングを設定する。
+
+@example
+(global-set-key "\C-xl" 'make-symbolic-link)
+@end example
+
+@c or
+または
+
+@example
+(define-key global-map "\C-xl" 'make-symbolic-link)
+@end example
+
+@c Note once again the single-quote used to refer to the symbol
+@c @code{make-symbolic-link} instead of its value as a variable.
+ここでもシンボル@code{make-symbolic-link}を変数としての値ではなく
+定数とするためにシングルクォートが使われていることに注意。
+
+@item
+@c Do the same thing for Lisp mode only.
+上と同じだが、Lispモードの中だけでのバインディングを設定する。
+
+@example
+(define-key lisp-mode-map "\C-xl" 'make-symbolic-link)
+@end example
+
+@item
+@c Redefine all keys which now run @code{next-line} in Fundamental mode
+@c so that they run @code{forward-line} instead.
+基本（fundamental）モードで@code{next-line}を
+実行するようになっているすべてのキーを、
+かわりに@code{forward-line}を実行するように直す。
+
+@example
+(substitute-key-definition 'next-line 'forward-line
+                           global-map)
+@end example
+
+@item
+@c Make @kbd{C-x C-v} undefined.
+@kbd{C-x C-v}を未定義にする。
+
+@example
+(global-unset-key "\C-x\C-v")
+@end example
+
+@c One reason to undefine a key is so that you can make it a prefix.
+@c Simply defining @kbd{C-x C-v @var{anything}} will make @kbd{C-x C-v} a
+@c prefix, but @kbd{C-x C-v} must first be freed of its usual non-prefix
+@c definition.
+キーを未定義にする必要のある場合の1つとして、
+そのキーをプレフィックスにしたい場合がある。
+たとえば、@kbd{C-x C-v @var{anything}}を定義すると、
+@kbd{C-x C-v}は自動的プレフィックスになるが、
+しかしそのまえに@kbd{C-x C-v}の通常の（プレフィックスではない）定義を
+未定義に戻しておく必要がある。
+
+@item
+@c Make @samp{$} have the syntax of punctuation in Text mode.
+@c Note the use of a character constant for @samp{$}.
+@samp{$}をテキスト（text）モードでの区切り文字にする。
+@samp{$}を文字定数として指定していることに注意。
+
+@example
+(modify-syntax-entry ?\$ "." text-mode-syntax-table)
+@end example
+
+@item
+@c Enable the use of the command @code{narrow-to-region} without confirmation.
+コマンド@code{narrow-to-region}を確認なしに使えるようにする。
+
+@example
+(put 'narrow-to-region 'disabled nil)
+@end example
+@end itemize
+
+@node Terminal Init
+@c @subsection Terminal-specific Initialization
+@subsection 端末に固有の初期化
+
+@c   Each terminal type can have a Lisp library to be loaded into Emacs when
+@c it is run on that type of terminal.  For a terminal type named
+@c @var{termtype}, the library is called @file{term/@var{termtype}} and it is
+@c found by searching the directories @code{load-path} as usual and trying the
+@c suffixes @samp{.elc} and @samp{.el}.  Normally it appears in the
+@c subdirectory @file{term} of the directory where most Emacs libraries are
+@c kept.@refill
+各端末種別ごとに、Emacsがその端末で動くときにロードするライブラリを
+指定できます。
+つまり、@var{termtype}という名前の端末でEmacsを起動するときには、
+@file{term/@var{termtype}}というライブラリがロードされます。
+ライブラリの探索は通常どおり
+@code{load-path}の各ディレクトリに対して行われ、
+ファイルの拡張子は@samp{.elc}か@samp{.el}です。
+通常、これらのライブラリはほとんどの
+Emacsライブラリを収めたディレクトリの下の@file{term}という
+サブディレクトリに置かれます。
+
+@c   The usual purpose of the terminal-specific library is to map the
+@c escape sequences used by the terminal's function keys onto more
+@c meaningful names, using @code{function-key-map}.  See the file
+@c @file{term/lk201.el} for an example of how this is done.  Many function
+@c keys are mapped automatically according to the information in the
+@c Termcap data base; the terminal-specific library needs to map only the
+@c function keys that Termcap does not specify.
+端末固有のライブラリの普通の用途は、端末のファンクションキーによって
+送出されるエスケープシーケンスを@code{function-key-map}を使って意味の
+ある名前に対応付けることです。
+このような設定を行うファイルの例として、たとえば
+ファイル@file{term/kl201.el}を見てみてください。
+多くのファンクションキーはtermcapデータベースの情報に
+基づいて自動的に対応付けがなされます。
+端末固有ライブラリでは、termcapで指定されていないファンクションキー
+だけを対応付ければよいのです。
+
+@c   When the terminal type contains a hyphen, only the part of the name
+@c before the first hyphen is significant in choosing the library name.
+@c Thus, terminal types @samp{aaa-48} and @samp{aaa-30-rv} both use
+@c the library @file{term/aaa}.  The code in the library can use
+@c @code{(getenv "TERM")} to find the full terminal type name.@refill
+端末種別にハイフンが含まれている場合は、
+ライブラリ名の選択には最初のハイフンよりまえの部分だけが使われます。
+つまり、端末種別@samp{aaa-48}と@samp{aaa-30-rv}では、
+どちらも@file{term/aaa}をロードします。
+ライブラリ中のコードでは@code{(getenv "TERM")}を
+使って必要なら完全な端末種別名を取得できます。
+
+@vindex term-file-prefix
+@c   The library's name is constructed by concatenating the value of the
+@c variable @code{term-file-prefix} and the terminal type.  Your @file{.emacs}
+@c file can prevent the loading of the terminal-specific library by setting
+@c @code{term-file-prefix} to @code{nil}.
+端末ライブラリの名前は、変数@code{term-file-prefix}と端末種別とを
+連結して作られます。
+ファイル@file{.emacs}中で@code{term-file-prefix}を
+@code{nil}に設定すると端末ライブラリのロードを抑止できます。
+
+@vindex term-setup-hook
+@c   Emacs runs the hook @code{term-setup-hook} at the end of
+@c initialization, after both your @file{.emacs} file and any
+@c terminal-specific library have been read in.  Add hook functions to this
+@c hook if you wish to override part of any of the terminal-specific
+@c libraries and to define initializations for terminals that do not have a
+@c library.  @xref{Hooks}.
+Emacsは@file{.emacs}と端末ライブラリを読んだあと、
+初期化の最後にフック@code{term-setup-hook}を実行します。
+端末ライブラリによる指定を一部変更したり、
+端末ライブラリがない端末の初期設定を行いたければ、
+このフックにフック関数を追加してください。
+@xref{Hooks}。
+
+@node Find Init
+@c @subsection How Emacs Finds Your Init File
+@subsection 個人の初期化ファイルの探し方
+
+@c   Normally Emacs uses the environment variable @code{HOME} to find
+@c @file{.emacs}; that's what @samp{~} means in a file name.  But if you
+@c have done @code{su}, Emacs tries to find your own @file{.emacs}, not
+@c that of the user you are currently pretending to be.  The idea is
+@c that you should get your own editor customizations even if you are
+@c running as the super user.
+通常、Emacsは環境変数@code{HOME}に基づいて@file{.emacs}を探し、
+ファイル名の@samp{~}の意味を定めます。
+しかし、@code{su}を実行したあとでは、Emacsは（su実行前の）
+もとのユーザーの@file{.emacs}を読もうとし、
+suした先のユーザーのではありません。
+これは、たとえスーパーユーザーになっているとしても、
+本来のユーザー独自のエディタのカスタマイズを使うべきだと考えるからです。
+
+@c   More precisely, Emacs first determines which user's init file to use.
+@c It gets the user name from the environment variables @code{LOGNAME} and
+@c @code{USER}; if neither of those exists, it uses effective user-ID.
+@c If that user name matches the real user-ID, then Emacs uses @code{HOME};
+@c otherwise, it looks up the home directory corresponding to that user
+@c name in the system's data base of users.
+@c @c  LocalWords:  backtab
+より正確には、Emacsはまずどのユーザーの初期化ファイルを使うかを決めます。
+それにはまず環境変数@code{LOGNAME}および@code{USER}からユーザー名を取得します。
+これらの環境変数がみつからなければ、Emacsは実効ユーザーIDを参照します。
+ユーザー名と実ユーザーIDが一致すれば、Emacsは@code{HOME}を利用します。
+一致しない場合は、システムのユーザーデータベースから
+そのユーザー名に対応するホームディレクトリを探して使用します。
