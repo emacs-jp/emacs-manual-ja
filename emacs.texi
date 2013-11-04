@@ -1,4 +1,5 @@
-\input texinfo
+\input texinfo  @c -*- coding: utf-8 -*-
+
 @c =============================================================
 @c = 元 翻 訳: 田中聡＠東京女子大学
 @c = 加筆修正: 大木敦雄＠大塚.筑波大学 = 1998/11/25
@@ -12,331 +13,1257 @@
 @c =============================================================
 
 @setfilename ../info/emacs-ja
-@c @settitle GNU Emacs Manual
-@settitle GNU Emacsマニュアル
+@settitle GNU Emacs マニュアル
 
-@c The edition number appears in several places in this file
-@set EDITION   Fourteenth
-@set EMACSVER  21.3.50
+@c The edition number appears in more than one place in this file
+@c I don't really know what it means...
+@c For example, it has said "Sixteenth" since sometime in the Emacs 22
+@c series, all through 23, and into 24.  So it is not very useful IMO,
+@c and offers nothing that EMACSVER does not.  I guess it relates
+@c mainly to the published book sold by the FSF.  Hence no longer
+@c bother including it except iftex.  Really, I think it should not be
+@c here at all (since anyone can make a pdf version), but should just
+@c be something added by the FSF during the publishing process.
+@c Also, the lispref uses a float (3.0), whereas this uses an ordinal,
+@c so the format is not even consistent.
+@set EDITION   Seventeenth
+@include emacsver.texi
 
-@ignore
 @copying
-@c This is the @value{EDITION} edition of the @cite{GNU Emacs Manual},
-@c updated for Emacs version @value{EMACSVER}.
-Emacs @value{EMACSVER}版対応に改訂した@cite{GNU Emacs Manual} @value{EDITION} 版です。
-@c Please REMEMBER to update edition number in *three* places in this file.
+@iftex
+本書は @cite{GNU Emacs Manual} @value{EDITION} 版であり、@*
+@end iftex
+@ifnottex
+本書は @cite{GNU Emacs Manual} であり、
+@end ifnottex
+Emacs @value{EMACSVER}版対応に改訂している。
 
-Copyright (C) 1985, 1986, 1987, 1993, 1994, 1995, 1996, 1997, 1998,
-1999, 2000, 2001, 2002 Free Software Foundation, Inc.
+Copyright @copyright{} 1985--1987, 1993--2013 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
+under the terms of the GNU Free Documentation License, Version 1.3 or
 any later version published by the Free Software Foundation; with the
-Invariant Sections being ``The GNU Manifesto'', ``Distribution'' and
-``GNU GENERAL PUBLIC LICENSE'', with the Front-Cover texts being ``A GNU
+Invariant Sections being ``The GNU Manifesto,'' ``Distribution'' and
+``GNU GENERAL PUBLIC LICENSE,'' with the Front-Cover texts being ``A GNU
 Manual,'' and with the Back-Cover Texts as in (a) below.  A copy of the
 license is included in the section entitled ``GNU Free Documentation
 License.''
 
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
 @end quotation
 @end copying
-@end ignore
+
+@documentencoding UTF-8
 
 @dircategory Emacs
 @direntry
-* Emacs: (emacs).	The extensible self-documenting text editor.
+* Emacs: (emacs).       The extensible self-documenting text editor.
 @end direntry
 
 @c in general, keep the following line commented out, unless doing a
-@c copy of this manual that will be published.  the manual should go
+@c copy of this manual that will be published.  The manual should go
 @c onto the distribution in the full, 8.5 x 11" size.
+@c @set smallbook
 
-@c @smallbook
+@ifset smallbook
+@smallbook
+@end ifset
 
-@setchapternewpage odd
+@c per rms and peterb, use 10pt fonts for the main text, mostly to
+@c save on paper cost.
+@c Do this inside @tex for now, so current makeinfo does not complain.
+@tex
+@ifset smallbook
+@fonttextsize 10
+@end ifset
+\global\hbadness=6666 % don't worry about not-too-underfull boxes
+@end tex
+
 @defcodeindex op
 @synindex pg cp
 
 @iftex
 @kbdinputstyle code
 
-@c @shorttitlepage GNU Emacs Manual
-@shorttitlepage GNU Emacsマニュアル
+@shorttitlepage GNU Emacs マニュアル
 @end iftex
 
 @titlepage
 @sp 6
-@c @center @titlefont{GNU Emacs Manual}
-@center @titlefont{GNU Emacsマニュアル}
+@center @titlefont{GNU Emacs マニュアル}
 @sp 4
-@c @center @value{EDITION} Edition, Updated for Emacs Version @value{EMACSVER}.
 @center 第@value{EDITION}版、 Emacsバージョン@value{EMACSVER}対応改訂版
 @sp 5
-@center Richard Stallman
+@center Richard Stallman et al.
 @page
 @vskip 0pt plus 1filll
 @insertcopying
 
 @sp 2
-ISBN 1-882114-06-X @*
 Published by the Free Software Foundation @*
-59 Temple Place, Suite 330 @*
-Boston, MA  02111-1307 USA
+51 Franklin Street, Fifth Floor @*
+Boston, MA 02110-1301 USA @*
+ISBN 978-0-9831592-4-7
 
-@c = 原著の表紙はそうだけど…
 @sp 2
-@c Cover art by Etienne Suvasa.
+Cover art by Etienne Suvasa; cover design by Matt Lee.
 
 @end titlepage
-@page
+
+
+@summarycontents
+@contents
+
+
 @ifnottex
-@node Top, GNU Free Documentation License, (dir), (dir)
+@node Top
 @top The Emacs Editor
 
-@c Emacs is the extensible, customizable, self-documenting real-time
-@c display editor.  This Info file describes how to edit with Emacs and
-@c some of how to customize it; it corresponds to GNU Emacs version
-@c @value{EMACSVER}.
-Emacsは、拡張可能で、カスタマイズ可能な、
-セルフドキュメント方式のリアルタイム画面エディタです。
-このinfoファイルでは、Emacsでの編集方法や
-Emacsのカスタマイズ方法の一部について説明します。
-GNU Emacs @value{EMACSVER}版に対応します。
+Emacsは、拡張可能で、カスタマイズ可能な、セルフドキュメント方式のリアルタ
+イム画面エディタです。このinfoファイルでは、Emacsでの編集方法やEmacsのカ
+スタマイズ方法の一部について説明します。GNU Emacs @value{EMACSVER}版に対
+応します。
+
+@ifset WWW_GNU_ORG
+@html
+The homepage for GNU Emacs is at
+<a href="/software/emacs/">http://www.gnu.org/software/emacs/</a>.<br>
+To view this manual in other formats, click
+<a href="/software/emacs/manual/emacs.html">here</a>.<br>
+You can also purchase a printed copy from the
+<a href="http://shop.fsf.org/product/emacs-manual/">FSF store</a>.
+@end html
+@end ifset
+
 @ifinfo
-@c If you never before used the Info documentation system, type @kbd{h},
-@c and Emacs will take you to a programmed instruction sequence for the
-@c Info commands.
-もしInfoによる文書を読んだことがなければ，@kbd{h}を入力し操作方法を練習するとい
-いでしょう．
+本書をEmacsで読んでいる場合は、@kbd{h}を入力しInfoの操作方法を練習すると
+いいでしょう．
 @end ifinfo
 
-@c For information on extending Emacs, see @ref{Top, Emacs Lisp,, elisp, The
-@c Emacs Lisp Reference Manual}.
 Emacsの拡張に関しては、
 @ref{Top, Emacs Lisp,, elisp, Emacs Lisp リファレンスマニュアル} を参照してください．
+
+@insertcopying
 @end ifnottex
 
-@ignore
-These subcategories have been deleted for simplicity
-and to avoid conflicts.
+@c Note that the TeX version generates its own TOC, so the ifnottex's
+@c here are not really necessary.
+@menu
+* Distrib::             How to get the latest Emacs distribution.
+* Intro::               An introduction to Emacs concepts.
+
+Important General Concepts
+* Screen::              How to interpret what you see on the screen.
+* User Input::          Kinds of input events (characters, buttons,
+                          function keys).
+* Keys::                Key sequences: what you type to request one
+                          editing action.
+* Commands::            Named functions run by key sequences to do editing.
+* Entering Emacs::      Starting Emacs from the shell.
+* Exiting::             Stopping or killing Emacs.
+
+本質的な編集コマンド
+* Basic::               The most basic editing commands.
+* Minibuffer::          Entering arguments that are prompted for.
+* M-x::                 Invoking commands by their names.
+* Help::                Commands for asking Emacs about its commands.
+
+重要なテキスト変更コマンド
+* Mark::                The mark: how to delimit a "region" of text.
+* Killing::             Killing (cutting) and yanking (copying) text.
+* Registers::           Saving a text string or a location in the buffer.
+* Display::             Controlling what text is displayed.
+* Search::              Finding or replacing occurrences of a string.
+* Fixit::               Commands especially useful for fixing typos.
+* Keyboard Macros::     Recording a sequence of keystrokes to be replayed.
+
+Emacsの主要な構造
+* Files::               All about handling files.
+* Buffers::             Multiple buffers; editing several files at once.
+* Windows::             Viewing multiple pieces of text in one frame.
+* Frames::              Using multiple "windows" on your display.
+* International::       Using non-@acronym{ASCII} character sets.
+
+中級向けの機能
+* Modes::               Major and minor modes alter Emacs's basic behavior.
+* Indentation::         Editing the white space at the beginnings of lines.
+* Text::                Commands and modes for editing human languages.
+* Programs::            Commands and modes for editing programs.
+* Building::            Compiling, running and debugging programs.
+* Maintaining::         Features for maintaining large programs.
+* Abbrevs::             Defining text abbreviations to reduce typing.
+* Dired::               Directory and file manager.
+* Calendar/Diary::      Calendar and diary facilities.
+* Sending Mail::        Sending mail in Emacs.
+* Rmail::               Reading mail in Emacs.
+* Gnus::                A flexible mail and news reader.
+* Document View::       Viewing PDF, PS and DVI files.
+* Shell::               Executing shell commands from Emacs.
+* Emacs Server::        Using Emacs as an editing server.
+* Printing::            Printing hardcopies of buffers or regions.
+* Sorting::             Sorting lines, paragraphs or pages within Emacs.
+@ifnottex
+* Picture Mode::        Editing pictures made up of text characters.
+@end ifnottex
+* Editing Binary Files::  Editing binary files with Hexl mode.
+* Saving Emacs Sessions:: Saving Emacs state from one session to the next.
+* Recursive Edit::      Performing edits while "within another command".
+* Emulation::           Emulating some other editors with Emacs.
+* Hyperlinking::        Following links in buffers.
+* Amusements::          Various games and hacks.
+* Packages::            Installing additional features.
+* Customization::       Modifying the behavior of Emacs.
+
+トラブルからの復旧
+* Quitting::            Quitting and aborting.
+* Lossage::             What to do if Emacs is hung or malfunctioning.
+* Bugs::                How and when to report a bug.
+* Contributing::        How to contribute improvements to Emacs.
+* Service::             How to get help for your own Emacs needs.
+
+Appendices
+* Copying::             The GNU General Public License gives you permission
+                          to redistribute GNU Emacs on certain terms;
+                          it also explains that there is no warranty.
+* GNU Free Documentation License:: The license for this documentation.
+* Emacs Invocation::    Hairy startup options.
+* X Resources::         X resources for customizing Emacs.
+* Antinews::            Information about Emacs version 23.
+* Mac OS / GNUstep::    Using Emacs under Mac OS and GNUstep.
+* Microsoft Windows::   Using Emacs on Microsoft Windows and MS-DOS.
+* Manifesto::           What's GNU?  Gnu's Not Unix!
+
+* Glossary::            Terms used in this manual.
+@ifnottex
+* Acknowledgments::     Major contributors to GNU Emacs.
+@end ifnottex
+
+索引
+* Key Index::           An item for each standard Emacs key sequence.
+* Option Index::        An item for every command-line option.
+* Command Index::       An item for each command name.
+* Variable Index::      An item for each documented variable.
+* Concept Index::       An item for each concept.
+
+@c Do NOT modify the following 3 lines!  They must have this form to
+@c be correctly identified by `texinfo-multiple-files-update'.  In
+@c particular, the detailed menu header line MUST be identical to the
+@c value of `texinfo-master-menu-header'.  See texnfo-upd.el.
+
+@detailmenu
+ --- The Detailed Node Listing ---
+ ---------------------------------
+
+Here are some other nodes which are really subnodes of the ones
+already listed, mentioned here so you can get to them in one step:
+
+The Organization of the Screen
+
+* Point::               The place in the text where editing commands operate.
+* Echo Area::           Short messages appear at the bottom of the screen.
+* Mode Line::           Interpreting the mode line.
+* Menu Bar::            How to use the menu bar.
+
+Basic Editing Commands
+
+* Inserting Text::      Inserting text by simply typing it.
+* Moving Point::        Moving the cursor to the place where you want to
+                        change something.
+* Erasing::             Deleting and killing text.
+* Basic Undo::          Undoing recent changes in the text.
+* Basic Files::         Visiting, creating, and saving files.
+* Basic Help::          Asking what a character does.
+* Blank Lines::         Making and deleting blank lines.
+* Continuation Lines::  How Emacs displays lines too wide for the screen.
+* Position Info::       What line, row, or column is point on?
+* Arguments::           Numeric arguments for repeating a command N times.
+* Repeating::           Repeating the previous command quickly.
+
+The Minibuffer
+
+* Basic Minibuffer::      Basic usage of the minibuffer.
+* Minibuffer File::     Entering file names with the minibuffer.
+* Minibuffer Edit::     How to edit in the minibuffer.
+* Completion::          An abbreviation facility for minibuffer input.
+* Minibuffer History::  Reusing recent minibuffer arguments.
+* Repetition::          Re-executing commands that used the minibuffer.
+* Passwords::           Entering passwords in the echo area.
+* Yes or No Prompts::   Replying yes or no in the echo area.
+
 Completion
+
+* Completion Example::  Examples of using completion.
+* Completion Commands:: A list of completion commands.
+* Completion Exit::     Completion and minibuffer text submission.
+* Completion Styles::   How completion matches are chosen.
+* Completion Options::  Options for completion.
+
+Help
+
+* Help Summary::        Brief list of all Help commands.
+* Key Help::            Asking what a key does in Emacs.
+* Name Help::           Asking about a command, variable or function name.
+* Apropos::             Asking what pertains to a given topic.
+* Help Mode::           Special features of Help mode and Help buffers.
+* Package Keywords::    Finding Lisp libraries by keywords (topics).
+* Language Help::       Help relating to international language support.
+* Misc Help::           Other help commands.
+* Help Files::          Commands to display auxiliary help files.
+* Help Echo::           Help on active text and tooltips ("balloon help").
+
+The Mark and the Region
+
+* Setting Mark::        Commands to set the mark.
+* Marking Objects::     Commands to put region around textual units.
+* Using Region::        Summary of ways to operate on contents of the region.
+* Mark Ring::           Previous mark positions saved so you can go back there.
+* Global Mark Ring::    Previous mark positions in various buffers.
+* Shift Selection::     Using shifted cursor motion keys.
+* Disabled Transient Mark:: Leaving regions unhighlighted by default.
+
+Killing and Moving Text
+
+* Deletion and Killing:: Commands that remove text.
+* Yanking::             Commands that insert text.
+* Cut and Paste::       Clipboard and selections on graphical displays.
+* Accumulating Text::   Other methods to add text to the buffer.
+* Rectangles::          Operating on text in rectangular areas.
+* CUA Bindings::        Using @kbd{C-x}/@kbd{C-c}/@kbd{C-v} to kill and yank.
+
+Deletion and Killing
+
+* Deletion::            Commands for deleting small amounts of text and
+                          blank areas.
+* Killing by Lines::    How to kill entire lines of text at one time.
+* Other Kill Commands:: Commands to kill large regions of text and
+                          syntactic units such as words and sentences.
+* Kill Options::        Options that affect killing.
+
+Yanking
+
+* Kill Ring::           Where killed text is stored.
+* Earlier Kills::       Yanking something killed some time ago.
+* Appending Kills::     Several kills in a row all yank together.
+
+"Cut and Paste" Operations on Graphical Displays
+
+* Clipboard::           How Emacs uses the system clipboard.
+* Primary Selection::   The temporarily selected text selection.
+* Secondary Selection:: Cutting without altering point and mark.
+
+Registers
+
+* Position Registers::      Saving positions in registers.
+* Text Registers::          Saving text in registers.
+* Rectangle Registers::     Saving rectangles in registers.
+* Configuration Registers:: Saving window configurations in registers.
+* Number Registers::        Numbers in registers.
+* File Registers::          File names in registers.
+* Bookmarks::               Bookmarks are like registers, but persistent.
+
+Controlling the Display
+
+* Scrolling::              Commands to move text up and down in a window.
+* Recentering::            A scroll command that centers the current line.
+* Auto Scrolling::         Redisplay scrolls text automatically when needed.
+* Horizontal Scrolling::   Moving text left and right in a window.
+* Narrowing::              Restricting display and editing to a portion
+                             of the buffer.
+* View Mode::              Viewing read-only buffers.
+* Follow Mode::            Follow mode lets two windows scroll as one.
+* Faces::                  How to change the display style using faces.
+* Colors::                 Specifying colors for faces.
+* Standard Faces::         The main predefined faces.
+* Text Scale::             Increasing or decreasing text size in a buffer.
+* Font Lock::              Minor mode for syntactic highlighting using faces.
+* Highlight Interactively:: Tell Emacs what text to highlight.
+* Fringes::                Enabling or disabling window fringes.
+* Displaying Boundaries::  Displaying top and bottom of the buffer.
+* Useless Whitespace::     Showing possibly spurious trailing whitespace.
+* Selective Display::      Hiding lines with lots of indentation.
+* Optional Mode Line::     Optional mode line display features.
+* Text Display::           How text characters are normally displayed.
+* Cursor Display::         Features for displaying the cursor.
+* Line Truncation::        Truncating lines to fit the screen width instead
+                             of continuing them to multiple screen lines.
+* Visual Line Mode::       Word wrap and screen line-based editing.
+* Display Custom::         Information on variables for customizing display.
+
+Searching and Replacement
+
+* Incremental Search::     Search happens as you type the string.
+* Nonincremental Search::  Specify entire string and then search.
+* Word Search::            Search for sequence of words.
+* Symbol Search::          Search for a source code symbol.
+* Regexp Search::          Search for match for a regexp.
+* Regexps::                Syntax of regular expressions.
+* Regexp Backslash::       Regular expression constructs starting with `\'.
+* Regexp Example::         A complex regular expression explained.
+* Search Case::            To ignore case while searching, or not.
+* Replace::                Search, and replace some or all matches.
+* Other Repeating Search:: Operating on all matches for some regexp.
+
+Incremental Search
+
+* Basic Isearch::        Basic incremental search commands.
+* Repeat Isearch::       Searching for the same string again.
+* Error in Isearch::     When your string is not found.
+* Special Isearch::      Special input in incremental search.
+* Isearch Yank::         Commands that grab text into the search string
+                           or else edit the search string.
+* Not Exiting Isearch::  Prefix argument and scrolling commands.
+* Isearch Minibuffer::   Incremental search of the minibuffer history.
+
+Replacement Commands
+
+* Unconditional Replace::  Replacing all matches for a string.
+* Regexp Replace::         Replacing all matches for a regexp.
+* Replacement and Case::   How replacements preserve case of letters.
+* Query Replace::          How to use querying.
+
+Commands for Fixing Typos
+
+* Undo::                The Undo commands.
+* Transpose::           Exchanging two characters, words, lines, lists...
+* Fixing Case::         Correcting case of last word entered.
+* Spelling::            Apply spelling checker to a word, or a whole file.
+
+Keyboard Macros
+
+* Basic Keyboard Macro::     Defining and running keyboard macros.
+* Keyboard Macro Ring::      Where previous keyboard macros are saved.
+* Keyboard Macro Counter::   Inserting incrementing numbers in macros.
+* Keyboard Macro Query::     Making keyboard macros do different things each
+                                time.
+* Save Keyboard Macro::      Giving keyboard macros names; saving them in
+                                files.
+* Edit Keyboard Macro::      Editing keyboard macros.
+* Keyboard Macro Step-Edit:: Interactively executing and editing a keyboard
+                                macro.
+
+File Handling
+
+* File Names::          How to type and edit file-name arguments.
+* Visiting::            Visiting a file prepares Emacs to edit the file.
+* Saving::              Saving makes your changes permanent.
+* Reverting::           Reverting cancels all the changes not saved.
+@ifnottex
+* Autorevert::          Auto Reverting non-file buffers.
+@end ifnottex
+* Auto Save::           Auto Save periodically protects against loss of data.
+* File Aliases::        Handling multiple names for one file.
+* Directories::         Creating, deleting, and listing file directories.
+* Comparing Files::     Finding where two files differ.
+* Diff Mode::           Mode for editing file differences.
+* Misc File Ops::       Other things you can do on files.
+* Compressed Files::    Accessing compressed files.
+* File Archives::       Operating on tar, zip, jar etc. archive files.
+* Remote Files::        Accessing files on other machines.
+* Quoted File Names::   Quoting special characters in file names.
+* File Name Cache::     Completion against a list of files you often use.
+* File Conveniences::   Convenience Features for Finding Files.
+* Filesets::            Handling sets of files.
+
+Saving Files
+
+* Save Commands::       Commands for saving files.
+* Backup::              How Emacs saves the old version of your file.
+* Customize Save::      Customizing the saving of files.
+* Interlocking::        How Emacs protects against simultaneous editing
+                          of one file by two users.
+* File Shadowing::      Copying files to "shadows" automatically.
+* Time Stamps::         Emacs can update time stamps on saved files.
+
 Backup Files
+
+* Backup Names::        How backup files are named.
+* Backup Deletion::     Emacs deletes excess numbered backups.
+* Backup Copying::      Backups can be made by copying or renaming.
+
+@ifnottex
+Auto Reverting Non-File Buffers
+
+* Auto Reverting the Buffer Menu:: Auto Revert of the Buffer Menu.
+* Auto Reverting Dired::           Auto Revert of Dired buffers.
+* Supporting additional buffers::  How to add more Auto Revert support.
+@end ifnottex
+
 Auto-Saving: Protection Against Disasters
-Snapshots
-Text Mode
+
+* Auto Save Files::     The file where auto-saved changes are
+                          actually made until you save the file.
+* Auto Save Control::   Controlling when and how often to auto-save.
+* Recover::             Recovering text from auto-save files.
+
+Using Multiple Buffers
+
+* Select Buffer::       Creating a new buffer or reselecting an old one.
+* List Buffers::        Getting a list of buffers that exist.
+* Misc Buffer::         Renaming; changing read-onlyness; copying text.
+* Kill Buffer::         Killing buffers you no longer need.
+* Several Buffers::     How to go through the list of all buffers
+                          and operate variously on several of them.
+* Indirect Buffers::    An indirect buffer shares the text of another buffer.
+* Buffer Convenience::  Convenience and customization features for
+                          buffer handling.
+
+Convenience Features and Customization of Buffer Handling
+
+* Uniquify::            Making buffer names unique with directory parts.
+* Iswitchb::            Switching between buffers with substrings.
+* Buffer Menus::        Configurable buffer menu.
+
+Multiple Windows
+
+* Basic Window::        Introduction to Emacs windows.
+* Split Window::        New windows are made by splitting existing windows.
+* Other Window::        Moving to another window or doing something to it.
+* Pop Up Window::       Finding a file or buffer in another window.
+* Change Window::       Deleting windows and changing their sizes.
+* Displaying Buffers::  How Emacs picks a window for displaying a buffer.
+* Window Convenience::  Convenience functions for window handling.
+
+Displaying a Buffer in a Window
+
+* Window Choice::       How @code{display-buffer} works.
+
+Frames and Graphical Displays
+
+* Mouse Commands::      Moving, cutting, and pasting, with the mouse.
+* Word and Line Mouse:: Mouse commands for selecting whole words or lines.
+* Mouse References::    Using the mouse to select an item from a list.
+* Menu Mouse Clicks::   Mouse clicks that bring up menus.
+* Mode Line Mouse::     Mouse clicks on the mode line.
+* Creating Frames::     Creating additional Emacs frames with various contents.
+* Frame Commands::      Iconifying, deleting, and switching frames.
+* Fonts::               Changing the frame font.
+* Speedbar::            How to make and use a speedbar frame.
+* Multiple Displays::   How one Emacs instance can talk to several displays.
+* Frame Parameters::    Changing the colors and other modes of frames.
+* Scroll Bars::         How to enable and disable scroll bars; how to use them.
+* Drag and Drop::       Using drag and drop to open files and insert text.
+* Menu Bars::           Enabling and disabling the menu bar.
+* Tool Bars::           Enabling and disabling the tool bar.
+* Dialog Boxes::        Controlling use of dialog boxes.
+* Tooltips::            Displaying information at the current mouse position.
+* Mouse Avoidance::     Preventing the mouse pointer from obscuring text.
+* Non-Window Terminals::  Multiple frames on terminals that show only one.
+* Text-Only Mouse::     Using the mouse in text terminals.
+
+International Character Set Support
+
+* International Chars::     Basic concepts of multibyte characters.
+* Language Environments::   Setting things up for the language you use.
+* Input Methods::           Entering text characters not on your keyboard.
+* Select Input Method::     Specifying your choice of input methods.
+* Coding Systems::          Character set conversion when you read and
+                              write files, and so on.
+* Recognize Coding::        How Emacs figures out which conversion to use.
+* Specify Coding::          Specifying a file's coding system explicitly.
+* Output Coding::           Choosing coding systems for output.
+* Text Coding::             Choosing conversion to use for file text.
+* Communication Coding::    Coding systems for interprocess communication.
+* File Name Coding::        Coding systems for file @emph{names}.
+* Terminal Coding::         Specifying coding systems for converting
+                              terminal input and output.
+* Fontsets::                Fontsets are collections of fonts
+                              that cover the whole spectrum of characters.
+* Defining Fontsets::       Defining a new fontset.
+* Modifying Fontsets::      Modifying an existing fontset.
+* Undisplayable Characters::When characters don't display.
+* Unibyte Mode::            You can pick one European character set
+                              to use without multibyte characters.
+* Charsets::                How Emacs groups its internal character codes.
+* Bidirectional Editing::   Support for right-to-left scripts.
+
+Major and Minor Modes
+
+* Major Modes::         Text mode vs. Lisp mode vs. C mode...
+* Minor Modes::         Each minor mode is a feature you can turn on
+                          independently of any others.
+* Choosing Modes::      How modes are chosen when visiting files.
+
+Indentation
+
+* Indentation Commands::  More commands for performing indentation.
+* Tab Stops::             Stop points for indentation in Text modes.
+* Just Spaces::           Using only space characters for indentation.
+* Indent Convenience::    Optional indentation features.
+
+Commands for Human Languages
+
+* Words::               Moving over and killing words.
+* Sentences::           Moving over and killing sentences.
+* Paragraphs::          Moving over paragraphs.
+* Pages::               Moving over pages.
+* Filling::             Filling or justifying text.
+* Case::                Changing the case of text.
+* Text Mode::           The major modes for editing text files.
+* Outline Mode::        Editing outlines.
+* Org Mode::            The Emacs organizer.
+* TeX Mode::            Editing TeX and LaTeX files.
+* HTML Mode::           Editing HTML and SGML files.
+* Nroff Mode::          Editing input to the nroff formatter.
+* Enriched Text::       Editing text "enriched" with fonts, colors, etc.
+* Text Based Tables::   Commands for editing text-based tables.
+* Two-Column::          Splitting text columns into separate windows.
+
+Filling Text
+
+* Auto Fill::           Auto Fill mode breaks long lines automatically.
+* Fill Commands::       Commands to refill paragraphs and center lines.
+* Fill Prefix::         Filling paragraphs that are indented
+                          or in a comment, etc.
+* Adaptive Fill::       How Emacs can determine the fill prefix automatically.
+
 Outline Mode
+
+* Outline Format::      What the text of an outline looks like.
+* Outline Motion::      Special commands for moving through outlines.
+* Outline Visibility::  Commands to control what is visible.
+* Outline Views::       Outlines and multiple views.
+* Foldout::             Folding means zooming in on outlines.
+
+Org Mode
+
+* Org Organizer::       Managing TODO lists and agendas.
+* Org Authoring::       Exporting Org buffers to various formats.
+
 @TeX{} Mode
-Formatted Text
+
+* TeX Editing::         Special commands for editing in TeX mode.
+* LaTeX Editing::       Additional commands for LaTeX input files.
+* TeX Print::           Commands for printing part of a file with TeX.
+* TeX Misc::            Customization of TeX mode, and related features.
+
+Enriched Text
+
+* Enriched Mode::           Entering and exiting Enriched mode.
+* Hard and Soft Newlines::  There are two different kinds of newlines.
+* Editing Format Info::     How to edit text properties.
+* Enriched Faces::          Bold, italic, underline, etc.
+* Enriched Indentation::    Changing the left and right margins.
+* Enriched Justification::  Centering, setting text flush with the
+                              left or right margin, etc.
+* Enriched Properties::     The "special" text properties submenu.
+
+@c The automatic texinfo menu update inserts some duplicate items here
+@c (faces, colors, indentation, justification, properties), because
+@c they are listed in two menus.  But we already have them above, no
+@c need to list them twice.
+
+Editing Text-based Tables
+
+* Table Definition::    What is a text based table.
+* Table Creation::      How to create a table.
+* Table Recognition::   How to activate and deactivate tables.
+* Cell Commands::       Cell-oriented commands in a table.
+* Cell Justification::  Justifying cell contents.
+* Table Rows and Columns:: Inserting and deleting rows and columns.
+* Table Conversion::    Converting between plain text and tables.
+* Table Misc::          Table miscellany.
+
+Editing Programs
+
+* Program Modes::       Major modes for editing programs.
+* Defuns::              Commands to operate on major top-level parts
+                          of a program.
+* Program Indent::      Adjusting indentation to show the nesting.
+* Parentheses::         Commands that operate on parentheses.
+* Comments::            Inserting, killing, and aligning comments.
+* Documentation::       Getting documentation of functions you plan to call.
+* Hideshow::            Displaying blocks selectively.
+* Symbol Completion::   Completion on symbol names of your program or language.
+* Glasses::             Making identifiersLikeThis more readable.
+* Semantic::            Suite of editing tools based on source code parsing.
+* Misc for Programs::   Other Emacs features useful for editing programs.
+* C Modes::             Special commands of C, C++, Objective-C,
+                          Java, IDL, Pike and AWK modes.
+* Asm Mode::            Asm mode and its special features.
+@ifnottex
+* Fortran::             Fortran mode and its special features.
+@end ifnottex
+
+Top-Level Definitions, or Defuns
+
+* Left Margin Paren::   An open-paren or similar opening delimiter
+                          starts a defun if it is at the left margin.
+* Moving by Defuns::    Commands to move over or mark a major definition.
+* Imenu::               Making buffer indexes as menus.
+* Which Function::      Which Function mode shows which function you are in.
+
+Indentation for Programs
+
+* Basic Indent::        Indenting a single line.
+* Multi-line Indent::   Commands to reindent many lines at once.
+* Lisp Indent::         Specifying how each Lisp function should be indented.
+* C Indent::            Extra features for indenting C and related modes.
+* Custom C Indent::     Controlling indentation style for C and related modes.
+
+Commands for Editing with Parentheses
+
+* Expressions::         Expressions with balanced parentheses.
+* Moving by Parens::    Commands for moving up, down and across
+                          in the structure of parentheses.
+* Matching::            Insertion of a close-delimiter flashes matching open.
+
+Manipulating Comments
+
+* Comment Commands::    Inserting, killing, and aligning comments.
+* Multi-Line Comments:: Commands for adding and editing multi-line comments.
+* Options for Comments::Customizing the comment features.
+
+Documentation Lookup
+
+* Info Lookup::        Looking up library functions and commands in Info files.
+* Man Page::           Looking up man pages of library functions and commands.
+* Lisp Doc::           Looking up Emacs Lisp functions, etc.
+
+C and Related Modes
+
+* Motion in C::         Commands to move by C statements, etc.
+* Electric C::          Colon and other chars can automatically reindent.
+* Hungry Delete::       A more powerful DEL command.
+* Other C Commands::    Filling comments, viewing expansion of macros,
+                          and other neat features.
+
+@ifnottex
 Fortran Mode
+
+* Fortran Motion::      Moving point by statements or subprograms.
+* Fortran Indent::      Indentation commands for Fortran.
+* Fortran Comments::    Inserting and aligning comments.
+* Fortran Autofill::    Auto fill support for Fortran.
+* Fortran Columns::     Measuring columns for valid Fortran.
+* Fortran Abbrev::      Built-in abbrevs for Fortran keywords.
+
 Fortran Indentation
+
+* ForIndent Commands::  Commands for indenting and filling Fortran.
+* ForIndent Cont::      How continuation lines indent.
+* ForIndent Num::       How line numbers auto-indent.
+* ForIndent Conv::      Conventions you must obey to avoid trouble.
+* ForIndent Vars::      Variables controlling Fortran indent style.
+@end ifnottex
+
+Compiling and Testing Programs
+
+* Compilation::         Compiling programs in languages other
+                          than Lisp (C, Pascal, etc.).
+* Compilation Mode::    The mode for visiting compiler errors.
+* Compilation Shell::   Customizing your shell properly
+                          for use in the compilation buffer.
+* Grep Searching::      Searching with grep.
+* Flymake::             Finding syntax errors on the fly.
+* Debuggers::           Running symbolic debuggers for non-Lisp programs.
+* Executing Lisp::      Various modes for editing Lisp programs,
+                          with different facilities for running
+                          the Lisp programs.
+* Lisp Libraries::      How Lisp programs are loaded into Emacs.
+* Lisp Eval::           Executing a single Lisp expression in Emacs.
+* Lisp Interaction::    Executing Lisp in an Emacs buffer.
+* External Lisp::       Communicating through Emacs with a separate Lisp.
+
+Running Debuggers Under Emacs
+
+* Starting GUD::        How to start a debugger subprocess.
+* Debugger Operation::  Connection between the debugger and source buffers.
+* Commands of GUD::     Key bindings for common commands.
+* GUD Customization::   Defining your own commands for GUD.
+* GDB Graphical Interface::  An enhanced mode that uses GDB features to
+                          implement a graphical debugging environment.
+
+GDB Graphical Interface
+
+* GDB User Interface Layout::   Control the number of displayed buffers.
+* Source Buffers::              Use the mouse in the fringe/margin to
+                                control your program.
+* Breakpoints Buffer::          A breakpoint control panel.
+* Threads Buffer::              Displays your threads.
+* Stack Buffer::                Select a frame from the call stack.
+* Other GDB Buffers::           Other buffers for controlling the GDB state.
+* Watch Expressions::           Monitor variable values in the speedbar.
+* Multithreaded Debugging::     Debugging programs with several threads.
+
+Maintaining Large Programs
+
+* Version Control::     Using version control systems.
+* Change Log::          Maintaining a change history for your program.
+* Tags::                Go directly to any function in your program in one
+                          command.  Tags remembers which file it is in.
+* EDE::                 An integrated development environment for Emacs.
+@ifnottex
+* Emerge::              A convenient way of merging two versions of a program.
+@end ifnottex
+
+Version Control
+
+* Introduction to VC::  How version control works in general.
+* VC Mode Line::        How the mode line shows version control status.
+* Basic VC Editing::    How to edit a file under version control.
+* Log Buffer::          Features available in log entry buffers.
+* Registering::         Putting a file under version control.
+* Old Revisions::       Examining and comparing old versions.
+* VC Change Log::       Viewing the VC Change Log.
+* VC Undo::             Canceling changes before or after committing.
+* VC Ignore::           Ignore files under version control system.
+* VC Directory Mode::   Listing files managed by version control.
+* Branches::            Multiple lines of development.
+@ifnottex
+* Miscellaneous VC::    Various other commands and features of VC.
+* Customizing VC::      Variables that change VC's behavior.
+@end ifnottex
+
+Introduction to Version Control
+
+* Why Version Control?::    Understanding the problems it addresses.
+* Version Control Systems:: Supported version control back-end systems.
+* VCS Concepts::            Words and concepts related to version control.
+* VCS Merging::             How file conflicts are handled.
+* VCS Changesets::          How changes are grouped.
+* VCS Repositories::        Where version control repositories are stored.
+* Types of Log File::       The VCS log in contrast to the ChangeLog.
+
+Basic Editing under Version Control
+
+* VC With A Merging VCS::  Without locking: default mode for CVS.
+* VC With A Locking VCS::  RCS in its default mode, SCCS, and optionally CVS.
+* Advanced C-x v v::       Advanced features available with a prefix argument.
+
+VC Directory Mode
+
+* VC Directory Buffer::   What the buffer looks like and means.
+* VC Directory Commands:: Commands to use in a VC directory buffer.
+
+Version Control Branches
+
+* Switching Branches::    How to get to another existing branch.
+* VC Pull::               Updating the contents of a branch.
+* Merging::               Transferring changes between branches.
+* Creating Branches::     How to start a new branch.
+
+@ifnottex
+Miscellaneous Commands and Features of VC
+
+* Change Logs and VC::    Generating a change log file from log entries.
+* VC Delete/Rename::      Deleting and renaming version-controlled files.
+* Revision Tags::         Symbolic names for revisions.
+* Version Headers::       Inserting version control headers into working files.
+
+Customizing VC
+
+* General VC Options::    Options that apply to multiple back ends.
+* RCS and SCCS::          Options for RCS and SCCS.
+* CVS Options::           Options for CVS.
+@end ifnottex
+
+Change Logs
+
+* Change Log Commands:: Commands for editing change log files.
+* Format of ChangeLog:: What the change log file looks like.
+
+Tags Tables
+
+* Tag Syntax::          Tag syntax for various types of code and text files.
+* Create Tags Table::   Creating a tags table with @command{etags}.
+* Etags Regexps::       Create arbitrary tags using regular expressions.
+* Select Tags Table::   How to visit a tags table.
+* Find Tag::            Commands to find the definition of a specific tag.
+* Tags Search::         Using a tags table for searching and replacing.
+* List Tags::           Using tags for completion, and listing them.
+
+@ifnottex
+Merging Files with Emerge
+
+* Overview of Emerge::  How to start Emerge.  Basic concepts.
+* Submodes of Emerge::  Fast mode vs. Edit mode.
+                          Skip Prefers mode and Auto Advance mode.
+* State of Difference:: You do the merge by specifying state A or B
+                          for each difference.
+* Merge Commands::      Commands for selecting a difference,
+                          changing states of differences, etc.
+* Exiting Emerge::      What to do when you've finished the merge.
+* Combining in Emerge::     How to keep both alternatives for a difference.
+* Fine Points of Emerge::   Miscellaneous issues.
+@end ifnottex
+
+Abbrevs
+
+* Abbrev Concepts::     Fundamentals of defined abbrevs.
+* Defining Abbrevs::    Defining an abbrev, so it will expand when typed.
+* Expanding Abbrevs::   Controlling expansion: prefixes, canceling expansion.
+* Editing Abbrevs::     Viewing or editing the entire list of defined abbrevs.
+* Saving Abbrevs::      Saving the entire list of abbrevs for another session.
+* Dynamic Abbrevs::     Abbreviations for words already in the buffer.
+* Dabbrev Customization:: What is a word, for dynamic abbrevs.  Case handling.
+
+@ifnottex
+Editing Pictures
+
+* Basic Picture::         Basic concepts and simple commands of Picture Mode.
+* Insert in Picture::     Controlling direction of cursor motion
+                            after "self-inserting" characters.
+* Tabs in Picture::       Various features for tab stops and indentation.
+* Rectangles in Picture:: Clearing and superimposing rectangles.
+@end ifnottex
+
+Dired, the Directory Editor
+
+* Dired Enter::              How to invoke Dired.
+* Dired Navigation::         Special motion commands in the Dired buffer.
+* Dired Deletion::           Deleting files with Dired.
+* Flagging Many Files::      Flagging files based on their names.
+* Dired Visiting::           Other file operations through Dired.
+* Marks vs Flags::           Flagging for deletion vs marking.
+* Operating on Files::       How to copy, rename, print, compress, etc.
+                               either one file or several files.
+* Shell Commands in Dired::  Running a shell command on the marked files.
+* Transforming File Names::  Using patterns to rename multiple files.
+* Comparison in Dired::      Running @code{diff} by way of Dired.
+* Subdirectories in Dired::  Adding subdirectories to the Dired buffer.
+@ifnottex
+* Subdir Switches::          Subdirectory switches in Dired.
+@end ifnottex
+* Subdirectory Motion::      Moving across subdirectories, and up and down.
+* Hiding Subdirectories::    Making subdirectories visible or invisible.
+* Dired Updating::           Discarding lines for files of no interest.
+* Dired and Find::           Using @code{find} to choose the files for Dired.
+* Wdired::                   Operating on files by editing the Dired buffer.
+* Image-Dired::              Viewing image thumbnails in Dired.
+* Misc Dired Features::      Various other features.
+
+The Calendar and the Diary
+
+* Calendar Motion::     Moving through the calendar; selecting a date.
+* Scroll Calendar::     Bringing earlier or later months onto the screen.
+* Counting Days::       How many days are there between two dates?
+* General Calendar::    Exiting or recomputing the calendar.
+* Writing Calendar Files:: Writing calendars to files of various formats.
+* Holidays::            Displaying dates of holidays.
+* Sunrise/Sunset::      Displaying local times of sunrise and sunset.
+* Lunar Phases::        Displaying phases of the moon.
+* Other Calendars::     Converting dates to other calendar systems.
+* Diary::               Displaying events from your diary.
+* Appointments::        Reminders when it's time to do something.
+* Importing Diary::     Converting diary events to/from other formats.
+* Daylight Saving::     How to specify when daylight saving time is active.
+* Time Intervals::      Keeping track of time intervals.
+@ifnottex
+* Advanced Calendar/Diary Usage:: Advanced Calendar/Diary customization.
+@end ifnottex
+
+Movement in the Calendar
+
+* Calendar Unit Motion::      Moving by days, weeks, months, and years.
+* Move to Beginning or End::  Moving to start/end of weeks, months, and years.
+* Specified Dates::           Moving to the current date or another
+                                specific date.
+
+Conversion To and From Other Calendars
+
+* Calendar Systems::       The calendars Emacs understands
+                             (aside from Gregorian).
+* To Other Calendar::      Converting the selected date to various calendars.
+* From Other Calendar::    Moving to a date specified in another calendar.
+
+The Diary
+
+* Displaying the Diary::   Viewing diary entries and associated calendar dates.
+* Format of Diary File::   Entering events in your diary.
+* Date Formats::           Various ways you can specify dates.
+* Adding to Diary::        Commands to create diary entries.
+* Special Diary Entries::  Anniversaries, blocks of dates, cyclic entries, etc.
+
+@ifnottex
+More advanced features of the Calendar and Diary
+
+* Calendar Customizing::   Calendar layout and hooks.
+* Holiday Customizing::    Defining your own holidays.
+* Mayan Calendar::         Moving to a date specified in a Mayan calendar.
+* Date Display Format::    Changing the format.
+* Time Display Format::    Changing the format.
+* Diary Customizing::      Defaults you can set.
+* Non-Gregorian Diary::    Diary entries based on other calendars.
+* Diary Display::          A choice of ways to display the diary.
+* Fancy Diary Display::    Sorting diary entries, using included diary files.
+* Sexp Diary Entries::     More flexible diary entries.
+@end ifnottex
+
+Sending Mail
+
+* Mail Format::         Format of a mail message.
+* Mail Headers::        Details of some standard mail header fields.
+* Mail Aliases::        Abbreviating and grouping mail addresses.
+* Mail Commands::       Special commands for editing mail being composed.
+* Mail Signature::      Adding a signature to every message.
+* Mail Amusements::     Distracting the NSA; adding fortune messages.
+* Mail Methods::        Using alternative mail-composition methods.
+
+Mail Commands
+
+* Mail Sending::        Commands to send the message.
+* Header Editing::      Commands to move to header fields and edit them.
+* Citing Mail::         Quoting a message you are replying to.
+* Mail Misc::           Attachments, spell checking, etc.
+
+Reading Mail with Rmail
+
+* Rmail Basics::        Basic concepts of Rmail, and simple use.
+* Rmail Scrolling::     Scrolling through a message.
+* Rmail Motion::        Moving to another message.
+* Rmail Deletion::      Deleting and expunging messages.
+* Rmail Inbox::         How mail gets into the Rmail file.
+* Rmail Files::         Using multiple Rmail files.
+* Rmail Output::        Copying message out to files.
+* Rmail Labels::        Classifying messages by labeling them.
+* Rmail Attributes::    Certain standard labels, called attributes.
+* Rmail Reply::         Sending replies to messages you are viewing.
+* Rmail Summary::       Summaries show brief info on many messages.
+* Rmail Sorting::       Sorting messages in Rmail.
+* Rmail Display::       How Rmail displays a message; customization.
+* Rmail Coding::        How Rmail handles decoding character sets.
+* Rmail Editing::       Editing message text and headers in Rmail.
+* Rmail Digest::        Extracting the messages from a digest message.
+* Rmail Rot13::         Reading messages encoded in the rot13 code.
+* Movemail::            More details of fetching new mail.
+* Remote Mailboxes::    Retrieving mail from remote mailboxes.
+* Other Mailbox Formats:: Retrieving mail from local mailboxes in
+                          various formats.
+
+Rmail Summaries
+
+* Rmail Make Summary::  Making various sorts of summaries.
+* Rmail Summary Edit::  Manipulating messages from the summary.
+
+Gnus
+
+* Buffers of Gnus::     The group, summary, and article buffers.
+* Gnus Startup::        What you should know about starting Gnus.
+* Gnus Group Buffer::   A short description of Gnus group commands.
+* Gnus Summary Buffer:: A short description of Gnus summary commands.
+
+Document Viewing
+
+* DocView Navigation::  Navigating DocView buffers.
+* DocView Searching::   Searching inside documents.
+* DocView Slicing::     Specifying which part of a page is displayed.
+* DocView Conversion::  Influencing and triggering conversion.
+
+Running Shell Commands from Emacs
+
+* Single Shell::        How to run one shell command and return.
+* Interactive Shell::   Permanent shell taking input via Emacs.
+* Shell Mode::          Special Emacs commands used with permanent shell.
+* Shell Prompts::       Two ways to recognize shell prompts.
+* Shell History::       Repeating previous commands in a shell buffer.
+* Directory Tracking::  Keeping track when the subshell changes directory.
+* Shell Options::       Options for customizing Shell mode.
+* Terminal emulator::   An Emacs window as a terminal emulator.
+* Term Mode::           Special Emacs commands used in Term mode.
+* Remote Host::         Connecting to another computer.
+* Serial Terminal::     Connecting to a serial port.
+
 Shell Command History
 
-The ones for Dired and Rmail have had the items turned into :: items
-to avoid conflicts.
-Also Running Shell Commands from Emacs
-and Sending Mail and Registers and Minibuffer.
-@end ignore
+* Shell Ring::           Fetching commands from the history list.
+* Shell History Copying::Moving to a command and then copying it.
+* History References::   Expanding @samp{!}-style history references.
 
-@menu
-* GNU Free Documentation License::  The license for this documentation.
-* Screen::                      How to interpret what you see on the screen.
-* User Input::                  Kinds of input events (characters, buttons,
-                          function keys).
-* Entering Emacs::              Starting Emacs from the shell.
-* Basic::                       The most basic editing commands.
-* Minibuffer::                  Entering arguments that are prompted for.
-* M-x::                         Invoking commands by their names.
-* Help::                        Commands for asking Emacs about its commands.
+Using Emacs as a Server
 
-@c Important Text-Changing Commands
-重要なテキスト変更コマンド
-* Mark::                        The mark: how to delimit a ``region'' of text.
-* Killing::                     Killing text.
-* Registers::                   Saving a text string or a location in the buffer.
-* Display::                     Controlling what text is displayed.
-* Search::                      Finding or replacing occurrences of a string.
-* Fixit::                       Commands especially useful for fixing typos.
-* Keyboard Macros::             A keyboard macro records a sequence of
-			  keystrokes to be replayed with a single command.
+* Invoking emacsclient:: Connecting to the Emacs server.
+* emacsclient Options::  Emacs client startup options.
 
-@c Major Structures of Emacs
-Emacsの主要な構造
-* Files::                       All about handling files.
-* Buffers::                     Multiple buffers; editing several files at once.
-* Windows::                     Viewing two pieces of text at once.
-* Frames::                      Running the same Emacs session in multiple X windows.
-* International::               Using non-@acronym{ASCII} character sets (the MULE features).
+Printing Hard Copies
 
-@c Advanced Features
-中級向けの機能
-* Major Modes::                 Text mode vs. Lisp mode vs. C mode ...
-* Indentation::                 Editing the white space at the beginnings of lines.
-* Text::                        Commands and modes for editing English.
-* Programs::                    Commands and modes for editing programs.
-* Building::                    Compiling, running and debugging programs.
-* Maintaining::                 Features for maintaining large programs.
-* Abbrevs::                     How to define text abbreviations to reduce
-			  the number of characters you must type.
-* Picture::                     Editing pictures made up of characters
-			  using the quarter-plane screen model.
-* Sending Mail::                Sending mail in Emacs.
-* Rmail::                       Reading mail in Emacs.
-* Dired::                       You can ``edit'' a directory to manage files in it.
-* Calendar/Diary::              The calendar and diary facilities.
-* Gnus::                        How to read netnews with Emacs.
-* Customization::               Modifying the behavior of Emacs.
-* Quitting::                    Quitting and aborting.
-* Command Arguments::           Hairy startup options.
+* PostScript::           Printing buffers or regions as PostScript.
+* PostScript Variables:: Customizing the PostScript printing commands.
+* Printing Package::     An optional advanced printing interface.
 
-@c Fundamental Editing Commands
-基本的な編集コマンド
-* X Resources::                 X resources for customizing Emacs.
+Hyperlinking and Navigation Features
 
-@c Recovery from Problems
-トラブルからの復旧
-* Antinews::                    Information about Emacs version 20.
-* Mac OS::                      Using Emacs in the Mac.
-* MS-DOS::                      Using Emacs on MS-DOS (otherwise known as "MS-DOG").
-* Manifesto::                   What's GNU?  Gnu's Not Unix!
-* Glossary::                    The glossary.
-* Acknowledgments::             Major contributors to GNU Emacs.
+* Browse-URL::          Following URLs.
+* Goto Address mode::   Activating URLs.
+* FFAP::                Finding files etc. at point.
 
-@c Indexes (nodes containing large menus)
-索引
+Emacs Lisp Packages
+
+* Package Menu::         Buffer for viewing and managing packages.
+* Package Installation:: Options for package installation.
+* Package Files::        Where packages are installed.
+
+Customization
+
+* Easy Customization::  Convenient way to browse and change settings.
+* Variables::           Many Emacs commands examine Emacs variables
+                          to decide what to do; by setting variables,
+                          you can control their functioning.
+* Key Bindings::        The keymaps say what command each key runs.
+                          By changing them, you can "redefine" keys.
+* Init File::           How to write common customizations in the
+                          initialization file.
+
+Easy Customization Interface
+
+* Customization Groups::     How settings are classified.
+* Browsing Custom::          Browsing and searching for settings.
+* Changing a Variable::      How to edit an option's value and set the option.
+* Saving Customizations::    Saving customizations for future Emacs sessions.
+* Face Customization::       How to edit the attributes of a face.
+* Specific Customization::   Customizing specific settings or groups.
+* Custom Themes::            Collections of customization settings.
+* Creating Custom Themes::   How to create a new custom theme.
+
+Variables
+
+* Examining::           Examining or setting one variable's value.
+* Hooks::               Hook variables let you specify programs for parts
+                          of Emacs to run on particular occasions.
+* Locals::              Per-buffer values of variables.
+* File Variables::      How files can specify variable values.
+* Directory Variables:: How variable values can be specified by directory.
+
+Local Variables in Files
+
+* Specifying File Variables:: Specifying file local variables.
+* Safe File Variables::       Making sure file local variables are safe.
+
+Customizing Key Bindings
+
+* Keymaps::             Generalities.  The global keymap.
+* Prefix Keymaps::      Keymaps for prefix keys.
+* Local Keymaps::       Major and minor modes have their own keymaps.
+* Minibuffer Maps::     The minibuffer uses its own local keymaps.
+* Rebinding::           How to redefine one key's meaning conveniently.
+* Init Rebinding::      Rebinding keys with your initialization file.
+* Modifier Keys::       Using modifier keys in key bindings.
+* Function Keys::       Rebinding terminal function keys.
+* Named ASCII Chars::   Distinguishing @key{TAB} from @kbd{C-i}, and so on.
+* Mouse Buttons::       Rebinding mouse buttons in Emacs.
+* Disabling::           Disabling a command means confirmation is required
+                          before it can be executed.  This is done to protect
+                          beginners from surprises.
+
+The Emacs Initialization File
+
+* Init Syntax::         Syntax of constants in Emacs Lisp.
+* Init Examples::       How to do some things with an init file.
+* Terminal Init::       Each terminal type can have an init file.
+* Find Init::           How Emacs finds the init file.
+* Init Non-ASCII::      Using non-@acronym{ASCII} characters in an init file.
+
+Dealing with Emacs Trouble
+
+* DEL Does Not Delete:: What to do if @key{DEL} doesn't delete.
+* Stuck Recursive::     `[...]' in mode line around the parentheses.
+* Screen Garbled::      Garbage on the screen.
+* Text Garbled::        Garbage in the text.
+* Memory Full::         How to cope when you run out of memory.
+* Crashing::            What Emacs does when it crashes.
+* After a Crash::       Recovering editing in an Emacs session that crashed.
+* Emergency Escape::    What to do if Emacs stops responding.
+
+Reporting Bugs
+
+* Known Problems::      How to read about known problems and bugs.
+* Bug Criteria::        Have you really found a bug?
+* Understanding Bug Reporting:: How to report a bug effectively.
+* Checklist::           Steps to follow for a good bug report.
+* Sending Patches::     How to send a patch for GNU Emacs.
+
+Command Line Arguments for Emacs Invocation
+
+* Action Arguments::    Arguments to visit files, load libraries,
+                          and call functions.
+* Initial Options::     Arguments that take effect while starting Emacs.
+* Command Example::     Examples of using command line arguments.
+* Environment::         Environment variables that Emacs uses.
+* Display X::           Changing the default display and using remote login.
+* Font X::              Choosing a font for text, under X.
+* Colors X::            Choosing display colors.
+* Window Size X::       Start-up window size, under X.
+* Borders X::           Internal and external borders, under X.
+* Title X::             Specifying the initial frame's title.
+* Icons X::             Choosing what sort of icon to use, under X.
+* Misc X::              Other display options.
+
+Environment Variables
+
+* General Variables::   Environment variables that all versions of Emacs use.
+* Misc Variables::      Certain system-specific variables.
+* MS-Windows Registry:: An alternative to the environment on MS-Windows.
+
+X Options and Resources
+
+* Resources::           Using X resources with Emacs (in general).
+* Table of Resources::  Table of specific X resources that affect Emacs.
+* Lucid Resources::     X resources for Lucid menus.
+* Motif Resources::     X resources for Motif and LessTif menus.
+* GTK resources::       Resources for GTK widgets.
+
+GTK resources
+
+* GTK Resource Basics::   Basic usage of GTK+ resources.
+* GTK Widget Names::      How GTK+ widgets are named.
+* GTK Names in Emacs::    GTK widgets used by Emacs.
+* GTK styles::            What can be customized in a GTK widget.
+
+Emacs and Mac OS / GNUstep
+
+* Mac / GNUstep Basics::        Basic Emacs usage under GNUstep or Mac OS.
+* Mac / GNUstep Customization:: Customizations under GNUstep or Mac OS.
+* Mac / GNUstep Events::        How window system events are handled.
+* GNUstep Support::             Details on status of GNUstep support.
+
+Emacs and Microsoft Windows/MS-DOS
+
+* Windows Startup::     How to start Emacs on Windows.
+* Text and Binary::     Text files use CRLF to terminate lines.
+* Windows Files::       File-name conventions on Windows.
+* ls in Lisp::          Emulation of @code{ls} for Dired.
+* Windows HOME::        Where Emacs looks for your @file{.emacs} and
+                          where it starts up.
+* Windows Keyboard::    Windows-specific keyboard features.
+* Windows Mouse::       Windows-specific mouse features.
+* Windows Processes::   Running subprocesses on Windows.
+* Windows Printing::    How to specify the printer on MS-Windows.
+* Windows Fonts::       Specifying fonts on MS-Windows.
+* Windows Misc::        Miscellaneous Windows features.
+@ifnottex
+* MS-DOS::              Using Emacs on MS-DOS.
+
+Emacs and MS-DOS
+
+* MS-DOS Keyboard::     Keyboard conventions on MS-DOS.
+* MS-DOS Mouse::        Mouse conventions on MS-DOS.
+* MS-DOS Display::      Fonts, frames and display size on MS-DOS.
+* MS-DOS File Names::   File name conventions on MS-DOS.
+* MS-DOS Printing::     Printing specifics on MS-DOS.
+* MS-DOS and MULE::     Support for internationalization on MS-DOS.
+* MS-DOS Processes::    Running subprocesses on MS-DOS.
+@end ifnottex
+
+@end detailmenu
 @end menu
 
 @iftex
-@c = 訳者まえがき
-@c @include jp-pre.texi
-@c =============================================================
-@c = 訳者まえがき
-@c = 大木敦雄＠大塚.筑波大学 = 1998/11/25
-@c =                  20.4改訂:1999/09/12
-@c =                  20.5改訂:1999/12/13
-@c =                  20.6改訂:2000/03/03
-@c =============================================================
-
-@unnumbered 訳者まえがき
-
-本和訳文書は ASCII により翻訳された Emacsマニュアルを底本にして，最新
-のものにアップデートしているものです．
-
-このようにすばらしい和文文書を改変自由な状態で公開している ASCII 様に
-感謝いたします．
-
-以下は ASCII 様による翻訳時の前書きです．
-
-本書は、
-@display
-GNU Emacs Manual
-Thirteenth Edition, Updated for Emacs Version 20.1
-July 1997
-ISBN 1-882114-06-X
-@end display
-@noindent
-の日本語訳として企画されたのですが、
-その時点で最新であった
-GNU Emacs 20.2の@file{man/*.texi}をもとに訳出を始めました。
-高汐が1章から12章を、
-鈴木が13章から19章を、
-赤池が20章から22章を、
-粕川が23章から29章を、
-久野が30章から32章を、
-田中が「GNU一般公有使用許諾書」と「GNU宣言」を除いた残りの部分を担当し、
-全体をとおしての翻訳の調整と修正を大木が担当しました。
-なお、「GNU一般公有使用許諾書」と「GNU宣言」の日本語訳については、
-引地さんのところの日本語訳を使わせていただいたことを
-ここに記して感謝いたします。
-翻訳中にGNU Emacs 20.3がリリースされましたので、
-翻訳の調整と修正の過程で20.3の@file{man/*.texi}の変更点も反映してあります。
-さらに、20.4、20.5、
-@footnote{20.4/20.5対応の日本語訳は未刊行であるが、
-20.6対応と同一内容と考えてさしつかえない。}
-20.6の@file{man/*.texi}の変更にあわせて改訂しました。
-日本語訳したtexinfoファイル
-@footnote{ファイル@code{emacs.dvi}の生成に必要なファイルのみ。
-また、infoに固有の部分は訳出してない。}
-は、
-@display
-ftp://ftp.ascii.co.jp/pub/GNU/emacs-20.x/emacs20.6-man-jp.tgz
-@end display
-@noindent
-にあります。
-コマンド@code{texi2dvi}などでdviファイルを生成したり、
-GNU Emacsでinfoファイル
-@footnote{@file{emacs.texi}を訪問したバッファで
-@kbd{M-x texinfo-format-buffer}を実行する。
-ただし、接続関係の処理に不備がある。
-ファイルをすべてEUCコードにしておけば、
-@code{makeinfo}プログラムでも処理できる場合があるが、
-整形が美しくない部分がある。}
-へ変換できますので、ぜひ利用してください。
-
-本書は@cite{The GNU Emacs Manual}の日本語訳としては3冊目になると思いますが、
-もちろん、GNU Emacsの最新版に対応したものです。
-GNU Emacs 20からは、Muleの機能が全部ではありませんが採り入れられています
-（@pxref{International}）。
-このため、MuleからGNU Emacsへの移行を計画している方々も多いと思います。
-そのような方々に本書が有益であることを願っています。
-
-@sp 3
-@noindent
-【改訂履歴】
-@display
-1999年9月   Emacs 20.4対応に改訂
-1999年12月  Emacs 20.5対応に改訂(typoの修正のみ数箇所)
-2000年2月   @@.*ref@{...,, elisp, The Emacs Lisp Reference Manual @}を
-            @@.*ref@{..., 日本語タイトル, elisp,
-            Emacs Lisp リファレンスマニュアル@}に変更
-2000年3月   Emacs 20.6対応に改訂
-2004年1月   Emacs 21対応に改訂開始
-@end display
-
-@c ============================================================== 
-@c = @pxref{Node_Name,,日本語タイトル}のように章/節を埋め込まなくても
-@c = 済むようにtexinfo.texを修正した。
-@c = 途中までは、英語タイトルを削除していたが…
-@c = 面倒なので、タイトルを無視するようにtexinfo.texを修正した。
-@c @unnumbered Preface
 @unnumbered まえがき
 
-@c   This manual documents the use and simple customization of the Emacs
-@c editor.  The reader is not expected to be a programmer; simple
-@c customizations do not require programming skill.  But the user who is not
-@c interested in customizing can ignore the scattered customization hints.
-本書では、Emacsエディタの使い方と簡単なカスタマイズについて解説します。
-読者がプログラマであるとは想定していません。
-簡単なカスタマイズには、プログラミングの手腕は必要ありません。
-しかし、カスタマイズに興味のない方は、
-各所に散在するカスタマイズのヒントを無視してください。
+本書では、Emacsエディタの使い方と簡単なカスタマイズについて解説します。読
+者がプログラマであるとは想定していません。簡単なカスタマイズには、プログ
+ラミングの手腕は必要ありません。しかし、カスタマイズに興味のない方は、各
+所に散在するカスタマイズのヒントを無視してください。
 
-@c   This is primarily a reference manual, but can also be used as a
-@c primer.  For complete beginners, it is a good idea to start with the
-@c on-line, learn-by-doing tutorial, before reading the manual.  To run the
-@c tutorial, start Emacs and type @kbd{C-h t}.  This way you can learn
-@c Emacs by using Emacs on a specially designed file which describes
-@c commands, tells you when to try them, and then explains the results you
-@c see.
-本書の主目的はリファレンスマニュアルですが、
-入門書としても利用できます。
-本当の初心者には、本書を読み始めるまえに、実際に動かしながら学べる
-オンラインのチュートリアルをお勧めします。
-チュートリアルを実行するには、
-Emacsを起動して@kbd{C-h t}と打ちます。
-こうすると、コマンドの説明、試し方とその実行結果がどうなるかを
-記述した専用のファイルをとおしてEmacsを使いながらEmacsを学べます。
+本書の主目的はリファレンスマニュアルですが、入門書としても利用できます。
+本当の初心者には、本書を読み始めるまえに、実際に動かしながら学べるオンラ
+インのチュートリアルをお勧めします。チュートリアルを実行するには、Emacsを
+起動して@kbd{C-h t}と打ちます。こうすると、コマンドの説明、試し方とその実
+行結果がどうなるかを記述した専用のファイルをとおしてEmacsを使いながら
+Emacsを学べます。
 
-@c   On first reading, just skim chapters 1 and 2, which describe the
-@c notational conventions of the manual and the general appearance of the
-@c Emacs display screen.  Note which questions are answered in these
-@c chapters, so you can refer back later.  After reading chapter 4, you
-@c should practice the commands there.  The next few chapters describe
-@c fundamental techniques and concepts that are used constantly.  You need
-@c to understand them thoroughly, experimenting with them if necessary.
 初めて読む場合には、まず、1章と2章をざっと読んでください。
 本書で用いる表記法とEmacs画面の一般的な体裁を説明します。
 これらの章のどこで何が説明されているか心に留めて、
@@ -345,39 +1272,18 @@ Emacsを起動して@kbd{C-h t}と打ちます。
 そのあとの何章かでは、常用する基本的な技法や概念を説明します。
 必要ならば試してみて、それらを完全に理解しておいてください。
 
-@c   Chapters 14 through 19 describe intermediate-level features that are
-@c useful for all kinds of editing.  Chapter 20 and following chapters
-@c describe features that you may or may not want to use; read those
-@c chapters when you need them.
 14章から19章では、どんな編集作業にも有用な中級の機能を説明します。
 20章以降に説明してある機能は、使う場合もあれば、使わない場合もあるでしょう。
 必要になったときにそれぞれの章を読んでください。
 
-@c   Read the Trouble chapter if Emacs does not seem to be working
-@c properly.  It explains how to cope with some common problems
-@c (@pxref{Lossage}), as well as when and how to report Emacs bugs
-@c (@pxref{Bugs}).
-Emacsが正常に動いてないように思えたら、
-障害対策の章を読んでください。
-よくある問題にどう対処するか説明し
-（@pxref{Lossage}）、
-Emacsのバグをいつどのように報告するかも説明します
-（@pxref{Bugs}）。
+Emacsが正常に動いてないように思えたら、障害対策の章を読んでください。よく
+ある問題にどう対処するか説明し（@pxref{Lossage}）、Emacsのバグをいつどの
+ように報告するかも説明します（@pxref{Bugs}）。
  
-@c   To find the documentation on a particular command, look in the index.
-@c Keys (character commands) and command names have separate indexes.  There
-@c is also a glossary, with a cross reference for each term.
 特定のコマンドの説明を探すには索引を見てください。
 キー（文字コマンド）とコマンド名は別々の索引になっています。
 また、相互参照付きの用語集もあります。
 
-@c   This manual is available as a printed book and also as an Info file.
-@c The Info file is for on-line perusal with the Info program, which will
-@c be the principal way of viewing documentation on-line in the GNU system.
-@c Both the Info file and the Info program itself are distributed along
-@c with GNU Emacs.  The Info file and the printed book contain
-@c substantially the same text and are generated from the same source
-@c files, which are also distributed along with GNU Emacs.
 本書は、印刷物としても、あるいは、infoファイルとしても入手できます。
 infoファイルは、infoプログラムでオンライン閲覧するためのものです。
 infoプログラムは、GNUシステムにおいてドキュメントを
@@ -386,9 +1292,6 @@ infoファイルもinfoプログラムも、GNU Emacsと一緒に配布されて
 infoファイルと印刷物は実質的には同じ内容で、
 GNU Emacsと一緒に配布されている同一のソースファイルから生成したものです。
 
-@c   GNU Emacs is a member of the Emacs editor family.  There are many Emacs
-@c editors, all sharing common principles of organization.  For information on
-@c the underlying philosophy of Emacs and the lessons learned from its
 @c development, write for a copy of AI memo 519a, ``Emacs, the Extensible,
 @c Customizable Self-Documenting Display Editor,'' to Publications Department,
 @c Artificial Intelligence Lab, 545 Tech Square, Cambridge, MA 02139, USA@.  At
@@ -400,24 +1303,10 @@ GNU EmacsはEmacsエディタ族の一員です。
 何種類ものEmacsエディタがありますが、
 それらはすべて同じ構成原理を共有しています。
 Emacsの根底にある考え方や、その開発から得た知見を学ぶには、
-Publications Department、
-Artificial Intelligence Lab、545 Tech Square、Cambridge、MA 02139、USA
-から、AI memo 519a、
-『Emacs, the Extensible, Customizable Self-Documenting Display Editor』
-を入手してください。
-最新版は1部2.25ドルです。
-また、
-Publications Department、Laboratory for Computer Science、545 Tech Square、
-Cambridge、MA 02139、USAから入手できるCraig Finsethの
-LCS TM-165、『A Cookbook for an Emacs』もよい文献です。
-現在の価格は3ドルです。
+see @cite{Emacs, the Extensible,
+Customizable Self-Documenting Display Editor}, available from
+@url{ftp://publications.ai.mit.edu/ai-publications/pdf/AIM-519A.pdf}.
 
-@c This edition of the manual is intended for use with GNU Emacs installed
-@c on GNU and Unix systems.  GNU Emacs can also be used on VMS, MS-DOS
-@c (also called MS-DOG), Windows NT, and Windows 95 systems.  Those systems use
-@c different file name syntax; in addition, VMS and MS-DOS do not support
-@c all GNU Emacs features.  We don't try to describe VMS usage in this
-@c manual.  @xref{MS-DOS}, for information about using Emacs on MS-DOS.
 本書のこの版は、GNUおよびUNIXシステムにインストールしたGNU Emacsに対応します。
 GNU Emacsは、VMS、（MS-DOGとも呼ばれる）MS-DOS、Windows NT、
 Windows 95でも使えます。
@@ -425,21 +1314,13 @@ Windows 95でも使えます。
 さらに、VMSやMS-DOSでは、GNU Emacsの全機能を使えるわけではありません。
 本書ではVMSでの利用方法は説明しません。
 MS-DOSでEmacsを使う際の情報は、@xref{MS-DOS}。
+@xref{Mac OS / GNUstep}, for information about using Emacs
+on Macintosh (and GNUstep).
 @end iftex
 
-@node Distrib, Acknowledgements, Top, Top
-@c @unnumbered Distribution
+@node Distrib
 @unnumbered 配布
 
-@c GNU Emacs is @dfn{free software}; this means that everyone is free to
-@c use it and free to redistribute it on certain conditions.  GNU Emacs is
-@c not in the public domain; it is copyrighted and there are restrictions
-@c on its distribution, but these restrictions are designed to permit
-@c everything that a good cooperating citizen would want to do.  What is
-@c not allowed is to try to prevent others from further sharing any version
-@c of GNU Emacs that they might get from you.  The precise conditions are
-@c found in the GNU General Public License that comes with Emacs and also
-@c appears following this section.
 GNU Emacsは@dfn{フリーソフトウェア}です。
 誰でも自由に利用でき、条件付きで自由に再配布できることを意味します。
 GNU Emacsはパブリックドメイン（public domain）ではありません。
@@ -454,25 +1335,12 @@ GNU Emacsはパブリックドメイン（public domain）ではありません�
 正式な許諾書は英文のGNU General Public Licenseであることに
 注意してほしい。}にあります。
 
-@c One way to get a copy of GNU Emacs is from someone else who has it.  You
-@c need not ask for our permission to do so, or tell any one else; just
-@c copy it.  If you have access to the Internet, you can get the latest
-@c distribution version of GNU Emacs by anonymous FTP; see the file
-@c @file{etc/FTP} in the Emacs distribution for more information.
-Gnu Emacsを入手する1つの方法は、持っている人から貰うことです。
-我々から許可を得る必要はないですし、誰かに連絡する必要もありません。
-単にコピーすればよいのです。
-Internetを利用できる場合には、
-匿名（anonymous）FTPでGNU Emacsの最新配布版を入手できます。
-詳しくは、Emacsの配布の中のファイル@file{etc/FTP}を見てください。
+Gnu Emacsを入手する1つの方法は、持っている人から貰うことです。我々から許
+可を得る必要はないですし、誰かに連絡する必要もありません。単にコピーすれ
+ばよいのです。Internetを利用できる場合には、匿名（anonymous）FTPでGNU
+Emacsの最新配布版を入手できます。詳しくは、我々のWebサイト
+@url{http://www.gnu.org/software/emacs} を見てください。
 
-@c You may also receive GNU Emacs when you buy a computer.  Computer
-@c manufacturers are free to distribute copies on the same terms that apply to
-@c everyone else.  These terms require them to give you the full sources,
-@c including whatever changes they may have made, and to permit you to
-@c redistribute the GNU Emacs received from them under the usual terms of the
-@c General Public License.  In other words, the program must be free for you
-@c when you get it, not just free for the manufacturer.
 コンピュータを買うとGNU Emacsが付いてくるかもしれません。
 コンピュータ製造業者も、他の人に適用されているのと同じ条項で、
 自由にコピーを配布できます。
@@ -483,921 +1351,155 @@ Internetを利用できる場合には、
 いいかえれば、製造業者がプログラムを自由にできるだけでなく、
 購入者も買ったプログラムを自由にできる必要があるのです。
 
-@c You can also order copies of GNU Emacs from the Free Software
-@c Foundation.  This is a convenient and reliable way to get a copy; it
-@c is also a good way to help fund our work.  (The Foundation has always
-@c received most of its funds in this way.)  An order form is included in
-@c the file @file{etc/ORDERS} in the Emacs distribution, and on our web
-@c site in @url{http://www.gnu.org/order/order.html}.  For further
-@c information, write to
+@c TODO 未訳
+We also sell hardcopy versions of this manual and @cite{An
+Introduction to Programming in Emacs Lisp}, by Robert J. Chassell.
+You can visit our online store at @url{http://shop.fsf.org/}.
+The income from sales goes to support the foundation's purpose: the
+development of new free software, and improvements to our existing
+programs including GNU Emacs.
+
+@c TODO 旧訳
 Free Software FoundationにGNU Emacsを注文してもかまいません。
 これは便利で確実な入手方法ですし、我々の仕事の資金援助にもなります。
 （Foundationの資金のほとんどは、この方法に頼っている。）
 Emacsの配布の中のファイル@file{etc/ORDERS}や、
 Webサイト@url{http://www.gnu.org/order/order.html}に注文票があります。
+
+@c TODO 未訳
 さらなる情報を得るには、下記へお願いします。
+If you need to contact the Free Software Foundation, see
+@url{http://www.fsf.org/about/contact/}, or write to
 
 @display
 Free Software Foundation
-59 Temple Place, Suite 330
-Boston, MA  02111-1307 USA
+51 Franklin Street, Fifth Floor
+Boston, MA 02110-1301
 USA
 @end display
 
-@c The income from distribution fees goes to support the foundation's
-@c purpose: the development of new free software, and improvements to our
-@c existing programs including GNU Emacs.
-配布代金から得た収入は、我々の目的、
-すなわち、新たなフリーソフトウェアの開発とGNU Emacsを含めた
-既存プログラムの改良のために使われます。
-
-@c If you find GNU Emacs useful, please @strong{send a donation} to the
-@c Free Software Foundation to support our work.  Donations to the Free
-@c Software Foundation are tax deductible in the US.  If you use GNU Emacs
-@c at your workplace, please suggest that the company make a donation.  If
-@c company policy is unsympathetic to the idea of donating to charity, you
-@c might instead suggest ordering a CD-ROM from the Foundation
-@c occasionally, or subscribing to periodic updates.
-GNU Emacsが有用だとわかったならば、我々の仕事を支援するために
-Free Software Foundationにぜひ@strong{寄付を送って}ください。
-合衆国では、Free Software Foundationへの寄付は税控除の対象になります。
-GNU Emacsを職場で利用しているならば、寄付するように会社に提案してください。
-会社の方針が慈善活動への寄付に冷淡であるならば、
-そのかわりとして、Free Software Foundationに適宜CD-ROMを注文したり、
-定期購読するように提案してください。
-
-@node Acknowledgements, Copying, Distrib, Top
-@section Acknowledgements
-
-@c Contributors to GNU Emacs include Per Abrahamsen, Jay K. Adams, Joe
-以下は、GNU Emacsに貢献された方々です。Per Abrahamsen, Jay K. Adams, Joe
-Arceneaux, Boaz Ben-Zvi, Jim Blandy, Terrence Brannon, Frank Bresz,
-Peter Breton, Kevin Broadey, Vincent Broman, David M. Brown, Bill
-Carpenter, Hans Chalupsky, Bob Chassell, James Clark, Mike Clarkson,
-Glynn Clements, Andrew Csillag, Doug Cutting, Michael DeCorte, Gary
-Delp, Matthieu Devin, Eri Ding, Carsten Dominik, Scott Draves, Viktor
-Dukhovni, John Eaton, Rolf Ebert, Stephen Eglen, Torbj@"orn Einarsson,
-Tsugutomo Enami, Hans Henrik Eriksen, Michael Ernst, Ata Etemadi,
-Frederick Farnbach, Fred Fish, Karl Fogel, Gary Foster, Noah Friedman,
-Keith Gabryelski, Kevin Gallagher, Kevin Gallo, Howard Gayle, Stephen
-Gildea, David Gillespie, Bob Glickstein, Boris Goldowsky, Michelangelo
-Grigni, Michael Gschwind, Henry Guillaume, Doug Gwyn, Ken'ichi Handa,
-Chris Hanson, K. Shane Hartman, John Heidemann, Markus Heritsch, Karl
-Heuer, Manabu Higashida, Anders Holst, Kurt Hornik, Tom Houlder, Lars
-Ingebrigtsen, Andrew Innes, Michael K. Johnson, Kyle Jones, Tomoji
-Kagatani, Brewster Kahle, David Kaufman, Henry Kautz, Howard Kaye,
-Michael Kifer, Richard King, Larry K. Kolodney, Robert Krawitz,
-Sebastian Kremer, Geoff Kuenning, David K@aa{}gedal, Daniel LaLiberte,
-Aaron Larson, James R. Larus, Frederic Lepied, Lars Lindberg, Eric
-Ludlam, Neil M. Mager, Ken Manheimer, Bill Mann, Brian Marick, Simon
-Marshall, Bengt Martensson, Charlie Martin, Thomas May, Roland McGrath,
-David Megginson, Wayne Mesard, Richard Mlynarik, Keith Moore, Erik
-Naggum, Thomas Neumann, Mike Newton, Jurgen Nickelsen, Jeff Norden,
-Andrew Norman, Jeff Peck, Damon Anton Permezel, Tom Perrine, Jens
-Petersen, Daniel Pfeiffer, Fred Pierresteguy, Christian Plaunt,
-Francesco A. Potorti, Michael D. Prange, Ashwin Ram, Eric S. Raymond,
-Paul Reilly, Edward M. Reingold, Rob Riepel, Roland B. Roberts, John
-Robinson, Danny Roozendaal, William Rosenblatt, Guillermo J. Rozas, Ivar
-Rummelhoff, Wolfgang Rupprecht, James B. Salem, Masahiko Sato, William
-Schelter, Ralph Schleicher, Gregor Schmid, Michael Schmidt, Ronald
-S. Schnell, Philippe Schnoebelen, Stephen Schoef, Randal Schwartz,
-Manuel Serrano, Stanislav Shalunov, Mark Shapiro, Richard Sharman, Olin
-Shivers, Espen Skoglund, Rick Sladkey, Lynn Slater, Chris Smith, David
-Smith, Paul D. Smith, William Sommerfeld, Michael Staats, Sam Steingold,
-Ake Stenhoff, Peter Stephenson, Jonathan Stigelman, Steve Strassman,
-Jens T. Berger Thielemann, Spencer Thomas, Jim Thompson, Masanobu Umeda,
-Neil W. Van Dyke, Ulrik Vieth, Geoffrey Voelker, Johan Vromans, Barry
-Warsaw, Morten Welinder, Joseph Brian Wells, Rodney Whitby, Ed
-Wilkinson, Mike Williams, Steven A. Wood, Dale R. Worley, Felix
-S. T. Wu, Tom Wurgler, Eli Zaretskii, Jamie Zawinski, Ian T. Zimmermann,
-Reto Zimmermann, and Neal Ziring.
-
-@c =============================================================
-@c = <using 引地さんが管理するGPLの日本語訳>
-@c =============================================================
-@node Copying, GNU Free Documentation License, Acknowledgements, Top
-@c @unnumbered GNU GENERAL PUBLIC LICENSE
-@c @center Version 2, June 1991
-@unnumbered GNU一般公有使用許諾書
-@center 1991年6月 バージョン2.0 
-
-@display
-Copyright @copyright{} 1989, 1991 Free Software Foundation, Inc.
-@c 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-675 Mass Ave, Cambridge, MA 02139, USA @footnote{【注意】
-現在、このバージョン2の発行者(FSF)住所は、正式に新しい住所の @*
-　59 Temple Place, Suite 330, Boston, MA 02111-1307, USA @*
-に変わっている。}
-@ifinfo
-【注意】 現在、このバージョン2の発行者(FSF)住所は、正式に新しい住所の
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA に変わっている。
-@end ifinfo
-
-@c Everyone is permitted to copy and distribute verbatim copies
-@c of this license document, but changing it is not allowed.
-何人も、以下の内容を変更しないでそのまま複写する場合に限り、
-本使用許諾書を複製したり頒布することができます。
-@end display
-
-@c @unnumberedsec Preamble
-@unnumberedsec はじめに
-
-@c   The licenses for most software are designed to take away your
-@c freedom to share and change it.  By contrast, the GNU General Public
-@c License is intended to guarantee your freedom to share and change free
-@c software---to make sure the software is free for all its users.  This
-@c General Public License applies to most of the Free Software
-@c Foundation's software and to any other program whose authors commit to
-@c using it.  (Some other Free Software Foundation software is covered by
-@c the GNU Library General Public License instead.)  You can apply it to
-@c your programs, too.
- ほとんどのソフトウェアの使用許諾は、ソフトウェアを共有し、
-変更するユーザの自由を奪うことを意図しています。
-それに対して、我々のGNU一般公有使用許諾は、
-フリー・ソフトウェアを共有したり変更する自由をユーザに保証するためのもの、
-即ちフリー・ソフトウェアがそのユーザ全てにとって
-フリーであることを保証するためのものです。
-本使用許諾は、Free Software Foundationのほとんど全てのソフトウェアに
-適用されるだけでなく、
-プログラムの作成者が本使用許諾に依るとした場合のそのプログラムにも
-適用することができます。
-（その他の Free Software Foundation のソフトウェアのいくつかは、
-本許諾書ではなく、GNUライブラリ一般公有使用許諾で保護されます。）
-あなたは自分のプログラムにもこれを適用できます。
-
-@c   When we speak of free software, we are referring to freedom, not
-@c price.  Our General Public Licenses are designed to make sure that you
-@c have the freedom to distribute copies of free software (and charge for
-@c this service if you wish), that you receive source code or can get it
-@c if you want it, that you can change the software or use pieces of it
-@c in new free programs; and that you know you can do these things.
- 我々がフリー・ソフトウェアについて言う場合は
-自由のことに言及しているのであって、価格のことではありません。
-我々の一般公有使用許諾の各条項は、次の事柄を確実に実現することを
-目的として立案されています。
-@itemize @bullet
-@item
-フリー・ソフトウェアの複製物を自由に頒布できること
-（そして、望むならあなたのこのサービスに対して対価を請求できること）。
-@item
-ソース・コードを実際に受け取るか、あるいは、
-希望しさえすればそれを入手することが可能であること。
-@item
-入手したソフトウェアを変更したり、
-新しいフリー・プログラムの一部として使用できること。
-@item
-以上の各内容を行なうことができるということをユーザ自身が知っていること。
-@end itemize
-
-@c   To protect your rights, we need to make restrictions that forbid
-@c anyone to deny you these rights or to ask you to surrender the rights.
-@c These restrictions translate to certain responsibilities for you if you
-@c distribute copies of the software, or if you modify it.
- このようなユーザの権利を守るために、我々は、
-何人もこれらの権利を否定したり、あるいは放棄するように
-ユーザに求めることはできないという制限条項を設ける必要があります。
-これらの制限条項は、ユーザが、フリー・ソフトウェアの複製物を
-頒布したり変更しようとする場合には、そのユーザ自身が守るべき義務ともなります。
-
-@c   For example, if you distribute copies of such a program, whether
-@c gratis or for a fee, you must give the recipients all the rights that
-@c you have.  You must make sure that they, too, receive or can get the
-@c source code.  And you must show them these terms so they know their
-@c rights.
- 例えば、あなたがフリー・ソフトウェアの複製物を頒布する場合、
-有償か無償かにかかわらず、
-あなたは自分の持っている権利を全て相手に与えなければなりません。
-あなたは、相手もまたソース・コードを受け取ったり入手できるということを
-認めなければなりません。
-さらにあなたは、彼らが自分たちの権利を知るように、
-これらの条項を知らしめなければなりません。
-
-@c   We protect your rights with two steps: (1) copyright the software, and
-@c (2) offer you this license which gives you legal permission to copy,
-@c distribute and/or modify the software.
-　我々は次の２つの方法でユーザの権利を守ります。
-（１）ソフトウェアに著作権を主張し、
-（２）本使用許諾の条項の下で
-ソフトウェアを複製・頒布・変更する権利をユーザに与えます。
-
-@c   Also, for each author's protection and ours, we want to make certain
-@c that everyone understands that there is no warranty for this free
-@c software.  If the software is modified by someone else and passed on, we
-@c want its recipients to know that what they have is not the original, so
-@c that any problems introduced by others will not reflect on the original
-@c authors' reputations.
- また、各作成者や我々自身を守るために、
-本フリー・ソフトウェアが無保証であることを
-全ての人々が了解している必要があります。
-さらに、他の誰かによって変更されたソフトウェアが頒布された場合、
-受領者はそのソフトウェアがオリジナル・バージョンではないということを
-知らされる必要があります。
-それは、他人の関与によって原開発者に対する評価が
-影響されないようにするためです。
-
-@c   Finally, any free program is threatened constantly by software
-@c patents.  We wish to avoid the danger that redistributors of a free
-@c program will individually obtain patent licenses, in effect making the
-@c program proprietary.  To prevent this, we have made it clear that any
-@c patent must be licensed for everyone's free use or not licensed at all.
- 最後に、どのフリー・プログラムもソフトウェア特許に絶えず脅かされています。
-我々は、フリー・プログラムの再頒布者が個人的に特許権を取得し、
-事実上そのプログラムを自分の財産にしてしまうという危険を
-避けたいと願っています。
-これを防ぐために我々は、いずれの特許も、
-誰でも自由に使用できるように使用許諾されるべきか、
-あるいは何人に対しても全く使用させないかの、
-いずれかにすべきであることを明らかにしてきました。
-
-@c   The precise terms and conditions for copying, distribution and
-@c modification follow.
- 複写・頒布・変更に対する正確な条項と条件を次に示します。
-
 @iftex
-@c @unnumberedsec TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-@unnumberedsec GNU一般公有使用許諾の下での複製、頒布、変更に関する条項と条件
+@node Acknowledgments
+@unnumberedsec Acknowledgments
+
+以下は、GNU Emacsに貢献された方々です。 Jari Aalto, Per Abrahamsen, Tomas
+Abrahamsson, Jay K. Adams, Alon Albert, Michael Albinus, Nagy
+Andras, Benjamin Andresen, Ralf Angeli, Dmitry Antipov, Joe Arceneaux, Emil Åström,
+Miles Bader, David Bakhash, Juanma Barranquero, Eli Barzilay, Thomas
+Baumann, Steven L. Baur, Jay Belanger, Alexander L. Belikoff,
+Thomas Bellman, Scott Bender, Boaz Ben-Zvi, Sergey Berezin, Karl
+Berry, Anna M. Bigatti, Ray Blaak, Martin Blais, Jim Blandy, Johan
+Bockgård, Jan Böcker, Joel Boehland, Lennart Borgman, Per Bothner,
+Terrence Brannon, Frank Bresz, Peter Breton, Emmanuel Briot, Kevin
+Broadey, Vincent Broman, Michael Brouwer, David M. Brown, Stefan Bruda,
+Georges Brun-Cottan, Joe Buehler, Scott Byer, Włodek Bzyl,
+Bill Carpenter, Per Cederqvist, Hans Chalupsky, Chris Chase, Bob
+Chassell, Andrew Choi, Chong Yidong, Sacha Chua, Stewart Clamen, James
+Clark, Mike Clarkson, Glynn Clements, Andrew Cohen, Daniel Colascione,
+Christoph Conrad, Ludovic Courtès, Andrew Csillag,
+Toby Cubitt, Baoqiu Cui, Doug Cutting, Mathias Dahl, Julien Danjou, Satyaki
+Das, Vivek Dasmohapatra, Dan Davison, Michael DeCorte, Gary Delp, Nachum
+Dershowitz, Dave Detlefs, Matthieu Devin, Christophe de Dinechin, Eri
+Ding, Jan Djärv, Lawrence R. Dodd, Carsten Dominik, Scott Draves,
+Benjamin Drieu, Viktor Dukhovni, Jacques Duthen, Dmitry Dzhus, John
+Eaton, Rolf Ebert, Carl Edman, David Edmondson, Paul Eggert, Stephen
+Eglen, Christian Egli, Torbjörn Einarsson, Tsugutomo Enami, David
+Engster, Hans Henrik Eriksen, Michael Ernst, Ata Etemadi, Frederick
+Farnbach, Oscar Figueiredo, Fred Fish, Steve Fisk, Karl Fogel, Gary
+Foster, Eric S. Fraga, Romain Francoise, Noah Friedman, Andreas
+Fuchs, Shigeru Fukaya, Hallvard Furuseth, Keith Gabryelski, Peter S.
+Galbraith, Kevin Gallagher, Fabián E. Gallina, Kevin Gallo, Juan León Lahoz García,
+Howard Gayle, Daniel German, Stephen Gildea, Julien Gilles, David
+Gillespie, Bob Glickstein, Deepak Goel, David De La Harpe Golden, Boris
+Goldowsky, David Goodger, Chris Gray, Kevin Greiner, Michelangelo Grigni, Odd
+Gripenstam, Kai Großjohann, Michael Gschwind, Bastien Guerry, Henry
+Guillaume, Doug Gwyn, Bruno Haible, Ken'ichi Handa, Lars Hansen, Chris
+Hanson, Jesper Harder, Alexandru Harsanyi, K. Shane Hartman, John
+Heidemann, Jon K. Hellan, Magnus Henoch, Markus Heritsch, Dirk
+Herrmann, Karl Heuer, Manabu Higashida, Konrad Hinsen, Anders Holst,
+Jeffrey C. Honig, Tassilo Horn, Kurt Hornik, Tom Houlder, Joakim
+Hove, Denis Howe, Lars Ingebrigtsen, Andrew Innes, Seiichiro Inoue,
+Philip Jackson, Martyn Jago, Pavel Janik, Paul Jarc, Ulf Jasper,
+Thorsten Jolitz, Michael K. Johnson, Kyle Jones, Terry Jones, Simon
+Josefsson, Alexandre Julliard, Arne Jørgensen, Tomoji Kagatani,
+Brewster Kahle, Tokuya Kameshima, Lute Kamstra, Ivan Kanis, David
+Kastrup, David Kaufman, Henry Kautz, Taichi Kawabata, Taro Kawagishi,
+Howard Kaye, Michael Kifer, Richard King, Peter Kleiweg, Karel
+Klíč, Shuhei Kobayashi, Pavel Kobyakov, Larry K. Kolodney, David
+M. Koppelman, Koseki Yoshinori, Robert Krawitz, Sebastian Kremer,
+Ryszard Kubiak, Igor Kuzmin, David Kågedal, Daniel LaLiberte, Karl
+Landstrom, Mario Lang, Aaron Larson, James R. Larus, Vinicius Jose
+Latorre, Werner Lemberg, Frederic Lepied, Peter Liljenberg, Christian
+Limpach, Lars Lindberg, Chris Lindblad, Anders Lindgren, Thomas Link,
+Juri Linkov, Francis Litterio, Sergey Litvinov, Emilio C. Lopes,
+Martin Lorentzon, Dave Love, Eric Ludlam, Károly Lőrentey, Sascha
+Lüdecke, Greg McGary, Roland McGrath, Michael McNamara, Alan Mackenzie,
+Christopher J. Madsen, Neil M. Mager, Ken Manheimer, Bill Mann,
+Brian Marick, Simon Marshall, Bengt Martensson, Charlie Martin,
+Yukihiro Matsumoto, Tomohiro Matsuyama, David Maus, Thomas May, Will Mengarini, David
+Megginson, Stefan Merten, Ben A. Mesander, Wayne Mesard, Brad
+Miller, Lawrence Mitchell, Richard Mlynarik, Gerd Möllmann, Stefan
+Monnier, Keith Moore, Jan Moringen, Morioka Tomohiko, Glenn Morris,
+Don Morrison, Diane Murray, Riccardo Murri, Sen Nagata, Erik Naggum,
+Gergely Nagy, Nobuyoshi Nakada, Thomas Neumann, Mike Newton, Thien-Thi Nguyen,
+Jurgen Nickelsen, Dan Nicolaescu, Hrvoje Nikšić, Jeff Norden,
+Andrew Norman, Edward O'Connor, Kentaro Ohkouchi, Christian Ohler,
+Kenichi Okada, Alexandre Oliva, Bob Olson, Michael Olson, Takaaki Ota,
+Pieter E. J. Pareit, Ross Patterson, David Pearson, Juan Pechiar,
+Jeff Peck, Damon Anton Permezel, Tom Perrine, William M. Perry, Per
+Persson, Jens Petersen, Daniel Pfeiffer, Justus Piater, Richard L.
+Pieri, Fred Pierresteguy, François Pinard, Daniel Pittman, Christian
+Plaunt, Alexander Pohoyda, David Ponce, Francesco A. Potortì,
+Michael D. Prange, Mukesh Prasad, Ken Raeburn, Marko Rahamaa, Ashwin
+Ram, Eric S. Raymond, Paul Reilly, Edward M. Reingold, David
+Reitter, Alex Rezinsky, Rob Riepel, Lara Rios, Adrian Robert, Nick
+Roberts, Roland B. Roberts, John Robinson, Denis B. Roegel, Danny
+Roozendaal, Sebastian Rose, William Rosenblatt, Markus Rost, Guillermo
+J. Rozas, Martin Rudalics, Ivar Rummelhoff, Jason Rumney, Wolfgang
+Rupprecht, Benjamin Rutt, Kevin Ryde, James B. Salem, Masahiko Sato,
+Timo Savola, Jorgen Schäfer, Holger Schauer, William Schelter, Ralph
+Schleicher, Gregor Schmid, Michael Schmidt, Ronald S. Schnell,
+Philippe Schnoebelen, Jan Schormann, Alex Schroeder, Stefan Schoef,
+Rainer Schöpf, Raymond Scholz, Eric Schulte, Andreas Schwab, Randal
+Schwartz, Oliver Seidel, Manuel Serrano, Paul Sexton, Hovav Shacham,
+Stanislav Shalunov, Marc Shapiro, Richard Sharman, Olin Shivers, Tibor
+Šimko, Espen Skoglund, Rick Sladkey, Lynn Slater, Chris Smith,
+David Smith, Paul D. Smith, Wilson Snyder, William Sommerfeld, Simon
+South, Andre Spiegel, Michael Staats, Thomas Steffen, Ulf Stegemann,
+Reiner Steib, Sam Steingold, Ake Stenhoff, Peter Stephenson, Ken
+Stevens, Andy Stewart, Jonathan Stigelman, Martin Stjernholm, Kim F.
+Storm, Steve Strassmann, Christopher Suckling, Olaf Sylvester, Naoto
+Takahashi, Steven Tamm, Luc Teirlinck, Jean-Philippe Theberge, Jens
+T. Berger Thielemann, Spencer Thomas, Jim Thompson, Toru Tomabechi,
+David O'Toole, Markus Triska, Tom Tromey, Enami Tsugutomo, Eli
+Tziperman, Daiki Ueno, Masanobu Umeda, Rajesh Vaidheeswarran, Neil
+W. Van Dyke, Didier Verna, Joakim Verona, Ulrik Vieth, Geoffrey
+Voelker, Johan Vromans, Inge Wallin, John Paul Wallington, Colin
+Walters, Barry Warsaw, Christoph Wedler, Ilja Weis, Zhang Weize,
+Morten Welinder, Joseph Brian Wells, Rodney Whitby, John Wiegley,
+Sascha Wilde, Ed Wilkinson, Mike Williams, Roland Winkler, Bill
+Wohler, Steven A. Wood, Dale R. Worley, Francis J. Wright, Felix
+S. T. Wu, Tom Wurgler, Yamamoto Mitsuharu, Katsumi Yamaoka,
+Masatake Yamato, Jonathan Yavner, Ryan Yeske, Ilya Zakharevich, Milan
+Zamazal, Victor Zandy, Eli Zaretskii, Jamie Zawinski, Andrew Zhilin,
+Shenghuo Zhu, Piotr Zieliński, Ian T. Zimmermann, Reto Zimmermann,
+Neal Ziring, Teodor Zlatanov, and Detlev Zundel.
 @end iftex
-@ifinfo
-@c @center TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-@center GNU一般公有使用許諾の下での複製、頒布、変更に関する条項と条件
-@end ifinfo
 
-@enumerate 0
-@item
-@c This License applies to any program or other work which contains
-@c a notice placed by the copyright holder saying it may be distributed
-@c under the terms of this General Public License.  The ``Program'', below,
-@c refers to any such program or work, and a ``work based on the Program''
-@c means either the Program or any derivative work under copyright law:
-@c that is to say, a work containing the Program or a portion of it,
-@c either verbatim or with modifications and/or translated into another
-@c language.  (Hereinafter, translation is included without limitation in
-@c the term ``modification''.)  Each licensee is addressed as ``you''.
-本使用許諾は、本一般公有使用許諾の各条項に従って頒布されるという
-著作権者からの告知文が表示されているプログラムやその他の作成物に適用されます。
-以下において「プログラム」とは、そのようなプログラムや作成物を指すものとし、
-また、「プログラム生成物」とは、上述した「プログラム」自身、または、
-著作権法下における全ての派生物；すなわち、その「プログラム」の全部又は一部を、
-そのまま又は変更して、且つ／又は他の言語に変換して、
-内部に組み込んだ作成物を意味します。
-（以下、言語変換は「変更」という用語の中に無条件に含まれるものとします。）
-本使用許諾によって許諾を受ける者を「あなた」と呼びます。　
+@node Intro
+@unnumbered Introduction
 
-@c Activities other than copying, distribution and modification are not
-@c covered by this License; they are outside its scope.  The act of
-@c running the Program is not restricted, and the output from the Program
-@c is covered only if its contents constitute a work based on the
-@c Program (independent of having been made by running the Program).
-@c Whether that is true depends on what the Program does.
-複製、頒布、変更以外の行為は本使用許諾の対象としません。
-それらは本使用許諾の範囲外です。
-「プログラム」を実行させる行為に関して制約はありません。
-「プログラム」の出力は、
-（「プログラム」を実行させて作成させたかどうかとは無関係に）
-その内容が「プログラム生成物」である場合に限り本使用許諾の対象となります。
-これが当てはまるかどうかは、「プログラム」が何をするものかに依ります。
-
-@item
-@c You may copy and distribute verbatim copies of the Program's
-@c source code as you receive it, in any medium, provided that you
-@c conspicuously and appropriately publish on each copy an appropriate
-@c copyright notice and disclaimer of warranty; keep intact all the
-@c notices that refer to this License and to the absence of any warranty;
-@c and give any other recipients of the Program a copy of this License
-@c along with the Program.
-あなたは、どのような媒体上へ複製しようとする場合であっても、
-入手した「プログラム」のソース・コードを
-そのままの内容で複写した上で適正な著作権表示と保証の放棄を明確、
-且つ適正に付記する場合に限り、複製又は頒布することができます。
-その場合、本使用許諾及び無保証に関する記載部分は、
-全て元のままの形で表示してください。
-また、「プログラム」の頒布先に対しては、
-「プログラム」と共に本使用許諾書の写しを渡してください。
-
-@c You may charge a fee for the physical act of transferring a copy, and
-@c you may at your option offer warranty protection in exchange for a fee.
-複製物の引き渡しに要する実費は請求することができます。
-また、あなた独自の保証を行なう場合はそれを有償とすることができます。
-
-@item
-@c You may modify your copy or copies of the Program or any portion
-@c of it, thus forming a work based on the Program, and copy and
-@c distribute such modifications or work under the terms of Section 1
-@c above, provided that you also meet all of these conditions:
-次の各条件を全て満たしている限り、あなたは、
-「プログラム」又はその一部分を変更して「プログラム生成物」とすることができ、
-さらに、変更版や右作成物を上記第２項に従って複製又は頒布することもできます。
-
-@enumerate a
-@item
-@c You must cause the modified files to carry prominent notices
-@c stating that you changed the files and the date of any change.
-ファイルを変更した旨とその変更日とを、変更したファイル上に明確に表示すること。
-
-@item
-@c You must cause any work that you distribute or publish, that in
-@c whole or in part contains or is derived from the Program or any
-@c part thereof, to be licensed as a whole at no charge to all third
-@c parties under the terms of this License.
-変更したか否かを問わず、凡そ「プログラム」
-又はその一部分を内部に組み込んでいるか
-又はそれから派生した生成物を頒布する場合には、
-その全体を本使用許諾の条項に従って第三者へ無償で使用許諾すること。
-
-@item
-@c If the modified program normally reads commands interactively
-@c when run, you must cause it, when started running for such
-@c interactive use in the most ordinary way, to print or display an
-@c announcement including an appropriate copyright notice and a
-@c notice that there is no warranty (or else, saying that you provide
-@c a warranty) and that users may redistribute the program under
-@c these conditions, and telling the user how to view a copy of this
-@c License.  (Exception: if the Program itself is interactive but
-@c does not normally print such an announcement, your work based on
-@c the Program is not required to print an announcement.)
-変更したプログラムが実行時に通常の対話的な方法で
-コマンドを読むようになっているとすれば、
-最も普通の方法で対話的にそのプログラムを実行する時に、
-次の内容を示す文言がプリンタへ印字されるか、或いは画面に表示されること。
-@itemize @bullet
-@item
-適切な著作権表示。
-@item
-無保証であること（あなたが独自に保証する場合は、その旨）。
-@item
-頒布を受ける者も、
-本使用許諾と同一の条項に従って「プログラム」を再頒布できること。
-@item
-頒布を受ける者が本使用許諾書の写しを参照する方法。
-（例外として、「プログラム」自体は対話的であっても起動時の文言を
-通常は印字しないのならば、
-あなたの「プログラム生成物」はこのような文言を印字する必要はありません。）
-@end itemize
-@end enumerate
-
-@c These requirements apply to the modified work as a whole.  If
-@c identifiable sections of that work are not derived from the Program,
-@c and can be reasonably considered independent and separate works in
-@c themselves, then this License, and its terms, do not apply to those
-@c sections when you distribute them as separate works.  But when you
-@c distribute the same sections as part of a whole which is a work based
-@c on the Program, the distribution of the whole must be on the terms of
-@c this License, whose permissions for other licensees extend to the
-@c entire whole, and thus to each and every part regardless of who wrote it.
-これらの要件は変更された作成物にも全て適用されます。
-その変更版の或る部分が「プログラム」の派生物ではなく、
-しかもそれ自体独立で異なる作成物だと合理的に考えられる場合、
-あなたがそれらを別の作成物として頒布した時は、
-本使用許諾とその条項はそれらの部分には適用されません。
-しかし、それらを「プログラム生成物」の一部として頒布する場合は、
-全体が本使用許諾の条項に従って頒布されなければならず、
-使用許諾を受ける他の全ての者に対する許諾も
-プログラム全体にわたって与えられなければならず、
-結果として、誰が書いたかにかかわらず、
-全ての部分に本使用許諾が適用されなければなりません。
-
-@c Thus, it is not the intent of this section to claim rights or contest
-@c your rights to work written entirely by you; rather, the intent is to
-@c exercise the right to control the distribution of derivative or
-@c collective works based on the Program.
-このように、本条項の意図するところは、
-完全にあなたによって書かれた作成物について、権利を要求したり、
-あなたと権利関係を争うことではありません。
-むしろその目的は、作成物が「プログラム生成物」
-である場合にその派生物や集合物の頒布を規制することにあります。
-
-@c In addition, mere aggregation of another work not based on the Program
-@c with the Program (or with a work based on the Program) on a volume of
-@c a storage or distribution medium does not bring the other work under
-@c the scope of this License.
-さらに、「プログラム」（又は「プログラム生成物」）と
-「プログラム生成物」とはならない他のプログラムとを、
-単に保管や頒布のために同一の媒体上にまとめて記録したとしても、
-本使用許諾は他のプログラムには適用されません。
-
-@item
-@c You may copy and distribute the Program (or a work based on it,
-@c under Section 2) in object code or executable form under the terms of
-@c Sections 1 and 2 above provided that you also do one of the following:
-あなたは、以下のうちいずれか１つを満たす限り、
-上記第２項及び第３項に従って「プログラム」
-（又は、上記第３項で言及している「プログラム生成物」）を
-オブジェクト・コード又は実行可能な形式で複製及び頒布することができます。
-
-@enumerate a
-@item
-@c Accompany it with the complete corresponding machine-readable
-@c source code, which must be distributed under the terms of Sections
-@c 1 and 2 above on a medium customarily used for software interchange; or,
-対応する機械読み取り可能なソース・コード一式を一緒に引き渡すこと。
-その場合、そのソース・コードの引き渡しは上記第２項及び第３項に従って、
-通常ソフトウェアの交換に用いられる媒体で行なわれること。
-
-@item
-@c Accompany it with a written offer, valid for at least three
-@c years, to give any third party, for a charge no more than your
-@c cost of physically performing source distribution, a complete
-@c machine-readable copy of the corresponding source code, to be
-@c distributed under the terms of Sections 1 and 2 above on a medium
-@c customarily used for software interchange; or,
-少なくとも３年間の有効期間を定め、
-且つその期間内であれば対応する機械読み取り可能なソース・コード一式の複製を、
-ソース頒布に関わる実費以上の対価を要求せずに提供する旨、
-及びその場合には上記第２項及び第３項に従って、
-通常ソフトウェアの交換に用いられる媒体で提供される旨を記載した書面を、
-第三者に一緒に引き渡すこと。
-
-@item
-@c Accompany it with the information you received as to the offer
-@c to distribute corresponding source code.  (This alternative is
-@c allowed only for noncommercial distribution and only if you
-@c received the program in object code or executable form with such
-@c an offer, in accord with Subsection b above.)
-対応するソース・コード頒布の申し出に際して、
-あなたが得た情報を一緒に引き渡すこと。
-（この選択肢は、営利を目的としない頒布であって、
-且つあなたが上記の（ｂ）項に基づいて、
-オブジェクト・コード或いは実行可能形式の
-プログラムしか入手していない場合に限り適用される選択項目です。）
-@end enumerate
-
-@c The source code for a work means the preferred form of the work for
-@c making modifications to it.  For an executable work, complete source
-@c code means all the source code for all modules it contains, plus any
-@c associated interface definition files, plus the scripts used to
-@c control compilation and installation of the executable.  However, as a
-@c special exception, the source code distributed need not include
-@c anything that is normally distributed (in either source or binary
-@c form) with the major components (compiler, kernel, and so on) of the
-@c operating system on which the executable runs, unless that component
-@c itself accompanies the executable.
-なお、ソース・コードとは、変更作業に適した記述形式を指します。
-また、実行可能形式のファイルに対応するソース・コード一式とは、
-それに含まれる全モジュールに対応する全てのソース・コード、
-及びあらゆる関連のインタフェース定義ファイル、
-及び実行を可能にするコンパイルとインストールの制御に関する記述を指します。
-特別な例外として、実行可能なファイルが動作するオペレーティング・システムの
-主要な構成要素（コンパイラ、カーネルなど）と共に
-（ソース・コード又はバイナリのどちらかで）頒布されているものについては、
-その構成要素自体が実行形式に付随していない場合に限り、
-頒布されるソース・コードに含める必要はありません。
-
-@c If distribution of executable or object code is made by offering
-@c access to copy from a designated place, then offering equivalent
-@c access to copy the source code from the same place counts as
-@c distribution of the source code, even though third parties are not
-@c compelled to copy the source along with the object code.
-実行可能形式またはオブジェクト・コードの頒布が、
-指示された場所からの複製のためのアクセス権の賦与である場合、
-同じ場所からのソース・コードの複製のための同等なアクセス権を賦与すれば、
-たとえ第三者にオブジェクト・コードと共にソースの複製を強いなくとも、
-ソース・コードを頒布したものとみなします。
-
-@item
-@c You may not copy, modify, sublicense, or distribute the Program
-@c except as expressly provided under this License.  Any attempt
-@c otherwise to copy, modify, sublicense or distribute the Program is
-@c void, and will automatically terminate your rights under this License.
-@c However, parties who have received copies, or rights, from you under
-@c this License will not have their licenses terminated so long as such
-@c parties remain in full compliance.
-本使用許諾が明示的に許諾している場合を除き、あなたは、
-「プログラム」を複製、変更、サブライセンス、頒布することができません。
-本使用許諾に従わずに「プログラム」を複製、変更、サブライセンス、
-頒布しようとする行為は、それ自体が無効であり、且つ、
-本使用許諾があなたに許諾している「プログラム」の権利を自動的に消滅させます。
-その場合、本使用許諾に従ってあなたから複製物やその権利を得ている第三者は、
-本使用許諾に完全に従っている場合に限り、
-引続き有効な使用権限を持つものとします。
-
-@item
-@c You are not required to accept this License, since you have not
-@c signed it.  However, nothing else grants you permission to modify or
-@c distribute the Program or its derivative works.  These actions are
-@c prohibited by law if you do not accept this License.  Therefore, by
-@c modifying or distributing the Program (or any work based on the
-@c Program), you indicate your acceptance of this License to do so, and
-@c all its terms and conditions for copying, distributing or modifying
-@c the Program or works based on it.
-あなたはまだ同意の印として署名していないので、
-本使用許諾を受け入れる必要はありません。
-しかし、あなたに「プログラム」又はその派生物を変更又は再頒布する許可を
-与えるものは本使用許諾以外にはありません。
-これらの行為は、あなたがもし本使用許諾を受け入れないのであれば、
-法律によって禁じられます。
-従って、あなたが「プログラム」（又は「プログラム生成物」）の変更又は頒布を
-行えば、それ自体であなたは本使用許諾を受け入れ、且つ、
-「プログラム」又はその「プログラム生成物」の複製、頒布、変更に
-関するこれらの条項と条件の全てを受け入れたことを示します。
-
-@item
-@c Each time you redistribute the Program (or any work based on the
-@c Program), the recipient automatically receives a license from the
-@c original licensor to copy, distribute or modify the Program subject to
-@c these terms and conditions.  You may not impose any further
-@c restrictions on the recipients' exercise of the rights granted herein.
-@c You are not responsible for enforcing compliance by third parties to
-@c this License.
-あなたが「プログラム」（又はその「プログラム生成物」）を再頒布すると自動的に、
-その受領者は、元の使用許諾者から、本使用許諾の条項に従って「プログラム」を
-複製、頒布、変更することを内容とする使用許諾を受けたものとします。
-あなたは、受領者に許諾された権利の行使について、
-さらに制約を加えることはできません。
-あなたには、第三者に本使用許諾の受け入れを強いる責任はありません。
-
-@item
-@c If, as a consequence of a court judgment or allegation of patent
-@c infringement or for any other reason (not limited to patent issues),
-@c conditions are imposed on you (whether by court order, agreement or
-@c otherwise) that contradict the conditions of this License, they do not
-@c excuse you from the conditions of this License.  If you cannot
-@c distribute so as to satisfy simultaneously your obligations under this
-@c License and any other pertinent obligations, then as a consequence you
-@c may not distribute the Program at all.  For example, if a patent
-@c license would not permit royalty-free redistribution of the Program by
-@c all those who receive copies directly or indirectly through you, then
-@c the only way you could satisfy both it and this License would be to
-@c refrain entirely from distribution of the Program.
-裁判所の判決、又は特許侵害の申し立て、又は（特許問題に限らない）
-何らかの理由の結果として、あなたに課せられた条件が本使用許諾と
-相入れないものであったとしても（裁判所の命令、契約、その他によるものであれ）、
-本使用許諾の条件が免除されるものではありません。
-本使用許諾による責務と、その他の何らかの関連責務を同時に満たす態様で
-頒布することができないならば、
-あなたは「プログラム」を全く頒布してはいけません。
-例えば、特許権の内容が、あなたから直接又は間接に複製を受け取った全ての人に
-使用料のないプログラムの再頒布を許さないものであれば、
-あなたがかかる特許上の要請と本使用許諾の両方を満足させる方法は、
-「プログラム」の頒布を完全に断念することだけです。
-
-@c If any portion of this section is held invalid or unenforceable under
-@c any particular circumstance, the balance of the section is intended to
-@c apply and the section as a whole is intended to apply in other
-@c circumstances.
-本条項の或る部分が何らかの特別な状況下で無効または適用不可能になった場合、
-本条項のその他の残りの部分が適用されるように意図されており、また、
-本条項は全体としてその他の状況に当てはまるように意図されています。
-
-@c It is not the purpose of this section to induce you to infringe any
-@c patents or other property right claims or to contest validity of any
-@c such claims; this section has the sole purpose of protecting the
-@c integrity of the free software distribution system, which is
-@c implemented by public license practices.  Many people have made
-@c generous contributions to the wide range of software distributed
-@c through that system in reliance on consistent application of that
-@c system; it is up to the author/donor to decide if he or she is willing
-@c to distribute software through any other system and a licensee cannot
-@c impose that choice.
-本条項の目的は、特許やその他の財産権を侵害したり、
-そのような権利に基づく主張の妥当性を争うようにあなたに
-勧めることではありません。
-本条項の唯一の目的は、フリー・ソフトウェアの頒布システムの完全性を守ることで、
-それは公有使用許諾の実践によって履行されます。
-多くの人々が、このシステムの一貫した適用を信頼して、
-このシステムを通じて頒布されている幅広い範囲のソフトウェアに惜しみない貢献を
-してくれました。
-作成者や寄贈者が他の何らかのシステムを通じてソフトウェアを
-頒布したいと決めることは彼らの自由意志であり、
-使用許諾を受ける者はその選択を強いることはできません。
-
-@c This section is intended to make thoroughly clear what is believed to
-@c be a consequence of the rest of this License.
-本条項は、本使用許諾の他の条項の意味内容が何であるかを
-完全に明らかにすることを意図しています。
-
-@item
-@c If the distribution and/or use of the Program is restricted in
-@c certain countries either by patents or by copyrighted interfaces, the
-@c original copyright holder who places the Program under this License
-@c may add an explicit geographical distribution limitation excluding
-@c those countries, so that distribution is permitted only in or among
-@c countries not thus excluded.  In such case, this License incorporates
-@c the limitation as if written in the body of this License.
-「プログラム」の頒布・使用が、ある国において特許又は著作権で
-保護されたインタフェースのどちらかで制限される場合、
-「プログラム」を本使用許諾下においた原著作権保持者は、
-その国を除外する旨の明示的な頒布地域制限を加え、
-それ以外の（除外されない）国に限定して頒布が
-許されるようにすることができます。
-そのような場合、その制限を本使用許諾の本文に
-あたかも書かれているかのように本使用許諾の中に組み入れられるものとします。
-
-@item
-@c The Free Software Foundation may publish revised and/or new versions
-@c of the General Public License from time to time.  Such new versions will
-@c be similar in spirit to the present version, but may differ in detail to
-@c address new problems or concerns.
-Free Software Foundation は随時、本一般公有使用許諾の改訂版、
-又は新版を公表することがあります。
-そのような新しいバージョンは、
-現行のバージョンと基本的に変わるところはありませんが、
-新しい問題や懸案事項に対応するために細部では異なるかもしれません。
-
-@c Each version is given a distinguishing version number.  If the Program
-@c specifies a version number of this License which applies to it and ``any
-@c later version'', you have the option of following the terms and conditions
-@c either of that version or of any later version published by the Free
-@c Software Foundation.  If the Program does not specify a version number of
-@c this License, you may choose any version ever published by the Free Software
-@c Foundation.
-各バージョンは、バージョン番号によって区別します。
-「プログラム」中に本使用許諾のバージョン番号の指定がある場合は、
-その指定されたバージョンか、又はその後にFree Software Foundationから
-公表されているいずれかのバージョンから１つを選択して、
-その条項と条件に従ってください。
-「プログラム」中に本使用許諾のバージョン番号の指定がない場合は、
-Free Software Foundation が公表したどのバージョンでも選択することができます。
-
-@item
-@c If you wish to incorporate parts of the Program into other free
-@c programs whose distribution conditions are different, write to the author
-@c to ask for permission.  For software which is copyrighted by the Free
-@c Software Foundation, write to the Free Software Foundation; we sometimes
-@c make exceptions for this.  Our decision will be guided by the two goals
-@c of preserving the free status of all derivatives of our free software and
-@c of promoting the sharing and reuse of software generally.
-「プログラム」の一部を頒布条件の異なる他のフリー・プログラムに
-組み込みたい場合は、その開発者に書面で許可を求めてください。 
-Free Software Foundation が著作権を持っているソフトウェアについては、
-Free Software Foundation へ書面を提出してください。
-このような場合に対応するために我々は例外的処理をすることもありますが、
-その判断基準となるのは、次の２つの目標の実現に合致するか否かという点です。
-即ち、１つは我々のフリー・ソフトウェアの全ての派生物を
-フリーな状態に保つことであり、もう１つはソフトウェアの共有と再利用とを
-広く促進させることです。
-
-@iftex
-@c @heading NO WARRANTY
-@heading 無保証
-@end iftex
-@ifinfo
-@c @center NO WARRANTY
-@center 無保証
-@end ifinfo
-
-@item
-@c BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
-@c FOR THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW@.  EXCEPT WHEN
-@c OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
-@c PROVIDE THE PROGRAM ``AS IS'' WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
-@c OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-@c MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE@.  THE ENTIRE RISK AS
-@c TO THE QUALITY AND PERFORMANCE OF THE PROGRAM IS WITH YOU@.  SHOULD THE
-@c PROGRAM PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING,
-@c REPAIR OR CORRECTION.
-「プログラム」は無償で使用許諾されますので、適用法令の範囲内で、
-「プログラム」の保証は一切ありません。
-著作権者やその他の第三者は全く無保証で「そのまま」の状態で、且つ、
-明示か暗黙であるかを問わず一切の保証をつけないで提供するものとします。
-ここでいう保証とは、市場性や特定目的適合性についての暗黙の保証も含まれますが、
-それに限定されるものではありません。
-「プログラム」の品質や性能に関する全てのリスクはあなたが負うものとします。
-「プログラム」に欠陥があるとわかった場合、
-それに伴う一切の派生費用や修理・訂正に要する費用は全てあなたの負担とします。
-
-@item
-@c IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-@c WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
-@c REDISTRIBUTE THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES,
-@c INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING
-@c OUT OF THE USE OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED
-@c TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY
-@c YOU OR THIRD PARTIES OR A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER
-@c PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE
-@c POSSIBILITY OF SUCH DAMAGES.
-適用法令の定め、又は書面による合意がある場合を除き、
-著作権者や上記許諾を受けて「プログラム」の変更・再頒布を為し得る第三者は、
-「プログラム」を使用したこと、
-または使用できないことに起因する一切の損害について何らの責任も負いません。
-著作権者や前記の第三者が、そのような損害の発生する可能性について
-知らされていた場合でも同様です。
-なお、ここでいう損害には通常損害、特別損害、偶発損害、間接損害が含まれます
-（データの消失、又はその正確さの喪失、あなたや第三者が被った損失、
-他のプログラムとのインタフェースの不適合化、等も含まれますが、
-これに限定されるものではありません）。
-@end enumerate
-
-@iftex
-@c @heading END OF TERMS AND CONDITIONS
-@heading 以上
-@end iftex
-@ifinfo
-@c @center END OF TERMS AND CONDITIONS
-@center 以上
-@end ifinfo
-
-@c = 以下は日本語訳に関した部分
-@heading 注意
- 英文文書（GNU General Public License）を正式文書とする。
-この和文文書は弁護士の意見を採り入れて、
-できるだけ正確に英文文書を翻訳したものであるが、
-法律的に有効な契約書ではない。
-
-@unnumberedsec 和文文書自体の再配布に関して
-
-@emph{この部分は GPL の条文に関する再配布規定です．和文マニュアルに関しては，
-再配布，改変は自由に行っていただいて構いません．}
-
- いかなる媒体でも次の条件がすべて満たされている場合に限り、
-本和文文書をそのまま複写し配布することを許可する。
-また、あなたは第三者に対して本許可告知と同一の許可を与える場合に限り、
-再配布することが許可されています。
-@itemize @bullet
-@item
-受領、配布されたコピーに著作権表示および本許諾告知が
-前もって載せられていること。　
-@item
-コピーの受領者がさらに再配布する場合、
-その配布者が本告知と同じ許可を与えていること。
-@item
-和文文書の本文を改変しないこと。
-@end itemize
-
-@page
-@c @unnumberedsec How to Apply These Terms to Your New Programs
-@unnumberedsec あなたの新しいプログラムにこれらの条項を適用する方法
-
-@c   If you develop a new program, and you want it to be of the greatest
-@c possible use to the public, the best way to achieve this is to make it
-@c free software which everyone can redistribute and change under these terms.
- あなたが新しくプログラムを作成し、それを公用に供したい場合は、
-プログラムをフリー・ソフトウェアにして、
-全ての人々が以上の各条項に従ってこれを再頒布や変更をすることが
-できるようにするのが最良の方法です。
-
-@c   To do so, attach the following notices to the program.  It is safest
-@c to attach them to the start of each source file to most effectively
-@c convey the exclusion of warranty; and each file should have at least
-@c the ``copyright'' line and a pointer to where the full notice is found.
- そうするためには、プログラムに以下の表示をしてください。
-その場合、無保証であるということを最も効果的に伝えるために、
-ソース・ファイルの冒頭にその全文を表示すれば最も安全ですが、
-その他の方法で表示する場合でも、「著作権表示」と全文を読み出す為の
-アドレスへのポインタだけはファイル上に表示しておいてください。
-
-@smallexample
-@c @var{one line to give the program's name and an idea of what it does.}
-@c Copyright (C) 19@var{yy}  @var{name of author}
-@var{プログラム名とどんな動作をするものかについての簡単な説明の行}
-Ｃｏｐｙｒｉｇｈｔ（Ｃ）　１９○○年、@var{著作権者名}
-
-@c This program is free software; you can redistribute it and/or
-@c modify it under the terms of the GNU General Public License
-@c as published by the Free Software Foundation; either version 2
-@c of the License, or (at your option) any later version.
-本プログラムはフリー・ソフトウェアです。
-あなたは、Free Software Foundationが公表したGNU 一般公有使用許諾の
-「バージョン２」或いはそれ以降の各バージョンの中からいずれかを選択し、
-そのバージョンが定める条項に従って本プログラムを
-再頒布または変更することができます。
-
-@c This program is distributed in the hope that it will be useful,
-@c but WITHOUT ANY WARRANTY; without even the implied warranty of
-@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE@.  See the
-@c GNU General Public License for more details.
-本プログラムは有用とは思いますが、頒布にあたっては、
-市場性及び特定目的適合性についての暗黙の保証を含めて、
-いかなる保証も行ないません。
-詳細についてはGNU 一般公有使用許諾書をお読みください。
-
-@c You should have received a copy of the GNU General Public License along
-@c with this program; if not, write to the Free Software Foundation, Inc.,
-@c 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
-あなたは、本プログラムと一緒にGNU一般公有使用許諾の写しを
-受け取っているはずです。
-そうでない場合は、@*
-　Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA
-@footnote{【注意】現在、このバージョン2の発行者(FSF)住所は、
-正式に新しい住所の
-59 Temple Place, Suite 330, Boston, MA 02111-1307, USA に変わっている。}
-@ifinfo
-【注意】 現在、このバージョン2の発行者(FSF)住所は、正式に新しい住所の
- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA に変わっている。
-@end ifinfo
-へ手紙を書いてください。
-@end smallexample
-
-@c Also add information on how to contact you by electronic and paper mail.
-また、ユーザが電子メイルや書信であなたと連絡をとる方法についての情報も
-書き添えてください。
-
-@c If the program is interactive, make it output a short notice like this
-@c when it starts in an interactive mode:
-プログラムが対話的に動作する場合は、
-対話モードで起動した時に次のような短い告知文が表示されるようにしてください。
-
-@smallexample
-@c Gnomovision version 69, Copyright (C) 20@var{yy} @var{name of author}
-@c Gnomovision comes with ABSOLUTELY NO WARRANTY; for details
-@c type `show w'.  This is free software, and you are welcome
-@c to redistribute it under certain conditions; type `show c' 
-@c for details.
-Gnomovision バージョン69，Copyright (C) 20@var{yy} @var{name of author}
-Gnomovision は完全に無保証です。詳細は show w とタイプしてください。
-これはフリー・ソフトウェアなので、特定の条件の下でこれを再頒布する
-ことができます。詳細は show c とタイプしてください。
-@end smallexample
-
-@c The hypothetical commands @samp{show w} and @samp{show c} should show
-@c the appropriate parts of the General Public License.  Of course, the
-@c commands you use may be called something other than @samp{show w} and
-@c @samp{show c}; they could even be mouse-clicks or menu items---whatever
-@c suits your program.
-上記の@samp{show w}や@samp{show c}は各々、
-本一般公有使用許諾の関連する部分を表示するコマンドを指します。
-もちろん、あなたが使うこれらのコマンドは@samp{show w}や@samp{show c}といった
-呼び名でなくても構いません。
-さらに、それらのコマンドはあなたのプログラムに合わせる為に、
-マウスでクリックしたりメニュー形式にすることもできます。
-
-@c You should also get your employer (if you work as a programmer) or your
-@c school, if any, to sign a ``copyright disclaimer'' for the program, if
-@c necessary.  Here is a sample; alter the names:
-また、必要と認めた場合には、あなたの雇い主
-（あなたがプログラマとして働いている場合）や在籍する学校から、
-そのプログラムに対する「著作権放棄」を認めた署名入りの書面を入手してください。
-ここにその文例を載せます。名前は変えてください。
-
-@smallexample
-@group
-@c Yoyodyne, Inc., hereby disclaims all copyright
-@c interest in the program `Gnomovision'
-@c (which makes passes at compilers) written 
-@c by James Hacker.
-Yoyodyne, Inc. は、James Hacker が開発したプログラム`Gnomovision' 
-（コンパイラにつなげるプログラム）についての著作権法上の全ての権利を放棄する。
-
-@c @var{signature of Ty Coon}, 1 April 1989
-@c Ty Coon, President of Vice
-@var{Ty Coon の署名}， 1 April 1989
-Ty Coon，副社長
-@end group
-@end smallexample
-
-@c This General Public License does not permit incorporating your program into
-@c proprietary programs.  If your program is a subroutine library, you may
-@c consider it more useful to permit linking proprietary applications with the
-@c library.  If this is what you want to do, use the GNU Library General
-@c Public License instead of this License.
-本一般公有使用許諾は、あなたのプログラムを財産権の対象となっている
-他のプログラムに組み込むことは認めていません。
-あなたのプログラムがサブルーチン・ライブラリであって、
-あなたがそのライブラリを財産権の対象となっている他のアプリケーションと
-リンクさせることによって、さらに有用なものにしようとする場合には、
-本使用許諾書の代わりに、GNUライブラリ一般公有使用許諾書に従ってください。
-@c =============================================================
-@c = 以上のGPLの日本語訳に関しての問い合わせは、以下のアドレスに
-@c = お願いいたします。
-@c = mieko@gnu.org もしくは hikichi@gnu.org
-@c =============================================================
-
-@include doclicense.texi
-
-@node Intro, Glossary, GNU Free Documentation License, Top
-@c @unnumbered Introduction
-@unnumbered はじめに Introduction
-
-@c   You are reading about GNU Emacs, the GNU incarnation of the advanced,
-@c self-documenting, customizable, extensible real-time display editor Emacs.
-@c (The `G' in `GNU' is not silent.)
 あなたは、先進的で、セルフドキュメント方式で、カスタマイズ可能で、
 拡張可能な、GNU版の権化であるリアルタイム画面エディタ
 Emacsについて読んでいるところです。
-（「GNU」の「G」は発音します。）
+（「@acronym{GNU, @acronym{GNU}'s Not Unix}」の「@samp{G}」は発音します。）
 
-@c   We say that Emacs is a @dfn{display} editor because normally the text
-@c being edited is visible on the screen and is updated automatically as you
-@c type your commands.  @xref{Screen,Display}.
-Emacsは@dfn{画面}エディタであるというのは、
-編集中のテキストを画面上で見ることができ、
-コマンドを入力すると自動的に画面が更新されるということです。
-@xref{Screen,Display}。
-
-@c   We call it a @dfn{real-time} editor because the display is updated very
-@c frequently, usually after each character or pair of characters you
-@c type.  This minimizes the amount of information you must keep in your
-@c head as you edit.  @xref{Basic,Real-time,Basic Editing}.
-@dfn{リアルタイム}エディタと呼ぶのは、
-頻繁に画面更新が行われ、通常、1文字か2文字打つと更新されるからです。
-編集にともなって覚えておくべきことを最小限に抑えられます。
-@xref{Basic,Real-time,Basic Editing}。
-
-@c   We call Emacs advanced because it provides facilities that go beyond
-@c simple insertion and deletion: controlling subprocesses; automatic
-@c indentation of programs; viewing two or more files at once; editing
-@c formatted text; and dealing in terms of characters, words, lines,
-@c sentences, paragraphs, and pages, as well as expressions and comments in
-@c several different programming languages.
-Emacsは先進的であるというのは、単純な挿入と削除だけでなく、
+Emacsは先進的（@dfn{advanced}）であるというのは、単純な挿入と削除だけでなく、
 プロセスの制御、プログラムの字下げの自動化、
 複数のファイルを同時に眺める、整形済みテキストを編集する、
 文字、単語、行、文、段落、ページを扱うのと同様に、
 異なるプログラミム言語の式やコメントを扱うといった機能も提供するからです。
 
-@c   @dfn{Self-documenting} means that at any time you can type a special
-@c character, @kbd{Control-h}, to find out what your options are.  You can
-@c also use it to find out what any command does, or to find all the commands
-@c that pertain to a topic.  @xref{Help}.
 @dfn{セルフドキュメント方式}とは、
 特別な文字@kbd{Control-h}を打てば、
 何ができるかいつでも知ることができるということです。
@@ -1405,14 +1507,6 @@ Emacsは先進的であるというのは、単純な挿入と削除だけでな
 ある話題に関連するすべてのコマンドを調べることができます。
 @xref{Help}。
 
-@c   @dfn{Customizable} means that you can change the definitions of Emacs
-@c commands in little ways.  For example, if you use a programming language in
-@c which comments start with @samp{<**} and end with @samp{**>}, you can tell
-@c the Emacs comment manipulation commands to use those strings
-@c (@pxref{Comments}).  Another sort of customization is rearrangement of the
-@c command set.  For example, if you prefer the four basic cursor motion
-@c commands (up, down, left and right) on keys in a diamond pattern on the
-@c keyboard, you can rebind the keys that way.  @xref{Customization}.
 @dfn{カスタマイズ可能}とは、
 Emacsコマンドの定義を若干変更できるということです。
 たとえば、@samp{<**}で始まり@samp{**>}で終わるようなコメントの
@@ -1425,19 +1519,6 @@ Emacsのコメント操作コマンドにこれらの文字列を使うように
 そのようにキーを再定義できます。
 @xref{Customization}。
 
-@c   @dfn{Extensible} means that you can go beyond simple customization and
-@c write entirely new commands, programs in the Lisp language to be run by
-@c Emacs's own Lisp interpreter.  Emacs is an ``on-line extensible''
-@c system, which means that it is divided into many functions that call
-@c each other, any of which can be redefined in the middle of an editing
-@c session.  Almost any part of Emacs can be replaced without making a
-@c separate copy of all of Emacs.  Most of the editing commands of Emacs
-@c are written in Lisp; the few exceptions could have been written
-@c in Lisp but are written in C for efficiency.  Although only a programmer
-@c can write an extension, anybody can use it afterward.  If you want to
-@c learn Emacs Lisp programming, we recommend the @cite{Introduction to
-@c Emacs Lisp} by Robert J. Chassell, also published by the Free Software
-@c Foundation.
 @dfn{拡張可能}とは、単純なカスタマイズではなく、
 Emacs自身のLisp処理系で動作するLisp言語でプログラムを書ける、
 つまり、まったく新しいコマンドを書けるということです。
@@ -1458,19 +1539,6 @@ Robert J. Chassellの
 『Emacs Lispプログラミング入門』、アスキー出版局、ISBN 4-7561-1805-4}
 を勧めます。
 
-@c    When run under the X Window System, Emacs provides its own menus and
-@c convenient bindings to mouse buttons.  But Emacs can provide many of the
-@c benefits of a window system on a text-only terminal.  For instance, you
-@c can look at or edit several files at once, move text between files, and
-@c edit files while running shell commands.
-Xウィンドウシステムで動作するEmacsでは、
-独自のメニューとマウスボタンによる便利な操作を提供します。
-しかし、たとえ文字端末であっても、
-Emacsはウィンドウシステムの恩恵を与えてくれます。
-たとえば、複数のファイルを同時に眺めたり編集したり、
-ファイル間でテキストを移動したり、
-シェルコマンドを実行している最中でもファイルを編集できます。
-
 @include screen.texi
 @include commands.texi
 @include entering.texi
@@ -1485,95 +1553,78 @@ Emacsはウィンドウシステムの恩恵を与えてくれます。
 @include search.texi
 @include fixit.texi
 @include kmacro.texi
+@c Includes arevert-xtra.
 @include files.texi
 @include buffers.texi
 @include windows.texi
 @include frames.texi
 @include mule.texi
-@include major.texi
+@include modes.texi
 @include indent.texi
 @include text.texi
+@c Includes fortran-xtra.
 @include programs.texi
 @include building.texi
+@c Includes vc1-xtra, emerge-xtra.
 @include maintaining.texi
 @include abbrevs.texi
-@include picture.texi
+@c Includes dired-xtra.
+@include dired.texi
+@c Includes cal-xtra.
+@include calendar.texi
 @include sending.texi
 @include rmail.texi
-@include dired.texi
-@include calendar.texi
+@c Includes picture-xtra.texi
 @include misc.texi
+@include package.texi
 @include custom.texi
 @include trouble.texi
+
+@node Copying
+@appendix GNU GENERAL PUBLIC LICENSE
+@include gpl.texi
+
+@node GNU Free Documentation License
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
 @include cmdargs.texi
 @include xresources.texi
 
 @include anti.texi
 @include macos.texi
+@c Includes msdog-xtra.
 @include msdog.texi
-@c = texinfo-format-bufferでは、明示的にクリアしないと、
-@c = セットと仮定してしまうので…
-@clear justgnu
 @include gnu.texi
-@c = アルファベット順のまま
-@c @include glossary.texi
-@c = あいうえお順に直したもの
-@include glossary-jp.texi
-@ifinfo
+@include glossary.texi
+@ifnottex
 @include ack.texi
-@end ifinfo
+@end ifnottex
 
 @c The Option Index is produced only in the on-line version,
 @c because the index entries related to command-line options
 @c tend to point to the same pages and all begin with a dash.
-@c This, and the need to keep the node links consistent, are
-@c the reasons for the funky @iftex/@ifnottex dance below.
-@c The Option Index is _not_ before Key Index, because that
-@c would require changes in the glossary.texi's @node line.
-@c It is not after Concept Index for similar reasons.
 
-@iftex
-@node Key Index, Command Index, Glossary, Top
-@c @unnumbered Key (Character) Index
+@node Key Index
 @unnumbered キー（文字）索引
 @printindex ky
-@end iftex
 
 @ifnottex
-@node Key Index, Option Index, Glossary, Top
-@unnumbered Key (Character) Index
-@printindex ky
-
-@node Option Index, Command Index, Key Index, Top
-@unnumbered Command-Line Options Index
+@node Option Index
+@unnumbered コマンドライン引数索引
 @printindex op
-
-@node Command Index, Variable Index, Option Index, Top
-@unnumbered Command and Function Index
-@printindex fn
 @end ifnottex
 
-@iftex
-@node Command Index, Variable Index, Key Index, Top
-@c @unnumbered Command and Function Index
+@node Command Index
 @unnumbered コマンド/関数索引
 @printindex fn
-@end iftex
 
-@node Variable Index, Concept Index, Command Index, Top
-@c @unnumbered Variable Index
+@node Variable Index
 @unnumbered 変数索引
 @printindex vr
 
-@node Concept Index, Acknowledgments, Variable Index, Top
-@c @unnumbered Concept Index
+@node Concept Index
 @unnumbered 概念索引
 @printindex cp
 
-@summarycontents
-@contents
 @bye
-
-@ignore
-   arch-tag: ed48740a-410b-46ea-9387-c9a9252a3392
-@end ignore
